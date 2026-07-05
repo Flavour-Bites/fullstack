@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@350;450;550&display=swap');
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  
+  --color-warm-950: #1b1715;
+  --color-warm-900: #292421;
+  --color-warm-100: #f7f5f0;
+  --color-lux-gold: #c5a880;
+  --color-lux-cream: #faf7f2;
+  
+  --color-stone-850: #221e1b;
+  --color-stone-550: #706861;
+  --color-stone-250: #e5ded7;
+}
+
+/* Global bespoke styles */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-lux-cream);
+  color: #2e2a25;
+  font-family: var(--font-sans);
+  transition: background-color 300ms, color 300ms;
+}
+
+html.dark body {
+  background-color: #111111;
+  color: #faf7f2;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: #111111;
+}
+
+/* Custom fade animation support and utility classes */
+::selection {
+  background-color: #c5a880;
+  color: #111111;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #faf7f2;
+}
+::-webkit-scrollbar-thumb {
+  background: #c5a880;
+  border-radius: 3px;
+}
+

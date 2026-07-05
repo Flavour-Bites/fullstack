@@ -1,0 +1,6 @@
+{
+  "name": "Flavour Bites",
+  "description": "Designed for moments worth celebrating - custom bakery and celebration cake booking experience based in Addis Ababa, Ethiopia",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

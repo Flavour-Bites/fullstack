@@ -1,0 +1,172 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  customer
+  staff
+  admin
+}
+
+enum OrderStatus {
+  Received
+  Designing
+  Quoted
+  Confirmed
+  InProgress
+  Ready
+  Completed
+  Cancelled
+}
+
+enum PaymentStatus {
+  unpaid
+  partial
+  paid
+}
+
+enum RecoveryStatus {
+  pending
+  approved
+  rejected
+}
+
+model User {
+  id                String  @id
+  telegramId        String  @unique
+  telegramUsername  String?
+  telegramPhone     String?
+  telegramPhoto     String?
+  passwordHash      String?
+  name              String  @default("Telegram Customer")
+  role              Role    @default(customer)
+  notifyViaTelegram Boolean  @default(true)
+
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  requests      CustomCakeRequest[]
+  reviews       Review[]
+  statusEvents  OrderStatusEvent[]  @relation("OrderStatusChangedBy")
+}
+
+model CustomCakeRequest {
+  id                  String      @id
+  userId              String?
+  user                User?       @relation(fields: [userId], references: [id])
+
+  contactName         String
+  contactPhone        String
+  eventType           String
+  guestCount          Int
+  deliveryOption      String
+  deliveryAddress     String?
+  deliveryDate        String
+  designStyle         String
+  flavor              String
+  tierCount           Int
+  specialInstructions String
+  referenceImage      String?
+  referenceImagePublicId String?
+  referenceImageFormat   String?
+  referenceImageBytes    Int?
+  legacyContact      Json?
+  requestDate         String
+
+  quotedPrice         Int?
+  finalPrice          Int?
+  priceConfirmedAt   DateTime?
+  depositAmount      Int           @default(0)
+  depositPaidAt      DateTime?
+  remainingBalance   Int           @default(0)
+  paymentStatus      PaymentStatus @default(unpaid)
+
+  status              OrderStatus @default(Received)
+  bakerNote           String?
+  deletedAt           DateTime?
+
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  lastNotifiedStatus  OrderStatus?
+  statusEvents        OrderStatusEvent[]
+
+  @@index([userId, deletedAt])
+  @@index([status, deletedAt])
+}
+
+model CakeGalleryItem {
+  id            String   @id
+  name          String
+  description   String
+  categoryId    String
+  category      Category @relation(fields: [categoryId], references: [id])
+  flavors       String[]
+  priceEstimate String
+  image         String
+  imagePublicId String?
+  servingCount  String
+  tags          String[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Category {
+  id          String   @id
+  name        String
+  slug        String   @unique
+  description String?
+  color       String?
+  icon        String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  items       CakeGalleryItem[]
+
+  @@index([isActive, sortOrder])
+}
+
+model Review {
+  id        String   @id
+  rating    Int
+  content   String
+  author    String
+  eventType String
+  role      String   @default("Host")
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  productId String?
+  date      String
+  createdAt DateTime @default(now())
+}
+
+model RecoveryRequest {
+  id            String         @id
+  oldTelegramId String
+  newTelegramId String
+  status        RecoveryStatus @default(pending)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([oldTelegramId, newTelegramId, status])
+}
+
+model OrderStatusEvent {
+  id          String             @id
+  orderId     String
+  order       CustomCakeRequest  @relation(fields: [orderId], references: [id])
+  fromStatus  OrderStatus?
+  toStatus    OrderStatus
+  changedById String?
+  changedBy   User?              @relation("OrderStatusChangedBy", fields: [changedById], references: [id])
+  source      String
+  note        String?
+  createdAt   DateTime           @default(now())
+
+  @@index([orderId, createdAt])
+  @@index([changedById])
+}
