@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Cake, CalendarDays, Instagram, Mail, Compass, Menu, X, Send, LogOut, LogIn, User as UserIcon, Sun, Moon, HelpCircle, ExternalLink, ShieldCheck, ShoppingBag } from 'lucide-react';
+import { Cake, CalendarDays, Instagram, Mail, Compass, Menu, X, Send, LogOut, LogIn, User as UserIcon, Sun, Moon, HelpCircle, ExternalLink, ShieldCheck, ShoppingBag, Globe } from 'lucide-react';
 import { PageType, CakeGalleryItem, User } from './types';
 
 // Views
@@ -15,6 +15,9 @@ import ProfileView from './components/ProfileView';
 import AdminView from './components/AdminView';
 import AuthView from './components/AuthView';
 
+import { setLocale, getLocale } from './i18n';
+import type { Locale } from './i18n';
+
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
     const saved = localStorage.getItem('flavourbites_user');
@@ -22,6 +25,7 @@ export default function App() {
   });
   const [activePage, setActivePage] = useState<PageType>('home');
   const [adminTab, setAdminTab] = useState<'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users'>('dashboard');
+  const [locale, setLocaleState] = useState<Locale>(() => getLocale());
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('theme') === 'dark';
   });
@@ -428,6 +432,24 @@ export default function App() {
               </AnimatePresence>
             </div>
 
+            {/* Locale Switcher */}
+            <button
+              onClick={() => {
+                const next: Locale = locale === 'en' ? 'am' : 'en';
+                setLocaleState(next);
+                setLocale(next);
+              }}
+              className={`px-2.5 py-1.5 rounded-sm font-mono text-[10px] uppercase font-bold tracking-wider border transition-all cursor-pointer shrink-0 ${
+                isAdminMode || darkMode
+                  ? 'border-stone-800 text-stone-400 hover:text-lux-gold hover:border-lux-gold/50 bg-stone-900/30'
+                  : 'border-stone-200 text-stone-500 hover:text-lux-gold hover:border-lux-gold/50 bg-white/30'
+              }`}
+              title="Switch language"
+            >
+              <Globe className="w-3.5 h-3.5 inline-block mr-1" />
+              {locale === 'en' ? 'AM' : 'EN'}
+            </button>
+
             {/* Book Custom Cake CTA button - Hidden conditionally in Admin Mode */}
             {!isAdminMode && (
               <button
@@ -521,6 +543,24 @@ export default function App() {
                     </button>
                   ))
                 )}
+
+                {/* Mobile Locale Switcher */}
+                <div className={`pt-2 border-b pb-2 flex justify-between items-center ${
+                  isAdminMode || darkMode ? 'border-stone-800' : 'border-stone-150'
+                }`}>
+                  <span className="text-xs font-semibold text-stone-400 uppercase tracking-wider">Language</span>
+                  <button
+                    onClick={() => {
+                      const next: Locale = locale === 'en' ? 'am' : 'en';
+                      setLocaleState(next);
+                      setLocale(next);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 border border-stone-800 rounded-sm text-xs text-lux-gold font-mono cursor-pointer"
+                  >
+                    <Globe className="w-3.5 h-3.5" />
+                    <span>{locale === 'en' ? 'አማርኛ' : 'English'}</span>
+                  </button>
+                </div>
 
                 {/* Mobile Theme Toggle integration */}
                 <div className={`pt-2 border-b pb-2 flex justify-between items-center ${
