@@ -36,4 +36,9 @@ export const reviewsRepository = {
     const prisma = getPrisma();
     return prisma.review.delete({ where: { id } });
   },
+
+  async update(id: string, data: Record<string, unknown>) {
+    const prisma = getPrisma();
+    return prisma.review.update({ where: { id }, data });
+  },
 };
