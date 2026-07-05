@@ -10,11 +10,13 @@ import reviewsRoutes from '../modules/reviews/reviews.routes.js';
 import statsRoutes from '../modules/stats/stats.routes.js';
 import chatbotRoutes from '../modules/chatbot/chatbot.routes.js';
 import contactRoutes from '../modules/contact/contact.routes.js';
+import paymentRoutes from '../modules/payment/payment.routes.js';
 
 const router = Router();
 
 router.use('/auth', authRoutes);
 router.use('/requests', ordersRoutes);
+router.use('/payments', paymentRoutes);
 router.use('/users', usersRoutes);
 router.use('/categories', categoriesRoutes);
 router.use('/gallery', galleryRoutes);
