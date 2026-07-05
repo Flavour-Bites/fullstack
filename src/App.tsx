@@ -24,7 +24,7 @@ export default function App() {
     return saved ? JSON.parse(saved) : null;
   });
   const [activePage, setActivePage] = useState<PageType>('home');
-  const [adminTab, setAdminTab] = useState<'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users'>('dashboard');
+  const [adminTab, setAdminTab] = useState<'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users' | 'recovery'>('dashboard');
   const [locale, setLocaleState] = useState<Locale>(() => getLocale());
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('theme') === 'dark';
@@ -142,7 +142,8 @@ export default function App() {
                   { id: 'menu', label: 'MENU' },
                   { id: 'categories', label: 'CATEGORIES' },
                   { id: 'reviews', label: 'REVIEWS' },
-                  ...(currentUser?.role === 'admin' ? [{ id: 'users', label: 'USERS' }] : [])
+                  ...(currentUser?.role === 'admin' ? [{ id: 'users', label: 'USERS' }] : []),
+                  ...(currentUser?.role === 'admin' ? [{ id: 'recovery', label: 'RECOVERY' }] : [])
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -502,7 +503,8 @@ export default function App() {
                     { id: 'menu', label: 'Studio Cake Menu' },
                     { id: 'categories', label: 'Cake Categories' },
                     { id: 'reviews', label: 'Customer Reviews' },
-                    ...(currentUser?.role === 'admin' ? [{ id: 'users', label: 'Registered Clients' }] : [])
+                    ...(currentUser?.role === 'admin' ? [{ id: 'users', label: 'Registered Clients' }] : []),
+                    ...(currentUser?.role === 'admin' ? [{ id: 'recovery', label: 'Account Recovery' }] : [])
                   ].map((tab) => (
                     <button
                       key={tab.id}

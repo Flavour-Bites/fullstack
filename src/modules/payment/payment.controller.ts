@@ -6,10 +6,9 @@ export const paymentController = {
   initiate: asyncHandler(async (req: Request, res: Response) => {
     const result = await paymentService.initiate({
       orderId: req.body.orderId,
+      amount: req.body.amount,
       phone: req.body.phone,
       email: req.body.email,
-      firstName: req.user?.name?.split(' ')[0],
-      lastName: req.user?.name?.split(' ').slice(1).join(' '),
     });
     if (result.success) {
       res.json({ success: true, checkoutUrl: result.checkoutUrl, transactionRef: result.transactionRef });
