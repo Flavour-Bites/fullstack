@@ -163,6 +163,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editStatus, setEditStatus] = useState('');
   const [editCost, setEditCost] = useState(0);
+  const [editDeposit, setEditDeposit] = useState(0);
   const [updating, setUpdating] = useState(false);
 
   // Users state (admin only)
@@ -309,6 +310,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
     setEditingId(req.id);
     setEditStatus(req.status);
     setEditCost(req.finalPrice ?? req.quotedPrice ?? 0);
+    setEditDeposit(req.depositAmount ?? 0);
   };
 
   const saveRequestUpdates = async (id: string, name: string) => {
@@ -316,6 +318,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
     try {
       const body: Record<string, any> = { status: editStatus };
       if (editCost > 0) body.quotedPrice = editCost;
+      if (editDeposit > 0) body.depositAmount = editDeposit;
       const res = await fetch(`/api/requests/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -928,7 +931,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                       {isEditing && (
                         <div onClick={e => e.stopPropagation()} className="mt-4 p-4 border-t border-stone-200/70 dark:border-stone-800/70 bg-stone-100/50 dark:bg-stone-900/50 space-y-4 rounded-xs">
                           <h4 className="text-[10px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 font-bold">{t('admin.editOrder')}</h4>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                               <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.statusLabel')}</label>
                               <select value={editStatus} onChange={e => setEditStatus(e.target.value)} className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs">
@@ -938,6 +941,10 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                             <div>
                               <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.quotedPrice')}</label>
                               <input type="number" value={editCost} onChange={e => setEditCost(Math.max(0, Number(e.target.value)))} className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+                            </div>
+                            <div>
+                              <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">Deposit (ETB)</label>
+                              <input type="number" value={editDeposit} onChange={e => setEditDeposit(Math.max(0, Number(e.target.value)))} className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
                             </div>
                           </div>
                           <div className="flex justify-end gap-2">
@@ -1017,21 +1024,44 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between border-t border-stone-200 dark:border-stone-800 pt-4">
-                      <div>
-                        <span className="text-[9px] uppercase font-mono text-stone-400 dark:text-stone-400 block">Quoted Price</span>
-                        <span className="text-lg font-mono font-bold text-lux-gold">
-                          {orderPrice(selectedRequest) ? `${orderPrice(selectedRequest).toLocaleString()} ETB` : 'Not quoted yet'}
-                        </span>
+                    <div className="border-t border-stone-200 dark:border-stone-800 pt-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="text-[9px] uppercase font-mono text-stone-400 dark:text-stone-400 block">Quoted Price</span>
+                          <span className="text-lg font-mono font-bold text-lux-gold">
+                            {orderPrice(selectedRequest) ? `${orderPrice(selectedRequest).toLocaleString()} ETB` : 'Not quoted yet'}
+                          </span>
+                        </div>
+                        <div className="flex gap-2">
+                          <button onClick={() => startEditing(selectedRequest)} className="px-3 py-2 bg-stone-100 dark:bg-stone-900 hover:bg-lux-gold text-stone-700 dark:text-stone-200 hover:text-stone-950 font-mono text-[10px] uppercase font-bold rounded-sm border border-stone-200 dark:border-stone-800 transition-all cursor-pointer">
+                            Edit
+                          </button>
+                          <button onClick={() => handleDeleteRequest(selectedRequest.id, selectedRequest.contactName)} className="p-2 border border-stone-200 dark:border-stone-800 hover:border-red-800 bg-red-950/20 text-red-400 rounded-sm cursor-pointer">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                        <button onClick={() => startEditing(selectedRequest)} className="px-3 py-2 bg-stone-100 dark:bg-stone-900 hover:bg-lux-gold text-stone-700 dark:text-stone-200 hover:text-stone-950 font-mono text-[10px] uppercase font-bold rounded-sm border border-stone-200 dark:border-stone-800 transition-all cursor-pointer">
-                          Edit
-                        </button>
-                        <button onClick={() => handleDeleteRequest(selectedRequest.id, selectedRequest.contactName)} className="p-2 border border-stone-200 dark:border-stone-800 hover:border-red-800 bg-red-950/20 text-red-400 rounded-sm cursor-pointer">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                      <div className="grid grid-cols-3 gap-3 text-left">
+                        <div className="bg-stone-100 dark:bg-[#15110f] p-2.5 border border-stone-200 dark:border-stone-800 rounded-xs">
+                          <span className="text-[8px] uppercase font-mono text-stone-400 dark:text-stone-400 block">Deposit</span>
+                          <span className="text-xs font-mono font-bold text-stone-700 dark:text-stone-200">{selectedRequest.depositAmount.toLocaleString()} ETB</span>
+                        </div>
+                        <div className="bg-stone-100 dark:bg-[#15110f] p-2.5 border border-stone-200 dark:border-stone-800 rounded-xs">
+                          <span className="text-[8px] uppercase font-mono text-stone-400 dark:text-stone-400 block">Balance</span>
+                          <span className="text-xs font-mono font-bold text-stone-700 dark:text-stone-200">{selectedRequest.remainingBalance.toLocaleString()} ETB</span>
+                        </div>
+                        <div className="bg-stone-100 dark:bg-[#15110f] p-2.5 border border-stone-200 dark:border-stone-800 rounded-xs">
+                          <span className="text-[8px] uppercase font-mono text-stone-400 dark:text-stone-400 block">Status</span>
+                          <span className={`text-[10px] font-mono font-bold uppercase ${selectedRequest.paymentStatus === 'paid' ? 'text-emerald-400' : selectedRequest.paymentStatus === 'partial' ? 'text-amber-400' : 'text-stone-500'}`}>
+                            {selectedRequest.paymentStatus}
+                          </span>
+                        </div>
                       </div>
+                      {selectedRequest.depositPaidAt && (
+                        <div className="text-[9px] font-mono text-stone-400 dark:text-stone-500">
+                          Deposit paid: {new Date(selectedRequest.depositPaidAt).toLocaleDateString()}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </motion.div>
