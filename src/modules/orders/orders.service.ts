@@ -2,7 +2,7 @@ import { getPrisma } from '../../app/config/prisma.js';
 import { ordersRepository } from './orders.repository.js';
 import { makeOrderId } from '../../shared/utils/ids.js';
 import { normalizeMoney } from './orders.workflow.js';
-import { notifyStaffNewOrder, notifyCustomerStatusChange } from '../../integrations/telegram/telegramNotifications.js';
+import { notifyStaffNewOrder, notifyCustomerStatusChange, notifyStaffQuoteAccepted } from '../../integrations/telegram/telegramNotifications.js';
 import type { OrderStatus } from '@prisma/client';
 import type { OrderActor } from './orders.types.js';
 
@@ -151,6 +151,9 @@ export const ordersService = {
 
     notifyCustomerStatusChange(orderId).catch((err: Error) =>
       console.error('[Notify] Customer notice failed:', err.message),
+    );
+    notifyStaffQuoteAccepted(updated as any).catch((err: Error) =>
+      console.error('[Notify] Staff quote-accepted notice failed:', err.message),
     );
 
     return updated;
