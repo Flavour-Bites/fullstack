@@ -5,7 +5,8 @@ import {
   Sparkles, Check, Loader2, Activity, RefreshCw, User, Mail,
   Phone, MapPin, Search, Filter, FilterX, Edit3, Save, X, Database,
   Users, Star, BarChart2, Download, AlertTriangle, ShieldCheck, Settings,
-  ChevronDown, CheckCircle2, Clock, Package, Truck, Inbox
+  ChevronDown, CheckCircle2, Clock, Package, Truck, Inbox,
+  Plus, Image, Hash, Pencil, ToggleLeft, ToggleRight, Layers, MessageSquare
 } from 'lucide-react';
 import { useToast } from './Toast';
 import { t } from '../i18n';
@@ -59,9 +60,35 @@ interface Stats {
 import { User as UserType } from '../types';
 
 interface AdminViewProps {
-  activeTab?: 'dashboard' | 'orders' | 'menu' | 'users';
-  onTabChange?: (tab: 'dashboard' | 'orders' | 'menu' | 'users') => void;
+  activeTab?: 'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users';
+  onTabChange?: (tab: 'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users') => void;
   currentUser?: UserType | null;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  color: string | null;
+  icon: string | null;
+  sortOrder: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ReviewItem {
+  id: string;
+  rating: number;
+  content: string;
+  author: string;
+  eventType: string;
+  role: string;
+  userId: string | null;
+  productId: string | null;
+  date: string;
+  createdAt: string;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -121,7 +148,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
   const { showToast } = useToast();
   const isAdmin = currentUser?.role === 'admin';
 
-  const [internalTab, setInternalTab] = useState<'dashboard' | 'orders' | 'menu' | 'users'>('dashboard');
+  const [internalTab, setInternalTab] = useState<'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users'>('dashboard');
   const currentTab = activeTab || internalTab;
   const setCurrentTab = onTabChange || setInternalTab;
 
@@ -152,6 +179,28 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
 
   // Stats (admin/staff)
   const [stats, setStats] = useState<Stats | null>(null);
+
+  // Categories state
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
+  const [showCategoryForm, setShowCategoryForm] = useState(false);
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+  const [categoryForm, setCategoryForm] = useState({ name: '', slug: '', description: '', color: '', icon: '', sortOrder: 0 });
+  const [savingCategory, setSavingCategory] = useState(false);
+
+  // Reviews state
+  const [reviewItems, setReviewItems] = useState<ReviewItem[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
+  const [editReviewContent, setEditReviewContent] = useState('');
+  const [editReviewRating, setEditReviewRating] = useState(5);
+  const [savingReview, setSavingReview] = useState(false);
+
+  // Gallery CRUD state
+  const [showGalleryForm, setShowGalleryForm] = useState(false);
+  const [editingGalleryId, setEditingGalleryId] = useState<string | null>(null);
+  const [galleryForm, setGalleryForm] = useState({ name: '', description: '', categoryId: '', flavors: '', priceEstimate: '', image: '', servingCount: '', tags: '' });
+  const [savingGallery, setSavingGallery] = useState(false);
 
   // ── Data Fetching ──────────────────────────────────────────
   const fetchRequests = useCallback(async (silent = false) => {
@@ -199,11 +248,33 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
     } catch (e) { /* ignore */ }
   };
 
+  const fetchCategories = async () => {
+    setCategoriesLoading(true);
+    try {
+      const res = await fetch('/api/categories?includeInactive=true');
+      const data = await res.json();
+      if (data.success) setCategories(data.categories || []);
+    } catch (e) { /* ignore */ }
+    finally { setCategoriesLoading(false); }
+  };
+
+  const fetchReviews = async () => {
+    setReviewsLoading(true);
+    try {
+      const res = await fetch('/api/reviews');
+      const data = await res.json();
+      if (data.success) setReviewItems(data.reviews || []);
+    } catch (e) { /* ignore */ }
+    finally { setReviewsLoading(false); }
+  };
+
   useEffect(() => { fetchRequests(true); fetchStats(); }, []);
 
   useEffect(() => {
     if (currentTab === 'users' && isAdmin) fetchUsers();
     if (currentTab === 'menu') fetchGallery();
+    if (currentTab === 'categories') { fetchCategories(); fetchGallery(); }
+    if (currentTab === 'reviews') fetchReviews();
   }, [currentTab]);
 
   // ── Order Actions ──────────────────────────────────────────
@@ -310,6 +381,187 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
       } else throw new Error(data.error);
     } catch (e: any) { showToast('Delete Failed', e.message, 'error'); }
     finally { setDeletingUserId(null); }
+  };
+
+  // ── Category Actions ─────────────────────────────────────
+  const handleSaveCategory = async () => {
+    if (!categoryForm.name.trim()) { showToast('Validation', 'Name is required.', 'error'); return; }
+    setSavingCategory(true);
+    try {
+      const slug = categoryForm.slug || categoryForm.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const body: Record<string, unknown> = { ...categoryForm, slug };
+      if (editingCategoryId) {
+        const res = await fetch(`/api/categories/${editingCategoryId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Category Updated', `"${categoryForm.name}" updated.`, 'success');
+          setEditingCategoryId(null);
+        } else throw new Error(data.error);
+      } else {
+        const res = await fetch('/api/categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Category Created', `"${categoryForm.name}" added.`, 'success');
+        } else throw new Error(data.error);
+      }
+      setShowCategoryForm(false);
+      setCategoryForm({ name: '', slug: '', description: '', color: '', icon: '', sortOrder: 0 });
+      fetchCategories();
+    } catch (e: any) { showToast('Failed', e.message, 'error'); }
+    finally { setSavingCategory(false); }
+  };
+
+  const handleDeleteCategory = async (id: string, name: string) => {
+    if (!window.confirm(`Delete category "${name}"? Gallery items in it will become uncategorized.`)) return;
+    try {
+      const res = await fetch(`/api/categories/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Category Deleted', `"${name}" removed.`, 'warning');
+        fetchCategories();
+      } else throw new Error(data.error);
+    } catch (e: any) { showToast('Delete Failed', e.message, 'error'); }
+  };
+
+  const startEditCategory = (cat: Category) => {
+    setEditingCategoryId(cat.id);
+    setCategoryForm({
+      name: cat.name,
+      slug: cat.slug,
+      description: cat.description || '',
+      color: cat.color || '',
+      icon: cat.icon || '',
+      sortOrder: cat.sortOrder,
+    });
+    setShowCategoryForm(true);
+  };
+
+  const handleToggleCategoryActive = async (cat: Category) => {
+    try {
+      const res = await fetch(`/api/categories/${cat.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: !cat.isActive }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Category Updated', `"${cat.name}" is now ${cat.isActive ? 'inactive' : 'active'}.`, 'success');
+        fetchCategories();
+      } else throw new Error(data.error);
+    } catch (e: any) { showToast('Failed', e.message, 'error'); }
+  };
+
+  // ── Review Actions ───────────────────────────────────────
+  const handleDeleteReview = async (id: string, author: string) => {
+    if (!window.confirm(`Delete review by ${author}? This cannot be undone.`)) return;
+    try {
+      const res = await fetch(`/api/reviews/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Review Deleted', `Review by ${author} removed.`, 'warning');
+        setEditingReviewId(null);
+        fetchReviews();
+      } else throw new Error(data.error);
+    } catch (e: any) { showToast('Delete Failed', e.message, 'error'); }
+  };
+
+  const handleSaveReview = async (id: string) => {
+    setSavingReview(true);
+    try {
+      const res = await fetch(`/api/reviews/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: editReviewContent, rating: editReviewRating }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Review Updated', 'Review updated successfully.', 'success');
+        setEditingReviewId(null);
+        fetchReviews();
+      } else throw new Error(data.error);
+    } catch (e: any) { showToast('Update Failed', e.message, 'error'); }
+    finally { setSavingReview(false); }
+  };
+
+  // ── Gallery CRUD Actions ────────────────────────────────
+  const handleSaveGalleryItem = async () => {
+    if (!galleryForm.name.trim() || !galleryForm.priceEstimate.trim()) {
+      showToast('Validation', 'Name and price are required.', 'error'); return;
+    }
+    setSavingGallery(true);
+    try {
+      const body: Record<string, unknown> = {
+        name: galleryForm.name,
+        description: galleryForm.description,
+        categoryId: galleryForm.categoryId || undefined,
+        flavors: galleryForm.flavors.split(',').map(f => f.trim()).filter(Boolean),
+        priceEstimate: galleryForm.priceEstimate,
+        image: galleryForm.image || undefined,
+        servingCount: galleryForm.servingCount || undefined,
+        tags: galleryForm.tags.split(',').map(t => t.trim()).filter(Boolean),
+      };
+      if (editingGalleryId) {
+        const res = await fetch(`/api/gallery/${editingGalleryId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Gallery Item Updated', `"${galleryForm.name}" updated.`, 'success');
+          setEditingGalleryId(null);
+        } else throw new Error(data.error);
+      } else {
+        const res = await fetch('/api/gallery', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Gallery Item Created', `"${galleryForm.name}" added.`, 'success');
+        } else throw new Error(data.error);
+      }
+      setShowGalleryForm(false);
+      setGalleryForm({ name: '', description: '', categoryId: '', flavors: '', priceEstimate: '', image: '', servingCount: '', tags: '' });
+      fetchGallery();
+    } catch (e: any) { showToast('Failed', e.message, 'error'); }
+    finally { setSavingGallery(false); }
+  };
+
+  const startEditGalleryItem = (item: any) => {
+    setEditingGalleryId(item.id);
+    setGalleryForm({
+      name: item.name,
+      description: item.description || '',
+      categoryId: item.categoryId || '',
+      flavors: Array.isArray(item.flavors) ? item.flavors.join(', ') : '',
+      priceEstimate: item.priceEstimate,
+      image: item.image || '',
+      servingCount: item.servingCount || '',
+      tags: Array.isArray(item.tags) ? item.tags.join(', ') : '',
+    });
+    setShowGalleryForm(true);
+  };
+
+  const handleDeleteGalleryItem = async (id: string, name: string) => {
+    if (!window.confirm(`Delete gallery item "${name}"? This cannot be undone.`)) return;
+    try {
+      const res = await fetch(`/api/gallery/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Gallery Item Deleted', `"${name}" removed.`, 'warning');
+        fetchGallery();
+      } else throw new Error(data.error);
+    } catch (e: any) { showToast('Delete Failed', e.message, 'error'); }
   };
 
   // ── Derived Values ─────────────────────────────────────────
@@ -795,28 +1047,101 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
         </div>
       )}
 
-      {/* ── Menu Tab ──────────────────────────────────────── */}
+      {/* ── Menu Tab (with CRUD) ──────────────────────────── */}
       {currentTab === 'menu' && (
         <div className="max-w-7xl mx-auto space-y-6 relative z-10 text-left font-sans">
           <div className="flex justify-between items-center bg-stone-50 dark:bg-[#1d1916] p-5 border border-stone-200 dark:border-stone-800 rounded-sm">
             <h2 className="font-serif text-xl text-stone-900 dark:text-white flex items-center gap-2">
               <Package className="w-5 h-5 text-lux-gold" /> Cake Menu ({galleryItems.length} items)
             </h2>
-            {isAdmin && <span className="text-[10px] uppercase tracking-widest text-[#c5a880] font-mono">Admin — read-only view</span>}
+            <button
+              onClick={() => { setShowGalleryForm(true); setEditingGalleryId(null); setGalleryForm({ name: '', description: '', categoryId: '', flavors: '', priceEstimate: '', image: '', servingCount: '', tags: '' }); }}
+              className="px-3 py-1.5 bg-lux-gold text-stone-950 font-mono text-[10px] uppercase font-bold tracking-wider rounded-sm flex items-center gap-1.5 hover:bg-white transition-all cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" /> {t('admin.addGalleryItem')}
+            </button>
           </div>
+
+          {/* Gallery Create/Edit Form */}
+          {showGalleryForm && (
+            <div className="bg-white dark:bg-[#1e1a17] border border-lux-gold/30 dark:border-[#c5a880]/30 rounded-sm p-6 space-y-4">
+              <h3 className="font-serif text-base text-stone-900 dark:text-white font-medium">
+                {editingGalleryId ? t('admin.editGalleryItem') : t('admin.addGalleryItem')}
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.itemName')}</label>
+                  <input value={galleryForm.name} onChange={e => setGalleryForm(f => ({ ...f, name: e.target.value }))} className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+                </div>
+                <div>
+                  <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.itemCategory')}</label>
+                  <select value={galleryForm.categoryId} onChange={e => setGalleryForm(f => ({ ...f, categoryId: e.target.value }))} className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs">
+                    <option value="">— No category —</option>
+                    {categories.filter(c => c.isActive).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.itemDescription')}</label>
+                  <textarea value={galleryForm.description} onChange={e => setGalleryForm(f => ({ ...f, description: e.target.value }))} rows={3} className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+                </div>
+                <div>
+                  <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.itemFlavors')}</label>
+                  <input value={galleryForm.flavors} onChange={e => setGalleryForm(f => ({ ...f, flavors: e.target.value }))} placeholder="Vanilla, Chocolate" className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+                </div>
+                <div>
+                  <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.itemPrice')}</label>
+                  <input value={galleryForm.priceEstimate} onChange={e => setGalleryForm(f => ({ ...f, priceEstimate: e.target.value }))} placeholder="From 4,500 ETB" className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+                </div>
+                <div>
+                  <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.itemImage')}</label>
+                  <input value={galleryForm.image} onChange={e => setGalleryForm(f => ({ ...f, image: e.target.value }))} placeholder="https://..." className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+                </div>
+                <div>
+                  <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.itemServingCount')}</label>
+                  <input value={galleryForm.servingCount} onChange={e => setGalleryForm(f => ({ ...f, servingCount: e.target.value }))} placeholder="10-15 guests" className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+                </div>
+                <div>
+                  <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.itemTags')}</label>
+                  <input value={galleryForm.tags} onChange={e => setGalleryForm(f => ({ ...f, tags: e.target.value }))} placeholder="birthday, chocolate" className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <button onClick={() => { setShowGalleryForm(false); setEditingGalleryId(null); }} className="px-3 py-1.5 text-[10px] font-mono font-bold uppercase bg-stone-200 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:bg-stone-300 dark:hover:bg-stone-700 rounded-sm">{t('admin.cancelEdit')}</button>
+                <button onClick={handleSaveGalleryItem} disabled={savingGallery} className="px-3.5 py-1.5 text-[10px] font-mono font-bold uppercase bg-lux-gold text-stone-950 hover:bg-white rounded-sm flex items-center gap-1">
+                  {savingGallery ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} {t('admin.saveChanges')}
+                </button>
+              </div>
+            </div>
+          )}
 
           {galleryLoading ? (
             <div className="text-center py-20 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
               <Loader2 className="w-7 h-7 animate-spin text-lux-gold mx-auto mb-2" />
               <p className="text-xs text-stone-400 dark:text-stone-400 font-mono">{t('admin.loadingMenu')}</p>
             </div>
+          ) : galleryItems.length === 0 ? (
+            <div className="text-center py-20 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
+              <Image className="w-10 h-10 text-stone-400 dark:text-stone-500 mx-auto mb-3" />
+              <p className="text-sm font-serif text-stone-600 dark:text-stone-300 italic">No gallery items yet.</p>
+              <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">Add your first cake to the menu.</p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {galleryItems.map(item => (
-                <div key={item.id} className="bg-[#1e1a17] border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden">
-                  <img src={item.image} alt={item.name} className="h-44 w-full object-cover grayscale brightness-75 hover:grayscale-0 hover:brightness-100 transition-all duration-300" referrerPolicy="no-referrer" />
+                <div key={item.id} className="bg-[#1e1a17] border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden group">
+                  <img src={item.image} alt={item.name} className="h-44 w-full object-cover grayscale brightness-75 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-300" referrerPolicy="no-referrer" />
                   <div className="p-5">
-                    <span className="text-[9px] uppercase tracking-widest font-mono text-lux-gold bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 px-2 py-0.5 rounded-sm mb-2 inline-block">{item.category?.name ?? item.categoryId}</span>
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-[9px] uppercase tracking-widest font-mono text-lux-gold bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 px-2 py-0.5 rounded-sm">{item.category?.name ?? item.categoryId}</span>
+                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onClick={() => startEditGalleryItem(item)} className="p-1 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-400 hover:text-lux-gold rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.editGalleryItem')}>
+                          <Pencil className="w-3 h-3" />
+                        </button>
+                        <button onClick={() => handleDeleteGalleryItem(item.id, item.name)} className="p-1 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.deleteGalleryItem')}>
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
                     <h3 className="font-serif text-base text-stone-100 font-medium">{item.name}</h3>
                     <p className="text-xs text-stone-400 dark:text-stone-400 font-light mt-1 leading-relaxed line-clamp-2">{item.description}</p>
                     <div className="mt-4 pt-3 border-t border-stone-200/60 dark:border-stone-800/60 font-mono text-[11px] text-stone-600 dark:text-stone-300 flex justify-between">
@@ -826,6 +1151,208 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Categories Tab ────────────────────────────────── */}
+      {currentTab === 'categories' && (
+        <div className="max-w-7xl mx-auto space-y-5 relative z-10 font-sans">
+          <div className="flex justify-between items-center bg-stone-50 dark:bg-[#1d1916] p-5 border border-stone-200 dark:border-stone-800 rounded-sm">
+            <h2 className="font-serif text-xl text-stone-900 dark:text-white flex items-center gap-2">
+              <Layers className="w-5 h-5 text-lux-gold" /> {t('admin.categories')} ({categories.length})
+            </h2>
+            <button
+              onClick={() => { setShowCategoryForm(true); setEditingCategoryId(null); setCategoryForm({ name: '', slug: '', description: '', color: '', icon: '', sortOrder: 0 }); }}
+              className="px-3 py-1.5 bg-lux-gold text-stone-950 font-mono text-[10px] uppercase font-bold tracking-wider rounded-sm flex items-center gap-1.5 hover:bg-white transition-all cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" /> {t('admin.addCategory')}
+            </button>
+          </div>
+
+          {/* Create/Edit Form */}
+          {showCategoryForm && (
+            <div className="bg-white dark:bg-[#1e1a17] border border-lux-gold/30 dark:border-[#c5a880]/30 rounded-sm p-6 space-y-4">
+              <h3 className="font-serif text-base text-stone-900 dark:text-white font-medium">
+                {editingCategoryId ? t('admin.editCategory') : t('admin.addCategory')}
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.categoryName')}</label>
+                  <input value={categoryForm.name} onChange={e => setCategoryForm(f => ({ ...f, name: e.target.value }))} className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+                </div>
+                <div>
+                  <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.categorySlug')}</label>
+                  <input value={categoryForm.slug} onChange={e => setCategoryForm(f => ({ ...f, slug: e.target.value }))} placeholder="Auto-generated if empty" className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.categoryDescription')}</label>
+                  <textarea value={categoryForm.description} onChange={e => setCategoryForm(f => ({ ...f, description: e.target.value }))} rows={2} className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+                </div>
+                <div>
+                  <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.categoryColor')}</label>
+                  <input value={categoryForm.color} onChange={e => setCategoryForm(f => ({ ...f, color: e.target.value }))} placeholder="#c5a880" className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+                </div>
+                <div>
+                  <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.categoryIcon')}</label>
+                  <input value={categoryForm.icon} onChange={e => setCategoryForm(f => ({ ...f, icon: e.target.value }))} placeholder="Cake" className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+                </div>
+                <div>
+                  <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.categorySortOrder')}</label>
+                  <input type="number" value={categoryForm.sortOrder} onChange={e => setCategoryForm(f => ({ ...f, sortOrder: parseInt(e.target.value) || 0 }))} className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <button onClick={() => { setShowCategoryForm(false); setEditingCategoryId(null); }} className="px-3 py-1.5 text-[10px] font-mono font-bold uppercase bg-stone-200 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:bg-stone-300 dark:hover:bg-stone-700 rounded-sm">{t('admin.cancelEdit')}</button>
+                <button onClick={handleSaveCategory} disabled={savingCategory} className="px-3.5 py-1.5 text-[10px] font-mono font-bold uppercase bg-lux-gold text-stone-950 hover:bg-white rounded-sm flex items-center gap-1">
+                  {savingCategory ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} {t('admin.saveChanges')}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {categoriesLoading ? (
+            <div className="text-center py-16 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
+              <Loader2 className="w-7 h-7 animate-spin text-lux-gold mx-auto mb-2" />
+              <p className="text-xs text-stone-400 dark:text-stone-400 font-mono">{t('admin.loadingCategories')}</p>
+            </div>
+          ) : categories.length === 0 ? (
+            <div className="text-center py-16 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
+              <Layers className="w-10 h-10 text-stone-400 dark:text-stone-500 mx-auto mb-3" />
+              <p className="text-sm font-serif text-stone-600 dark:text-stone-300 italic">{t('admin.noCategories')}</p>
+            </div>
+          ) : (
+            <div className="bg-[#1e1a17] border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-stone-100 dark:bg-[#15110f] text-stone-400 dark:text-stone-400 uppercase font-mono tracking-wider font-semibold border-b border-stone-200 dark:border-stone-800">
+                    <tr>
+                      <th className="px-5 py-4">{t('admin.categoryName')}</th>
+                      <th className="px-5 py-4">{t('admin.categorySlug')}</th>
+                      <th className="px-5 py-4">{t('admin.categorySortOrder')}</th>
+                      <th className="px-5 py-4">{t('admin.categoryColor')}</th>
+                      <th className="px-5 py-4">Status</th>
+                      <th className="px-5 py-4 text-right">{t('admin.saveChanges')}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-stone-800/60">
+                    {categories.map(cat => (
+                      <tr key={cat.id} className="hover:bg-white/5 transition-colors">
+                        <td className="px-5 py-4 font-serif italic text-stone-900 dark:text-white text-sm">{cat.name}</td>
+                        <td className="px-5 py-4 text-stone-500 dark:text-stone-400 font-mono text-[10px]">{cat.slug}</td>
+                        <td className="px-5 py-4 text-stone-400 dark:text-stone-500">{cat.sortOrder}</td>
+                        <td className="px-5 py-4">
+                          {cat.color ? <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full border" style={{ backgroundColor: cat.color }} />{cat.color}</span> : <span className="text-stone-500">—</span>}
+                        </td>
+                        <td className="px-5 py-4">
+                          <button onClick={() => handleToggleCategoryActive(cat)} className={`text-[9px] font-mono uppercase font-bold px-2 py-0.5 rounded-full border flex items-center gap-1 ${cat.isActive ? 'bg-emerald-900/20 border-emerald-800 text-emerald-400' : 'bg-stone-800 border-stone-700 text-stone-500'}`}>
+                            {cat.isActive ? <ToggleRight className="w-3 h-3" /> : <ToggleLeft className="w-3 h-3" />}
+                            {cat.isActive ? t('admin.active') : t('admin.inactive')}
+                          </button>
+                        </td>
+                        <td className="px-5 py-4">
+                          <div className="flex items-center justify-end gap-2">
+                            <button onClick={() => startEditCategory(cat)} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-400 hover:text-lux-gold rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.editCategory')}>
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+                            <button onClick={() => handleDeleteCategory(cat.id, cat.name)} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.deleteCategory')}>
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Reviews Tab ────────────────────────────────────── */}
+      {currentTab === 'reviews' && (
+        <div className="max-w-7xl mx-auto space-y-5 relative z-10 font-sans">
+          <div className="flex justify-between items-center bg-stone-50 dark:bg-[#1d1916] p-5 border border-stone-200 dark:border-stone-800 rounded-sm">
+            <h2 className="font-serif text-xl text-stone-900 dark:text-white flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-lux-gold" /> {t('admin.reviews')} ({reviewItems.length})
+            </h2>
+          </div>
+
+          {reviewsLoading ? (
+            <div className="text-center py-16 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
+              <Loader2 className="w-7 h-7 animate-spin text-lux-gold mx-auto mb-2" />
+              <p className="text-xs text-stone-400 dark:text-stone-400 font-mono">{t('admin.loadingReviews')}</p>
+            </div>
+          ) : reviewItems.length === 0 ? (
+            <div className="text-center py-16 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
+              <MessageSquare className="w-10 h-10 text-stone-400 dark:text-stone-500 mx-auto mb-3" />
+              <p className="text-sm font-serif text-stone-600 dark:text-stone-300 italic">{t('admin.noReviews')}</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {reviewItems.map(rev => {
+                const isEditing = editingReviewId === rev.id;
+                return (
+                  <div key={rev.id} className="bg-white dark:bg-[#1e1a17] border border-stone-200 dark:border-stone-800 rounded-sm p-5 text-left">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-serif text-base text-stone-900 dark:text-white font-medium">{rev.author}</h3>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="flex">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Star key={i} className={`w-3.5 h-3.5 ${i < rev.rating ? 'text-lux-gold fill-lux-gold' : 'text-stone-300 dark:text-stone-600'}`} />
+                            ))}
+                          </div>
+                          <span className="text-[10px] text-stone-400 dark:text-stone-400 font-mono">{rev.eventType}</span>
+                          <span className="text-[10px] text-stone-400 dark:text-stone-400 font-mono">• {rev.date}</span>
+                        </div>
+                      </div>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => {
+                            if (isEditing) { setEditingReviewId(null); return; }
+                            setEditingReviewId(rev.id);
+                            setEditReviewContent(rev.content);
+                            setEditReviewRating(rev.rating);
+                          }}
+                          className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-400 hover:text-lux-gold rounded-xs border border-stone-200 dark:border-stone-800"
+                          title={t('admin.editReview')}
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={() => handleDeleteReview(rev.id, rev.author)} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.deleteReview')}>
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {isEditing ? (
+                      <div className="mt-4 space-y-3 p-4 bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 rounded-xs">
+                        <div>
+                          <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.reviewRating')}</label>
+                          <select value={editReviewRating} onChange={e => setEditReviewRating(Number(e.target.value))} className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs">
+                            {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n} Star{n > 1 ? 's' : ''}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.reviewContent')}</label>
+                          <textarea value={editReviewContent} onChange={e => setEditReviewContent(e.target.value)} rows={3} className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+                        </div>
+                        <div className="flex justify-end gap-2">
+                          <button onClick={() => setEditingReviewId(null)} className="px-3 py-1.5 text-[10px] font-mono font-bold uppercase bg-stone-200 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:bg-stone-300 dark:hover:bg-stone-700 rounded-sm">{t('admin.cancelEdit')}</button>
+                          <button onClick={() => handleSaveReview(rev.id)} disabled={savingReview} className="px-3.5 py-1.5 text-[10px] font-mono font-bold uppercase bg-lux-gold text-stone-950 hover:bg-white rounded-sm flex items-center gap-1">
+                            {savingReview ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} {t('admin.saveChanges')}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-stone-600 dark:text-stone-300 font-light mt-3 leading-relaxed">"{rev.content}"</p>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
