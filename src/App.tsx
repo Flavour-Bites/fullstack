@@ -88,7 +88,7 @@ export default function App() {
   const isAdminMode = currentUser && (currentUser.role === 'admin' || currentUser.role === 'staff') && activePage === 'admin';
 
   return (
-    <div className={`min-h-screen flex flex-col justify-between selection:bg-lux-gold transition-colors duration-300 relative ${
+    <div className={`min-h-screen flex flex-col justify-between selection:bg-lux-gold transition-colors duration-300 relative overflow-x-hidden ${
       darkMode 
         ? 'bg-[#111111] text-stone-100' 
         : 'bg-lux-cream text-stone-800'
