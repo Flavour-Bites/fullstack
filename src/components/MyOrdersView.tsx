@@ -301,6 +301,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
                 <input
                   type="text"
                   placeholder="Order ID or Client Name..."
+                  aria-label="Order ID or Client Name"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 focus:outline-none focus:ring-1 focus:ring-lux-gold focus:border-lux-gold pl-9 pr-3 py-2.5 text-xs text-stone-850 dark:text-stone-100 placeholder-stone-400 rounded-sm"
@@ -335,6 +336,8 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
                 <div
                   key={ord.id}
                   onClick={() => { setSelectedOrder(ord); setSearchError(false); }}
+                  role="button"
+                  tabIndex={0}
                   className={`p-3.5 rounded-sm border transition-all cursor-pointer text-left ${
                     selectedOrder?.id === ord.id
                       ? 'bg-lux-cream/20 dark:bg-stone-900/40 border-lux-gold/60 shadow-xs'

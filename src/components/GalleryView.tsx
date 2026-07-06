@@ -170,6 +170,7 @@ export default function GalleryView({
               <input
                 type="text"
                 placeholder={t('gallery.searchFlavors')}
+                aria-label={t('gallery.searchFlavors')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 focus:border-lux-gold focus:outline-none pl-10 pr-10 py-3 text-xs uppercase tracking-wider font-mono rounded-sm transition-all text-stone-800 dark:text-stone-100 placeholder-stone-400"
@@ -177,6 +178,7 @@ export default function GalleryView({
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
+                  aria-label="Clear search"
                   className="absolute inset-y-0 right-3 flex items-center text-stone-400 hover:text-stone-700"
                 >
                   <X className="w-4 h-4" />
