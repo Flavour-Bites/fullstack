@@ -3,8 +3,10 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Send, Mail, MapPin, Phone, HelpCircle, Check, ChevronDown, CheckCircle2, Calculator, Map, ShieldAlert, Search, Loader2 } from 'lucide-react';
 import { FAQS } from '../data';
 import { t } from '../i18n';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 export default function ContactView() {
+  usePageTitle("Contact");
   const [activeFaq, setActiveFaq] = useState<string | null>(null);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [sending, setSending] = useState(false);

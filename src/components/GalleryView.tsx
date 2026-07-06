@@ -4,6 +4,7 @@ import { Sparkles, X, ChevronRight, Cake, Info, Search, Tag, RotateCcw } from 'l
 import { CakeGalleryItem } from '../types';
 import { GALLERY_ITEMS } from '../data';
 import { t } from '../i18n';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 interface GalleryViewProps {
   selectedCake: CakeGalleryItem | null;
@@ -58,6 +59,7 @@ export default function GalleryView({
   onSelectCake,
   onCommissionCake
 }: GalleryViewProps) {
+  usePageTitle("Gallery");
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);

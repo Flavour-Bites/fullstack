@@ -4,6 +4,7 @@ import { Sparkles, Calendar, ChevronRight, ChevronLeft, Star, Heart, Check, Awar
 import { PageType, CakeGalleryItem } from '../types';
 import { GALLERY_ITEMS, TESTIMONIALS } from '../data';
 import { t } from '../i18n';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 interface HomeViewProps {
   onNavigate: (page: PageType) => void;
@@ -11,6 +12,7 @@ interface HomeViewProps {
 }
 
 export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
+  usePageTitle("Home");
   const [activeTestimonial, setActiveTestimonial] = useState(0);
 
   // Auto scroll testimonials (resets interval on manual action)

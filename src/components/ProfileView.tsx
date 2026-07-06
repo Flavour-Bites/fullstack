@@ -4,6 +4,7 @@ import { User as UserIcon, Search, CheckCircle2, Clock, Eye, AlertCircle, Shoppi
 import { User, CustomCakeRequest } from '../types';
 import { useToast } from './Toast';
 import { t } from '../i18n';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 interface SimulatedOrder {
   id: string;
@@ -91,6 +92,7 @@ interface ProfileViewProps {
 }
 
 export default function ProfileView({ currentUser, onLogout, onNavigate }: ProfileViewProps) {
+  usePageTitle("Profile");
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [liveOrders, setLiveOrders] = useState<any[]>([]);

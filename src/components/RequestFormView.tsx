@@ -5,6 +5,7 @@ import { CustomCakeRequest, CakeGalleryItem, User } from '../types';
 import { useToast } from './Toast';
 import { t } from '../i18n';
 import { apiFetch } from '../shared/utils/apiClient';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 interface RequestFormViewProps {
   prefilledCake: CakeGalleryItem | null;
@@ -32,6 +33,7 @@ export default function RequestFormView({
   onClearPrefilledCake,
   currentUser
 }: RequestFormViewProps) {
+  usePageTitle("Request a Cake");
   const { showToast } = useToast();
   const [form, setForm] = useState(DEFAULT_FORM);
 
