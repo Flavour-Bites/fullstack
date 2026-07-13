@@ -31,12 +31,12 @@ function toPublic(user: User): PublicUser {
 export const authRepository = {
   async findByTelegramId(telegramId: string) {
     const prisma = getPrisma();
-    return prisma.user.findUnique({ where: { telegramId } });
+    return prisma.user.findFirst({ where: { telegramId, deletedAt: null } });
   },
 
   async findById(id: string) {
     const prisma = getPrisma();
-    return prisma.user.findUnique({ where: { id } });
+    return prisma.user.findFirst({ where: { id, deletedAt: null } });
   },
 
   async upsertTelegramUser(telegramData: {

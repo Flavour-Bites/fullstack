@@ -5,6 +5,7 @@ export const usersRepository = {
   async findAll() {
     const prisma = getPrisma();
     return prisma.user.findMany({
+      where: { deletedAt: null },
       select: {
         id: true,
         name: true,
@@ -21,15 +22,15 @@ export const usersRepository = {
 
   async findById(userId: string) {
     const prisma = getPrisma();
-    return prisma.user.findUnique({
-      where: { id: userId },
+    return prisma.user.findFirst({
+      where: { id: userId, deletedAt: null },
       select: { id: true, role: true },
     });
   },
 
   async countByRole(role: Role) {
     const prisma = getPrisma();
-    return prisma.user.count({ where: { role } });
+    return prisma.user.count({ where: { role, deletedAt: null } });
   },
 
   async updateRole(userId: string, role: Role) {
@@ -39,6 +40,9 @@ export const usersRepository = {
 
   async delete(userId: string) {
     const prisma = getPrisma();
-    return prisma.user.delete({ where: { id: userId } });
+    return prisma.user.update({
+      where: { id: userId },
+      data: { deletedAt: new Date() },
+    });
   },
 };

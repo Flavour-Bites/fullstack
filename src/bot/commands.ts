@@ -72,7 +72,7 @@ export function handleCommands(bot: Bot) {
             return ctx.reply(msg, { parse_mode: "HTML" });
         }
 
-        const user = await prisma.user.findUnique({ where: { telegramId } });
+        const user = await prisma.user.findFirst({ where: { telegramId, deletedAt: null } });
 
         if (user) {
             await ctx.reply(
@@ -99,8 +99,8 @@ export function handleCommands(bot: Bot) {
         const telegramId = String(ctx.from?.id);
         const prisma = getPrisma();
 
-        const user = await prisma.user.findUnique({
-            where: { telegramId },
+        const user = await prisma.user.findFirst({
+            where: { telegramId, deletedAt: null },
             include: {
                 requests: {
                     where: {
@@ -168,7 +168,7 @@ export function handleCommands(bot: Bot) {
         const telegramId = String(ctx.from?.id);
         const prisma = getPrisma();
 
-        const user = await prisma.user.findUnique({ where: { telegramId } });
+        const user = await prisma.user.findFirst({ where: { telegramId, deletedAt: null } });
 
         if (!user) {
             return ctx.reply(

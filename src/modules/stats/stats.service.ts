@@ -13,6 +13,7 @@ export const statsService = {
       }),
       prisma.user.groupBy({
         by: ['role'],
+        where: { deletedAt: null },
         _count: true,
       }),
       prisma.review.aggregate({
@@ -50,7 +51,7 @@ export const statsService = {
         : '0',
       statusBreakdown,
       roleCounts,
-      totalUsers: await prisma.user.count(),
+      totalUsers: await prisma.user.count({ where: { deletedAt: null } }),
       totalReviews: reviewStats._count,
     };
   },

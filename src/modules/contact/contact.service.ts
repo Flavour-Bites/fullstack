@@ -18,6 +18,7 @@ async function getStaffChatIds(): Promise<string[]> {
         role: { in: ['admin', 'staff'] },
         notifyViaTelegram: true,
         telegramId: { not: '' },
+        deletedAt: null,
       },
       select: { telegramId: true },
     });

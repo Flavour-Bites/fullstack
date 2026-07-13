@@ -49,6 +49,7 @@ model User {
 
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
+  deletedAt     DateTime?
   requests      CustomCakeRequest[]
   reviews       Review[]
   statusEvents  OrderStatusEvent[]  @relation("OrderStatusChangedBy")
