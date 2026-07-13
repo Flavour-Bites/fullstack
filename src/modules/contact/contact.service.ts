@@ -42,9 +42,7 @@ export const contactService = {
     ].join('\n');
 
     const staffIds = await getStaffChatIds();
-    for (const id of staffIds) {
-      await sendMessage(id, text);
-    }
+    await Promise.allSettled(staffIds.map((id) => sendMessage(id, text)));
 
     return { delivered: staffIds.length > 0 };
   },

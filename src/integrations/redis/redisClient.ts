@@ -179,7 +179,12 @@ let redisInstance: KeyValueStore | null = null;
 
 export function getRedisStore() {
   if (!redisInstance) {
-    redisInstance = process.env.REDIS_URL ? new RedisStore() : new MemoryStore();
+    if (process.env.REDIS_URL) {
+      redisInstance = new RedisStore();
+    } else {
+      console.warn('[Redis] REDIS_URL not set. Using in-memory store. Conversation state will NOT persist across restarts or scale across replicas.');
+      redisInstance = new MemoryStore();
+    }
   }
   return redisInstance;
 }

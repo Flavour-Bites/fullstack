@@ -32,6 +32,12 @@ const PLACEHOLDER_URLS = new Set([
   'your-app-url',
 ]);
 
+const PLACEHOLDER_BASE_URLS = new Set([
+  'http://localhost:3000',
+  'https://localhost:3000',
+  '',
+]);
+
 export function validateEnv() {
   const missing = required.filter((key) => !process.env[key]);
   if (missing.length > 0) {
@@ -64,6 +70,14 @@ export function validateEnv() {
   if (!hasUrl && missingCloudinary.length > 0) {
     throw new Error(
       `Missing Cloudinary configuration: either set CLOUDINARY_URL or all of: ${missingCloudinary.join(', ')}`
+    );
+  }
+
+  // Validate BASE_URL if set (used for payment callbacks)
+  const baseUrl = process.env.BASE_URL || '';
+  if (baseUrl && (PLACEHOLDER_BASE_URLS.has(baseUrl) || !baseUrl.startsWith('http'))) {
+    console.warn(
+      `[Env] BASE_URL "${baseUrl}" looks like a placeholder. Payment callbacks will fail.`
     );
   }
 

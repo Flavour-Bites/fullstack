@@ -13,4 +13,7 @@ coverage/
 .*/ 
 !.github/
 
+# Large data/logs
+*.har
+*.jsonl
 *skills*

@@ -155,6 +155,10 @@ export const ordersService = {
     return ordersRepository.softDelete(orderId);
   },
 
+  async updateAll(orderId: string, fields: Record<string, unknown>) {
+    return ordersRepository.updateFull(orderId, fields);
+  },
+
   async restore(orderId: string) {
     return ordersRepository.restore(orderId);
   },

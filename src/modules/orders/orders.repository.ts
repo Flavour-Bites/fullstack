@@ -186,6 +186,18 @@ export const ordersRepository = {
     });
   },
 
+  async updateFull(orderId: string, fields: Record<string, unknown>) {
+    const prisma = getPrisma();
+    return prisma.$transaction(async (tx) => {
+      const current = await tx.customCakeRequest.findUnique({
+        where: { id: orderId },
+        select: { id: true, deletedAt: true },
+      });
+      if (!current || current.deletedAt) throw new Error('Order not found.');
+      return tx.customCakeRequest.update({ where: { id: orderId }, data: fields });
+    });
+  },
+
   async softDelete(orderId: string) {
     const prisma = getPrisma();
     return prisma.customCakeRequest.update({

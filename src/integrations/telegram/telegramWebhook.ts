@@ -1,6 +1,8 @@
+import crypto from 'crypto';
+
 export function verifyTelegramWebhookSecret(actual: string | undefined): boolean {
   const expected = process.env.TELEGRAM_WEBHOOK_SECRET;
-  if (!expected) return false;
-  if (!actual) return false;
-  return actual === expected;
+  if (!expected || !actual) return false;
+  if (actual.length !== expected.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
 }

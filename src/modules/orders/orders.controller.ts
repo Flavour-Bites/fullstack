@@ -86,6 +86,11 @@ export const ordersController = {
   }),
 
   restore: asyncHandler(async (req: Request, res: Response) => {
+    const order = await ordersService.findById(req.params.id);
+    if (!order) {
+      res.status(404).json({ success: false, error: 'Order not found.' });
+      return;
+    }
     const restored = await ordersService.restore(req.params.id);
     res.json({ success: true, request: restored });
   }),
