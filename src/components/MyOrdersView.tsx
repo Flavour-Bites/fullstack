@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Search, CheckCircle2, Clock, Eye, AlertCircle, RefreshCw, ShoppingBag, ShieldCheck, CreditCard, Loader2 } from 'lucide-react';
 import { t } from '../i18n';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 interface SimulatedOrder {
   id: string;
@@ -114,6 +115,7 @@ interface MyOrdersViewProps {
 }
 
 export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
+  usePageTitle("My Orders");
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<SimulatedOrder | null>(null);
   const [liveOrders, setLiveOrders] = useState<SimulatedOrder[]>([]);

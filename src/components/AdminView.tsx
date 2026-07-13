@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useToast } from './Toast';
 import { t } from '../i18n';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 // ─────────────────────────────────────────────────────────────
 // Types
@@ -145,6 +146,7 @@ function exportOrdersCSV(requests: CakeRequest[]) {
 // Component
 // ─────────────────────────────────────────────────────────────
 export default function AdminView({ activeTab, onTabChange, currentUser }: AdminViewProps) {
+  usePageTitle("Admin");
   const { showToast } = useToast();
   const isAdmin = currentUser?.role === 'admin';
 

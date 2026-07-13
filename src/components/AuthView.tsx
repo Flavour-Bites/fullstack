@@ -4,6 +4,7 @@ import { useToast } from './Toast';
 import { User as UserType } from '../types';
 import { t } from '../i18n';
 import { setToken } from '../shared/utils/apiClient';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 interface AuthViewProps {
   onAuthSuccess: (user: UserType) => void;
@@ -46,6 +47,7 @@ export default function AuthView({
   title,
   subtitle
 }: AuthViewProps) {
+  usePageTitle("Sign In");
   const { showToast } = useToast();
   const [step, setStep] = useState<'telegram' | 'password'>('telegram');
   const [telegramId, setTelegramId] = useState('');
