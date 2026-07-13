@@ -11,6 +11,7 @@ import {
 import { useToast } from './Toast';
 import { t } from '../i18n';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { SkeletonCard, SkeletonTable, SkeletonGrid } from './Skeleton';
 
 // ─────────────────────────────────────────────────────────────
 // Types
@@ -859,9 +860,10 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
 
             {/* Order List */}
             {loading ? (
-              <div className="bg-stone-50 dark:bg-[#1d1916] text-center p-16 border border-stone-200/60 dark:border-stone-800/60 rounded-sm">
-                <Loader2 className="w-7 h-7 animate-spin text-lux-gold mx-auto mb-3" />
-                <p className="text-xs text-stone-400 dark:text-stone-400 font-mono uppercase tracking-widest">{t('admin.loadingOrders')}</p>
+              <div className="space-y-4">
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
               </div>
             ) : filteredRequests.length === 0 ? (
               <div className="bg-stone-50 dark:bg-[#1d1916] text-center p-16 border border-stone-200/60 dark:border-stone-800/60 rounded-sm">
@@ -1150,10 +1152,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
           )}
 
           {galleryLoading ? (
-            <div className="text-center py-20 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
-              <Loader2 className="w-7 h-7 animate-spin text-lux-gold mx-auto mb-2" />
-              <p className="text-xs text-stone-400 dark:text-stone-400 font-mono">{t('admin.loadingMenu')}</p>
-            </div>
+            <SkeletonGrid items={6} />
           ) : galleryItems.length === 0 ? (
             <div className="text-center py-20 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
               <Image className="w-10 h-10 text-stone-400 dark:text-stone-500 mx-auto mb-3" />
@@ -1248,10 +1247,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
           )}
 
           {categoriesLoading ? (
-            <div className="text-center py-16 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
-              <Loader2 className="w-7 h-7 animate-spin text-lux-gold mx-auto mb-2" />
-              <p className="text-xs text-stone-400 dark:text-stone-400 font-mono">{t('admin.loadingCategories')}</p>
-            </div>
+            <SkeletonTable rows={4} cols={3} />
           ) : categories.length === 0 ? (
             <div className="text-center py-16 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
               <Layers className="w-10 h-10 text-stone-400 dark:text-stone-500 mx-auto mb-3" />
@@ -1316,9 +1312,10 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
           </div>
 
           {reviewsLoading ? (
-            <div className="text-center py-16 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
-              <Loader2 className="w-7 h-7 animate-spin text-lux-gold mx-auto mb-2" />
-              <p className="text-xs text-stone-400 dark:text-stone-400 font-mono">{t('admin.loadingReviews')}</p>
+            <div className="space-y-4">
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
             </div>
           ) : reviewItems.length === 0 ? (
             <div className="text-center py-16 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
@@ -1408,10 +1405,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
             </div>
 
             {usersLoading ? (
-              <div className="text-center py-16 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
-                <Loader2 className="w-7 h-7 animate-spin text-lux-gold mx-auto mb-2" />
-                <p className="text-xs text-stone-400 dark:text-stone-400 font-mono">{t('admin.loadingUsers')}</p>
-              </div>
+              <SkeletonTable rows={5} cols={4} />
             ) : (
               <div className="bg-[#1e1a17] border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden">
                 <div className="overflow-x-auto">
