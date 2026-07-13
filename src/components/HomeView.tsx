@@ -123,7 +123,7 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="flex gap-10 mt-12 pt-8 border-t border-stone-850 text-left"
+              className="flex gap-4 sm:gap-10 mt-12 pt-8 border-t border-stone-850 text-left"
             >
               {[
                 { value: "500+", label: t('home.statsCakes') },

@@ -370,7 +370,7 @@ export default function GalleryView({
               {/* Product Close button - Absolutely positioned z-50 to float cleanly over content or image */}
               <button
                 onClick={onClearSelectedCake}
-                className="absolute top-4 right-4 z-50 p-2 bg-white/90 hover:bg-white dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-800 dark:text-stone-200 rounded-full transition-all cursor-pointer shadow-md border border-stone-200/50 dark:border-stone-800"
+                className="absolute top-4 right-4 z-50 p-3 bg-white/90 hover:bg-white dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-800 dark:text-stone-200 rounded-full transition-all cursor-pointer shadow-md border border-stone-200/50 dark:border-stone-800"
                 aria-label={t('gallery.closeDetails')}
               >
                 <X className="w-5 h-5" />

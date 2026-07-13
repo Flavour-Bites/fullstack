@@ -824,7 +824,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                     placeholder={t('admin.searchOrders')}
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
-                    className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-lux-gold pl-9 pr-3 py-2.5 text-xs rounded-xs"
+                    className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-lux-gold pl-9 pr-3 py-3 text-xs rounded-xs"
                   />
                 </div>
                 <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
@@ -832,7 +832,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                   <select
                     value={statusFilter}
                     onChange={e => setStatusFilter(e.target.value)}
-                    className="bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300 focus:outline-none focus:ring-1 focus:ring-lux-gold py-2.5 px-3 text-xs rounded-xs font-mono font-bold flex-grow sm:flex-grow-0"
+                    className="bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300 focus:outline-none focus:ring-1 focus:ring-lux-gold py-3 px-3 text-xs rounded-xs font-mono font-bold flex-grow sm:flex-grow-0"
                   >
                     <option value="all">{t('admin.allStatuses')}</option>
                     <option value="pending">Pending</option>

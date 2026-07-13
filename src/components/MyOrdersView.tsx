@@ -303,12 +303,12 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
                   placeholder="Order ID or Client Name..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 focus:outline-none focus:ring-1 focus:ring-lux-gold focus:border-lux-gold pl-9 pr-3 py-2.5 text-xs text-stone-850 dark:text-stone-100 placeholder-stone-400 rounded-sm"
+                  className="w-full bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 focus:outline-none focus:ring-1 focus:ring-lux-gold focus:border-lux-gold pl-9 pr-3 py-3 text-xs text-stone-850 dark:text-stone-100 placeholder-stone-400 rounded-sm"
                 />
               </div>
               <button
                 type="submit"
-                className="px-4 py-2.5 bg-stone-900 dark:bg-stone-800 hover:bg-lux-gold text-white hover:text-stone-950 dark:hover:text-stone-950 font-mono text-[10px] uppercase font-bold tracking-wider rounded-sm transition-colors cursor-pointer"
+                className="px-4 py-3 bg-stone-900 dark:bg-stone-800 hover:bg-lux-gold text-white hover:text-stone-950 dark:hover:text-stone-950 font-mono text-[10px] uppercase font-bold tracking-wider rounded-sm transition-colors cursor-pointer"
               >
                 {t('common.track')}
               </button>
@@ -439,7 +439,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
                         <button
                           onClick={() => handlePayNow(selectedOrder.id)}
                           disabled={payingOrderId === selectedOrder.id}
-                          className="px-4 py-2 bg-lux-gold text-stone-950 font-mono text-[10px] uppercase font-bold tracking-wider rounded-sm flex items-center gap-1.5 hover:bg-white transition-all cursor-pointer disabled:opacity-50"
+                          className="px-4 py-3 bg-lux-gold text-stone-950 font-mono text-[10px] uppercase font-bold tracking-wider rounded-sm flex items-center gap-1.5 hover:bg-white transition-all cursor-pointer disabled:opacity-50"
                         >
                           {payingOrderId === selectedOrder.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CreditCard className="w-3 h-3" />}
                           Pay Now
