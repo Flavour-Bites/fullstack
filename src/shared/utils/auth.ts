@@ -2,9 +2,14 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_development_secret_do_not_use_in_prod';
 const JWT_EXPIRES = '30d';
 const BCRYPT_ROUNDS = 12;
+
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error('JWT_SECRET is not configured.');
+  return secret;
+}
 
 export const hashPassword = (plain: string) => bcrypt.hash(plain, BCRYPT_ROUNDS);
 
@@ -19,11 +24,11 @@ export interface TokenPayload {
 }
 
 export function signToken(payload: TokenPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES });
+  return jwt.sign(payload, getJwtSecret(), { expiresIn: JWT_EXPIRES });
 }
 
 export function verifyToken(token: string): TokenPayload {
-  return jwt.verify(token, JWT_SECRET) as TokenPayload;
+  return jwt.verify(token, getJwtSecret()) as TokenPayload;
 }
 
 export interface TelegramAuthData {

@@ -10,13 +10,13 @@ import reviewsRoutes from '../modules/reviews/reviews.routes.js';
 import statsRoutes from '../modules/stats/stats.routes.js';
 import chatbotRoutes from '../modules/chatbot/chatbot.routes.js';
 import contactRoutes from '../modules/contact/contact.routes.js';
-import paymentRoutes from '../modules/payment/payment.routes.js';
+// import paymentRoutes from '../modules/payment/payment.routes.js'; // v2 — Chapa integration
 
 const router = Router();
 
 router.use('/auth', authRoutes);
 router.use('/requests', ordersRoutes);
-router.use('/payments', paymentRoutes);
+// router.use('/payments', paymentRoutes); // v2 — Chapa integration
 router.use('/users', usersRoutes);
 router.use('/categories', categoriesRoutes);
 router.use('/gallery', galleryRoutes);

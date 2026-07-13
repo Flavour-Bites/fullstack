@@ -51,7 +51,8 @@ src/
 │   ├── recovery/         # Telegram account recovery
 │   ├── reviews/          # Customer reviews
 │   ├── stats/            # Admin analytics
-│   └── chatbot/          # AI assistant (Gemini)
+│   ├── chatbot/          # AI assistant (Gemini)
+│   └── contact/          # Contact form submissions
 ├── integrations/         # External service adapters
 │   ├── telegram/         # Client, webhook, notifications
 │   ├── redis/            # Key-value store, conversation state
