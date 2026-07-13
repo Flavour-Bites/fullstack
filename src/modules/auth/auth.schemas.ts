@@ -16,7 +16,7 @@ export const finalizeSchema = z.object({
 });
 
 export const passwordSchema = z.object({
-  password: z.string().min(6, 'Password must be at least 6 characters.'),
+  password: z.string().min(8, 'Password must be at least 8 characters.'),
 });
 
 export const telegramPasswordSchema = z.object({
