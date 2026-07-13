@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeAll } from 'vitest';
+import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import {
   hashPassword,
   verifyPassword,
@@ -59,6 +59,9 @@ describe('verifyPassword', () => {
 });
 
 describe('signToken', () => {
+  beforeAll(() => { process.env.JWT_SECRET = 'test-secret'; });
+  afterAll(() => { delete process.env.JWT_SECRET; });
+
   it('creates a signed JWT token', () => {
     const token = signToken({ userId: 'usr_123', role: 'customer' });
     expect(typeof token).toBe('string');
@@ -67,6 +70,9 @@ describe('signToken', () => {
 });
 
 describe('verifyToken', () => {
+  beforeAll(() => { process.env.JWT_SECRET = 'test-secret'; });
+  afterAll(() => { delete process.env.JWT_SECRET; });
+
   it('returns payload for valid token', () => {
     const payload = verifyToken('valid-token');
     expect(payload.userId).toBe('usr_123');

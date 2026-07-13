@@ -17,6 +17,8 @@ Cancelled can occur at any point.
 ### PaymentStatus
 `unpaid` | `partial` | `paid`
 
+> **Note:** Payment status tracking exists in the schema but is unused in v1. Payment integration (Chapa) is planned for v2. See [Future Features](FUTURE_FEATURES.md).
+
 ### RecoveryStatus
 `pending` | `approved` | `rejected`
 
@@ -65,13 +67,13 @@ Relations: `requests` (CustomCakeRequest[]), `reviews` (Review[]), `statusEvents
 | referenceImageBytes | Int? | |
 | legacyContact | Json? | |
 | requestDate | DateTime | |
-| quotedPrice | Decimal? | |
-| finalPrice | Decimal? | |
-| priceConfirmedAt | DateTime? | |
-| depositAmount | Decimal | Default: 0 |
-| depositPaidAt | DateTime? | |
-| remainingBalance | Decimal | Default: 0 |
-| paymentStatus | PaymentStatus | Default: `unpaid` |
+| quotedPrice | Decimal? | **v2** — Price quoted by staff |
+| finalPrice | Decimal? | **v2** — Price confirmed by customer |
+| priceConfirmedAt | DateTime? | **v2** — When customer accepted price |
+| depositAmount | Decimal | **v2** — Amount paid so far (default: 0) |
+| depositPaidAt | DateTime? | **v2** — When first payment was made |
+| remainingBalance | Decimal | **v2** — `finalPrice - depositAmount` (default: 0) |
+| paymentStatus | PaymentStatus | **v2** — `unpaid` / `partial` / `paid` (default: `unpaid`) |
 | status | OrderStatus | Default: `Received` |
 | bakerNote | String? | |
 | deletedAt | DateTime? | Soft delete |

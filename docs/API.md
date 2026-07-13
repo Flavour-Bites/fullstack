@@ -283,3 +283,9 @@ Send messages to the AI assistant (Gemini).
   ]
 }
 ```
+
+---
+
+## Future Features
+
+Payment endpoints (Chapa integration) are planned for v2. See [Future Features](FUTURE_FEATURES.md) for details.
