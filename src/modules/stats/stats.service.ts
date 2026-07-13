@@ -4,7 +4,7 @@ export const statsService = {
   async getStats() {
     const prisma = getPrisma();
 
-    const [orderStats, userRoles, reviewStats, statusCounts] = await Promise.all([
+    const [orderStats, userRoles, reviewStats, statusCounts, paidOrders, totalUsers] = await Promise.all([
       prisma.customCakeRequest.aggregate({
         where: { deletedAt: null },
         _count: true,
@@ -25,6 +25,10 @@ export const statsService = {
         where: { deletedAt: null },
         _count: true,
       }),
+      prisma.customCakeRequest.count({
+        where: { deletedAt: null, paymentStatus: 'paid' },
+      }),
+      prisma.user.count({ where: { deletedAt: null } }),
     ]);
 
     const roleCounts = { customer: 0, staff: 0, admin: 0 };
@@ -39,9 +43,7 @@ export const statsService = {
 
     return {
       totalRevenue: orderStats._sum.finalPrice ?? 0,
-      paidOrders: await prisma.customCakeRequest.count({
-        where: { deletedAt: null, paymentStatus: 'paid' },
-      }),
+      paidOrders,
       avgOrderValue: orderStats._avg.finalPrice
         ? Math.round(orderStats._avg.finalPrice)
         : 0,
@@ -51,7 +53,7 @@ export const statsService = {
         : '0',
       statusBreakdown,
       roleCounts,
-      totalUsers: await prisma.user.count({ where: { deletedAt: null } }),
+      totalUsers,
       totalReviews: reviewStats._count,
     };
   },
