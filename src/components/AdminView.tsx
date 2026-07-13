@@ -822,6 +822,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                   <input
                     type="text"
                     placeholder={t('admin.searchOrders')}
+                    aria-label={t('admin.searchOrders')}
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
                     className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-lux-gold pl-9 pr-3 py-3 text-xs rounded-xs"
@@ -877,6 +878,8 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                       key={req.id}
                       layoutId={`order-${req.id}`}
                       onClick={() => { if (!isEditing) setSelectedRequest(req); }}
+                      role="button"
+                      tabIndex={0}
                       className={`bg-white/95 dark:bg-[#1e1a17]/95 border text-left rounded-sm p-5 transition-all cursor-pointer relative ${
                         isSelected ? 'border-lux-gold shadow-lg shadow-lux-gold/5 bg-stone-100 dark:bg-[#221d19]' : 'border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700'
                       }`}
@@ -921,7 +924,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                           <button onClick={e => { e.stopPropagation(); startEditing(req); }} className="p-1 px-2 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-400 hover:text-lux-gold rounded-xs border border-stone-200 dark:border-stone-800 text-[10px] font-mono flex items-center gap-1">
                             <Edit3 className="w-3 h-3" /> Edit
                           </button>
-                          <button onClick={e => { e.stopPropagation(); handleDeleteRequest(req.id, req.contactName); }} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800">
+                          <button onClick={e => { e.stopPropagation(); handleDeleteRequest(req.id, req.contactName); }} aria-label={`Delete order ${req.id}`} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800">
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
@@ -979,7 +982,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                         <h2 className="font-serif text-xl text-stone-900 dark:text-white font-medium">{selectedRequest.contactName}</h2>
                         <p className="text-[10px] text-stone-400 dark:text-stone-400 font-mono mt-1">{selectedRequest.id} • {selectedRequest.requestDate}</p>
                       </div>
-                      <button onClick={() => setSelectedRequest(null)} className="p-1.5 rounded-sm hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white"><X className="w-4 h-4" /></button>
+                      <button onClick={() => setSelectedRequest(null)} aria-label="Close details" className="p-1.5 rounded-sm hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white"><X className="w-4 h-4" /></button>
                     </div>
 
                     <div className="space-y-2 bg-stone-100 dark:bg-[#15110f] p-3 border border-stone-200 dark:border-stone-800 rounded-xs text-xs">
@@ -1036,7 +1039,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                           <button onClick={() => startEditing(selectedRequest)} className="px-3 py-2 bg-stone-100 dark:bg-stone-900 hover:bg-lux-gold text-stone-700 dark:text-stone-200 hover:text-stone-950 font-mono text-[10px] uppercase font-bold rounded-sm border border-stone-200 dark:border-stone-800 transition-all cursor-pointer">
                             Edit
                           </button>
-                          <button onClick={() => handleDeleteRequest(selectedRequest.id, selectedRequest.contactName)} className="p-2 border border-stone-200 dark:border-stone-800 hover:border-red-800 bg-red-950/20 text-red-400 rounded-sm cursor-pointer">
+                          <button onClick={() => handleDeleteRequest(selectedRequest.id, selectedRequest.contactName)} aria-label="Delete order" className="p-2 border border-stone-200 dark:border-stone-800 hover:border-red-800 bg-red-950/20 text-red-400 rounded-sm cursor-pointer">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
@@ -1164,10 +1167,10 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                     <div className="flex justify-between items-start mb-2">
                       <span className="text-[9px] uppercase tracking-widest font-mono text-lux-gold bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 px-2 py-0.5 rounded-sm">{item.category?.name ?? item.categoryId}</span>
                       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => startEditGalleryItem(item)} className="p-1 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-400 hover:text-lux-gold rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.editGalleryItem')}>
+                        <button onClick={() => startEditGalleryItem(item)} aria-label={t('admin.editGalleryItem')} className="p-1 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-400 hover:text-lux-gold rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.editGalleryItem')}>
                           <Pencil className="w-3 h-3" />
                         </button>
-                        <button onClick={() => handleDeleteGalleryItem(item.id, item.name)} className="p-1 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.deleteGalleryItem')}>
+                        <button onClick={() => handleDeleteGalleryItem(item.id, item.name)} aria-label={t('admin.deleteGalleryItem')} className="p-1 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.deleteGalleryItem')}>
                           <Trash2 className="w-3 h-3" />
                         </button>
                       </div>
@@ -1283,10 +1286,10 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                         </td>
                         <td className="px-5 py-4">
                           <div className="flex items-center justify-end gap-2">
-                            <button onClick={() => startEditCategory(cat)} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-400 hover:text-lux-gold rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.editCategory')}>
+                            <button onClick={() => startEditCategory(cat)} aria-label={t('admin.editCategory')} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-400 hover:text-lux-gold rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.editCategory')}>
                               <Edit3 className="w-3.5 h-3.5" />
                             </button>
-                            <button onClick={() => handleDeleteCategory(cat.id, cat.name)} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.deleteCategory')}>
+                            <button onClick={() => handleDeleteCategory(cat.id, cat.name)} aria-label={t('admin.deleteCategory')} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.deleteCategory')}>
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
@@ -1347,12 +1350,13 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                             setEditReviewContent(rev.content);
                             setEditReviewRating(rev.rating);
                           }}
+                          aria-label={t('admin.editReview')}
                           className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-400 hover:text-lux-gold rounded-xs border border-stone-200 dark:border-stone-800"
                           title={t('admin.editReview')}
                         >
                           <Edit3 className="w-3.5 h-3.5" />
                         </button>
-                        <button onClick={() => handleDeleteReview(rev.id, rev.author)} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.deleteReview')}>
+                        <button onClick={() => handleDeleteReview(rev.id, rev.author)} aria-label={t('admin.deleteReview')} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.deleteReview')}>
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -1463,6 +1467,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                                 <>
                                   <button
                                     onClick={() => { setEditingUserId(u.id); setEditingRole(u.role); }}
+                                    aria-label="Change role"
                                     className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-400 hover:text-lux-gold rounded-xs border border-stone-200 dark:border-stone-800 transition-colors"
                                     title="Change role"
                                   >
@@ -1472,6 +1477,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                                     <button
                                       onClick={() => deleteUser(u.id, u.name)}
                                       disabled={deletingUserId === u.id}
+                                      aria-label="Delete user"
                                       className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800 transition-colors"
                                       title="Delete user"
                                     >

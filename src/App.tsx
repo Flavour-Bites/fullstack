@@ -88,6 +88,10 @@ export default function App() {
   const isAdminMode = currentUser && (currentUser.role === 'admin' || currentUser.role === 'staff') && activePage === 'admin';
 
   return (
+    <>
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-lux-gold focus:text-stone-950 focus:text-sm focus:font-mono focus:uppercase focus:font-bold focus:rounded-sm focus:outline-none">
+        Skip to main content
+      </a>
     <div className={`min-h-screen flex flex-col justify-between selection:bg-lux-gold transition-colors duration-300 relative overflow-x-hidden ${
       darkMode 
         ? 'bg-[#111111] text-stone-100' 
@@ -203,7 +207,11 @@ export default function App() {
                     : 'border-stone-200 bg-white/30 text-stone-900'
                 }`}
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)} 
-                title="Account Settings"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setProfileDropdownOpen(!profileDropdownOpen); } }}
+                aria-label={currentUser ? `Account: ${currentUser.name}` : 'Sign in'}
+                aria-expanded={profileDropdownOpen}
               >
                 {currentUser ? (
                   <>
@@ -373,12 +381,13 @@ export default function App() {
                       <div className={`my-1 border-t border-b py-1.5 ${
                         isAdminMode || darkMode ? 'border-stone-850' : 'border-stone-200/50'
                       }`}>
-                        <button
+                          <button
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
                             setDarkMode(!darkMode);
                           }}
+                          aria-label={`Switch to ${darkMode ? 'light' : 'dark'} mode`}
                           className={`w-full text-left px-3 py-1 text-[10px] rounded-sm transition-colors cursor-pointer flex items-center justify-between group ${
                             isAdminMode || darkMode
                               ? 'hover:bg-stone-900 text-stone-300 hover:text-white'
@@ -638,7 +647,7 @@ export default function App() {
       </header>
 
       {/* Main Core Screen Contents with transition wrapper */}
-      <main className="flex-grow">
+      <main id="main-content" className="flex-grow">
         <AnimatePresence mode="wait">
           <motion.div
             key={activePage}
@@ -849,5 +858,6 @@ export default function App() {
       )}
       <CakeAssistantBot />
     </div>
+    </>
   );
 }
