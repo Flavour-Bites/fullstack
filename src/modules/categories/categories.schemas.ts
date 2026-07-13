@@ -9,3 +9,5 @@ export const categorySchema = z.object({
   sortOrder: z.coerce.number().int().optional(),
   isActive: z.boolean().optional(),
 });
+
+export const categoryUpdateSchema = categorySchema.partial();
