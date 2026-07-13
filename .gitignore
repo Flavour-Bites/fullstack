@@ -4,8 +4,13 @@ dist/
 coverage/
 .DS_Store
 *.log
-.env*
-!,github
-.*/
+
+# Environment files — never commit secrets
+.env
+.env.*
+
+# Hidden directories except .github
+.*/ 
 !.github/
+
 *skills*

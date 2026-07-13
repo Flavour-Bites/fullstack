@@ -37,14 +37,29 @@ export function validateImageUpload(input: ImageUploadInput) {
   return { base64, byteLength };
 }
 
+function parseCloudinaryUrl(url: string): { cloudName: string; apiKey: string; apiSecret: string } | null {
+  // Format: cloudinary://api_key:api_secret@cloud_name
+  const match = url.match(/^cloudinary:\/\/([^:]+):([^@]+)@(.+)$/);
+  if (!match) return null;
+  return { apiKey: match[1], apiSecret: match[2], cloudName: match[3] };
+}
+
 function requireCloudinaryEnv() {
+  // Prefer individual vars, fall back to CLOUDINARY_URL
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
   const apiKey = process.env.CLOUDINARY_API_KEY;
   const apiSecret = process.env.CLOUDINARY_API_SECRET;
-  if (!cloudName || !apiKey || !apiSecret) {
-    throw new Error('Cloudinary is not configured.');
+  if (cloudName && apiKey && apiSecret) {
+    return { cloudName, apiKey, apiSecret };
   }
-  return { cloudName, apiKey, apiSecret };
+
+  const url = process.env.CLOUDINARY_URL;
+  if (url) {
+    const parsed = parseCloudinaryUrl(url);
+    if (parsed) return parsed;
+  }
+
+  throw new Error('Cloudinary is not configured. Set CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET.');
 }
 
 function signCloudinaryParams(params: Record<string, string | number>, apiSecret: string) {
