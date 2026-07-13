@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { User as UserIcon, Search, CheckCircle2, Clock, Eye, AlertCircle, ShoppingBag, ShieldCheck, Mail, Calendar, Sparkles, Building, Settings, Compass } from 'lucide-react';
+import { User as UserIcon, Search, CheckCircle2, Clock, Eye, AlertCircle, ShoppingBag, ShieldCheck, Mail, Calendar, Sparkles, Building, Settings, Compass, RefreshCw, Send, Loader2 } from 'lucide-react';
 import { User, CustomCakeRequest } from '../types';
 import { useToast } from './Toast';
 import { t } from '../i18n';
@@ -99,6 +99,40 @@ export default function ProfileView({ currentUser, onLogout, onNavigate }: Profi
   const [searchError, setSearchError] = useState(false);
   const [loading, setLoading] = useState(true);
   const { showToast } = useToast();
+
+  // Recovery request state
+  const [showRecoveryForm, setShowRecoveryForm] = useState(false);
+  const [newTelegramId, setNewTelegramId] = useState('');
+  const [recoverySubmitting, setRecoverySubmitting] = useState(false);
+
+  const handleRecoverySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTelegramId.trim()) return;
+    setRecoverySubmitting(true);
+    try {
+      const res = await fetch('/api/recovery', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ oldTelegramId: currentUser?.telegramId, newTelegramId: newTelegramId.trim() }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (data.alreadyExists) {
+          showToast('Request Already Exists', 'A pending recovery request for these IDs already exists.', 'info');
+        } else {
+          showToast('Recovery Request Submitted', 'An admin will review your request shortly.', 'success');
+          setShowRecoveryForm(false);
+          setNewTelegramId('');
+        }
+      } else {
+        throw new Error(data.error || 'Failed to submit request');
+      }
+    } catch (err: any) {
+      showToast('Submission Failed', err.message, 'error');
+    } finally {
+      setRecoverySubmitting(false);
+    }
+  };
 
   useEffect(() => {
     async function loadOrders() {
@@ -339,6 +373,64 @@ export default function ProfileView({ currentUser, onLogout, onNavigate }: Profi
                 {t('profile.orderCustomCake')}
               </button>
             </div>
+
+            {/* Account Recovery Card - visible when user has a Telegram ID */}
+            {currentUser.telegramId && (
+              <div className="bg-[#faf7f2] dark:bg-[#111111] border border-stone-200/50 dark:border-stone-800/80 rounded-sm shadow-xs p-6 text-left relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-500/10 via-transparent to-transparent pointer-events-none" />
+                <h4 className="font-serif text-base text-stone-900 dark:text-white mb-1 flex items-center gap-2">
+                  <RefreshCw className="w-4 h-4 text-lux-gold" /> {t('admin.recoverAccount')}
+                </h4>
+                <p className="text-[10px] text-stone-500 dark:text-stone-400 font-light leading-relaxed mb-3">
+                  Migrate your account to a new Telegram ID if you've changed accounts.
+                </p>
+
+                <div className="text-xs text-stone-500 dark:text-stone-400 font-mono mb-3">
+                  <span className="text-stone-400">Current Telegram ID: </span>
+                  <span className="text-stone-800 dark:text-stone-200 font-semibold">{currentUser.telegramId}</span>
+                </div>
+
+                {showRecoveryForm ? (
+                  <form onSubmit={handleRecoverySubmit} className="space-y-3">
+                    <div>
+                      <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 block mb-1">New Telegram ID</label>
+                      <input
+                        type="text"
+                        value={newTelegramId}
+                        onChange={e => setNewTelegramId(e.target.value)}
+                        placeholder="Enter your new Telegram user ID"
+                        className="w-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-lux-gold rounded-xs font-mono"
+                        required
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="submit"
+                        disabled={recoverySubmitting || !newTelegramId.trim()}
+                        className="flex-1 py-2 bg-lux-gold text-stone-950 font-bold text-[10px] uppercase tracking-wider rounded-xs transition-colors hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1"
+                      >
+                        {recoverySubmitting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+                        Submit Request
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setShowRecoveryForm(false); setNewTelegramId(''); }}
+                        className="px-3 py-2 border border-stone-200 dark:border-stone-800 text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 text-[10px] uppercase font-mono rounded-xs cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <button
+                    onClick={() => setShowRecoveryForm(true)}
+                    className="w-full py-2 border border-lux-gold text-lux-gold hover:bg-lux-gold hover:text-stone-950 font-bold text-[10px] uppercase tracking-wider rounded-xs transition-colors cursor-pointer"
+                  >
+                    <RefreshCw className="w-3 h-3 inline mr-1" /> Recover Account
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Right Column: Dynamic Live Tracking Block */}

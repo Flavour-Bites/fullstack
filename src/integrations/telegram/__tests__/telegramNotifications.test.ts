@@ -1,9 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.hoisted(() => {
-  process.env.TELEGRAM_STAFF_CHAT_ID = '-100_staff_chat';
-});
-
 vi.mock('../telegramClient.js', () => ({
   sendMessage: vi.fn().mockResolvedValue(true),
   editMessage: vi.fn().mockResolvedValue(true),
@@ -14,6 +10,9 @@ const mockPrisma = {
   customCakeRequest: {
     findUnique: vi.fn(),
     update: vi.fn(),
+  },
+  user: {
+    findMany: vi.fn(),
   },
 };
 
@@ -27,6 +26,7 @@ import { sendMessage } from '../telegramClient.js';
 describe('notifyStaffNewOrder', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockPrisma.user.findMany.mockResolvedValue([{ telegramId: '-100_staff_chat' }]);
   });
 
   it('sends notification for a new order', async () => {
@@ -226,6 +226,7 @@ describe('notifyCustomerStatusChange', () => {
 describe('notifyStaffQuoteAccepted', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockPrisma.user.findMany.mockResolvedValue([{ telegramId: '-100_staff_chat' }]);
   });
 
   it('notifies staff when a quote is accepted', async () => {

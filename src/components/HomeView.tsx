@@ -458,7 +458,7 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
                     referrerPolicy="no-referrer"
                   />
                   <div className="absolute top-4 left-4 px-3 py-1 bg-stone-900/90 backdrop-blur-md text-lux-gold text-[9px] uppercase font-mono tracking-widest rounded-full border border-stone-800">
-                    {cake.category}
+                    {typeof cake.category === 'string' ? cake.category : cake.category?.name}
                   </div>
                 </div>
                 <div className="flex justify-between items-start pt-1.5 font-sans">
