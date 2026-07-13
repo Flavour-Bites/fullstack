@@ -1,6 +1,15 @@
 import { sendMessage } from '../../integrations/telegram/telegramClient.js';
 import { getPrisma } from '../../app/config/prisma.js';
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 async function getStaffChatIds(): Promise<string[]> {
   try {
     const prisma = getPrisma();
@@ -23,12 +32,12 @@ export const contactService = {
     const text = [
       `<b>📬 New Contact Form Message</b>`,
       '',
-      `<b>From:</b> ${data.name}`,
-      `<b>Email:</b> ${data.email}`,
-      `<b>Subject:</b> ${data.subject}`,
+      `<b>From:</b> ${escapeHtml(data.name)}`,
+      `<b>Email:</b> ${escapeHtml(data.email)}`,
+      `<b>Subject:</b> ${escapeHtml(data.subject)}`,
       '',
       `<b>Message:</b>`,
-      data.message,
+      escapeHtml(data.message),
     ].join('\n');
 
     const staffIds = await getStaffChatIds();

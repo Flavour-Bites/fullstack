@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { validateEnv } from './config/env.js';
-import { createApp } from './app.js';
+import { createApp, registerWebhook } from './app.js';
 
 validateEnv();
 
@@ -11,6 +11,7 @@ async function start() {
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running at http://localhost:${PORT}`);
   });
+  registerWebhook();
 }
 
 start();

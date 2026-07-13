@@ -171,6 +171,21 @@ export const ordersRepository = {
     });
   },
 
+  async updateDesignAndNotes(
+    orderId: string,
+    data: { designStyle?: string; specialInstructions?: string; bakerNote?: string },
+  ) {
+    const prisma = getPrisma();
+    return prisma.customCakeRequest.update({
+      where: { id: orderId },
+      data: {
+        ...(data.designStyle !== undefined ? { designStyle: String(data.designStyle) } : {}),
+        ...(data.specialInstructions !== undefined ? { specialInstructions: String(data.specialInstructions) } : {}),
+        ...(data.bakerNote !== undefined ? { bakerNote: String(data.bakerNote) } : {}),
+      },
+    });
+  },
+
   async softDelete(orderId: string) {
     const prisma = getPrisma();
     return prisma.customCakeRequest.update({

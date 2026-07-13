@@ -1,4 +1,3 @@
-import { getPrisma } from '../../app/config/prisma.js';
 import { ordersRepository } from './orders.repository.js';
 import { makeOrderId } from '../../shared/utils/ids.js';
 import { normalizeMoney } from './orders.workflow.js';
@@ -107,15 +106,7 @@ export const ordersService = {
     orderId: string,
     data: { designStyle?: string; specialInstructions?: string; bakerNote?: string },
   ) {
-    const prisma = getPrisma();
-    return prisma.customCakeRequest.update({
-      where: { id: orderId },
-      data: {
-        ...(data.designStyle !== undefined ? { designStyle: String(data.designStyle) } : {}),
-        ...(data.specialInstructions !== undefined ? { specialInstructions: String(data.specialInstructions) } : {}),
-        ...(data.bakerNote !== undefined ? { bakerNote: String(data.bakerNote) } : {}),
-      },
-    });
+    return ordersRepository.updateDesignAndNotes(orderId, data);
   },
 
   async changeStatus(

@@ -16,6 +16,9 @@ export const recoveryService = {
   },
 
   async updateStatus(id: string, status: RecoveryStatus) {
+    // TODO: Before approving, verify the requester owns the old Telegram ID
+    // by sending a confirmation message to the old account.
+    // For now, admin approval is based on manual verification.
     return recoveryRepository.updateStatus(id, status);
   },
 };

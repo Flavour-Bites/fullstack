@@ -19,6 +19,19 @@ export const usersRepository = {
     });
   },
 
+  async findById(userId: string) {
+    const prisma = getPrisma();
+    return prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, role: true },
+    });
+  },
+
+  async countByRole(role: Role) {
+    const prisma = getPrisma();
+    return prisma.user.count({ where: { role } });
+  },
+
   async updateRole(userId: string, role: Role) {
     const prisma = getPrisma();
     return prisma.user.update({ where: { id: userId }, data: { role } });
