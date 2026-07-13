@@ -4,6 +4,7 @@ import { Sparkles, X, ChevronRight, Cake, Info, Search, Tag, RotateCcw } from 'l
 import { CakeGalleryItem } from '../types';
 import { GALLERY_ITEMS } from '../data';
 import { t } from '../i18n';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 interface GalleryViewProps {
   selectedCake: CakeGalleryItem | null;
@@ -58,6 +59,7 @@ export default function GalleryView({
   onSelectCake,
   onCommissionCake
 }: GalleryViewProps) {
+  usePageTitle("Gallery");
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -170,6 +172,7 @@ export default function GalleryView({
               <input
                 type="text"
                 placeholder={t('gallery.searchFlavors')}
+                aria-label={t('gallery.searchFlavors')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 focus:border-lux-gold focus:outline-none pl-10 pr-10 py-3 text-xs uppercase tracking-wider font-mono rounded-sm transition-all text-stone-800 dark:text-stone-100 placeholder-stone-400"
@@ -177,6 +180,7 @@ export default function GalleryView({
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
+                  aria-label="Clear search"
                   className="absolute inset-y-0 right-3 flex items-center text-stone-400 hover:text-stone-700"
                 >
                   <X className="w-4 h-4" />
@@ -289,7 +293,7 @@ export default function GalleryView({
                     <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6" />
 
                     <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-md px-3 py-1 text-[9px] uppercase tracking-widest font-mono text-stone-800 rounded-sm shadow-xs border border-stone-200/30 font-semibold animate-pulse">
-                      {cake.category}
+                      {cake.category?.name ?? cake.categoryId}
                     </div>
 
                     {/* Hover commission prompt */}
@@ -370,7 +374,7 @@ export default function GalleryView({
               {/* Product Close button - Absolutely positioned z-50 to float cleanly over content or image */}
               <button
                 onClick={onClearSelectedCake}
-                className="absolute top-4 right-4 z-50 p-2 bg-white/90 hover:bg-white dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-800 dark:text-stone-200 rounded-full transition-all cursor-pointer shadow-md border border-stone-200/50 dark:border-stone-800"
+                className="absolute top-4 right-4 z-50 p-3 bg-white/90 hover:bg-white dark:bg-stone-900 dark:hover:bg-stone-800 text-stone-800 dark:text-stone-200 rounded-full transition-all cursor-pointer shadow-md border border-stone-200/50 dark:border-stone-800"
                 aria-label={t('gallery.closeDetails')}
               >
                 <X className="w-5 h-5" />
@@ -385,7 +389,7 @@ export default function GalleryView({
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute top-4 left-4 bg-stone-900/90 text-white text-[10px] tracking-widest uppercase font-mono px-3 py-1 shadow-md font-semibold font-bold rounded-xs">
-                  {t('gallery.collection')} {selectedCake.category}
+                  {t('gallery.collection')} {selectedCake.category?.name ?? selectedCake.categoryId}
                 </div>
               </div>
 

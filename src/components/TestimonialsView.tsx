@@ -3,8 +3,10 @@ import { motion } from 'motion/react';
 import { Sparkles, Quote, Award } from 'lucide-react';
 import { TESTIMONIALS } from '../data';
 import { t } from '../i18n';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 export default function TestimonialsView() {
+  usePageTitle("Testimonials");
   const [filter, setFilter] = useState<'all' | 'celebration' | 'birthday'>('all');
 
   const filteredReviews = TESTIMONIALS.filter((t) => {

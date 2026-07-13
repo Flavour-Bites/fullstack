@@ -47,6 +47,7 @@ npm run dev
 | [Frontend](docs/FRONTEND.md) | Components, routing, i18n, styling |
 | [Telegram Bot](docs/TELEGRAM_BOT.md) | Commands, conversation flow, notifications |
 | [Deployment](docs/DEPLOYMENT.md) | Environment setup, build, production deploy |
+| [Future Features](docs/FUTURE_FEATURES.md) | Planned features (payments, email, SMS, etc.) |
 
 ## Scripts
 

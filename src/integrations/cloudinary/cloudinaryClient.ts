@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { fetchWithTimeout } from '../../shared/utils/fetchWithTimeout.js';
 
 export const ALLOWED_IMAGE_TYPES = new Set([
   'image/jpeg',
@@ -37,14 +38,29 @@ export function validateImageUpload(input: ImageUploadInput) {
   return { base64, byteLength };
 }
 
+function parseCloudinaryUrl(url: string): { cloudName: string; apiKey: string; apiSecret: string } | null {
+  // Format: cloudinary://api_key:api_secret@cloud_name
+  const match = url.match(/^cloudinary:\/\/([^:]+):([^@]+)@(.+)$/);
+  if (!match) return null;
+  return { apiKey: match[1], apiSecret: match[2], cloudName: match[3] };
+}
+
 function requireCloudinaryEnv() {
+  // Prefer individual vars, fall back to CLOUDINARY_URL
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
   const apiKey = process.env.CLOUDINARY_API_KEY;
   const apiSecret = process.env.CLOUDINARY_API_SECRET;
-  if (!cloudName || !apiKey || !apiSecret) {
-    throw new Error('Cloudinary is not configured.');
+  if (cloudName && apiKey && apiSecret) {
+    return { cloudName, apiKey, apiSecret };
   }
-  return { cloudName, apiKey, apiSecret };
+
+  const url = process.env.CLOUDINARY_URL;
+  if (url) {
+    const parsed = parseCloudinaryUrl(url);
+    if (parsed) return parsed;
+  }
+
+  throw new Error('Cloudinary is not configured. Set CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET.');
 }
 
 function signCloudinaryParams(params: Record<string, string | number>, apiSecret: string) {
@@ -71,10 +87,10 @@ export async function uploadImageToCloudinary(input: ImageUploadInput) {
   form.append('folder', folder);
   form.append('signature', signature);
 
-  const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+  const response = await fetchWithTimeout(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
     method: 'POST',
     body: form,
-  });
+  }, 30_000);
 
   const body = await response.json();
   if (!response.ok) {
@@ -101,10 +117,10 @@ export async function deleteImageFromCloudinary(publicId: string) {
   form.append('timestamp', String(timestamp));
   form.append('signature', signature);
 
-  const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/destroy`, {
+  const response = await fetchWithTimeout(`https://api.cloudinary.com/v1_1/${cloudName}/image/destroy`, {
     method: 'POST',
     body: form,
-  });
+  }, 15_000);
 
   const body = await response.json();
   if (!response.ok) {

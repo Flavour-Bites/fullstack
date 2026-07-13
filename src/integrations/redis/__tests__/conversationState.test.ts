@@ -128,3 +128,58 @@ describe('setConversationStoreForTests', () => {
     expect(getConversationStore()).not.toBe(mock);
   });
 });
+
+describe('ConversationStateStore — corrupted data resilience', () => {
+  it('returns null and clears corrupted JSON for order', async () => {
+    const delFn = vi.fn(async () => {});
+    const corruptedStore: KeyValueStore = {
+      get: vi.fn(async () => 'not-valid-json{{{'),
+      set: vi.fn(async () => {}),
+      del: delFn,
+    };
+    const store = new ConversationStateStore(corruptedStore);
+
+    const result = await store.getOrder('user1');
+    expect(result).toBeNull();
+    // Corrupted entry should be cleaned up
+    expect(delFn).toHaveBeenCalled();
+  });
+
+  it('returns null and clears corrupted JSON for quote', async () => {
+    const delFn = vi.fn(async () => {});
+    const corruptedStore: KeyValueStore = {
+      get: vi.fn(async () => '{{invalid'),
+      set: vi.fn(async () => {}),
+      del: delFn,
+    };
+    const store = new ConversationStateStore(corruptedStore);
+
+    const result = await store.getQuote('user1');
+    expect(result).toBeNull();
+    expect(delFn).toHaveBeenCalled();
+  });
+
+  it('returns null when Redis returns empty string', async () => {
+    const emptyStore: KeyValueStore = {
+      get: vi.fn(async () => ''),
+      set: vi.fn(async () => {}),
+      del: vi.fn(async () => {}),
+    };
+    const store = new ConversationStateStore(emptyStore);
+
+    const result = await store.getOrder('user1');
+    expect(result).toBeNull();
+  });
+
+  it('returns null when Redis returns null (key expired)', async () => {
+    const nullStore: KeyValueStore = {
+      get: vi.fn(async () => null),
+      set: vi.fn(async () => {}),
+      del: vi.fn(async () => {}),
+    };
+    const store = new ConversationStateStore(nullStore);
+
+    const result = await store.getOrder('user1');
+    expect(result).toBeNull();
+  });
+});

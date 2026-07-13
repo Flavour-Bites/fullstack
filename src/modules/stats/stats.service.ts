@@ -1,61 +1,60 @@
 import { getPrisma } from '../../app/config/prisma.js';
 
-function calculateAnalytics(orders: Array<{
-  status: string;
-  finalPrice: number | null;
-  paymentStatus: string;
-  deletedAt: Date | null;
-  createdAt: Date;
-}>) {
-  const active = orders.filter((o) => !o.deletedAt);
-  const totalRevenue = active.reduce((sum, o) => sum + (o.finalPrice ?? 0), 0);
-  const paidOrders = active.filter((o) => o.paymentStatus === 'paid').length;
-  const avgOrderValue = active.length ? Math.round(totalRevenue / active.length) : 0;
-
-  return {
-    totalRevenue,
-    paidOrders,
-    avgOrderValue,
-  };
-}
-
 export const statsService = {
   async getStats() {
     const prisma = getPrisma();
 
-    const [orders, users, reviews] = await Promise.all([
-      prisma.customCakeRequest.findMany({
-        select: { status: true, finalPrice: true, paymentStatus: true, deletedAt: true, createdAt: true },
+    const [orderStats, userRoles, reviewStats, statusCounts, paidOrders, totalUsers] = await Promise.all([
+      prisma.customCakeRequest.aggregate({
+        where: { deletedAt: null },
+        _count: true,
+        _sum: { finalPrice: true },
+        _avg: { finalPrice: true },
       }),
-      prisma.user.findMany({ select: { role: true } }),
-      prisma.review.findMany({ select: { rating: true } }),
+      prisma.user.groupBy({
+        by: ['role'],
+        where: { deletedAt: null },
+        _count: true,
+      }),
+      prisma.review.aggregate({
+        _count: true,
+        _avg: { rating: true },
+      }),
+      prisma.customCakeRequest.groupBy({
+        by: ['status'],
+        where: { deletedAt: null },
+        _count: true,
+      }),
+      prisma.customCakeRequest.count({
+        where: { deletedAt: null, paymentStatus: 'paid' },
+      }),
+      prisma.user.count({ where: { deletedAt: null } }),
     ]);
 
-    const analytics = calculateAnalytics(orders);
-    const avgRating = reviews.length
-      ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
-      : '0';
+    const roleCounts = { customer: 0, staff: 0, admin: 0 };
+    for (const r of userRoles) {
+      roleCounts[r.role as keyof typeof roleCounts] = r._count;
+    }
 
-    const roleCounts = users.reduce<Record<string, number>>((acc, user) => {
-      acc[user.role] = (acc[user.role] || 0) + 1;
-      return acc;
-    }, { customer: 0, staff: 0, admin: 0 });
-
-    const statusBreakdown = orders
-      .filter((o) => !o.deletedAt)
-      .reduce<Record<string, number>>((acc, order) => {
-        acc[order.status] = (acc[order.status] || 0) + 1;
-        return acc;
-      }, {});
+    const statusBreakdown: Record<string, number> = {};
+    for (const s of statusCounts) {
+      statusBreakdown[s.status] = s._count;
+    }
 
     return {
-      ...analytics,
-      totalOrders: orders.filter((o) => !o.deletedAt).length,
-      avgRating,
+      totalRevenue: orderStats._sum.finalPrice ?? 0,
+      paidOrders,
+      avgOrderValue: orderStats._avg.finalPrice
+        ? Math.round(orderStats._avg.finalPrice)
+        : 0,
+      totalOrders: orderStats._count,
+      avgRating: reviewStats._avg.rating
+        ? reviewStats._avg.rating.toFixed(1)
+        : '0',
       statusBreakdown,
       roleCounts,
-      totalUsers: users.length,
-      totalReviews: reviews.length,
+      totalUsers,
+      totalReviews: reviewStats._count,
     };
   },
 };

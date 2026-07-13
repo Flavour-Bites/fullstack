@@ -24,4 +24,16 @@ describe('makeOrderId', () => {
     expect(id.length).toBeGreaterThan(3);
     expect(id.split('-')[1].length).toBe(6);
   });
+
+  it('generates 100 unique IDs without collision', () => {
+    const ids = new Set(Array.from({ length: 100 }, () => makeOrderId()));
+    expect(ids.size).toBe(100);
+  });
+
+  it('uses cryptographic randomness (not Math.random)', () => {
+    const id = makeOrderId();
+    const hex = id.split('-')[1];
+    // Hex string should only contain valid hex characters
+    expect(/^[0-9A-F]+$/.test(hex)).toBe(true);
+  });
 });

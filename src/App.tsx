@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Cake, CalendarDays, Instagram, Mail, Compass, Menu, X, Send, LogOut, LogIn, User as UserIcon, Sun, Moon, HelpCircle, ExternalLink, ShieldCheck, ShoppingBag } from 'lucide-react';
+import { Cake, CalendarDays, Instagram, Mail, Compass, Menu, X, Send, LogOut, LogIn, User as UserIcon, Sun, Moon, HelpCircle, ExternalLink, ShieldCheck, ShoppingBag, Globe } from 'lucide-react';
 import { PageType, CakeGalleryItem, User } from './types';
 
 // Views
@@ -14,6 +14,10 @@ import CakeAssistantBot from './components/CakeAssistantBot';
 import ProfileView from './components/ProfileView';
 import AdminView from './components/AdminView';
 import AuthView from './components/AuthView';
+import ErrorBoundary from './components/ErrorBoundary';
+
+import { setLocale, getLocale } from './i18n';
+import type { Locale } from './i18n';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(() => {
@@ -21,7 +25,8 @@ export default function App() {
     return saved ? JSON.parse(saved) : null;
   });
   const [activePage, setActivePage] = useState<PageType>('home');
-  const [adminTab, setAdminTab] = useState<'dashboard' | 'orders' | 'menu' | 'users'>('dashboard');
+  const [adminTab, setAdminTab] = useState<'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users' | 'recovery'>('dashboard');
+  const [locale, setLocaleState] = useState<Locale>(() => getLocale());
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('theme') === 'dark';
   });
@@ -84,7 +89,11 @@ export default function App() {
   const isAdminMode = currentUser && (currentUser.role === 'admin' || currentUser.role === 'staff') && activePage === 'admin';
 
   return (
-    <div className={`min-h-screen flex flex-col justify-between selection:bg-lux-gold transition-colors duration-300 relative ${
+    <>
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-lux-gold focus:text-stone-950 focus:text-sm focus:font-mono focus:uppercase focus:font-bold focus:rounded-sm focus:outline-none">
+        Skip to main content
+      </a>
+    <div className={`min-h-screen flex flex-col justify-between selection:bg-lux-gold transition-colors duration-300 relative overflow-x-hidden ${
       darkMode 
         ? 'bg-[#111111] text-stone-100' 
         : 'bg-lux-cream text-stone-800'
@@ -136,7 +145,10 @@ export default function App() {
                   { id: 'dashboard', label: 'DASHBOARD' },
                   { id: 'orders', label: 'ORDERS' },
                   { id: 'menu', label: 'MENU' },
-                  ...(currentUser?.role === 'admin' ? [{ id: 'users', label: 'USERS' }] : [])
+                  { id: 'categories', label: 'CATEGORIES' },
+                  { id: 'reviews', label: 'REVIEWS' },
+                  ...(currentUser?.role === 'admin' ? [{ id: 'users', label: 'USERS' }] : []),
+                  ...(currentUser?.role === 'admin' ? [{ id: 'recovery', label: 'RECOVERY' }] : [])
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -197,7 +209,11 @@ export default function App() {
                     : 'border-stone-200 bg-white/30 text-stone-900'
                 }`}
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)} 
-                title="Account Settings"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setProfileDropdownOpen(!profileDropdownOpen); } }}
+                aria-label={currentUser ? `Account: ${currentUser.name}` : 'Sign in'}
+                aria-expanded={profileDropdownOpen}
               >
                 {currentUser ? (
                   <>
@@ -367,12 +383,13 @@ export default function App() {
                       <div className={`my-1 border-t border-b py-1.5 ${
                         isAdminMode || darkMode ? 'border-stone-850' : 'border-stone-200/50'
                       }`}>
-                        <button
+                          <button
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
                             setDarkMode(!darkMode);
                           }}
+                          aria-label={`Switch to ${darkMode ? 'light' : 'dark'} mode`}
                           className={`w-full text-left px-3 py-1 text-[10px] rounded-sm transition-colors cursor-pointer flex items-center justify-between group ${
                             isAdminMode || darkMode
                               ? 'hover:bg-stone-900 text-stone-300 hover:text-white'
@@ -426,6 +443,24 @@ export default function App() {
               </AnimatePresence>
             </div>
 
+            {/* Locale Switcher */}
+            <button
+              onClick={() => {
+                const next: Locale = locale === 'en' ? 'am' : 'en';
+                setLocaleState(next);
+                setLocale(next);
+              }}
+              className={`px-2.5 py-1.5 rounded-sm font-mono text-[10px] uppercase font-bold tracking-wider border transition-all cursor-pointer shrink-0 ${
+                isAdminMode || darkMode
+                  ? 'border-stone-800 text-stone-400 hover:text-lux-gold hover:border-lux-gold/50 bg-stone-900/30'
+                  : 'border-stone-200 text-stone-500 hover:text-lux-gold hover:border-lux-gold/50 bg-white/30'
+              }`}
+              title="Switch language"
+            >
+              <Globe className="w-3.5 h-3.5 inline-block mr-1" />
+              {locale === 'en' ? 'AM' : 'EN'}
+            </button>
+
             {/* Book Custom Cake CTA button - Hidden conditionally in Admin Mode */}
             {!isAdminMode && (
               <button
@@ -476,7 +511,10 @@ export default function App() {
                     { id: 'dashboard', label: 'Dashboard Overview' },
                     { id: 'orders', label: 'Reservation Inquiries' },
                     { id: 'menu', label: 'Studio Cake Menu' },
-                    ...(currentUser?.role === 'admin' ? [{ id: 'users', label: 'Registered Clients' }] : [])
+                    { id: 'categories', label: 'Cake Categories' },
+                    { id: 'reviews', label: 'Customer Reviews' },
+                    ...(currentUser?.role === 'admin' ? [{ id: 'users', label: 'Registered Clients' }] : []),
+                    ...(currentUser?.role === 'admin' ? [{ id: 'recovery', label: 'Account Recovery' }] : [])
                   ].map((tab) => (
                     <button
                       key={tab.id}
@@ -517,6 +555,24 @@ export default function App() {
                     </button>
                   ))
                 )}
+
+                {/* Mobile Locale Switcher */}
+                <div className={`pt-2 border-b pb-2 flex justify-between items-center ${
+                  isAdminMode || darkMode ? 'border-stone-800' : 'border-stone-150'
+                }`}>
+                  <span className="text-xs font-semibold text-stone-400 uppercase tracking-wider">Language</span>
+                  <button
+                    onClick={() => {
+                      const next: Locale = locale === 'en' ? 'am' : 'en';
+                      setLocaleState(next);
+                      setLocale(next);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 border border-stone-800 rounded-sm text-xs text-lux-gold font-mono cursor-pointer"
+                  >
+                    <Globe className="w-3.5 h-3.5" />
+                    <span>{locale === 'en' ? 'አማርኛ' : 'English'}</span>
+                  </button>
+                </div>
 
                 {/* Mobile Theme Toggle integration */}
                 <div className={`pt-2 border-b pb-2 flex justify-between items-center ${
@@ -594,7 +650,8 @@ export default function App() {
       </header>
 
       {/* Main Core Screen Contents with transition wrapper */}
-      <main className="flex-grow">
+      <main id="main-content" className="flex-grow">
+        <ErrorBoundary>
         <AnimatePresence mode="wait">
           <motion.div
             key={activePage}
@@ -688,6 +745,7 @@ export default function App() {
             )}
           </motion.div>
         </AnimatePresence>
+        </ErrorBoundary>
       </main>
 
       {/* Immersive Luxury Footer */}
@@ -803,7 +861,8 @@ export default function App() {
           </div>
         </footer>
       )}
-      <CakeAssistantBot />
+      <ErrorBoundary><CakeAssistantBot /></ErrorBoundary>
     </div>
+    </>
   );
 }

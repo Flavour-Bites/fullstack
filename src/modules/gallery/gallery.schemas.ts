@@ -14,3 +14,5 @@ export const gallerySchema = z.object({
   servingCount: z.string().optional(),
   tags: z.union([z.string(), z.array(z.string())]).optional(),
 });
+
+export const galleryUpdateSchema = gallerySchema.partial();

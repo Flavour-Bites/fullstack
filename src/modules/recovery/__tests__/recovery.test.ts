@@ -1,6 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
 import { recoveryService } from '../recovery.service.js';
 
+vi.mock('../../../integrations/telegram/telegramClient.js', () => ({
+  sendMessage: vi.fn(() => Promise.resolve(true)),
+}));
+
 vi.mock('../recovery.repository.js', () => {
   let callCount = 0;
   return {
@@ -11,6 +15,7 @@ vi.mock('../recovery.repository.js', () => {
           ? Promise.resolve({ id: 'rec_existing', oldTelegramId: '111', newTelegramId: '222', status: 'pending' })
           : Promise.resolve(null);
       }),
+      findById: vi.fn((id) => Promise.resolve({ id, oldTelegramId: '111', newTelegramId: '222', status: 'pending' })),
       create: vi.fn((oldId, newId) => Promise.resolve({
         id: 'rec_abc', oldTelegramId: oldId, newTelegramId: newId, status: 'pending',
       })),

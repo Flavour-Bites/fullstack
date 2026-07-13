@@ -3,8 +3,10 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Send, Mail, MapPin, Phone, HelpCircle, Check, ChevronDown, CheckCircle2, Calculator, Map, ShieldAlert, Search, Loader2 } from 'lucide-react';
 import { FAQS } from '../data';
 import { t } from '../i18n';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 export default function ContactView() {
+  usePageTitle("Contact");
   const [activeFaq, setActiveFaq] = useState<string | null>(null);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
@@ -174,6 +176,7 @@ export default function ContactView() {
                 <input
                   type="text"
                   placeholder="e.g. Bole, Kirkos"
+                  aria-label="Sub-city lookup"
                   value={subCityInput}
                   onChange={(e) => setSubCityInput(e.target.value)}
                   className="bg-stone-850 border border-stone-750 text-white p-3 text-xs w-full focus:outline-none focus:border-lux-gold rounded-sm uppercase"
@@ -394,6 +397,7 @@ export default function ContactView() {
             <input
               type="text"
               placeholder={t('contact.searchPolicies')}
+              aria-label={t('contact.searchPolicies')}
               value={faqSearch}
               onChange={(e) => setFaqSearch(e.target.value)}
               className="w-full bg-stone-50/75 dark:bg-stone-900/60 border border-stone-250/70 dark:border-stone-800 pl-10 pr-4 py-3 text-xs focus:outline-none focus:ring-1 focus:ring-lux-gold focus:border-lux-gold rounded-sm transition-all text-stone-850 dark:text-stone-100 placeholder-stone-400"

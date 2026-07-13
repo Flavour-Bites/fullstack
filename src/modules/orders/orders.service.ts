@@ -1,8 +1,8 @@
-import { getPrisma } from '../../app/config/prisma.js';
 import { ordersRepository } from './orders.repository.js';
 import { makeOrderId } from '../../shared/utils/ids.js';
+import { formatRequestDate } from '../../shared/utils/dateFormat.js';
 import { normalizeMoney } from './orders.workflow.js';
-import { notifyStaffNewOrder, notifyCustomerStatusChange } from '../../integrations/telegram/telegramNotifications.js';
+import { notifyStaffNewOrder, notifyCustomerStatusChange, notifyStaffQuoteAccepted } from '../../integrations/telegram/telegramNotifications.js';
 import type { OrderStatus } from '@prisma/client';
 import type { OrderActor } from './orders.types.js';
 
@@ -43,7 +43,7 @@ export const ordersService = {
       referenceImagePublicId: data.referenceImagePublicId ?? null,
       referenceImageFormat: data.referenceImageFormat ?? null,
       referenceImageBytes: data.referenceImageBytes ?? null,
-      requestDate: data.requestDate || new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+      requestDate: data.requestDate || formatRequestDate(),
     };
 
     const order = await ordersRepository.create(orderData);
@@ -107,15 +107,7 @@ export const ordersService = {
     orderId: string,
     data: { designStyle?: string; specialInstructions?: string; bakerNote?: string },
   ) {
-    const prisma = getPrisma();
-    return prisma.customCakeRequest.update({
-      where: { id: orderId },
-      data: {
-        ...(data.designStyle !== undefined ? { designStyle: String(data.designStyle) } : {}),
-        ...(data.specialInstructions !== undefined ? { specialInstructions: String(data.specialInstructions) } : {}),
-        ...(data.bakerNote !== undefined ? { bakerNote: String(data.bakerNote) } : {}),
-      },
-    });
+    return ordersRepository.updateDesignAndNotes(orderId, data);
   },
 
   async changeStatus(
@@ -152,12 +144,19 @@ export const ordersService = {
     notifyCustomerStatusChange(orderId).catch((err: Error) =>
       console.error('[Notify] Customer notice failed:', err.message),
     );
+    notifyStaffQuoteAccepted(updated as any).catch((err: Error) =>
+      console.error('[Notify] Staff quote-accepted notice failed:', err.message),
+    );
 
     return updated;
   },
 
   async softDelete(orderId: string) {
     return ordersRepository.softDelete(orderId);
+  },
+
+  async updateAll(orderId: string, fields: Record<string, unknown>) {
+    return ordersRepository.updateFull(orderId, fields);
   },
 
   async restore(orderId: string) {

@@ -4,6 +4,7 @@ import { Sparkles, Calendar, ChevronRight, ChevronLeft, Star, Heart, Check, Awar
 import { PageType, CakeGalleryItem } from '../types';
 import { GALLERY_ITEMS, TESTIMONIALS } from '../data';
 import { t } from '../i18n';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 interface HomeViewProps {
   onNavigate: (page: PageType) => void;
@@ -11,6 +12,7 @@ interface HomeViewProps {
 }
 
 export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
+  usePageTitle("Home");
   const [activeTestimonial, setActiveTestimonial] = useState(0);
 
   // Auto scroll testimonials (resets interval on manual action)
@@ -123,7 +125,7 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="flex gap-10 mt-12 pt-8 border-t border-stone-850 text-left"
+              className="flex gap-4 sm:gap-10 mt-12 pt-8 border-t border-stone-850 text-left"
             >
               {[
                 { value: "500+", label: t('home.statsCakes') },
@@ -456,7 +458,7 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
                     referrerPolicy="no-referrer"
                   />
                   <div className="absolute top-4 left-4 px-3 py-1 bg-stone-900/90 backdrop-blur-md text-lux-gold text-[9px] uppercase font-mono tracking-widest rounded-full border border-stone-800">
-                    {cake.category}
+                    {typeof cake.category === 'string' ? cake.category : cake.category?.name}
                   </div>
                 </div>
                 <div className="flex justify-between items-start pt-1.5 font-sans">

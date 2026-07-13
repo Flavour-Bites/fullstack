@@ -1,35 +1,51 @@
 import { describe, it, expect, vi } from 'vitest';
 
-const mockRequestsFindMany = vi.fn();
-const mockUsersFindMany = vi.fn();
-const mockReviewsFindMany = vi.fn();
+const mockOrderAggregate = vi.fn();
+const mockOrderCount = vi.fn();
+const mockUserGroupBy = vi.fn();
+const mockUserCount = vi.fn();
+const mockReviewAggregate = vi.fn();
+const mockOrderGroupBy = vi.fn();
 
 vi.mock('../../../app/config/prisma.js', () => ({
   getPrisma: vi.fn(() => ({
-    customCakeRequest: { findMany: mockRequestsFindMany },
-    user: { findMany: mockUsersFindMany },
-    review: { findMany: mockReviewsFindMany },
+    customCakeRequest: {
+      aggregate: mockOrderAggregate,
+      count: mockOrderCount,
+      groupBy: mockOrderGroupBy,
+    },
+    user: {
+      groupBy: mockUserGroupBy,
+      count: mockUserCount,
+    },
+    review: {
+      aggregate: mockReviewAggregate,
+    },
   })),
 }));
 
 describe('statsService.getStats', () => {
   it('returns computed stats', async () => {
-    mockRequestsFindMany.mockResolvedValue([
-      { status: 'Completed', finalPrice: 10000, paymentStatus: 'paid', deletedAt: null, createdAt: new Date() },
-      { status: 'Received', finalPrice: null, paymentStatus: 'unpaid', deletedAt: null, createdAt: new Date() },
-      { status: 'Confirmed', finalPrice: 5000, paymentStatus: 'partial', deletedAt: null, createdAt: new Date() },
-      { status: 'Completed', finalPrice: null, paymentStatus: 'unpaid', deletedAt: new Date(), createdAt: new Date() },
+    mockOrderAggregate.mockResolvedValue({
+      _count: 3,
+      _sum: { finalPrice: 15000 },
+      _avg: { finalPrice: 5000 },
+    });
+    mockOrderCount.mockResolvedValue(1);
+    mockUserGroupBy.mockResolvedValue([
+      { role: 'admin', _count: 1 },
+      { role: 'staff', _count: 1 },
+      { role: 'customer', _count: 2 },
     ]);
-    mockUsersFindMany.mockResolvedValue([
-      { role: 'admin' },
-      { role: 'staff' },
-      { role: 'customer' },
-      { role: 'customer' },
-    ]);
-    mockReviewsFindMany.mockResolvedValue([
-      { rating: 5 },
-      { rating: 4 },
-      { rating: 3 },
+    mockUserCount.mockResolvedValue(4);
+    mockReviewAggregate.mockResolvedValue({
+      _count: 3,
+      _avg: { rating: 4.0 },
+    });
+    mockOrderGroupBy.mockResolvedValue([
+      { status: 'Completed', _count: 1 },
+      { status: 'Received', _count: 1 },
+      { status: 'Confirmed', _count: 1 },
     ]);
 
     const { statsService } = await import('../stats.service.js');
@@ -47,9 +63,19 @@ describe('statsService.getStats', () => {
   });
 
   it('handles empty data', async () => {
-    mockRequestsFindMany.mockResolvedValue([]);
-    mockUsersFindMany.mockResolvedValue([]);
-    mockReviewsFindMany.mockResolvedValue([]);
+    mockOrderAggregate.mockResolvedValue({
+      _count: 0,
+      _sum: { finalPrice: null },
+      _avg: { finalPrice: null },
+    });
+    mockOrderCount.mockResolvedValue(0);
+    mockUserGroupBy.mockResolvedValue([]);
+    mockUserCount.mockResolvedValue(0);
+    mockReviewAggregate.mockResolvedValue({
+      _count: 0,
+      _avg: { rating: null },
+    });
+    mockOrderGroupBy.mockResolvedValue([]);
 
     const { statsService } = await import('../stats.service.js');
     const emptyStats = await statsService.getStats();

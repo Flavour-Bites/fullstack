@@ -171,6 +171,33 @@ export const ordersRepository = {
     });
   },
 
+  async updateDesignAndNotes(
+    orderId: string,
+    data: { designStyle?: string; specialInstructions?: string; bakerNote?: string },
+  ) {
+    const prisma = getPrisma();
+    return prisma.customCakeRequest.update({
+      where: { id: orderId },
+      data: {
+        ...(data.designStyle !== undefined ? { designStyle: String(data.designStyle) } : {}),
+        ...(data.specialInstructions !== undefined ? { specialInstructions: String(data.specialInstructions) } : {}),
+        ...(data.bakerNote !== undefined ? { bakerNote: String(data.bakerNote) } : {}),
+      },
+    });
+  },
+
+  async updateFull(orderId: string, fields: Record<string, unknown>) {
+    const prisma = getPrisma();
+    return prisma.$transaction(async (tx) => {
+      const current = await tx.customCakeRequest.findUnique({
+        where: { id: orderId },
+        select: { id: true, deletedAt: true },
+      });
+      if (!current || current.deletedAt) throw new Error('Order not found.');
+      return tx.customCakeRequest.update({ where: { id: orderId }, data: fields });
+    });
+  },
+
   async softDelete(orderId: string) {
     const prisma = getPrisma();
     return prisma.customCakeRequest.update({

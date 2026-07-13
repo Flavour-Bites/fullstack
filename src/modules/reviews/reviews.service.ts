@@ -24,4 +24,8 @@ export const reviewsService = {
   async delete(id: string) {
     return reviewsRepository.delete(id);
   },
+
+  async update(id: string, data: Record<string, unknown>) {
+    return reviewsRepository.update(id, data);
+  },
 };

@@ -59,6 +59,7 @@ vi.mock('../orders.repository.js', () => ({
     ),
     softDelete: vi.fn((id) => Promise.resolve({ ...mockOrder, id, deletedAt: new Date() })),
     restore: vi.fn((id) => Promise.resolve({ ...mockOrder, id, deletedAt: null })),
+    updateFull: vi.fn((id, fields) => Promise.resolve({ ...mockOrder, id, ...fields })),
     findStatusEvents: vi.fn(() => Promise.resolve([])),
   },
 }));
@@ -84,6 +85,7 @@ vi.mock('../orders.workflow.js', () => ({
 vi.mock('../../../integrations/telegram/telegramNotifications.js', () => ({
   notifyStaffNewOrder: vi.fn(() => Promise.resolve()),
   notifyCustomerStatusChange: vi.fn(() => Promise.resolve()),
+  notifyStaffQuoteAccepted: vi.fn(() => Promise.resolve()),
 }));
 
 vi.mock('../../../app/config/prisma.js', () => ({
@@ -195,6 +197,14 @@ describe('ordersService.restore', () => {
   it('restores a deleted order', async () => {
     const result = await ordersService.restore('FB-DELETED');
     expect(result.deletedAt).toBeNull();
+  });
+});
+
+describe('ordersService.updateAll', () => {
+  it('returns the updated order', async () => {
+    const result = await ordersService.updateAll('FB-ABC123', { quotedPrice: 5000 });
+    expect(result).toBeDefined();
+    expect(result.id).toBe('FB-ABC123');
   });
 });
 

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { ordersService } from './orders.service.js';
 import { asyncHandler } from '../../app/middleware/asyncHandler.js';
+import { isValidTransition } from './orders.workflow.js';
 import type { OrderStatus } from '@prisma/client';
 
 export const ordersController = {
@@ -38,6 +39,13 @@ export const ordersController = {
 
     if (req.body.status !== undefined) {
       const status = req.body.status as OrderStatus;
+      if (!isValidTransition(current.status, status)) {
+        res.status(400).json({
+          success: false,
+          error: `Cannot change status from ${current.status} to ${status}.`,
+        });
+        return;
+      }
       updated = await ordersService.changeStatus(id, status, {
         userId: req.user!.userId,
         source: req.user!.role === 'admin' ? 'admin_api' : 'staff_api',
@@ -69,8 +77,8 @@ export const ordersController = {
       res.status(404).json({ success: false, error: 'Order not found.' });
       return;
     }
-    if (req.user!.role === 'customer' && order.userId !== req.user!.userId) {
-      res.status(403).json({ success: false, error: 'You can only cancel your own cake order.' });
+    if (order.deletedAt) {
+      res.status(404).json({ success: false, error: 'Order not found.' });
       return;
     }
     await ordersService.softDelete(req.params.id);
@@ -78,6 +86,11 @@ export const ordersController = {
   }),
 
   restore: asyncHandler(async (req: Request, res: Response) => {
+    const order = await ordersService.findById(req.params.id);
+    if (!order) {
+      res.status(404).json({ success: false, error: 'Order not found.' });
+      return;
+    }
     const restored = await ordersService.restore(req.params.id);
     res.json({ success: true, request: restored });
   }),

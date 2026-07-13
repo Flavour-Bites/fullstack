@@ -23,20 +23,7 @@ export const galleryRepository = {
     const existing = await prisma.category.findUnique({ where: { slug } });
     if (existing) return existing.id;
 
-    const created = await prisma.category.create({
-      data: {
-        id: makeId('cat'),
-        name: raw
-          .split(/[-_\s]+/)
-          .filter(Boolean)
-          .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-          .join(' '),
-        slug,
-        color: '#c5a880',
-        icon: 'cake',
-      },
-    });
-    return created.id;
+    throw new Error(`Category "${raw}" does not exist. Please create it first.`);
   },
 
   async create(data: {

@@ -6,10 +6,19 @@ export type TranslationDict = typeof en;
 
 const dictionaries: Record<Locale, TranslationDict> = { en, am };
 
-let currentLocale: Locale = 'en';
+function loadSavedLocale(): Locale {
+  try {
+    const saved = typeof localStorage !== 'undefined' ? localStorage.getItem('flavourbites_locale') : null;
+    if (saved === 'en' || saved === 'am') return saved;
+  } catch { /* ignore */ }
+  return 'en';
+}
+
+let currentLocale: Locale = loadSavedLocale();
 
 export function setLocale(locale: Locale) {
   currentLocale = locale;
+  try { localStorage.setItem('flavourbites_locale', locale); } catch { /* ignore */ }
 }
 
 export function getLocale(): Locale {

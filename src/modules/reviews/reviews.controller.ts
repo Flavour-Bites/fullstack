@@ -13,6 +13,11 @@ export const reviewsController = {
     res.json({ success: true, review });
   }),
 
+  update: asyncHandler(async (req: Request, res: Response) => {
+    const review = await reviewsService.update(req.params.id, req.body);
+    res.json({ success: true, review });
+  }),
+
   delete: asyncHandler(async (req: Request, res: Response) => {
     await reviewsService.delete(req.params.id);
     res.json({ success: true });

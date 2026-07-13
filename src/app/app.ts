@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
@@ -8,26 +7,42 @@ import cookieParser from 'cookie-parser';
 import { securityConfig } from './config/security.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { verifyTelegramWebhookSecret } from '../integrations/telegram/telegramWebhook.js';
+import { fetchWithTimeout } from '../shared/utils/fetchWithTimeout.js';
 import apiRoutes from './routes.js';
 
-export async function createApp() {
-  const app = express();
+export async function registerWebhook() {
+  if (!process.env.TELEGRAM_BOT_TOKEN || !process.env.APP_URL || !process.env.TELEGRAM_WEBHOOK_SECRET) {
+    console.warn('[Telegram] Webhook env vars missing, skipping registration.');
+    return;
+  }
 
-  app.use(securityConfig);
-  app.use(cookieParser());
-  app.use(express.json({ limit: '12mb' }));
-
-  if (process.env.TELEGRAM_BOT_TOKEN && process.env.APP_URL && process.env.TELEGRAM_WEBHOOK_SECRET) {
-    const webhookUrl = `${process.env.APP_URL}/bot/webhook`;
-    fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/setWebhook`, {
+  const webhookUrl = `${process.env.APP_URL}/bot/webhook`;
+  try {
+    const res = await fetchWithTimeout(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/setWebhook`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         url: webhookUrl,
         secret_token: process.env.TELEGRAM_WEBHOOK_SECRET,
       }),
-    }).catch((err) => console.error('[Telegram] Webhook registration failed:', err.message));
+    }, 10_000);
+    const data = await res.json();
+    if (data.ok) {
+      console.log('[Telegram] Webhook registered successfully.');
+    } else {
+      console.error('[Telegram] Webhook registration failed:', data.description);
+    }
+  } catch (err) {
+    console.error('[Telegram] Webhook registration error:', (err as Error).message);
   }
+}
+
+export async function createApp() {
+  const app = express();
+
+  app.use(securityConfig);
+  app.use(cookieParser());
+  app.use(express.json({ limit: '1mb' }));
 
   app.post(
     '/bot/webhook',

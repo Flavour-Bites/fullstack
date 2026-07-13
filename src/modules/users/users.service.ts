@@ -10,6 +10,15 @@ export const usersService = {
     if (targetUserId === currentUserId && role !== 'admin') {
       throw new Error('You cannot remove your own admin access.');
     }
+
+    if (role !== 'admin') {
+      const adminCount = await usersRepository.countByRole('admin');
+      const target = await usersRepository.findById(targetUserId);
+      if (target?.role === 'admin' && adminCount <= 1) {
+        throw new Error('Cannot demote the last admin.');
+      }
+    }
+
     return usersRepository.updateRole(targetUserId, role);
   },
 

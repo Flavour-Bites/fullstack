@@ -34,6 +34,7 @@ export async function getStaffChatIds(): Promise<string[]> {
         role: { in: ['admin', 'staff'] },
         notifyViaTelegram: true,
         telegramId: { not: '' },
+        deletedAt: null,
       },
       select: { telegramId: true },
     });
@@ -85,9 +86,7 @@ export async function notifyStaffNewOrder(
   ];
 
   const staffIds = await getStaffChatIds();
-  for (const id of staffIds) {
-    await sendMessage(id, text, buttons);
-  }
+  await Promise.allSettled(staffIds.map((id) => sendMessage(id, text, buttons)));
 }
 
 export async function notifyCustomerStatusChange(orderId: string): Promise<void> {
@@ -214,7 +213,5 @@ export async function notifyStaffQuoteAccepted(
   ];
 
   const staffIds = await getStaffChatIds();
-  for (const id of staffIds) {
-    await sendMessage(id, text, buttons);
-  }
+  await Promise.allSettled(staffIds.map((id) => sendMessage(id, text, buttons)));
 }
