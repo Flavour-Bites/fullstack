@@ -14,6 +14,7 @@ import CakeAssistantBot from './components/CakeAssistantBot';
 import ProfileView from './components/ProfileView';
 import AdminView from './components/AdminView';
 import AuthView from './components/AuthView';
+import ErrorBoundary from './components/ErrorBoundary';
 
 import { setLocale, getLocale } from './i18n';
 import type { Locale } from './i18n';
@@ -648,6 +649,7 @@ export default function App() {
 
       {/* Main Core Screen Contents with transition wrapper */}
       <main id="main-content" className="flex-grow">
+        <ErrorBoundary>
         <AnimatePresence mode="wait">
           <motion.div
             key={activePage}
@@ -741,6 +743,7 @@ export default function App() {
             )}
           </motion.div>
         </AnimatePresence>
+        </ErrorBoundary>
       </main>
 
       {/* Immersive Luxury Footer */}
@@ -856,7 +859,7 @@ export default function App() {
           </div>
         </footer>
       )}
-      <CakeAssistantBot />
+      <ErrorBoundary><CakeAssistantBot /></ErrorBoundary>
     </div>
     </>
   );
