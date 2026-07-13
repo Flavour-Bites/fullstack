@@ -4,8 +4,10 @@ import { Sparkles, Award, Utensils, Compass, ChevronRight } from 'lucide-react';
 import { IngredientSpotlight } from '../types';
 import { INGREDIENT_SPOTLIGHTS } from '../data';
 import { t } from '../i18n';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 export default function AboutView() {
+  usePageTitle("About");
   const [activeSpotlight, setActiveSpotlight] = useState<IngredientSpotlight>(INGREDIENT_SPOTLIGHTS[0]);
 
   return (

@@ -10,6 +10,8 @@ import {
 } from 'lucide-react';
 import { useToast } from './Toast';
 import { t } from '../i18n';
+import { usePageTitle } from '../hooks/usePageTitle';
+import { SkeletonCard, SkeletonTable, SkeletonGrid } from './Skeleton';
 
 // ─────────────────────────────────────────────────────────────
 // Types
@@ -60,8 +62,8 @@ interface Stats {
 import { User as UserType } from '../types';
 
 interface AdminViewProps {
-  activeTab?: 'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users';
-  onTabChange?: (tab: 'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users') => void;
+  activeTab?: 'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users' | 'recovery';
+  onTabChange?: (tab: 'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users' | 'recovery') => void;
   currentUser?: UserType | null;
 }
 
@@ -145,10 +147,11 @@ function exportOrdersCSV(requests: CakeRequest[]) {
 // Component
 // ─────────────────────────────────────────────────────────────
 export default function AdminView({ activeTab, onTabChange, currentUser }: AdminViewProps) {
+  usePageTitle("Admin");
   const { showToast } = useToast();
   const isAdmin = currentUser?.role === 'admin';
 
-  const [internalTab, setInternalTab] = useState<'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users'>('dashboard');
+  const [internalTab, setInternalTab] = useState<'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users' | 'recovery'>('dashboard');
   const currentTab = activeTab || internalTab;
   const setCurrentTab = onTabChange || setInternalTab;
 
@@ -196,6 +199,11 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
   const [editReviewContent, setEditReviewContent] = useState('');
   const [editReviewRating, setEditReviewRating] = useState(5);
   const [savingReview, setSavingReview] = useState(false);
+
+  // Recovery requests state (admin only)
+  const [recoveryRequests, setRecoveryRequests] = useState<any[]>([]);
+  const [recoveryLoading, setRecoveryLoading] = useState(false);
+  const [recoveryStatusFilter, setRecoveryStatusFilter] = useState('all');
 
   // Gallery CRUD state
   const [showGalleryForm, setShowGalleryForm] = useState(false);
@@ -269,6 +277,48 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
     finally { setReviewsLoading(false); }
   };
 
+  const fetchRecoveryRequests = async () => {
+    setRecoveryLoading(true);
+    try {
+      const url = recoveryStatusFilter === 'all' ? '/api/recovery' : `/api/recovery?status=${recoveryStatusFilter}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.success) setRecoveryRequests(data.requests || []);
+    } catch (e) { /* ignore */ }
+    finally { setRecoveryLoading(false); }
+  };
+
+  const handleRecoveryStatus = async (id: string, status: string) => {
+    try {
+      const res = await fetch(`/api/recovery/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Recovery Updated', `Request ${status}.`, 'success');
+        fetchRecoveryRequests();
+      } else throw new Error(data.error);
+    } catch (e: any) {
+      showToast('Update Failed', e.message, 'error');
+    }
+  };
+
+  const getRecoveryStatusBadge = (status: string) => {
+    const base = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono uppercase font-bold border';
+    switch (status) {
+      case 'pending':
+        return `${base} bg-amber-900/10 border-amber-800 text-amber-400`;
+      case 'approved':
+        return `${base} bg-emerald-900/10 border-emerald-800 text-emerald-400`;
+      case 'rejected':
+        return `${base} bg-red-900/10 border-red-800 text-red-400`;
+      default:
+        return `${base} bg-stone-800 border-stone-700 text-stone-400`;
+    }
+  };
+
   useEffect(() => { fetchRequests(true); fetchStats(); }, []);
 
   useEffect(() => {
@@ -276,7 +326,8 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
     if (currentTab === 'menu') fetchGallery();
     if (currentTab === 'categories') { fetchCategories(); fetchGallery(); }
     if (currentTab === 'reviews') fetchReviews();
-  }, [currentTab]);
+    if (currentTab === 'recovery' && isAdmin) fetchRecoveryRequests();
+  }, [currentTab, recoveryStatusFilter]);
 
   // ── Order Actions ──────────────────────────────────────────
   const handleDatabaseSeed = async () => {
@@ -822,9 +873,10 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                   <input
                     type="text"
                     placeholder={t('admin.searchOrders')}
+                    aria-label={t('admin.searchOrders')}
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
-                    className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-lux-gold pl-9 pr-3 py-2.5 text-xs rounded-xs"
+                    className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-lux-gold pl-9 pr-3 py-3 text-xs rounded-xs"
                   />
                 </div>
                 <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
@@ -832,7 +884,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                   <select
                     value={statusFilter}
                     onChange={e => setStatusFilter(e.target.value)}
-                    className="bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300 focus:outline-none focus:ring-1 focus:ring-lux-gold py-2.5 px-3 text-xs rounded-xs font-mono font-bold flex-grow sm:flex-grow-0"
+                    className="bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300 focus:outline-none focus:ring-1 focus:ring-lux-gold py-3 px-3 text-xs rounded-xs font-mono font-bold flex-grow sm:flex-grow-0"
                   >
                     <option value="all">{t('admin.allStatuses')}</option>
                     <option value="pending">Pending</option>
@@ -856,9 +908,10 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
 
             {/* Order List */}
             {loading ? (
-              <div className="bg-stone-50 dark:bg-[#1d1916] text-center p-16 border border-stone-200/60 dark:border-stone-800/60 rounded-sm">
-                <Loader2 className="w-7 h-7 animate-spin text-lux-gold mx-auto mb-3" />
-                <p className="text-xs text-stone-400 dark:text-stone-400 font-mono uppercase tracking-widest">{t('admin.loadingOrders')}</p>
+              <div className="space-y-4">
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
               </div>
             ) : filteredRequests.length === 0 ? (
               <div className="bg-stone-50 dark:bg-[#1d1916] text-center p-16 border border-stone-200/60 dark:border-stone-800/60 rounded-sm">
@@ -877,6 +930,8 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                       key={req.id}
                       layoutId={`order-${req.id}`}
                       onClick={() => { if (!isEditing) setSelectedRequest(req); }}
+                      role="button"
+                      tabIndex={0}
                       className={`bg-white/95 dark:bg-[#1e1a17]/95 border text-left rounded-sm p-5 transition-all cursor-pointer relative ${
                         isSelected ? 'border-lux-gold shadow-lg shadow-lux-gold/5 bg-stone-100 dark:bg-[#221d19]' : 'border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700'
                       }`}
@@ -921,7 +976,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                           <button onClick={e => { e.stopPropagation(); startEditing(req); }} className="p-1 px-2 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-400 hover:text-lux-gold rounded-xs border border-stone-200 dark:border-stone-800 text-[10px] font-mono flex items-center gap-1">
                             <Edit3 className="w-3 h-3" /> Edit
                           </button>
-                          <button onClick={e => { e.stopPropagation(); handleDeleteRequest(req.id, req.contactName); }} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800">
+                          <button onClick={e => { e.stopPropagation(); handleDeleteRequest(req.id, req.contactName); }} aria-label={`Delete order ${req.id}`} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800">
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
@@ -979,7 +1034,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                         <h2 className="font-serif text-xl text-stone-900 dark:text-white font-medium">{selectedRequest.contactName}</h2>
                         <p className="text-[10px] text-stone-400 dark:text-stone-400 font-mono mt-1">{selectedRequest.id} • {selectedRequest.requestDate}</p>
                       </div>
-                      <button onClick={() => setSelectedRequest(null)} className="p-1.5 rounded-sm hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white"><X className="w-4 h-4" /></button>
+                      <button onClick={() => setSelectedRequest(null)} aria-label="Close details" className="p-1.5 rounded-sm hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white"><X className="w-4 h-4" /></button>
                     </div>
 
                     <div className="space-y-2 bg-stone-100 dark:bg-[#15110f] p-3 border border-stone-200 dark:border-stone-800 rounded-xs text-xs">
@@ -1036,7 +1091,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                           <button onClick={() => startEditing(selectedRequest)} className="px-3 py-2 bg-stone-100 dark:bg-stone-900 hover:bg-lux-gold text-stone-700 dark:text-stone-200 hover:text-stone-950 font-mono text-[10px] uppercase font-bold rounded-sm border border-stone-200 dark:border-stone-800 transition-all cursor-pointer">
                             Edit
                           </button>
-                          <button onClick={() => handleDeleteRequest(selectedRequest.id, selectedRequest.contactName)} className="p-2 border border-stone-200 dark:border-stone-800 hover:border-red-800 bg-red-950/20 text-red-400 rounded-sm cursor-pointer">
+                          <button onClick={() => handleDeleteRequest(selectedRequest.id, selectedRequest.contactName)} aria-label="Delete order" className="p-2 border border-stone-200 dark:border-stone-800 hover:border-red-800 bg-red-950/20 text-red-400 rounded-sm cursor-pointer">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
@@ -1145,10 +1200,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
           )}
 
           {galleryLoading ? (
-            <div className="text-center py-20 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
-              <Loader2 className="w-7 h-7 animate-spin text-lux-gold mx-auto mb-2" />
-              <p className="text-xs text-stone-400 dark:text-stone-400 font-mono">{t('admin.loadingMenu')}</p>
-            </div>
+            <SkeletonGrid items={6} />
           ) : galleryItems.length === 0 ? (
             <div className="text-center py-20 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
               <Image className="w-10 h-10 text-stone-400 dark:text-stone-500 mx-auto mb-3" />
@@ -1164,10 +1216,10 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                     <div className="flex justify-between items-start mb-2">
                       <span className="text-[9px] uppercase tracking-widest font-mono text-lux-gold bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 px-2 py-0.5 rounded-sm">{item.category?.name ?? item.categoryId}</span>
                       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => startEditGalleryItem(item)} className="p-1 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-400 hover:text-lux-gold rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.editGalleryItem')}>
+                        <button onClick={() => startEditGalleryItem(item)} aria-label={t('admin.editGalleryItem')} className="p-1 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-400 hover:text-lux-gold rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.editGalleryItem')}>
                           <Pencil className="w-3 h-3" />
                         </button>
-                        <button onClick={() => handleDeleteGalleryItem(item.id, item.name)} className="p-1 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.deleteGalleryItem')}>
+                        <button onClick={() => handleDeleteGalleryItem(item.id, item.name)} aria-label={t('admin.deleteGalleryItem')} className="p-1 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.deleteGalleryItem')}>
                           <Trash2 className="w-3 h-3" />
                         </button>
                       </div>
@@ -1243,10 +1295,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
           )}
 
           {categoriesLoading ? (
-            <div className="text-center py-16 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
-              <Loader2 className="w-7 h-7 animate-spin text-lux-gold mx-auto mb-2" />
-              <p className="text-xs text-stone-400 dark:text-stone-400 font-mono">{t('admin.loadingCategories')}</p>
-            </div>
+            <SkeletonTable rows={4} cols={3} />
           ) : categories.length === 0 ? (
             <div className="text-center py-16 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
               <Layers className="w-10 h-10 text-stone-400 dark:text-stone-500 mx-auto mb-3" />
@@ -1283,10 +1332,10 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                         </td>
                         <td className="px-5 py-4">
                           <div className="flex items-center justify-end gap-2">
-                            <button onClick={() => startEditCategory(cat)} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-400 hover:text-lux-gold rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.editCategory')}>
+                            <button onClick={() => startEditCategory(cat)} aria-label={t('admin.editCategory')} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-400 hover:text-lux-gold rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.editCategory')}>
                               <Edit3 className="w-3.5 h-3.5" />
                             </button>
-                            <button onClick={() => handleDeleteCategory(cat.id, cat.name)} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.deleteCategory')}>
+                            <button onClick={() => handleDeleteCategory(cat.id, cat.name)} aria-label={t('admin.deleteCategory')} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.deleteCategory')}>
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
@@ -1311,9 +1360,10 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
           </div>
 
           {reviewsLoading ? (
-            <div className="text-center py-16 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
-              <Loader2 className="w-7 h-7 animate-spin text-lux-gold mx-auto mb-2" />
-              <p className="text-xs text-stone-400 dark:text-stone-400 font-mono">{t('admin.loadingReviews')}</p>
+            <div className="space-y-4">
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
             </div>
           ) : reviewItems.length === 0 ? (
             <div className="text-center py-16 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
@@ -1347,12 +1397,13 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                             setEditReviewContent(rev.content);
                             setEditReviewRating(rev.rating);
                           }}
+                          aria-label={t('admin.editReview')}
                           className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-400 hover:text-lux-gold rounded-xs border border-stone-200 dark:border-stone-800"
                           title={t('admin.editReview')}
                         >
                           <Edit3 className="w-3.5 h-3.5" />
                         </button>
-                        <button onClick={() => handleDeleteReview(rev.id, rev.author)} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.deleteReview')}>
+                        <button onClick={() => handleDeleteReview(rev.id, rev.author)} aria-label={t('admin.deleteReview')} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.deleteReview')}>
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -1388,6 +1439,110 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
         </div>
       )}
 
+      {/* ── Recovery Tab (Admin Only) ────────────────────── */}
+      {currentTab === 'recovery' && (
+        isAdmin ? (
+          <div className="max-w-7xl mx-auto space-y-5 relative z-10 font-sans">
+            <div className="flex justify-between items-center bg-stone-50 dark:bg-[#1d1916] p-5 border border-stone-200 dark:border-stone-800 rounded-sm">
+              <h2 className="font-serif text-xl text-stone-900 dark:text-white flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-lux-gold" /> {t('admin.recoveryRequests')} ({recoveryRequests.length})
+              </h2>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1 text-[10px] font-mono">
+                  {['all', 'pending', 'approved', 'rejected'].map(s => (
+                    <button
+                      key={s}
+                      onClick={() => setRecoveryStatusFilter(s)}
+                      className={`px-2 py-1 uppercase tracking-wider cursor-pointer border transition-colors ${
+                        recoveryStatusFilter === s
+                          ? 'bg-lux-gold text-stone-950 border-lux-gold font-bold'
+                          : 'bg-transparent text-stone-400 dark:text-stone-400 border-stone-200 dark:border-stone-800 hover:text-lux-gold'
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+                <button onClick={fetchRecoveryRequests} className="text-stone-400 hover:text-lux-gold p-1 cursor-pointer" title="Refresh">
+                  <RefreshCw className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {recoveryLoading ? (
+              <div className="text-center py-16 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
+                <Loader2 className="w-7 h-7 animate-spin text-lux-gold mx-auto mb-2" />
+                <p className="text-xs text-stone-400 dark:text-stone-400 font-mono">Loading recovery requests...</p>
+              </div>
+            ) : recoveryRequests.length === 0 ? (
+              <div className="text-center py-16 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
+                <ShieldCheck className="w-10 h-10 text-stone-400 dark:text-stone-500 mx-auto mb-3" />
+                <p className="text-sm font-serif text-stone-600 dark:text-stone-300 italic">No recovery requests found.</p>
+              </div>
+            ) : (
+              <div className="bg-[#1e1a17] border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-stone-100 dark:bg-[#15110f] text-stone-400 dark:text-stone-400 uppercase font-mono tracking-wider font-semibold border-b border-stone-200 dark:border-stone-800">
+                      <tr>
+                        <th className="px-5 py-4">Old Telegram ID</th>
+                        <th className="px-5 py-4">New Telegram ID</th>
+                        <th className="px-5 py-4">Status</th>
+                        <th className="px-5 py-4">Created</th>
+                        <th className="px-5 py-4 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-stone-800/60">
+                      {recoveryRequests.map((req: any) => (
+                        <tr key={req.id} className="hover:bg-white/5 transition-colors">
+                          <td className="px-5 py-4 font-mono text-stone-900 dark:text-white text-sm">{req.oldTelegramId}</td>
+                          <td className="px-5 py-4 font-mono text-stone-900 dark:text-white text-sm">{req.newTelegramId}</td>
+                          <td className="px-5 py-4">
+                            <span className={getRecoveryStatusBadge(req.status)}>
+                              {req.status === 'approved' ? <ShieldCheck className="w-3 h-3" /> : req.status === 'rejected' ? <X className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                              {req.status}
+                            </span>
+                          </td>
+                          <td className="px-5 py-4 text-stone-500 font-mono text-[10px]">{new Date(req.createdAt).toLocaleDateString()}</td>
+                          <td className="px-5 py-4">
+                            <div className="flex items-center justify-end gap-2">
+                              {req.status === 'pending' && (
+                                <>
+                                  <button
+                                    onClick={() => handleRecoveryStatus(req.id, 'approved')}
+                                    className="px-2.5 py-1 bg-emerald-600 text-white font-mono text-[9px] uppercase font-bold rounded-xs flex items-center gap-1 hover:bg-emerald-500 cursor-pointer"
+                                  >
+                                    <ShieldCheck className="w-3 h-3" /> Approve
+                                  </button>
+                                  <button
+                                    onClick={() => handleRecoveryStatus(req.id, 'rejected')}
+                                    className="px-2.5 py-1 bg-red-700 text-white font-mono text-[9px] uppercase font-bold rounded-xs flex items-center gap-1 hover:bg-red-600 cursor-pointer"
+                                  >
+                                    <X className="w-3 h-3" /> Reject
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="max-w-md mx-auto py-20 bg-white dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm text-center relative z-10 font-sans shadow-xl">
+            <ShieldCheck className="w-12 h-12 text-lux-gold/30 mx-auto mb-4" />
+            <h3 className="font-serif text-lg text-stone-900 dark:text-white font-medium mb-2">Admin Access Only</h3>
+            <p className="text-xs text-stone-400 dark:text-stone-400 max-w-xs mx-auto leading-relaxed">
+              Recovery request management is restricted to system administrators.
+            </p>
+          </div>
+        )
+      )}
+
       {/* ── Users Tab (Admin Only) ────────────────────────── */}
       {currentTab === 'users' && (
         isAdmin ? (
@@ -1402,10 +1557,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
             </div>
 
             {usersLoading ? (
-              <div className="text-center py-16 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
-                <Loader2 className="w-7 h-7 animate-spin text-lux-gold mx-auto mb-2" />
-                <p className="text-xs text-stone-400 dark:text-stone-400 font-mono">{t('admin.loadingUsers')}</p>
-              </div>
+              <SkeletonTable rows={5} cols={4} />
             ) : (
               <div className="bg-[#1e1a17] border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden">
                 <div className="overflow-x-auto">
@@ -1463,6 +1615,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                                 <>
                                   <button
                                     onClick={() => { setEditingUserId(u.id); setEditingRole(u.role); }}
+                                    aria-label="Change role"
                                     className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-400 hover:text-lux-gold rounded-xs border border-stone-200 dark:border-stone-800 transition-colors"
                                     title="Change role"
                                   >
@@ -1472,6 +1625,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
                                     <button
                                       onClick={() => deleteUser(u.id, u.name)}
                                       disabled={deletingUserId === u.id}
+                                      aria-label="Delete user"
                                       className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800 transition-colors"
                                       title="Delete user"
                                     >

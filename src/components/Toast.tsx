@@ -112,6 +112,8 @@ export function ToastProvider({ children }: ToastProviderProps) {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -10, scale: 0.95 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 240 }}
+                role="alert"
+                aria-live="polite"
                 className={`pointer-events-auto w-full p-4.5 rounded-sm flex items-start gap-3.5 border ${styles.bg} ${styles.border} ${styles.glow} backdrop-blur-md relative`}
               >
                 {/* Visual Glow Node */}

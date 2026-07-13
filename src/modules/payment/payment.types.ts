@@ -1,6 +1,6 @@
 export interface InitiatePaymentInput {
   orderId: string;
-  amount: number;
+  amount?: number;
   currency?: 'ETB' | 'USD';
   firstName?: string;
   lastName?: string;

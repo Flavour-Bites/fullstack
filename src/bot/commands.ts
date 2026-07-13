@@ -28,6 +28,49 @@ export function handleCommands(bot: Bot) {
     bot.command("start", async (ctx) => {
         const telegramId = String(ctx.from?.id);
         const prisma = getPrisma();
+        const payload = ctx.match?.toString().trim();
+
+        // ── Deep linking: order_<orderId> ──────────────────────────────────
+        if (payload?.startsWith("order_")) {
+            const orderId = payload.slice(6);
+            const order = await prisma.customCakeRequest.findUnique({
+                where: { id: orderId },
+                include: { user: true },
+            });
+
+            if (!order) {
+                return ctx.reply(
+                    `⚠️ Order <code>${orderId}</code> not found.\n\nUse /start to see the welcome message.`,
+                    { parse_mode: "HTML" },
+                );
+            }
+
+            const statusEmoji: Record<string, string> = {
+                Received: "📬", Designing: "✏️", Quoted: "💰",
+                Confirmed: "✅", InProgress: "🔥", Ready: "🎂", Completed: "✔️",
+            };
+            const emoji = statusEmoji[order.status] ?? "📦";
+
+            let msg =
+                `<b>🎂 Order #${order.id}</b>\n\n` +
+                `${emoji} <b>Status:</b> ${order.status}\n` +
+                `👤 <b>Customer:</b> ${order.contactName}\n` +
+                `📞 <b>Phone:</b> ${order.contactPhone}\n` +
+                `🎉 <b>Event:</b> ${order.eventType}\n` +
+                `🍰 <b>Flavor:</b> ${order.flavor}\n` +
+                `📅 <b>Delivery:</b> ${order.deliveryDate}\n` +
+                `👥 <b>Guests:</b> ${order.guestCount}\n` +
+                `🏗️ <b>Tiers:</b> ${order.tierCount}\n`;
+
+            if (order.quotedPrice) {
+                msg += `💰 <b>Price:</b> ${order.quotedPrice.toLocaleString()} ETB\n`;
+            }
+            if (order.deliveryOption === "delivery" && order.deliveryAddress) {
+                msg += `📍 <b>Address:</b> ${order.deliveryAddress}\n`;
+            }
+
+            return ctx.reply(msg, { parse_mode: "HTML" });
+        }
 
         const user = await prisma.user.findUnique({ where: { telegramId } });
 

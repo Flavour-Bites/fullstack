@@ -84,6 +84,7 @@ vi.mock('../orders.workflow.js', () => ({
 vi.mock('../../../integrations/telegram/telegramNotifications.js', () => ({
   notifyStaffNewOrder: vi.fn(() => Promise.resolve()),
   notifyCustomerStatusChange: vi.fn(() => Promise.resolve()),
+  notifyStaffQuoteAccepted: vi.fn(() => Promise.resolve()),
 }));
 
 vi.mock('../../../app/config/prisma.js', () => ({
