@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { setRedisStoreForTests, getRedisStore } from '../redisClient.js';
 
+const MEMORY_STORE_MAX_ENTRIES = 10_000;
+
 describe('MemoryStore', () => {
   let store: ReturnType<typeof getRedisStore>;
 
@@ -50,17 +52,25 @@ describe('MemoryStore', () => {
     expect(await store.get('b')).toBe('2');
   });
 
-  it('evicts oldest entries when max size reached', async () => {
-    // MemoryStore should have a max size limit
-    const maxEntries = 1000;
-    for (let i = 0; i < maxEntries + 10; i++) {
-      await store.set(`key-${i}`, `value-${i}`);
+  it('evicts expired entries before over-limit entries', async () => {
+    vi.useFakeTimers();
+    // Fill to capacity with some expiring entries
+    for (let i = 0; i < 50; i++) {
+      await store.set(`exp-${i}`, `val-${i}`, 1);
     }
-    // First entries should be evicted
-    const firstKey = await store.get('key-0');
-    // Either evicted (null) or still present — depends on eviction strategy
-    // The important thing is the store doesn't grow unbounded
-    expect(firstKey === null || typeof firstKey === 'string').toBe(true);
+    // Advance past expiry
+    vi.advanceTimersByTime(1500);
+
+    // These new entries should succeed by evicting expired entries first
+    for (let i = 0; i < 50; i++) {
+      await store.set(`new-${i}`, `new-val-${i}`);
+    }
+
+    // New entries should exist
+    expect(await store.get('new-0')).toBe('new-val-0');
+    // Old expired entries should be gone
+    expect(await store.get('exp-0')).toBeNull();
+    vi.useRealTimers();
   });
 
   it('cleans up expired entries proactively', async () => {
@@ -107,3 +117,63 @@ describe('getRedisStore / setRedisStoreForTests', () => {
     expect(s).toBeDefined();
   });
 });
+
+describe('getRedisStore fallback warning', () => {
+  it('logs warning when REDIS_URL is not set', () => {
+    setRedisStoreForTests(null);
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    // Reset so getRedisStore creates a new instance
+    setRedisStoreForTests(null);
+    getRedisStore();
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('REDIS_URL not set')
+    );
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('in-memory store')
+    );
+    warnSpy.mockRestore();
+  });
+
+  it('does not log warning when REDIS_URL is set', () => {
+    process.env.REDIS_URL = 'redis://localhost:6379';
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    setRedisStoreForTests(null);
+    getRedisStore();
+
+    const redisWarnings = warnSpy.mock.calls.filter(
+      (call) => typeof call[0] === 'string' && call[0].includes('REDIS_URL not set')
+    );
+    expect(redisWarnings).toHaveLength(0);
+    warnSpy.mockRestore();
+    delete process.env.REDIS_URL;
+  });
+});
+
+describe('MemoryStore eviction boundary', () => {
+  it('evicts 10% of entries when at capacity', async () => {
+    setRedisStoreForTests(null);
+    const store = getRedisStore();
+
+    // Fill to max capacity (10,000 entries)
+    for (let i = 0; i < MEMORY_STORE_MAX_ENTRIES; i++) {
+      await store.set(`key-${i}`, `value-${i}`);
+    }
+
+    // Adding one more should trigger eviction
+    await store.set('trigger-eviction', 'trigger-value');
+
+    // The new key should exist
+    expect(await store.get('trigger-eviction')).toBe('trigger-value');
+
+    // ~1000 earliest keys should be evicted (10% of 10K)
+    // key-0 through key-999 should be gone
+    expect(await store.get('key-0')).toBeNull();
+    expect(await store.get('key-999')).toBeNull();
+    // key-1000 should still exist (beyond the 10% eviction window)
+    expect(await store.get('key-1000')).toBe('value-1000');
+  });
+});
+
