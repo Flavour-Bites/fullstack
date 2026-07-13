@@ -30,6 +30,8 @@ export interface KeyValueStore {
   del(key: string): Promise<void>;
 }
 
+const MEMORY_STORE_MAX_ENTRIES = 10_000;
+
 class MemoryStore implements KeyValueStore {
   private values = new Map<string, { value: string; expiresAt: number | null }>();
 
@@ -44,6 +46,9 @@ class MemoryStore implements KeyValueStore {
   }
 
   async set(key: string, value: string, ttlSeconds?: number) {
+    if (this.values.size >= MEMORY_STORE_MAX_ENTRIES && !this.values.has(key)) {
+      this.evict();
+    }
     this.values.set(key, {
       value,
       expiresAt: ttlSeconds ? Date.now() + ttlSeconds * 1000 : null,
@@ -53,10 +58,30 @@ class MemoryStore implements KeyValueStore {
   async del(key: string) {
     this.values.delete(key);
   }
+
+  private evict() {
+    // Remove expired entries first
+    const now = Date.now();
+    for (const [k, v] of this.values) {
+      if (v.expiresAt !== null && v.expiresAt <= now) {
+        this.values.delete(k);
+      }
+    }
+    // If still over limit, remove oldest entries (first 10%)
+    if (this.values.size >= MEMORY_STORE_MAX_ENTRIES) {
+      const keysToDelete = Array.from(this.values.keys()).slice(0, Math.floor(MEMORY_STORE_MAX_ENTRIES * 0.1));
+      for (const k of keysToDelete) {
+        this.values.delete(k);
+      }
+    }
+  }
 }
 
 export class RedisStore implements KeyValueStore {
   private url: URL;
+  private socket: RedisSocket | null = null;
+  private connecting = false;
+  private connectPromise: Promise<RedisSocket> | null = null;
 
   constructor(redisUrl = process.env.REDIS_URL) {
     if (!redisUrl) {
@@ -65,19 +90,39 @@ export class RedisStore implements KeyValueStore {
     this.url = new URL(redisUrl);
   }
 
-  private async send(parts: Array<string | number>): Promise<string | null> {
+  private async getSocket(): Promise<RedisSocket> {
+    if (this.socket && !this.socket.destroyed) return this.socket;
+    if (this.connectPromise) return this.connectPromise;
+
+    this.connecting = true;
+    this.connectPromise = this.createSocket();
+    try {
+      this.socket = await this.connectPromise;
+      return this.socket;
+    } finally {
+      this.connecting = false;
+      this.connectPromise = null;
+    }
+  }
+
+  private createSocket(): Promise<RedisSocket> {
     const port = Number(this.url.port || (this.url.protocol === 'rediss:' ? 6380 : 6379));
     const host = this.url.hostname;
     const secure = this.url.protocol === 'rediss:';
-    const password = decodeURIComponent(this.url.password || '');
-    const username = decodeURIComponent(this.url.username || '');
 
-    const socket = await new Promise<RedisSocket>((resolve, reject) => {
+    return new Promise<RedisSocket>((resolve, reject) => {
       const s = secure
         ? tls.connect({ host, port, servername: host }, () => resolve(s))
         : net.connect({ host, port }, () => resolve(s));
       s.once('error', reject);
     });
+  }
+
+  private async send(parts: Array<string | number>): Promise<string | null> {
+    const password = decodeURIComponent(this.url.password || '');
+    const username = decodeURIComponent(this.url.username || '');
+
+    const socket = await this.getSocket();
 
     const writeAndRead = (command: Array<string | number>) => new Promise<string>((resolve, reject) => {
       let data = '';
@@ -89,20 +134,29 @@ export class RedisStore implements KeyValueStore {
         }
       };
       socket.on('data', onData);
-      socket.once('error', reject);
+      socket.once('error', (err) => {
+        socket.off('data', onData);
+        this.socket = null;
+        reject(err);
+      });
       socket.write(encodeCommand(command));
     });
 
     try {
-      if (password) {
+      if (password && !this._authenticated) {
         const authCommand = username ? ['AUTH', username, password] : ['AUTH', password];
         parseSimpleResponse(await writeAndRead(authCommand));
+        this._authenticated = true;
       }
       return parseSimpleResponse(await writeAndRead(parts));
-    } finally {
-      socket.end();
+    } catch (err) {
+      this.socket = null;
+      this._authenticated = false;
+      throw err;
     }
   }
+
+  private _authenticated = false;
 
   async get(key: string) {
     return this.send(['GET', key]);

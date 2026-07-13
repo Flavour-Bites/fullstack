@@ -3,6 +3,7 @@ import { getPrisma } from "../app/config/prisma.js";
 import { createOrder } from "../modules/orders/orders.operations.js";
 import { notifyStaffNewOrder } from "../integrations/telegram/telegramNotifications.js";
 import { getConversationStore } from "../integrations/redis/conversationState.js";
+import { formatRequestDate } from "../shared/utils/dateFormat.js";
 
 interface OrderConversation {
     step: string;
@@ -339,11 +340,7 @@ export function handleCommands(bot: Bot) {
                 conv.step = "done";
 
                 const requestId = `FB-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
-                const requestDate = new Date().toLocaleDateString("en-US", {
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric",
-                });
+                const requestDate = formatRequestDate();
 
                 const order = await createOrder(
                     prisma,

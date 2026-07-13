@@ -38,6 +38,31 @@ vi.mock('../../../app/config/prisma.js', () => ({
         return Promise.resolve({ ...mockOrder, ...data });
       }),
     },
+    $transaction: vi.fn(async (fn: Function) => {
+      const tx = {
+        customCakeRequest: {
+          findUnique: vi.fn().mockImplementation(({ where }) => {
+            if (where?.id === mockOrder.id) {
+              return Promise.resolve({
+                ...mockOrder,
+                depositAmount: mockOrder.depositAmount,
+                remainingBalance: mockOrder.remainingBalance,
+                paymentStatus: mockOrder.paymentStatus,
+              });
+            }
+            return Promise.resolve(null);
+          }),
+          update: vi.fn().mockImplementation(({ data }) => {
+            updateData = { ...data };
+            if (data.depositAmount !== undefined) mockOrder.depositAmount = data.depositAmount;
+            if (data.remainingBalance !== undefined) mockOrder.remainingBalance = data.remainingBalance;
+            if (data.paymentStatus !== undefined) mockOrder.paymentStatus = data.paymentStatus;
+            return Promise.resolve({ ...mockOrder, ...data });
+          }),
+        },
+      };
+      return fn(tx);
+    }),
     orderStatusEvent: {
       create: vi.fn().mockResolvedValue({}),
     },

@@ -1,5 +1,6 @@
 import { ordersRepository } from './orders.repository.js';
 import { makeOrderId } from '../../shared/utils/ids.js';
+import { formatRequestDate } from '../../shared/utils/dateFormat.js';
 import { normalizeMoney } from './orders.workflow.js';
 import { notifyStaffNewOrder, notifyCustomerStatusChange, notifyStaffQuoteAccepted } from '../../integrations/telegram/telegramNotifications.js';
 import type { OrderStatus } from '@prisma/client';
@@ -42,7 +43,7 @@ export const ordersService = {
       referenceImagePublicId: data.referenceImagePublicId ?? null,
       referenceImageFormat: data.referenceImageFormat ?? null,
       referenceImageBytes: data.referenceImageBytes ?? null,
-      requestDate: data.requestDate || new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+      requestDate: data.requestDate || formatRequestDate(),
     };
 
     const order = await ordersRepository.create(orderData);

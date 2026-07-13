@@ -1,3 +1,5 @@
+import { fetchWithTimeout } from '../../shared/utils/fetchWithTimeout.js';
+
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
 const BASE_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
@@ -10,11 +12,11 @@ export type InlineKeyboard = InlineButton[][];
 
 async function callTelegram(method: string, body: object): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE_URL}/${method}`, {
+    const res = await fetchWithTimeout(`${BASE_URL}/${method}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
-    });
+    }, 10_000);
     const data = await res.json() as { ok: boolean; description?: string };
     if (!data.ok) {
       console.error(`[Telegram] ${method} failed:`, data.description);

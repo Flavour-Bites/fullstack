@@ -1,6 +1,7 @@
 import { paymentConfig } from './payment.config.js';
 import { getPrisma } from '../../app/config/prisma.js';
 import { calculatePaymentState } from '../orders/orders.workflow.js';
+import { fetchWithTimeout } from '../../shared/utils/fetchWithTimeout.js';
 import type { InitiatePaymentInput, InitiatePaymentResult, VerifyPaymentResult } from './payment.types.js';
 
 const processedWebhooks = new Set<string>();
@@ -44,14 +45,14 @@ export const paymentService = {
         customization: { title: `Flavour Bites - ${order.eventType} Cake` },
       };
 
-      const res = await fetch(`${paymentConfig.chapaApiUrl}/transaction/initialize`, {
+      const res = await fetchWithTimeout(`${paymentConfig.chapaApiUrl}/transaction/initialize`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${paymentConfig.chapaSecretKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),
-      });
+      }, 15_000);
 
       const json = await res.json();
       if (json.status === 'success' && json.data?.checkout_url) {
@@ -69,9 +70,9 @@ export const paymentService = {
     }
 
     try {
-      const res = await fetch(`${paymentConfig.chapaApiUrl}/transaction/verify/${txRef}`, {
+      const res = await fetchWithTimeout(`${paymentConfig.chapaApiUrl}/transaction/verify/${txRef}`, {
         headers: { Authorization: `Bearer ${paymentConfig.chapaSecretKey}` },
-      });
+      }, 15_000);
       const json = await res.json();
       if (json.status === 'success' && json.data) {
         const chapaStatus = json.data.status;
@@ -96,24 +97,30 @@ export const paymentService = {
     processedWebhooks.add(txRef);
 
     const prisma = getPrisma();
-    const order = await prisma.customCakeRequest.findFirst({
-      where: { id: { startsWith: txRef.split('-').slice(0, -1).join('-') } },
-    });
-    if (!order) return;
+    // tx_ref format: FB-{orderId}-{suffix} — extract exact orderId
+    const parts = txRef.split('-');
+    const orderId = parts.length >= 3 ? parts.slice(0, -1).join('-') : txRef;
 
     const amount = body.amount ? Number(body.amount) : 0;
-    const depositAmount = (order.depositAmount || 0) + amount;
-    const state = calculatePaymentState({ finalPrice: order.finalPrice ?? order.quotedPrice ?? 0, depositAmount });
-    const finalPrice = order.finalPrice ?? order.quotedPrice ?? 0;
 
-    await getPrisma().customCakeRequest.update({
-      where: { id: order.id },
-      data: {
-        depositAmount: state.depositAmount || amount,
-        remainingBalance: Math.max(finalPrice - (state.depositAmount || amount), 0),
-        paymentStatus: state.paymentStatus,
-        depositPaidAt: new Date(),
-      },
+    // Use transaction to prevent race conditions on concurrent webhooks
+    await prisma.$transaction(async (tx) => {
+      const order = await tx.customCakeRequest.findUnique({ where: { id: orderId } });
+      if (!order) return;
+
+      const depositAmount = (order.depositAmount || 0) + amount;
+      const finalPrice = order.finalPrice ?? order.quotedPrice ?? 0;
+      const state = calculatePaymentState({ finalPrice, depositAmount });
+
+      await tx.customCakeRequest.update({
+        where: { id: order.id },
+        data: {
+          depositAmount: state.depositAmount || amount,
+          remainingBalance: Math.max(finalPrice - (state.depositAmount || amount), 0),
+          paymentStatus: state.paymentStatus,
+          depositPaidAt: new Date(),
+        },
+      });
     });
   },
 

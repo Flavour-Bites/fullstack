@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { fetchWithTimeout } from '../../shared/utils/fetchWithTimeout.js';
 
 export const ALLOWED_IMAGE_TYPES = new Set([
   'image/jpeg',
@@ -86,10 +87,10 @@ export async function uploadImageToCloudinary(input: ImageUploadInput) {
   form.append('folder', folder);
   form.append('signature', signature);
 
-  const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+  const response = await fetchWithTimeout(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
     method: 'POST',
     body: form,
-  });
+  }, 30_000);
 
   const body = await response.json();
   if (!response.ok) {
@@ -116,10 +117,10 @@ export async function deleteImageFromCloudinary(publicId: string) {
   form.append('timestamp', String(timestamp));
   form.append('signature', signature);
 
-  const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/destroy`, {
+  const response = await fetchWithTimeout(`https://api.cloudinary.com/v1_1/${cloudName}/image/destroy`, {
     method: 'POST',
     body: form,
-  });
+  }, 15_000);
 
   const body = await response.json();
   if (!response.ok) {

@@ -8,6 +8,7 @@ import cookieParser from 'cookie-parser';
 import { securityConfig } from './config/security.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { verifyTelegramWebhookSecret } from '../integrations/telegram/telegramWebhook.js';
+import { fetchWithTimeout } from '../shared/utils/fetchWithTimeout.js';
 import apiRoutes from './routes.js';
 
 export async function registerWebhook() {
@@ -18,14 +19,14 @@ export async function registerWebhook() {
 
   const webhookUrl = `${process.env.APP_URL}/bot/webhook`;
   try {
-    const res = await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/setWebhook`, {
+    const res = await fetchWithTimeout(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/setWebhook`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         url: webhookUrl,
         secret_token: process.env.TELEGRAM_WEBHOOK_SECRET,
       }),
-    });
+    }, 10_000);
     const data = await res.json();
     if (data.ok) {
       console.log('[Telegram] Webhook registered successfully.');
@@ -42,7 +43,7 @@ export async function createApp() {
 
   app.use(securityConfig);
   app.use(cookieParser());
-  app.use(express.json({ limit: '12mb' }));
+  app.use(express.json({ limit: '1mb' }));
 
   app.post(
     '/bot/webhook',

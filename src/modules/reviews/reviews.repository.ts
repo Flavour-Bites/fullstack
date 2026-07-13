@@ -1,5 +1,6 @@
 import { getPrisma } from '../../app/config/prisma.js';
 import { makeId } from '../../shared/utils/ids.js';
+import { formatRequestDate } from '../../shared/utils/dateFormat.js';
 
 export const reviewsRepository = {
   async findAll() {
@@ -27,7 +28,7 @@ export const reviewsRepository = {
         role: data.role || 'Customer',
         userId: data.userId,
         productId: data.productId ?? null,
-        date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+        date: formatRequestDate(),
       },
     });
   },

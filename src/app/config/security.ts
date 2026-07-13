@@ -2,7 +2,6 @@ import helmet from 'helmet';
 
 const ALLOWED_SCRIPT_SRC = [
   "'self'",
-  "'unsafe-inline'",
   'https://accounts.google.com',
   'https://apis.google.com',
 ];
