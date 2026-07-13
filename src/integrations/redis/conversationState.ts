@@ -39,7 +39,13 @@ export class ConversationStateStore {
 
   async getOrder(telegramId: string) {
     const raw = await this.store.get(orderKey(telegramId));
-    return raw ? JSON.parse(raw) as OrderConversation : null;
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as OrderConversation;
+    } catch {
+      await this.store.del(orderKey(telegramId));
+      return null;
+    }
   }
 
   async setOrder(telegramId: string, conversation: OrderConversation) {
@@ -52,7 +58,13 @@ export class ConversationStateStore {
 
   async getQuote(telegramId: string) {
     const raw = await this.store.get(quoteKey(telegramId));
-    return raw ? JSON.parse(raw) as QuoteConversation : null;
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as QuoteConversation;
+    } catch {
+      await this.store.del(quoteKey(telegramId));
+      return null;
+    }
   }
 
   async setQuote(telegramId: string, quote: QuoteConversation) {

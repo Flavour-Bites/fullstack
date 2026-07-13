@@ -3,6 +3,8 @@ import { getPrisma } from '../../app/config/prisma.js';
 import { calculatePaymentState } from '../orders/orders.workflow.js';
 import type { InitiatePaymentInput, InitiatePaymentResult, VerifyPaymentResult } from './payment.types.js';
 
+const processedWebhooks = new Set<string>();
+
 function generateRef(): string {
   return `FB-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 }
@@ -88,6 +90,10 @@ export const paymentService = {
     const txRef = body.tx_ref as string | undefined;
     const chapaStatus = body.status as string | undefined;
     if (!txRef || chapaStatus !== 'success') return;
+
+    // Idempotency: skip if this tx_ref was already processed
+    if (processedWebhooks.has(txRef)) return;
+    processedWebhooks.add(txRef);
 
     const prisma = getPrisma();
     const order = await prisma.customCakeRequest.findFirst({
