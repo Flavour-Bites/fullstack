@@ -14,6 +14,11 @@ export const recoveryRepository = {
     });
   },
 
+  async findById(id: string) {
+    const prisma = getPrisma();
+    return prisma.recoveryRequest.findUnique({ where: { id } });
+  },
+
   async create(oldTelegramId: string, newTelegramId: string) {
     const prisma = getPrisma();
     return prisma.recoveryRequest.create({
