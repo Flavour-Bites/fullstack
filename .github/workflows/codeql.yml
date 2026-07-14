@@ -2,11 +2,15 @@ name: CodeQL
 
 on:
   push:
-    branches: [main]
+    branches: [dev, main]
   pull_request:
-    branches: [main]
+    branches: [dev, main]
   schedule:
-    - cron: "0 6 * * 1"
+    - cron: '0 0 * * 1'
+
+permissions:
+  security-events: write
+  contents: read
 
 jobs:
   analyze:
@@ -14,13 +18,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       security-events: write
-      actions: read
       contents: read
 
     strategy:
       fail-fast: false
       matrix:
-        language: [javascript-typescript]
+        language: [javascript]
 
     steps:
       - uses: actions/checkout@v4
@@ -29,7 +32,13 @@ jobs:
         with:
           languages: ${{ matrix.language }}
 
-      - uses: github/codeql-action/autobuild@v3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+      - run: npx prisma generate
 
       - uses: github/codeql-action/analyze@v3
         with:

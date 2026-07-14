@@ -8,7 +8,6 @@ updates:
       time: "09:00"
       timezone: Africa/Addis_Ababa
     open-pull-requests-limit: 10
-    reviewers: []
     labels:
       - dependencies
       - automated
