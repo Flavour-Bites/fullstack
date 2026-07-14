@@ -69,8 +69,8 @@ describe('ordersController.restore', () => {
   });
 
   it('restores a deleted order (that is the purpose of restore)', async () => {
-    mockFindById.mockResolvedValue({ id: 'FB-DELETED', deletedAt: new Date() });
-    mockRestore.mockResolvedValue({ id: 'FB-DELETED', deletedAt: null });
+    mockFindById.mockResolvedValue({ id: 'FB-DELETED', deletedAt: new Date() } as any);
+    mockRestore.mockResolvedValue({ id: 'FB-DELETED', deletedAt: null } as any);
     const res = createRes();
 
     await ordersController.restore(createReq({ id: 'FB-DELETED' }), res, vi.fn());
@@ -81,8 +81,8 @@ describe('ordersController.restore', () => {
   });
 
   it('restores the order when found and not deleted', async () => {
-    mockFindById.mockResolvedValue({ id: 'FB-123', deletedAt: null });
-    mockRestore.mockResolvedValue({ id: 'FB-123', deletedAt: null });
+    mockFindById.mockResolvedValue({ id: 'FB-123', deletedAt: null } as any);
+    mockRestore.mockResolvedValue({ id: 'FB-123', deletedAt: null } as any);
     const res = createRes();
 
     await ordersController.restore(createReq({ id: 'FB-123' }), res, vi.fn());
@@ -110,7 +110,7 @@ describe('ordersController.softDelete', () => {
   });
 
   it('returns 404 when order is already deleted', async () => {
-    mockFindById.mockResolvedValue({ id: 'FB-123', deletedAt: new Date() });
+    mockFindById.mockResolvedValue({ id: 'FB-123', deletedAt: new Date() } as any);
     const res = createRes();
 
     await ordersController.softDelete(createReq({ id: 'FB-123' }), res, vi.fn());
@@ -119,8 +119,8 @@ describe('ordersController.softDelete', () => {
   });
 
   it('soft deletes an existing non-deleted order', async () => {
-    mockFindById.mockResolvedValue({ id: 'FB-123', deletedAt: null });
-    mockSoftDelete.mockResolvedValue({ id: 'FB-123', deletedAt: new Date() });
+    mockFindById.mockResolvedValue({ id: 'FB-123', deletedAt: null } as any);
+    mockSoftDelete.mockResolvedValue({ id: 'FB-123', deletedAt: new Date() } as any);
     const res = createRes();
 
     await ordersController.softDelete(createReq({ id: 'FB-123' }), res, vi.fn());

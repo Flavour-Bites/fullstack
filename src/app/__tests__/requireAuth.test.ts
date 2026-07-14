@@ -73,7 +73,7 @@ describe('requireAuth middleware', () => {
 
   it('throws when token payload has no userId', () => {
     mockGetTokenFromRequest.mockReturnValue('token-no-user');
-    mockVerifyToken.mockReturnValue({ role: 'customer' });
+    mockVerifyToken.mockReturnValue({ userId: '', role: 'customer' });
 
     expect(() => requireAuth(createReq(), createRes(), createNext()))
       .toThrow('Please sign in again.');
@@ -81,6 +81,7 @@ describe('requireAuth middleware', () => {
 
   it('throws when token payload has no role', () => {
     mockGetTokenFromRequest.mockReturnValue('token-no-role');
+    // Return a payload missing the role field entirely
     mockVerifyToken.mockReturnValue({ userId: 'usr_123' });
 
     expect(() => requireAuth(createReq(), createRes(), createNext()))
