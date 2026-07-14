@@ -17,42 +17,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          cache: npm
+      - run: npm ci
       - run: npx prisma generate
-      - run: pnpm lint
+      - run: npm run lint
 
   test:
     name: Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          cache: npm
+      - run: npm ci
       - run: npx prisma generate
-      - run: pnpm test
+      - run: npm test
 
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          cache: npm
+      - run: npm ci
       - run: npx prisma generate
-      - run: pnpm run build
+      - run: npm run build
 
   pr-size:
     name: PR Size Label
