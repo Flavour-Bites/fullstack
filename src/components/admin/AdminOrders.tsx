@@ -1,34 +1,24 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  Shield, Calendar, ArrowRight, Trash2, Search, Filter, FilterX,
-  Edit3, Save, Loader2, X, Mail, Phone, MapPin, Download
+  Search, Filter, FilterX, Shield, ArrowRight, Edit3, Trash2,
+  Save, X, Loader2, Calendar, Mail, Phone, MapPin
 } from 'lucide-react';
-import { useToast } from '../Toast';
 import { t } from '../../i18n';
 import { SkeletonCard } from '../Skeleton';
-import {
-  STATUS_COLORS, STATUS_ICONS, WORKFLOW, nextStatus, orderPrice, exportOrdersCSV
-} from './types';
+import { STATUS_COLORS, STATUS_ICONS, WORKFLOW, nextStatus, orderPrice } from './types';
 import type { CakeRequest } from './types';
 
 interface AdminOrdersProps {
   requests: CakeRequest[];
   loading: boolean;
+  refreshing: boolean;
   handleDeleteRequest: (id: string, name: string) => Promise<boolean | undefined>;
   saveRequestUpdates: (id: string, name: string, editStatus: string, editCost: number, editDeposit: number) => Promise<boolean | undefined>;
   advanceStatus: (req: CakeRequest, next: string) => Promise<boolean | undefined>;
 }
 
-export function AdminOrders({
-  requests,
-  loading,
-  handleDeleteRequest,
-  saveRequestUpdates,
-  advanceStatus,
-}: AdminOrdersProps) {
-  const { showToast } = useToast();
-
+export default function AdminOrders({ requests, loading, handleDeleteRequest, saveRequestUpdates, advanceStatus }: AdminOrdersProps) {
   const [selectedRequest, setSelectedRequest] = useState<CakeRequest | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -38,7 +28,7 @@ export function AdminOrders({
   const [editDeposit, setEditDeposit] = useState(0);
   const [updating, setUpdating] = useState(false);
 
-  const filteredRequests = useMemo(() => requests.filter(r => {
+  const filteredRequests = requests.filter(r => {
     const q = searchTerm.toLowerCase();
     const matchesSearch = r.contactName.toLowerCase().includes(q) || r.id.toLowerCase().includes(q) || r.flavor.toLowerCase().includes(q) || r.eventType.toLowerCase().includes(q);
     if (statusFilter === 'all') return matchesSearch;
@@ -46,7 +36,7 @@ export function AdminOrders({
     if (statusFilter === 'active') return matchesSearch && ['Designing', 'Quoted', 'Confirmed', 'In Progress'].includes(r.status);
     if (statusFilter === 'completed') return matchesSearch && (r.status === 'Ready' || r.status === 'Completed');
     return matchesSearch && r.status.toLowerCase() === statusFilter.toLowerCase();
-  }), [requests, searchTerm, statusFilter]);
+  });
 
   const startEditing = (req: CakeRequest) => {
     setEditingId(req.id);
@@ -55,33 +45,20 @@ export function AdminOrders({
     setEditDeposit(req.depositAmount ?? 0);
   };
 
-  const handleSaveRequestUpdates = async (id: string, name: string) => {
+  const handleSave = async (id: string, name: string) => {
     setUpdating(true);
-    try {
-      const result = await saveRequestUpdates(id, name, editStatus, editCost, editDeposit);
-      if (result) {
-        if (selectedRequest?.id === id) {
-          setSelectedRequest({ ...selectedRequest, status: editStatus, quotedPrice: editCost });
-        }
-        setEditingId(null);
-      }
-    } finally {
-      setUpdating(false);
+    await saveRequestUpdates(id, name, editStatus, editCost, editDeposit);
+    if (selectedRequest?.id === id) {
+      setSelectedRequest({ ...selectedRequest, status: editStatus, quotedPrice: editCost });
     }
-  };
-
-  const handleAdvanceStatus = async (req: CakeRequest, next: string) => {
-    const result = await advanceStatus(req, next);
-    if (result && selectedRequest?.id === req.id) {
-      setSelectedRequest({ ...req, status: next });
-    }
+    setEditingId(null);
+    setUpdating(false);
   };
 
   return (
     <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10 items-start">
       {/* Left: order list */}
       <div className="lg:col-span-7 space-y-5">
-
         {/* Search & Filter */}
         <div className="bg-stone-50 dark:bg-[#1d1916] p-4 border border-stone-200/60 dark:border-stone-800/60 rounded-sm space-y-4 font-sans">
           <div className="flex flex-col sm:flex-row items-center gap-3">
@@ -182,7 +159,7 @@ export function AdminOrders({
                     <div className="flex gap-2 flex-wrap">
                       {next && (
                         <button
-                          onClick={e => { e.stopPropagation(); handleAdvanceStatus(req, next); }}
+                          onClick={e => { e.stopPropagation(); advanceStatus(req, next); }}
                           className="bg-lux-gold/10 hover:bg-lux-gold text-lux-gold hover:text-stone-950 text-[9px] font-mono tracking-wider font-bold py-1 px-2.5 rounded-xs border border-lux-gold/20 flex items-center gap-1 transition-all"
                         >
                           <ArrowRight className="w-3 h-3" /> Mark as {next}
@@ -221,7 +198,7 @@ export function AdminOrders({
                       </div>
                       <div className="flex justify-end gap-2">
                         <button onClick={() => setEditingId(null)} className="px-3 py-1.5 text-[10px] font-mono font-bold uppercase bg-stone-200 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:bg-stone-300 dark:hover:bg-stone-700 rounded-sm">{t('admin.cancelEdit')}</button>
-                        <button onClick={() => handleSaveRequestUpdates(req.id, req.contactName)} disabled={updating} className="px-3.5 py-1.5 text-[10px] font-mono font-bold uppercase bg-lux-gold text-stone-950 hover:bg-white rounded-sm flex items-center gap-1">
+                        <button onClick={() => handleSave(req.id, req.contactName)} disabled={updating} className="px-3.5 py-1.5 text-[10px] font-mono font-bold uppercase bg-lux-gold text-stone-950 hover:bg-white rounded-sm flex items-center gap-1">
                           {updating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} {t('admin.saveChanges')}
                         </button>
                       </div>
@@ -282,7 +259,7 @@ export function AdminOrders({
                   <div>
                     <h4 className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 font-bold mb-2">Design Notes</h4>
                     <div className="p-3 border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-[#15110f] rounded-xs text-stone-600 dark:text-stone-300 text-xs font-light leading-relaxed italic">
-                      "{selectedRequest.designStyle}"
+                      &quot;{selectedRequest.designStyle}&quot;
                     </div>
                   </div>
                 )}
