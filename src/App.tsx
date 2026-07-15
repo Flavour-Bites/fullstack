@@ -41,6 +41,21 @@ export default function App() {
     }
   }, [darkMode]);
 
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.user) {
+          setCurrentUser(data.user);
+          localStorage.setItem('flavourbites_user', JSON.stringify(data.user));
+        } else {
+          setCurrentUser(null);
+          localStorage.removeItem('flavourbites_user');
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const navigateTo = (page: PageType) => {
     let targetPage = page;
     if (page === 'orders') targetPage = 'profile';
