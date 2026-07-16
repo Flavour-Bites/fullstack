@@ -5,7 +5,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AdminReviews from './AdminReviews';
 
-const noop = () => Promise.resolve(true);
+const noopVoid = () => Promise.resolve() as unknown as Promise<void>;
+const noopBool = () => Promise.resolve(true);
 
 const sampleReviews = [
   {
@@ -14,7 +15,11 @@ const sampleReviews = [
     rating: 5,
     content: 'Absolutely delicious!',
     eventType: 'Birthday',
+    role: 'customer',
+    userId: null,
+    productId: null,
     date: '2024-12-01',
+    createdAt: '2024-12-01',
   },
   {
     id: 'r2',
@@ -22,7 +27,11 @@ const sampleReviews = [
     rating: 3,
     content: 'It was okay.',
     eventType: 'Wedding',
+    role: 'customer',
+    userId: null,
+    productId: null,
     date: '2024-11-15',
+    createdAt: '2024-11-15',
   },
 ];
 
@@ -32,9 +41,9 @@ describe('AdminReviews', () => {
       <AdminReviews
         reviewItems={[]}
         reviewsLoading={true}
-        handleDeleteReview={noop}
-        handleSaveReview={noop as any}
-        fetchReviews={noop}
+        handleDeleteReview={noopBool}
+        handleSaveReview={noopBool as any}
+        fetchReviews={noopVoid}
       />
     );
     expect(screen.getByText('Reviews (0)')).toBeInTheDocument();
@@ -45,9 +54,9 @@ describe('AdminReviews', () => {
       <AdminReviews
         reviewItems={[]}
         reviewsLoading={false}
-        handleDeleteReview={noop}
-        handleSaveReview={noop as any}
-        fetchReviews={noop}
+        handleDeleteReview={noopBool}
+        handleSaveReview={noopBool as any}
+        fetchReviews={noopVoid}
       />
     );
     expect(screen.getByText(/No reviews/i)).toBeInTheDocument();
@@ -58,9 +67,9 @@ describe('AdminReviews', () => {
       <AdminReviews
         reviewItems={sampleReviews}
         reviewsLoading={false}
-        handleDeleteReview={noop}
-        handleSaveReview={noop as any}
-        fetchReviews={noop}
+        handleDeleteReview={noopBool}
+        handleSaveReview={noopBool as any}
+        fetchReviews={noopVoid}
       />
     );
     expect(screen.getByText('Alice')).toBeInTheDocument();

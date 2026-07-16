@@ -4,7 +4,8 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import AdminUsers from './AdminUsers';
 
-const noop = () => Promise.resolve(true);
+const noopVoid = () => Promise.resolve() as unknown as Promise<void>;
+const noopBool = () => Promise.resolve(true);
 
 const sampleUsers = [
   { id: 'u1', name: 'Alice', email: 'alice@test.com', role: 'admin', telegramId: '1', createdAt: '2024-01-01' },
@@ -22,9 +23,9 @@ describe('AdminUsers', () => {
         usersLoading={false}
         isAdmin={false}
         currentUser={null}
-        saveUserRole={noop}
-        deleteUser={noop}
-        fetchUsers={noop}
+        saveUserRole={noopBool}
+        deleteUser={noopBool}
+        fetchUsers={noopVoid}
       />
     );
     expect(screen.getByText('Admin Access Only')).toBeInTheDocument();
@@ -37,9 +38,9 @@ describe('AdminUsers', () => {
         usersLoading={true}
         isAdmin={true}
         currentUser={currentUser}
-        saveUserRole={noop}
-        deleteUser={noop}
-        fetchUsers={noop}
+        saveUserRole={noopBool}
+        deleteUser={noopBool}
+        fetchUsers={noopVoid}
       />
     );
     expect(container.querySelector('.animate-pulse')).toBeInTheDocument();
@@ -52,9 +53,9 @@ describe('AdminUsers', () => {
         usersLoading={false}
         isAdmin={true}
         currentUser={currentUser}
-        saveUserRole={noop}
-        deleteUser={noop}
-        fetchUsers={noop}
+        saveUserRole={noopBool}
+        deleteUser={noopBool}
+        fetchUsers={noopVoid}
       />
     );
     expect(screen.getByText('Alice')).toBeInTheDocument();

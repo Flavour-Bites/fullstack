@@ -15,7 +15,7 @@ afterEach(() => {
 
 describe('MyOrdersView', () => {
   it('renders page title', () => {
-    render(<MyOrdersView />);
+    render(<MyOrdersView currentUser={{ id: '1', email: 'a@b.com', name: 'Test', role: 'customer' }} />);
     expect(screen.getByText('Order Updates')).toBeInTheDocument();
   });
 });
