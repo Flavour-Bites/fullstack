@@ -51,14 +51,14 @@ describe('Header', () => {
   });
 
   it('shows admin users tab for admin role', () => {
-    const adminUser: User = { id: '1', telegramId: '1', name: 'Admin', role: 'admin' };
+    const adminUser: User = { id: '1', telegramId: '1', name: 'Admin', role: 'admin', createdAt: '2024-01-01' };
     render(<Header {...baseProps} isAdminMode={true} currentUser={adminUser} />);
     expect(screen.getByText('USERS')).toBeInTheDocument();
     expect(screen.getByText('RECOVERY')).toBeInTheDocument();
   });
 
   it('hides users and recovery tabs for staff role', () => {
-    const staffUser: User = { id: '2', telegramId: '2', name: 'Staff', role: 'staff' };
+    const staffUser: User = { id: '2', telegramId: '2', name: 'Staff', role: 'staff', createdAt: '2024-01-01' };
     render(<Header {...baseProps} isAdminMode={true} currentUser={staffUser} />);
     expect(screen.queryByText('USERS')).not.toBeInTheDocument();
     expect(screen.queryByText('RECOVERY')).not.toBeInTheDocument();
@@ -96,7 +96,7 @@ describe('Header', () => {
   });
 
   it('shows user name and initial for logged-in user', () => {
-    const user: User = { id: '1', telegramId: '1', name: 'Test User', role: 'customer' };
+    const user: User = { id: '1', telegramId: '1', name: 'Test User', role: 'customer', createdAt: '2024-01-01' };
     render(<Header {...baseProps} currentUser={user} />);
     expect(screen.getByText('T')).toBeInTheDocument();
     expect(screen.getByText('Test')).toBeInTheDocument();

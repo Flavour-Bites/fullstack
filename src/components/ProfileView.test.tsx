@@ -20,7 +20,7 @@ describe('ProfileView', () => {
   it('renders user profile section', () => {
     render(
       <ToastProvider>
-        <ProfileView currentUser={mockUser} onLogout={vi.fn()} />
+        <ProfileView currentUser={mockUser} onLogout={vi.fn()} onNavigate={vi.fn()} />
       </ToastProvider>
     );
     expect(screen.getByText('Your Account Dashboard')).toBeInTheDocument();

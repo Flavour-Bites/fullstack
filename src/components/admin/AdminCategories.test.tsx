@@ -5,11 +5,12 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AdminCategories from './AdminCategories';
 
-const noop = () => Promise.resolve(true);
+const noopVoid = () => Promise.resolve() as unknown as Promise<void>;
+const noopBool = () => Promise.resolve(true);
 
 const sampleCategories = [
-  { id: 'c1', name: 'Cakes', slug: 'cakes', description: 'All cakes', color: '#000', icon: 'cake', sortOrder: 1, isActive: true },
-  { id: 'c2', name: 'Cupcakes', slug: 'cupcakes', description: 'Mini cakes', color: '#111', icon: 'cupcake', sortOrder: 2, isActive: false },
+  { id: 'c1', name: 'Cakes', slug: 'cakes', description: 'All cakes', color: '#000', icon: 'cake', sortOrder: 1, isActive: true, createdAt: '2024-01-01', updatedAt: '2024-01-01' },
+  { id: 'c2', name: 'Cupcakes', slug: 'cupcakes', description: 'Mini cakes', color: '#111', icon: 'cupcake', sortOrder: 2, isActive: false, createdAt: '2024-01-01', updatedAt: '2024-01-01' },
 ];
 
 describe('AdminCategories', () => {
@@ -18,10 +19,10 @@ describe('AdminCategories', () => {
       <AdminCategories
         categories={[]}
         categoriesLoading={true}
-        handleSaveCategory={noop}
-        handleDeleteCategory={noop}
-        handleToggleCategoryActive={noop as any}
-        fetchCategories={noop}
+        handleSaveCategory={noopBool}
+        handleDeleteCategory={noopBool}
+        handleToggleCategoryActive={noopVoid as any}
+        fetchCategories={noopVoid}
       />
     );
     expect(screen.getByText('Categories (0)')).toBeInTheDocument();
@@ -32,10 +33,10 @@ describe('AdminCategories', () => {
       <AdminCategories
         categories={[]}
         categoriesLoading={false}
-        handleSaveCategory={noop}
-        handleDeleteCategory={noop}
-        handleToggleCategoryActive={noop as any}
-        fetchCategories={noop}
+        handleSaveCategory={noopBool}
+        handleDeleteCategory={noopBool}
+        handleToggleCategoryActive={noopVoid as any}
+        fetchCategories={noopVoid}
       />
     );
     expect(screen.getByText('Categories (0)')).toBeInTheDocument();
@@ -46,10 +47,10 @@ describe('AdminCategories', () => {
       <AdminCategories
         categories={sampleCategories}
         categoriesLoading={false}
-        handleSaveCategory={noop}
-        handleDeleteCategory={noop}
-        handleToggleCategoryActive={noop as any}
-        fetchCategories={noop}
+        handleSaveCategory={noopBool}
+        handleDeleteCategory={noopBool}
+        handleToggleCategoryActive={noopVoid as any}
+        fetchCategories={noopVoid}
       />
     );
     expect(screen.getByText('Categories (2)')).toBeInTheDocument();
