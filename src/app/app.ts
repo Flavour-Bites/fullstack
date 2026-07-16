@@ -16,6 +16,11 @@ export async function registerWebhook() {
     return;
   }
 
+  if (!/^[\x21-\x7E]+$/.test(process.env.TELEGRAM_WEBHOOK_SECRET)) {
+    console.error('[Telegram] TELEGRAM_WEBHOOK_SECRET contains invalid characters. Use only ASCII printable characters (no spaces, quotes, hashes, backslashes). Generate with: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+    return;
+  }
+
   const webhookUrl = `${process.env.APP_URL}/bot/webhook`;
   try {
     const res = await fetchWithTimeout(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/setWebhook`, {
