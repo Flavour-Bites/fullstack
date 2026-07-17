@@ -49,6 +49,9 @@ export async function createApp() {
   app.use(cookieParser());
   app.use(express.json({ limit: '1mb' }));
 
+  // Health check for Render platform monitoring
+  app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+
   app.post(
     '/bot/webhook',
     (req, res, next) => {
