@@ -10,6 +10,7 @@ import reviewsRoutes from '../modules/reviews/reviews.routes.js';
 import statsRoutes from '../modules/stats/stats.routes.js';
 import chatbotRoutes from '../modules/chatbot/chatbot.routes.js';
 import contactRoutes from '../modules/contact/contact.routes.js';
+import seedRoutes from '../modules/seed/seed.routes.js';
 // import paymentRoutes from '../modules/payment/payment.routes.js'; // v2 — Chapa integration
 
 const router = Router();
@@ -26,5 +27,6 @@ router.use('/reviews', reviewsRoutes);
 router.use('/stats', statsRoutes);
 router.use('/chat', chatbotRoutes);
 router.use('/contact', contactRoutes);
+router.use('/seed', seedRoutes);
 
 export default router;
