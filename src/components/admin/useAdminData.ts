@@ -1,5 +1,4 @@
-import { useEffect, useCallback } from 'react';
-import { useState } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import type { Stats } from './types';
 import type { User } from '../../types';
 
