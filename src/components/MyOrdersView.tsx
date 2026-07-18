@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Search, CheckCircle2, Clock, Eye, AlertCircle, RefreshCw, ShoppingBag, ShieldCheck } from 'lucide-react';
+import { Search, AlertCircle, ShoppingBag, ShieldCheck } from 'lucide-react';
 import { t } from '../i18n';
 import { usePageTitle } from '../hooks/usePageTitle';
 
@@ -117,7 +117,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
   const [selectedOrder, setSelectedOrder] = useState<SimulatedOrder | null>(null);
   const [liveOrders, setLiveOrders] = useState<SimulatedOrder[]>([]);
   const [searchError, setSearchError] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   // Load user submitted requests from the Postgres DB and merge with SIMULATED records
   useEffect(() => {
@@ -396,7 +396,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
                   
                   <div className="relative pl-6 space-y-6 border-l-2 border-stone-200 dark:border-stone-800">
                     {selectedOrder.timeline.map((step, idx) => {
-                      const isLast = idx === selectedOrder.timeline.length - 1;
+
                       return (
                         <div key={idx} className="relative">
                           {/* Circle indicator node */}

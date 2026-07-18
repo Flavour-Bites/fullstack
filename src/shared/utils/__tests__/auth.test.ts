@@ -11,8 +11,8 @@ import {
 
 vi.mock('jsonwebtoken', () => ({
   default: {
-    sign: vi.fn((payload, secret, options) => `mock-token-${payload.userId}`),
-    verify: vi.fn((token, secret) => {
+    sign: vi.fn((payload) => `mock-token-${payload.userId}`),
+    verify: vi.fn((token) => {
       if (token === 'valid-token') return { userId: 'usr_123', role: 'customer' };
       if (token === 'admin-token') return { userId: 'usr_001', role: 'admin' };
       throw new Error('invalid token');

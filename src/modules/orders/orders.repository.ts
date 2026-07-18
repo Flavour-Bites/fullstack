@@ -2,7 +2,6 @@ import { getPrisma } from '../../app/config/prisma.js';
 import { makeId } from '../../shared/utils/ids.js';
 import type { OrderStatus } from '@prisma/client';
 import type { OrderActor } from './orders.types.js';
-import { ORDER_WORKFLOW } from './orders.workflow.js';
 
 export const ordersRepository = {
   async create(data: {
@@ -58,7 +57,6 @@ export const ordersRepository = {
   },
 
   async findMany(
-    where: Record<string, unknown> = {},
     includeDeleted = false,
     userId?: string,
     role?: string,

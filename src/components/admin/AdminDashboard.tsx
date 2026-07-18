@@ -3,7 +3,6 @@ import {
   Package, Coins, Clock, Activity, BarChart2, Sparkles,
   Database, Users, Loader2, RefreshCw
 } from 'lucide-react';
-import { useToast } from '../Toast';
 import { t } from '../../i18n';
 import { WORKFLOW } from './types';
 import type { CakeRequest, Stats } from './types';

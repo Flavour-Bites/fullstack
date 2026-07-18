@@ -1,5 +1,3 @@
-import type { OrderStatus, PaymentStatus } from '@prisma/client';
-
 export type OrderActorSource = 'admin_api' | 'staff_api' | 'customer_api' | 'telegram_bot' | 'system';
 
 export type OrderActor = {

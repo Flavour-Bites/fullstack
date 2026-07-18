@@ -41,7 +41,7 @@ vi.mock('../auth.repository.js', () => ({
       if (id === 'usr_123') return Promise.resolve(mockUser);
       return Promise.resolve(null);
     }),
-    updatePassword: vi.fn((id, hash) => Promise.resolve({ ...mockUser, passwordHash: hash })),
+    updatePassword: vi.fn((_, hash) => Promise.resolve({ ...mockUser, passwordHash: hash })),
     toPublic: vi.fn((user) => ({
       id: user.id,
       name: user.name,

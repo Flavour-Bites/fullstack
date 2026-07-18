@@ -1,25 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { User as UserIcon, Search, CheckCircle2, Clock, Eye, AlertCircle, ShoppingBag, ShieldCheck, Mail, Calendar, Sparkles, Building, Settings, Compass, RefreshCw, Send, Loader2 } from 'lucide-react';
-import { User, CustomCakeRequest } from '../types';
+import { User as UserIcon, Search, AlertCircle, ShoppingBag, ShieldCheck, Mail, Calendar, Sparkles, Building, Settings, RefreshCw, Send, Loader2, Clock } from 'lucide-react';
+import { User } from '../types';
 import { useToast } from './Toast';
 import { t } from '../i18n';
 import { usePageTitle } from '../hooks/usePageTitle';
-
-interface SimulatedOrder {
-  id: string;
-  clientName: string;
-  email: string;
-  cakeType: string;
-  eventDate: string;
-  status: string;
-  stepNum: number;
-  tierCount: number;
-  flavor: string;
-  amount: string;
-  details: string;
-  timeline: { title: string; date: string; description: string; done: boolean }[];
-}
 
 // Predefined simulated orders that match sandbox user emails
 const SIMULATED_ORDERS = [

@@ -4,7 +4,6 @@ import {
   Cake, CalendarDays, LogOut, LogIn, User as UserIcon,
   Sun, Moon, HelpCircle, Compass, ShieldCheck, ShoppingBag, Menu, X, Globe
 } from 'lucide-react';
-import { t, setLocale as setI18nLocale } from '../i18n';
 import type { Locale } from '../i18n';
 import type { PageType, User } from '../types';
 

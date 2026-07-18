@@ -51,7 +51,7 @@ vi.mock('../orders.repository.js', () => ({
       return Promise.resolve(null);
     }),
     findMany: vi.fn(() => Promise.resolve([mockOrder])),
-    updateStatus: vi.fn((id, status, actor) =>
+    updateStatus: vi.fn((id, status) =>
       Promise.resolve({ ...mockOrder, id, status }),
     ),
     updateCommercials: vi.fn((id, data) =>
