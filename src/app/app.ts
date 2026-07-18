@@ -4,6 +4,7 @@ import { createServer as createViteServer } from 'vite';
 import { webhookCallback } from 'grammy';
 import { bot } from '../bot/index.js';
 import cookieParser from 'cookie-parser';
+import morgan from 'morgan';
 import { securityConfig } from './config/security.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { verifyTelegramWebhookSecret } from '../integrations/telegram/telegramWebhook.js';
@@ -47,7 +48,11 @@ export async function createApp() {
 
   app.use(securityConfig);
   app.use(cookieParser());
+  app.use(morgan('combined'));
   app.use(express.json({ limit: '1mb' }));
+
+  // Health check for Render platform monitoring
+  app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
   app.post(
     '/bot/webhook',

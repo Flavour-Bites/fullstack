@@ -209,9 +209,9 @@ export const FAQS: FaqItem[] = [
   },
   {
     id: 'faq-02',
-    question: 'What is your deposit and payment policy?',
-    answer: 'A 50% deposit is required to confirm all custom cake orders. The remaining balance is due upon pickup or delivery. We accept payment via Telebirr, CB Birr, or bank transfer to our Commercial Bank of Ethiopia account.',
-    category: 'payment'
+    question: 'How do I confirm my cake order?',
+    answer: 'Once you\'ve submitted your order request, Yodit will review your design specifications and provide a quote. Review, confirm, and we\'ll begin crafting your custom cake. For any questions about the order process, please contact us directly.',
+    category: 'ordering'
   },
   {
     id: 'faq-03',
@@ -222,7 +222,7 @@ export const FAQS: FaqItem[] = [
   {
     id: 'faq-04',
     question: 'Can I cancel or modify my order?',
-    answer: 'Orders can be modified up to 48 hours before the scheduled pickup/delivery date. Cancellations made more than 72 hours in advance receive a full refund of the deposit. Cancellations within 48 hours are non-refundable as we have already begun sourcing ingredients.',
+    answer: 'Orders can be modified up to 48 hours before the scheduled pickup/delivery date. Please contact us directly for any cancellation or modification requests, and we will accommodate where possible.',
     category: 'cancellation'
   },
   {

@@ -54,7 +54,6 @@ describe('statsService.getStats', () => {
     expect(stats.totalOrders).toBe(3);
     expect(stats.totalRevenue).toBe(15000);
     expect(stats.avgOrderValue).toBe(5000);
-    expect(stats.paidOrders).toBe(1);
     expect(stats.avgRating).toBe('4.0');
     expect(stats.totalUsers).toBe(4);
     expect(stats.totalReviews).toBe(3);

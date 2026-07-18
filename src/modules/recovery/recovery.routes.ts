@@ -4,7 +4,7 @@ import { requireAuth } from '../../app/middleware/requireAuth.js';
 import { requireRole } from '../../app/middleware/requireRole.js';
 import { validate } from '../../app/middleware/validate.js';
 import { recoveryCreateSchema, recoveryUpdateSchema } from './recovery.schemas.js';
-import { authLimiter, recoveryLimiter } from '../../app/config/rateLimiter.js';
+import { recoveryLimiter } from '../../app/config/rateLimiter.js';
 
 const router = Router();
 

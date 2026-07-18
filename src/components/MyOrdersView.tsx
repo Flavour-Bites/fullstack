@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Search, CheckCircle2, Clock, Eye, AlertCircle, RefreshCw, ShoppingBag, ShieldCheck, CreditCard, Loader2 } from 'lucide-react';
+import { Search, AlertCircle, ShoppingBag, ShieldCheck } from 'lucide-react';
 import { t } from '../i18n';
 import { usePageTitle } from '../hooks/usePageTitle';
 
@@ -17,9 +17,6 @@ interface SimulatedOrder {
   amount: string;
   details: string;
   timeline: { title: string; date: string; description: string; done: boolean }[];
-  depositAmount?: number;
-  remainingBalance?: number;
-  paymentStatus?: string;
 }
 
 const SIMULATED_ORDERS: SimulatedOrder[] = [
@@ -120,8 +117,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
   const [selectedOrder, setSelectedOrder] = useState<SimulatedOrder | null>(null);
   const [liveOrders, setLiveOrders] = useState<SimulatedOrder[]>([]);
   const [searchError, setSearchError] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [payingOrderId, setPayingOrderId] = useState<string | null>(null);
+  const [, setLoading] = useState(true);
 
   // Load user submitted requests from the Postgres DB and merge with SIMULATED records
   useEffect(() => {
@@ -160,9 +156,6 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
             flavor: item.flavor || 'Bespoke Assortment',
             amount: amountEtb,
             details: item.designStyle || 'Custom cake studio creation requested.',
-            depositAmount: item.depositAmount || 0,
-            remainingBalance: item.remainingBalance || 0,
-            paymentStatus: item.paymentStatus || 'unpaid',
             timeline: [
               { title: 'Inquiry Received', date: item.requestDate || 'Just Now', description: 'Your request has been filed in Yodit\'s review queue!', done: true },
               { title: 'Aesthetic Concept Design', date: 'Studio Stage', description: 'Yodit reviews your specs to draft a visual layout.', done: stepNumber >= 2 },
@@ -228,27 +221,6 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
     } else {
       setSelectedOrder(null);
       setSearchError(true);
-    }
-  };
-
-  const handlePayNow = async (orderId: string) => {
-    setPayingOrderId(orderId);
-    try {
-      const res = await fetch('/api/payments/initiate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId }),
-      });
-      const data = await res.json();
-      if (data.success && data.checkoutUrl) {
-        window.open(data.checkoutUrl, '_blank');
-      } else {
-        alert(data.error || 'Payment initiation failed.');
-      }
-    } catch (e: any) {
-      alert('Payment error. Please try again.');
-    } finally {
-      setPayingOrderId(null);
     }
   };
 
@@ -418,49 +390,13 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
                   <p className="text-xs text-stone-650 dark:text-stone-300 font-light leading-relaxed font-sans">{selectedOrder.details}</p>
                 </div>
 
-                {/* Payment Status */}
-                {selectedOrder.amount && selectedOrder.amount !== 'Pending Price' && (
-                  <div className="bg-stone-50 dark:bg-stone-900/40 p-4 border border-stone-200/60 dark:border-stone-850 rounded-sm text-left space-y-3">
-                    <span className="text-[9px] uppercase tracking-[0.15em] text-stone-400 dark:text-stone-400 font-mono font-semibold block">Payment</span>
-                    <div className="grid grid-cols-3 gap-3 text-xs">
-                      <div>
-                        <span className="text-[9px] uppercase text-stone-400 dark:text-stone-500 font-mono block">Total</span>
-                        <span className="font-semibold text-stone-800 dark:text-stone-200 font-mono">{selectedOrder.amount}</span>
-                      </div>
-                      <div>
-                        <span className="text-[9px] uppercase text-stone-400 dark:text-stone-500 font-mono block">Deposit</span>
-                        <span className="font-semibold text-stone-800 dark:text-stone-200 font-mono">{selectedOrder.depositAmount?.toLocaleString() || '0'} ETB</span>
-                      </div>
-                      <div>
-                        <span className="text-[9px] uppercase text-stone-400 dark:text-stone-500 font-mono block">Balance</span>
-                        <span className="font-semibold text-stone-800 dark:text-stone-200 font-mono">{selectedOrder.remainingBalance?.toLocaleString() || '0'} ETB</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between pt-2 border-t border-stone-200 dark:border-stone-800">
-                      <span className={`text-[10px] font-mono font-bold uppercase ${selectedOrder.paymentStatus === 'paid' ? 'text-emerald-500' : selectedOrder.paymentStatus === 'partial' ? 'text-amber-500' : 'text-stone-500'}`}>
-                        {selectedOrder.paymentStatus === 'paid' ? '✅ Paid in Full' : selectedOrder.paymentStatus === 'partial' ? '⚠️ Partially Paid' : '⏳ Unpaid'}
-                      </span>
-                      {selectedOrder.paymentStatus && selectedOrder.paymentStatus !== 'paid' && (
-                        <button
-                          onClick={() => handlePayNow(selectedOrder.id)}
-                          disabled={payingOrderId === selectedOrder.id}
-                          className="px-4 py-3 bg-lux-gold text-stone-950 font-mono text-[10px] uppercase font-bold tracking-wider rounded-sm flex items-center gap-1.5 hover:bg-white transition-all cursor-pointer disabled:opacity-50"
-                        >
-                          {payingOrderId === selectedOrder.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CreditCard className="w-3 h-3" />}
-                          Pay Now
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )}
-
                 {/* Visual Blueprint Steps Map - Accordion timeline */}
                 <div className="space-y-4 pt-4 border-t border-stone-100 dark:border-stone-800 text-left">
                   <span className="text-[9px] uppercase tracking-[0.15em] text-stone-400 dark:text-stone-400 font-mono font-semibold block">Artisan Handcraft milestones</span>
                   
                   <div className="relative pl-6 space-y-6 border-l-2 border-stone-200 dark:border-stone-800">
                     {selectedOrder.timeline.map((step, idx) => {
-                      const isLast = idx === selectedOrder.timeline.length - 1;
+
                       return (
                         <div key={idx} className="relative">
                           {/* Circle indicator node */}
@@ -496,7 +432,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
                 <div className="p-4 bg-stone-100 dark:bg-stone-900/60 border-l-2 border-lux-gold text-stone-800 dark:text-white text-[11px] rounded-xs font-sans leading-relaxed tracking-normal flex items-start gap-2.5">
                   <ShieldCheck className="w-4 h-4 text-lux-gold shrink-0 mt-0.5" />
                   <p className="font-light text-stone-600 dark:text-stone-300">
-                    <strong>Need to request changes or cancel?</strong> Sub-city reschedules must be done at least <strong className="text-white">5 days before</strong> the date to use the deposit as sandbox store credits.
+                    <strong>Need to request changes or cancel?</strong> Reschedules must be requested at least <strong className="text-white">5 days before</strong> the scheduled date.
                   </p>
                 </div>
               </div>

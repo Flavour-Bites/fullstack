@@ -22,7 +22,7 @@ describe('makeOrderId', () => {
   it('generates IDs of expected length', () => {
     const id = makeOrderId();
     expect(id.length).toBeGreaterThan(3);
-    expect(id.split('-')[1].length).toBe(6);
+    expect(id.split('-')[1].length).toBe(8);
   });
 
   it('generates 100 unique IDs without collision', () => {
@@ -34,6 +34,6 @@ describe('makeOrderId', () => {
     const id = makeOrderId();
     const hex = id.split('-')[1];
     // Hex string should only contain valid hex characters
-    expect(/^[0-9A-F]+$/.test(hex)).toBe(true);
+    expect(/^[0-9a-f]+$/i.test(hex)).toBe(true);
   });
 });

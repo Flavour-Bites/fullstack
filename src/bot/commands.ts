@@ -4,6 +4,7 @@ import { createOrder } from "../modules/orders/orders.operations.js";
 import { notifyStaffNewOrder } from "../integrations/telegram/telegramNotifications.js";
 import { getConversationStore } from "../integrations/redis/conversationState.js";
 import { formatRequestDate } from "../shared/utils/dateFormat.js";
+import { makeOrderId } from "../shared/utils/ids.js";
 
 interface OrderConversation {
     step: string;
@@ -339,7 +340,7 @@ export function handleCommands(bot: Bot) {
                 conv.specialInstructions = text === "none" ? "" : text;
                 conv.step = "done";
 
-                const requestId = `FB-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+                const requestId = makeOrderId();
                 const requestDate = formatRequestDate();
 
                 const order = await createOrder(

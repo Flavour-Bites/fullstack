@@ -62,7 +62,6 @@ export const ordersService = {
 
   async findAll(params: { includeDeleted?: boolean; userId?: string; role?: string }) {
     return ordersRepository.findMany(
-      {},
       params.includeDeleted || false,
       params.userId,
       params.role,

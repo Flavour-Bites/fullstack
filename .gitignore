@@ -17,3 +17,4 @@ coverage/
 *.har
 *.jsonl
 *skills*
+graphify-out/

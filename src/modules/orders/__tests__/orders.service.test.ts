@@ -51,7 +51,7 @@ vi.mock('../orders.repository.js', () => ({
       return Promise.resolve(null);
     }),
     findMany: vi.fn(() => Promise.resolve([mockOrder])),
-    updateStatus: vi.fn((id, status, actor) =>
+    updateStatus: vi.fn((id, status) =>
       Promise.resolve({ ...mockOrder, id, status }),
     ),
     updateCommercials: vi.fn((id, data) =>
@@ -75,11 +75,6 @@ vi.mock('../orders.workflow.js', () => ({
     if (!Number.isFinite(parsed)) return null;
     return Math.round(parsed);
   }),
-  calculatePaymentState: vi.fn((input) => ({
-    depositAmount: input.depositAmount ?? 0,
-    remainingBalance: (input.finalPrice ?? 0) - (input.depositAmount ?? 0),
-    paymentStatus: 'unpaid',
-  })),
 }));
 
 vi.mock('../../../integrations/telegram/telegramNotifications.js', () => ({
