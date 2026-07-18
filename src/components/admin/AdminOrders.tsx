@@ -14,7 +14,7 @@ interface AdminOrdersProps {
   loading: boolean;
   refreshing: boolean;
   handleDeleteRequest: (id: string, name: string) => Promise<boolean | undefined>;
-  saveRequestUpdates: (id: string, name: string, editStatus: string, editCost: number, editDeposit: number) => Promise<boolean | undefined>;
+  saveRequestUpdates: (id: string, name: string, editStatus: string, editCost: number) => Promise<boolean | undefined>;
   advanceStatus: (req: CakeRequest, next: string) => Promise<boolean | undefined>;
 }
 
@@ -25,7 +25,6 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editStatus, setEditStatus] = useState('');
   const [editCost, setEditCost] = useState(0);
-  const [editDeposit, setEditDeposit] = useState(0);
   const [updating, setUpdating] = useState(false);
 
   const filteredRequests = requests.filter(r => {
@@ -42,12 +41,11 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
     setEditingId(req.id);
     setEditStatus(req.status);
     setEditCost(req.finalPrice ?? req.quotedPrice ?? 0);
-    setEditDeposit(req.depositAmount ?? 0);
   };
 
   const handleSave = async (id: string, name: string) => {
     setUpdating(true);
-    await saveRequestUpdates(id, name, editStatus, editCost, editDeposit);
+    await saveRequestUpdates(id, name, editStatus, editCost);
     if (selectedRequest?.id === id) {
       setSelectedRequest({ ...selectedRequest, status: editStatus, quotedPrice: editCost });
     }
@@ -191,10 +189,6 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
                           <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.quotedPrice')}</label>
                           <input type="number" value={editCost} onChange={e => setEditCost(Math.max(0, Number(e.target.value)))} className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
                         </div>
-                        <div>
-                          <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">Deposit (ETB)</label>
-                          <input type="number" value={editDeposit} onChange={e => setEditDeposit(Math.max(0, Number(e.target.value)))} className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
-                        </div>
                       </div>
                       <div className="flex justify-end gap-2">
                         <button onClick={() => setEditingId(null)} className="px-3 py-1.5 text-[10px] font-mono font-bold uppercase bg-stone-200 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:bg-stone-300 dark:hover:bg-stone-700 rounded-sm">{t('admin.cancelEdit')}</button>
@@ -290,27 +284,12 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
                       </button>
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-3 text-left">
+                  <div className="grid grid-cols-1 gap-3 text-left">
                     <div className="bg-stone-100 dark:bg-[#15110f] p-2.5 border border-stone-200 dark:border-stone-800 rounded-xs">
-                      <span className="text-[8px] uppercase font-mono text-stone-400 dark:text-stone-400 block">Deposit</span>
-                      <span className="text-xs font-mono font-bold text-stone-700 dark:text-stone-200">{selectedRequest.depositAmount.toLocaleString()} ETB</span>
-                    </div>
-                    <div className="bg-stone-100 dark:bg-[#15110f] p-2.5 border border-stone-200 dark:border-stone-800 rounded-xs">
-                      <span className="text-[8px] uppercase font-mono text-stone-400 dark:text-stone-400 block">Balance</span>
-                      <span className="text-xs font-mono font-bold text-stone-700 dark:text-stone-200">{selectedRequest.remainingBalance.toLocaleString()} ETB</span>
-                    </div>
-                    <div className="bg-stone-100 dark:bg-[#15110f] p-2.5 border border-stone-200 dark:border-stone-800 rounded-xs">
-                      <span className="text-[8px] uppercase font-mono text-stone-400 dark:text-stone-400 block">Status</span>
-                      <span className={`text-[10px] font-mono font-bold uppercase ${selectedRequest.paymentStatus === 'paid' ? 'text-emerald-400' : selectedRequest.paymentStatus === 'partial' ? 'text-amber-400' : 'text-stone-500'}`}>
-                        {selectedRequest.paymentStatus}
-                      </span>
+                      <span className="text-[8px] uppercase font-mono text-stone-400 dark:text-stone-400 block">Quoted Price</span>
+                      <span className="text-xs font-mono font-bold text-stone-700 dark:text-stone-200">{orderPrice(selectedRequest) ? `${orderPrice(selectedRequest).toLocaleString()} ETB` : 'Not quoted'}</span>
                     </div>
                   </div>
-                  {selectedRequest.depositPaidAt && (
-                    <div className="text-[9px] font-mono text-stone-400 dark:text-stone-500">
-                      Deposit paid: {new Date(selectedRequest.depositPaidAt).toLocaleDateString()}
-                    </div>
-                  )}
                 </div>
               </div>
             </motion.div>

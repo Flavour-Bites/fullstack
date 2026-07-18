@@ -51,35 +51,12 @@ export default function RequestFormView({
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [estimatedCost, setEstimatedCost] = useState(0);
   const [dbConnected, setDbConnected] = useState<boolean | null>(null);
-  const [isSeeding, setIsSeeding] = useState(false);
   const [valError, setValError] = useState<string | null>(null);
-  const [seedError, setSeedError] = useState<string | null>(null);
   const [dateError, setDateError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const handleSeed = async () => {
-    setIsSeeding(true);
-    setSeedError(null);
-    try {
-      const res = await fetch('/api/seed', { method: 'POST' });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success) {
-          fetchRequests();
-        } else {
-          setSeedError('Failed to seed: ' + (data.error || 'Server error'));
-        }
-      } else {
-        setSeedError('Could not contact seed API endpoint.');
-      }
-    } catch (err: any) {
-      setSeedError('Error seeding database: ' + err.message);
-    } finally {
-      setIsSeeding(false);
-    }
-  };
 
   // Helper to calculate the 48-hour advance notice minimum date
   const getMinDateString = () => {
@@ -147,9 +124,6 @@ export default function RequestFormView({
             requestDate: 'June 18, 2026',
             status: 'Designing',
             quotedPrice: 11500,
-            depositAmount: 0,
-            remainingBalance: 0,
-            paymentStatus: 'unpaid',
           },
           {
             id: 'FB-9231B',
@@ -167,9 +141,6 @@ export default function RequestFormView({
             requestDate: 'June 19, 2026',
             status: 'Quoted',
             quotedPrice: 2800,
-            depositAmount: 0,
-            remainingBalance: 0,
-            paymentStatus: 'unpaid',
           }
         ];
         localStorage.setItem('fb_request_commissions', JSON.stringify(defaultRequests));
@@ -318,9 +289,6 @@ export default function RequestFormView({
       requestDate: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
       status: 'Received',
       referenceImage: uploadedImageUrl || fileAttached || undefined,
-      depositAmount: 0,
-      remainingBalance: 0,
-      paymentStatus: 'unpaid',
     };
 
     let savedOnBackend = false;
@@ -826,27 +794,6 @@ export default function RequestFormView({
               <h2 className="text-2xl font-serif text-warm-950 dark:text-stone-100">{t('order.trackRequests')}</h2>
               <p className="text-xs text-stone-500 dark:text-stone-400 font-light mt-1 mb-3 font-sans">See live progress updates, design status, and custom price bids.</p>
 
-              {dbConnected && (
-                <div className="space-y-2">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-sm border bg-emerald-50/80 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900 text-emerald-800 dark:text-emerald-300 text-[10px] font-mono tracking-wider">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      <span>{t('order.databaseActive')}</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleSeed}
-                      disabled={isSeeding}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm border border-lux-gold bg-stone-900 dark:bg-stone-800 text-lux-gold hover:bg-lux-gold hover:text-stone-950 text-[9px] uppercase font-mono tracking-widest font-semibold transition-all duration-200 disabled:opacity-50 cursor-pointer"
-                    >
-                      {isSeeding ? t('order.seeding') : t('order.seedData')}
-                    </button>
-                  </div>
-                  {seedError && (
-                    <p className="text-[10px] text-red-600 font-mono mt-1">{seedError}</p>
-                  )}
-                </div>
-              )}
               {dbConnected === false && (
                 <div className="inline-flex flex-col sm:flex-row sm:items-center gap-x-2.5 gap-y-1.5 px-3.5 py-2.5 rounded-sm border bg-amber-50/50 dark:bg-amber-950/15 border-amber-250 dark:border-amber-900/50 text-amber-900 dark:text-amber-300 text-[10.5px] font-mono tracking-wider max-w-xl">
                   <div className="flex items-center gap-1.5 shrink-0">

@@ -1,8 +1,8 @@
 import { getPrisma } from '../../app/config/prisma.js';
 import { makeId } from '../../shared/utils/ids.js';
-import type { OrderStatus, PaymentStatus } from '@prisma/client';
+import type { OrderStatus } from '@prisma/client';
 import type { OrderActor } from './orders.types.js';
-import { ORDER_WORKFLOW, calculatePaymentState } from './orders.workflow.js';
+import { ORDER_WORKFLOW } from './orders.workflow.js';
 
 export const ordersRepository = {
   async create(data: {
@@ -47,8 +47,6 @@ export const ordersRepository = {
         referenceImageBytes: data.referenceImageBytes ?? null,
         requestDate: data.requestDate,
         status: 'Received',
-        remainingBalance: 0,
-        paymentStatus: 'unpaid',
       },
       include: { user: true },
     });
@@ -150,11 +148,6 @@ export const ordersRepository = {
         input.depositAmount !== undefined
           ? input.depositAmount
           : current.depositAmount;
-      const payment = calculatePaymentState({
-        finalPrice: nextFinalPrice ?? 0,
-        depositAmount: nextDeposit ?? 0,
-      });
-      const paymentStatus = payment.paymentStatus as PaymentStatus;
 
       return tx.customCakeRequest.update({
         where: { id: orderId },
@@ -163,9 +156,8 @@ export const ordersRepository = {
           ...(input.finalPrice !== undefined ? { finalPrice: input.finalPrice } : {}),
           ...(input.priceConfirmedAt !== undefined ? { priceConfirmedAt: input.priceConfirmedAt } : {}),
           ...(input.depositPaidAt !== undefined ? { depositPaidAt: input.depositPaidAt } : {}),
-          depositAmount: payment.depositAmount,
-          remainingBalance: payment.remainingBalance,
-          paymentStatus,
+          depositAmount: nextDeposit,
+          remainingBalance: Math.max((nextFinalPrice ?? 0) - (nextDeposit ?? 0), 0),
         },
       });
     });

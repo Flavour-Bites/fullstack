@@ -11,13 +11,11 @@ const baseProps = {
   requests: [],
   stats: null,
   loading: false,
-  seeding: false,
   refreshing: false,
   totalRevenue: 0,
   pendingCount: 0,
   activeCount: 0,
   isAdmin: true,
-  handleDatabaseSeed: noop,
   fetchRequests: noop,
   fetchStats: noop,
 };
@@ -45,12 +43,4 @@ describe('AdminDashboard', () => {
     expect(values.length).toBeGreaterThanOrEqual(3);
   });
 
-  it('shows seed demo data button for admin', () => {
-    render(
-      <ToastProvider>
-        <AdminDashboard {...baseProps} />
-      </ToastProvider>
-    );
-    expect(screen.getByText('Seed Demo Data')).toBeInTheDocument();
-  });
 });

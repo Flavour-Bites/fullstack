@@ -12,13 +12,11 @@ interface AdminDashboardProps {
   requests: CakeRequest[];
   stats: Stats | null;
   loading: boolean;
-  seeding: boolean;
   refreshing: boolean;
   totalRevenue: number;
   pendingCount: number;
   activeCount: number;
   isAdmin: boolean;
-  handleDatabaseSeed: () => Promise<void>;
   fetchRequests: (silent?: boolean) => Promise<void>;
   fetchStats: () => Promise<void>;
 }
@@ -27,13 +25,11 @@ export function AdminDashboard({
   requests,
   stats,
   loading,
-  seeding,
   refreshing,
   totalRevenue,
   pendingCount,
   activeCount,
   isAdmin,
-  handleDatabaseSeed,
   fetchRequests,
   fetchStats,
 }: AdminDashboardProps) {
@@ -139,14 +135,6 @@ export function AdminDashboard({
               ))}
             </div>
             <div className="flex gap-2 pt-1">
-              <button
-                onClick={handleDatabaseSeed}
-                disabled={seeding}
-                className="px-3 py-1.5 bg-lux-gold text-stone-950 hover:bg-white text-[9px] uppercase font-mono font-bold tracking-widest rounded-sm flex items-center gap-1.5 transition-all cursor-pointer"
-              >
-                {seeding ? <Loader2 className="w-3 h-3 animate-spin" /> : <Database className="w-3 h-3" />}
-                Seed Demo Data
-              </button>
               <button
                 onClick={() => { fetchRequests(); fetchStats(); }}
                 disabled={refreshing}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Package, Image, Layers, Users, ShieldCheck, Star,
-  BarChart2, RefreshCw, Download, Database, Loader2
+  BarChart2, RefreshCw, Download, Loader2
 } from 'lucide-react';
 import { useToast } from './Toast';
 import { t } from '../i18n';
@@ -42,7 +42,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
   const setCurrentTab = onTabChange || setInternalTab;
 
   const admin = useAdminData(currentUser || null);
-  const { requests, loading, refreshing, seeding, isAdmin, stats, totalRevenue, pendingCount, activeCount } = admin;
+  const { requests, loading, refreshing, isAdmin, stats, totalRevenue, pendingCount, activeCount } = admin;
 
   useEffect(() => {
     if (currentTab === 'users' && isAdmin) admin.fetchUsers();
@@ -95,17 +95,6 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
             <Download className="w-3.5 h-3.5" />
             {t('admin.exportCSV')}
           </button>
-
-          {isAdmin && (
-            <button
-              onClick={admin.handleDatabaseSeed}
-              disabled={seeding}
-              className="px-4 py-2.5 bg-lux-gold/10 hover:bg-lux-gold text-lux-gold hover:text-stone-950 border border-lux-gold/25 hover:border-lux-gold rounded-sm font-mono text-[10px] uppercase font-bold tracking-wider flex items-center gap-2 transition-all cursor-pointer"
-            >
-              {seeding ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Database className="w-3.5 h-3.5" />}
-              Seed Demo Data
-            </button>
-          )}
         </div>
       </div>
 
@@ -136,13 +125,11 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
             requests={requests}
             stats={stats}
             loading={loading}
-            seeding={seeding}
             refreshing={refreshing}
             totalRevenue={totalRevenue}
             pendingCount={pendingCount}
             activeCount={activeCount}
             isAdmin={isAdmin}
-            handleDatabaseSeed={admin.handleDatabaseSeed}
             fetchRequests={admin.fetchRequests}
             fetchStats={admin.fetchStats}
           />

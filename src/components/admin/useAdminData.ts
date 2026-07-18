@@ -12,7 +12,6 @@ export function useAdminData(currentUser: User | null) {
   const [requests, setRequests] = useState<CakeRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [seeding, setSeeding] = useState(false);
 
   // Users state (admin only)
   const [users, setUsers] = useState<SystemUser[]>([]);
@@ -116,20 +115,6 @@ export function useAdminData(currentUser: User | null) {
   }, [recoveryStatusFilter]);
 
   // ── Order Actions ──────────────────────────────────────────
-  const handleDatabaseSeed = useCallback(async () => {
-    setSeeding(true);
-    try {
-      const res = await fetch('/api/seed', { method: 'POST' });
-      const data = await res.json();
-      if (data.success) {
-        showToast('Database Seeded', `Added ${data.seededRequests} orders and ${data.seededGalleryItems} menu items.`, 'success');
-        fetchRequests(true); fetchStats();
-      } else throw new Error(data.error);
-    } catch (e: any) {
-      showToast('Seeding Failed', e.message, 'error');
-    } finally { setSeeding(false); }
-  }, []);
-
   const handleDeleteRequest = useCallback(async (id: string, name: string) => {
     if (!window.confirm(`Delete order from ${name}? This cannot be undone.`)) return;
     try {
@@ -144,11 +129,10 @@ export function useAdminData(currentUser: User | null) {
     return false;
   }, []);
 
-  const saveRequestUpdates = useCallback(async (id: string, name: string, editStatus: string, editCost: number, editDeposit: number) => {
+  const saveRequestUpdates = useCallback(async (id: string, name: string, editStatus: string, editCost: number) => {
     try {
       const body: Record<string, any> = { status: editStatus };
       if (editCost > 0) body.quotedPrice = editCost;
-      if (editDeposit > 0) body.depositAmount = editDeposit;
       const res = await fetch(`/api/requests/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -394,7 +378,7 @@ export function useAdminData(currentUser: User | null) {
 
   return {
     // State
-    requests, loading, refreshing, seeding, users, usersLoading,
+    requests, loading, refreshing, users, usersLoading,
     galleryItems, galleryLoading, stats, categories, categoriesLoading,
     reviewItems, reviewsLoading, recoveryRequests, recoveryLoading, recoveryStatusFilter,
     // Derived
@@ -404,7 +388,7 @@ export function useAdminData(currentUser: User | null) {
     fetchRequests, fetchUsers, fetchGallery, fetchStats,
     fetchCategories, fetchReviews, fetchRecoveryRequests, setRecoveryStatusFilter,
     // Actions
-    handleDatabaseSeed, handleDeleteRequest, saveRequestUpdates, advanceStatus,
+    handleDeleteRequest, saveRequestUpdates, advanceStatus,
     saveUserRole, deleteUser,
     handleSaveCategory, handleDeleteCategory, handleToggleCategoryActive,
     handleDeleteReview, handleSaveReview,
