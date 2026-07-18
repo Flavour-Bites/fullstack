@@ -8,12 +8,12 @@ export function useAdminData(currentUser: User | null) {
   // Stats
   const [stats, setStats] = useState<Stats | null>(null);
 
-  const fetchStats = useCallback(async () => {
+  const fetchStats = useCallback(async () => {  
     try {
       const res = await fetch('/api/stats');
       const data = await res.json();
       if (data.success) setStats(data.stats);
-    } catch (e) { /* ignore */ }
+    } catch { /* ignore */ }
   }, []);
 
   useEffect(() => { fetchStats(); }, []);
