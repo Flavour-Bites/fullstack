@@ -10,6 +10,7 @@ import { useRecovery } from '../hooks/useRecovery';
 import { useReviews } from '../hooks/useReviews';
 import { useCategories } from '../hooks/useCategories';
 import { useGallery } from '../hooks/useGallery';
+import { useUsers } from '../hooks/useUsers';
 import { useAdminData } from './admin/useAdminData';
 import { AdminDashboard } from './admin/AdminDashboard';
 import AdminOrders from './admin/AdminOrders';
@@ -50,10 +51,11 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
   const reviews = useReviews();
   const categories = useCategories();
   const gallery = useGallery();
+  const usersPage = useUsers();
   const { requests, loading, refreshing, isAdmin, stats, totalRevenue, pendingCount, activeCount } = admin;
 
   useEffect(() => {
-    if (currentTab === 'users' && isAdmin) admin.fetchUsers();
+    if (currentTab === 'users' && isAdmin) usersPage.fetchUsers();
     if (currentTab === 'menu') gallery.fetchGallery();
     if (currentTab === 'categories') { categories.fetchCategories(); gallery.fetchGallery(); }
     if (currentTab === 'reviews') reviews.fetchReviews();
@@ -187,13 +189,13 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
 
         {currentTab === 'users' && (
           <AdminUsers
-            users={admin.users}
-            usersLoading={admin.usersLoading}
+            users={usersPage.users}
+            usersLoading={usersPage.usersLoading}
             isAdmin={isAdmin}
             currentUser={currentUser || null}
-            saveUserRole={admin.saveUserRole}
-            deleteUser={admin.deleteUser}
-            fetchUsers={admin.fetchUsers}
+            saveUserRole={usersPage.saveUserRole}
+            deleteUser={usersPage.deleteUser}
+            fetchUsers={usersPage.fetchUsers}
           />
         )}
 
