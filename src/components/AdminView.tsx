@@ -3,7 +3,6 @@ import {
   Package, Image, Layers, Users, ShieldCheck, Star,
   BarChart2, RefreshCw, Download, Loader2
 } from 'lucide-react';
-import { useToast } from './Toast';
 import { t } from '../i18n';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useRecovery } from '../hooks/useRecovery';
@@ -11,6 +10,7 @@ import { useReviews } from '../hooks/useReviews';
 import { useCategories } from '../hooks/useCategories';
 import { useGallery } from '../hooks/useGallery';
 import { useUsers } from '../hooks/useUsers';
+import { useOrders } from '../hooks/useOrders';
 import { useAdminData } from './admin/useAdminData';
 import { AdminDashboard } from './admin/AdminDashboard';
 import AdminOrders from './admin/AdminOrders';
@@ -40,7 +40,7 @@ const TABS = [
 
 export default function AdminView({ activeTab, onTabChange, currentUser }: AdminViewProps) {
   usePageTitle("Admin");
-  const { showToast } = useToast();
+
 
   const [internalTab, setInternalTab] = useState<'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users' | 'recovery'>('dashboard');
   const currentTab = activeTab || internalTab;
@@ -52,7 +52,9 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
   const categories = useCategories();
   const gallery = useGallery();
   const usersPage = useUsers();
-  const { requests, loading, refreshing, isAdmin, stats, totalRevenue, pendingCount, activeCount } = admin;
+  const orders = useOrders(() => admin.fetchStats());
+  const { isAdmin, stats } = admin;
+  const { requests, loading, refreshing, totalRevenue, pendingCount, activeCount } = orders;
 
   useEffect(() => {
     if (currentTab === 'users' && isAdmin) usersPage.fetchUsers();
@@ -62,7 +64,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
     if (currentTab === 'recovery' && isAdmin) recovery.fetchRecoveryRequests();
   }, [currentTab]);
 
-  const refreshAll = () => { admin.fetchRequests(); admin.fetchStats(); };
+  const refreshAll = () => { orders.fetchRequests(); admin.fetchStats(); };
 
   return (
     <div className="bg-stone-50 dark:bg-[#171412] dark:text-stone-100 min-h-screen py-16 px-4 sm:px-6 relative selection:bg-lux-gold/30 selection:text-white dark:selection:text-white">
@@ -140,7 +142,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
             pendingCount={pendingCount}
             activeCount={activeCount}
             isAdmin={isAdmin}
-            fetchRequests={admin.fetchRequests}
+            fetchRequests={orders.fetchRequests}
             fetchStats={admin.fetchStats}
           />
         )}
@@ -150,9 +152,9 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
             requests={requests}
             loading={loading}
             refreshing={refreshing}
-            handleDeleteRequest={admin.handleDeleteRequest}
-            saveRequestUpdates={admin.saveRequestUpdates}
-            advanceStatus={admin.advanceStatus}
+            handleDeleteRequest={orders.handleDeleteRequest}
+            saveRequestUpdates={orders.saveRequestUpdates}
+            advanceStatus={orders.advanceStatus}
           />
         )}
 
