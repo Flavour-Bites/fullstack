@@ -32,11 +32,6 @@ export function useAdminData(currentUser: User | null) {
   const [reviewItems, setReviewItems] = useState<ReviewItem[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
 
-  // Recovery state
-  const [recoveryRequests, setRecoveryRequests] = useState<any[]>([]);
-  const [recoveryLoading, setRecoveryLoading] = useState(false);
-  const [recoveryStatusFilter, setRecoveryStatusFilter] = useState('all');
-
   // ── Data Fetching ──────────────────────────────────────────
   const fetchRequests = useCallback(async (silent = false) => {
     if (!silent) setRefreshing(true);
@@ -102,17 +97,6 @@ export function useAdminData(currentUser: User | null) {
     } catch (e) { /* ignore */ }
     finally { setReviewsLoading(false); }
   }, []);
-
-  const fetchRecoveryRequests = useCallback(async () => {
-    setRecoveryLoading(true);
-    try {
-      const url = recoveryStatusFilter === 'all' ? '/api/recovery' : `/api/recovery?status=${recoveryStatusFilter}`;
-      const res = await fetch(url);
-      const data = await res.json();
-      if (data.success) setRecoveryRequests(data.requests || []);
-    } catch (e) { /* ignore */ }
-    finally { setRecoveryLoading(false); }
-  }, [recoveryStatusFilter]);
 
   // ── Order Actions ──────────────────────────────────────────
   const handleDeleteRequest = useCallback(async (id: string, name: string) => {
@@ -350,24 +334,6 @@ export function useAdminData(currentUser: User | null) {
     return false;
   }, []);
 
-  // ── Recovery Actions ────────────────────────────────────
-  const handleRecoveryStatus = useCallback(async (id: string, status: string) => {
-    try {
-      const res = await fetch(`/api/recovery/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        showToast('Recovery Updated', `Request ${status}.`, 'success');
-        fetchRecoveryRequests();
-      } else throw new Error(data.error);
-    } catch (e: any) {
-      showToast('Update Failed', e.message, 'error');
-    }
-  }, []);
-
   // ── Effects ────────────────────────────────────────────────
   useEffect(() => { fetchRequests(true); fetchStats(); }, []);
 
@@ -380,19 +346,18 @@ export function useAdminData(currentUser: User | null) {
     // State
     requests, loading, refreshing, users, usersLoading,
     galleryItems, galleryLoading, stats, categories, categoriesLoading,
-    reviewItems, reviewsLoading, recoveryRequests, recoveryLoading, recoveryStatusFilter,
+    reviewItems, reviewsLoading,
     // Derived
     totalRevenue, pendingCount, activeCount,
     isAdmin,
     // Fetch
     fetchRequests, fetchUsers, fetchGallery, fetchStats,
-    fetchCategories, fetchReviews, fetchRecoveryRequests, setRecoveryStatusFilter,
+    fetchCategories, fetchReviews,
     // Actions
     handleDeleteRequest, saveRequestUpdates, advanceStatus,
     saveUserRole, deleteUser,
     handleSaveCategory, handleDeleteCategory, handleToggleCategoryActive,
     handleDeleteReview, handleSaveReview,
     handleSaveGalleryItem, handleDeleteGalleryItem,
-    handleRecoveryStatus,
   };
 }

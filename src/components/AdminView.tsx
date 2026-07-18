@@ -6,6 +6,7 @@ import {
 import { useToast } from './Toast';
 import { t } from '../i18n';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { useRecovery } from '../hooks/useRecovery';
 import { useAdminData } from './admin/useAdminData';
 import { AdminDashboard } from './admin/AdminDashboard';
 import AdminOrders from './admin/AdminOrders';
@@ -42,6 +43,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
   const setCurrentTab = onTabChange || setInternalTab;
 
   const admin = useAdminData(currentUser || null);
+  const recovery = useRecovery();
   const { requests, loading, refreshing, isAdmin, stats, totalRevenue, pendingCount, activeCount } = admin;
 
   useEffect(() => {
@@ -49,7 +51,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
     if (currentTab === 'menu') admin.fetchGallery();
     if (currentTab === 'categories') { admin.fetchCategories(); admin.fetchGallery(); }
     if (currentTab === 'reviews') admin.fetchReviews();
-    if (currentTab === 'recovery' && isAdmin) admin.fetchRecoveryRequests();
+    if (currentTab === 'recovery' && isAdmin) recovery.fetchRecoveryRequests();
   }, [currentTab]);
 
   const refreshAll = () => { admin.fetchRequests(); admin.fetchStats(); };
@@ -192,12 +194,12 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
         {currentTab === 'recovery' && (
           <AdminRecovery
             isAdmin={isAdmin}
-            recoveryRequests={admin.recoveryRequests}
-            recoveryLoading={admin.recoveryLoading}
-            recoveryStatusFilter={admin.recoveryStatusFilter}
-            setRecoveryStatusFilter={admin.setRecoveryStatusFilter}
-            fetchRecoveryRequests={admin.fetchRecoveryRequests}
-            handleRecoveryStatus={admin.handleRecoveryStatus}
+            recoveryRequests={recovery.recoveryRequests}
+            recoveryLoading={recovery.recoveryLoading}
+            recoveryStatusFilter={recovery.recoveryStatusFilter}
+            setRecoveryStatusFilter={recovery.setRecoveryStatusFilter}
+            fetchRecoveryRequests={recovery.fetchRecoveryRequests}
+            handleRecoveryStatus={recovery.handleRecoveryStatus}
           />
         )}
       </div>
