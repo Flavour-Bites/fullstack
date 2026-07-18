@@ -7,6 +7,7 @@ import { useToast } from './Toast';
 import { t } from '../i18n';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useRecovery } from '../hooks/useRecovery';
+import { useReviews } from '../hooks/useReviews';
 import { useAdminData } from './admin/useAdminData';
 import { AdminDashboard } from './admin/AdminDashboard';
 import AdminOrders from './admin/AdminOrders';
@@ -44,13 +45,14 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
 
   const admin = useAdminData(currentUser || null);
   const recovery = useRecovery();
+  const reviews = useReviews();
   const { requests, loading, refreshing, isAdmin, stats, totalRevenue, pendingCount, activeCount } = admin;
 
   useEffect(() => {
     if (currentTab === 'users' && isAdmin) admin.fetchUsers();
     if (currentTab === 'menu') admin.fetchGallery();
     if (currentTab === 'categories') { admin.fetchCategories(); admin.fetchGallery(); }
-    if (currentTab === 'reviews') admin.fetchReviews();
+    if (currentTab === 'reviews') reviews.fetchReviews();
     if (currentTab === 'recovery' && isAdmin) recovery.fetchRecoveryRequests();
   }, [currentTab]);
 
@@ -171,11 +173,11 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
 
         {currentTab === 'reviews' && (
           <AdminReviews
-            reviewItems={admin.reviewItems}
-            reviewsLoading={admin.reviewsLoading}
-            handleDeleteReview={admin.handleDeleteReview}
-            handleSaveReview={admin.handleSaveReview}
-            fetchReviews={admin.fetchReviews}
+            reviewItems={reviews.reviewItems}
+            reviewsLoading={reviews.reviewsLoading}
+            handleDeleteReview={reviews.handleDeleteReview}
+            handleSaveReview={reviews.handleSaveReview}
+            fetchReviews={reviews.fetchReviews}
           />
         )}
 

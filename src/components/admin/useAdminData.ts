@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '../Toast';
-import type { CakeRequest, SystemUser, Stats, Category, ReviewItem } from './types';
+import type { CakeRequest, SystemUser, Stats, Category } from './types';
 import { orderPrice } from './types';
 import type { User } from '../../types';
 
@@ -27,10 +27,6 @@ export function useAdminData(currentUser: User | null) {
   // Categories state
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
-
-  // Reviews state
-  const [reviewItems, setReviewItems] = useState<ReviewItem[]>([]);
-  const [reviewsLoading, setReviewsLoading] = useState(false);
 
   // ── Data Fetching ──────────────────────────────────────────
   const fetchRequests = useCallback(async (silent = false) => {
@@ -86,16 +82,6 @@ export function useAdminData(currentUser: User | null) {
       if (data.success) setCategories(data.categories || []);
     } catch (e) { /* ignore */ }
     finally { setCategoriesLoading(false); }
-  }, []);
-
-  const fetchReviews = useCallback(async () => {
-    setReviewsLoading(true);
-    try {
-      const res = await fetch('/api/reviews');
-      const data = await res.json();
-      if (data.success) setReviewItems(data.reviews || []);
-    } catch (e) { /* ignore */ }
-    finally { setReviewsLoading(false); }
   }, []);
 
   // ── Order Actions ──────────────────────────────────────────
@@ -245,38 +231,6 @@ export function useAdminData(currentUser: User | null) {
     } catch (e: any) { showToast('Failed', e.message, 'error'); }
   }, []);
 
-  // ── Review Actions ───────────────────────────────────────
-  const handleDeleteReview = useCallback(async (id: string, author: string) => {
-    if (!window.confirm(`Delete review by ${author}? This cannot be undone.`)) return false;
-    try {
-      const res = await fetch(`/api/reviews/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.success) {
-        showToast('Review Deleted', `Review by ${author} removed.`, 'warning');
-        fetchReviews();
-        return true;
-      } else throw new Error(data.error);
-    } catch (e: any) { showToast('Delete Failed', e.message, 'error'); }
-    return false;
-  }, []);
-
-  const handleSaveReview = useCallback(async (id: string, content: string, rating: number) => {
-    try {
-      const res = await fetch(`/api/reviews/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, rating }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        showToast('Review Updated', 'Review updated successfully.', 'success');
-        fetchReviews();
-        return true;
-      } else throw new Error(data.error);
-    } catch (e: any) { showToast('Update Failed', e.message, 'error'); }
-    return false;
-  }, []);
-
   // ── Gallery CRUD Actions ────────────────────────────────
   const handleSaveGalleryItem = useCallback(async (galleryForm: any, editingGalleryId: string | null) => {
     if (!galleryForm.name.trim() || !galleryForm.priceEstimate.trim()) {
@@ -346,18 +300,16 @@ export function useAdminData(currentUser: User | null) {
     // State
     requests, loading, refreshing, users, usersLoading,
     galleryItems, galleryLoading, stats, categories, categoriesLoading,
-    reviewItems, reviewsLoading,
     // Derived
     totalRevenue, pendingCount, activeCount,
     isAdmin,
     // Fetch
     fetchRequests, fetchUsers, fetchGallery, fetchStats,
-    fetchCategories, fetchReviews,
+    fetchCategories,
     // Actions
     handleDeleteRequest, saveRequestUpdates, advanceStatus,
     saveUserRole, deleteUser,
     handleSaveCategory, handleDeleteCategory, handleToggleCategoryActive,
-    handleDeleteReview, handleSaveReview,
     handleSaveGalleryItem, handleDeleteGalleryItem,
   };
 }
