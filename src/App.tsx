@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PageType, CakeGalleryItem, User } from './types';
+import { clearToken } from './shared/utils/apiClient';
 import ErrorBoundary from './components/ErrorBoundary';
 
 import HomeView from './components/HomeView';
@@ -20,10 +21,7 @@ import { setLocale, getLocale } from './i18n';
 import type { Locale } from './i18n';
 
 export default function App() {
-  const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('flavourbites_user');
-    return saved ? JSON.parse(saved) : null;
-  });
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [activePage, setActivePage] = useState<PageType>('home');
   const [adminTab, setAdminTab] = useState<'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users' | 'recovery'>('dashboard');
   const [locale, setLocaleState] = useState<Locale>(() => getLocale());
@@ -43,7 +41,10 @@ export default function App() {
 
   useEffect(() => {
     fetch('/api/auth/me')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('Not authenticated');
+        return res.json();
+      })
       .then(data => {
         if (data.success && data.user) {
           setCurrentUser(data.user);
@@ -53,7 +54,10 @@ export default function App() {
           localStorage.removeItem('flavourbites_user');
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        setCurrentUser(null);
+        localStorage.removeItem('flavourbites_user');
+      });
   }, []);
 
   const navigateTo = (page: PageType) => {
@@ -70,7 +74,9 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
     localStorage.removeItem('flavourbites_user');
+    clearToken();
     setCurrentUser(null);
     navigateTo('home');
   };
