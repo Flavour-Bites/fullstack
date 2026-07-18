@@ -125,6 +125,9 @@ export default function RequestFormView({
             requestDate: 'June 18, 2026',
             status: 'Designing',
             quotedPrice: 11500,
+            depositAmount: 5000,
+            remainingBalance: 6500,
+            paymentStatus: 'partial',
           },
           {
             id: 'FB-9231B',
@@ -142,6 +145,9 @@ export default function RequestFormView({
             requestDate: 'June 19, 2026',
             status: 'Quoted',
             quotedPrice: 2800,
+            depositAmount: 0,
+            remainingBalance: 2800,
+            paymentStatus: 'unpaid',
           }
         ];
         localStorage.setItem('fb_request_commissions', JSON.stringify(defaultRequests));
@@ -290,6 +296,9 @@ export default function RequestFormView({
       requestDate: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
       status: 'Received',
       referenceImage: uploadedImageUrl || fileAttached || undefined,
+      depositAmount: 0,
+      remainingBalance: 0,
+      paymentStatus: 'unpaid',
     };
 
     let savedOnBackend = false;

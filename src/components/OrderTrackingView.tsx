@@ -90,7 +90,7 @@ export default function OrderTrackingView({ requests, dbConnected, onDelete }: O
                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] uppercase font-semibold font-mono rounded-full ${
                           req.status === 'Ready'
                             ? 'bg-green-100 dark:bg-green-950/40 text-green-850 dark:text-green-300 border border-green-200 dark:border-green-900/30'
-                            : req.status === 'In Progress'
+                            : req.status === 'InProgress'
                             ? 'bg-blue-100 dark:bg-blue-950/40 text-blue-850 dark:text-blue-300 border border-blue-200 dark:border-blue-900/30'
                             : req.status === 'Designing'
                             ? 'bg-amber-100 dark:bg-amber-955/40 text-amber-850 dark:text-amber-300 border border-amber-250 dark:border-amber-900/30'
