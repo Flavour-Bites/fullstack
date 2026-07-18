@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach } from 'vitest';
-import { t, setLocale, getLocale } from './index';
+import { t, setLocale, getLocale } from '../index';
 
 beforeEach(() => {
   localStorage.clear();

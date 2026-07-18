@@ -3,7 +3,7 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import AdminCategories from './AdminCategories';
+import AdminCategories from '../AdminCategories';
 
 const noopVoid = () => Promise.resolve() as unknown as Promise<void>;
 const noopBool = () => Promise.resolve(true);

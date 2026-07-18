@@ -3,8 +3,8 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import AdminMenu from './AdminMenu';
-import { ToastProvider } from '../Toast';
+import AdminMenu from '../AdminMenu';
+import { ToastProvider } from '../../Toast';
 
 const noop = () => Promise.resolve(true);
 

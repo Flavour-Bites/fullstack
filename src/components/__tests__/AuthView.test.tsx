@@ -3,8 +3,8 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ToastProvider } from './Toast';
-import AuthView from './AuthView';
+import { ToastProvider } from '../Toast';
+import AuthView from '../AuthView';
 
 beforeEach(() => {
   vi.stubGlobal('fetch', vi.fn());

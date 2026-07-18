@@ -3,7 +3,7 @@ import React from 'react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ToastProvider, useToast, ToastType } from './Toast';
+import { ToastProvider, useToast, ToastType } from '../Toast';
 
 afterEach(() => {
   cleanup();

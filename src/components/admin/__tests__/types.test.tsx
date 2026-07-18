@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from 'vitest';
-import { nextStatus, orderPrice, WORKFLOW } from './types';
-import type { CakeRequest } from './types';
+import { nextStatus, orderPrice, WORKFLOW } from '../types';
+import type { CakeRequest } from '../types';
 
 describe('WORKFLOW', () => {
   it('defines the standard order workflow stages', () => {

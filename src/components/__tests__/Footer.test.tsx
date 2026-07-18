@@ -3,7 +3,7 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import Footer from './Footer';
+import Footer from '../Footer';
 
 describe('Footer', () => {
   it('renders admin mode footer', () => {

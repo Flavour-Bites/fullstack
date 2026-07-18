@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import TestimonialsView from './TestimonialsView';
+import TestimonialsView from '../TestimonialsView';
 
 describe('TestimonialsView', () => {
   it('renders header section', () => {

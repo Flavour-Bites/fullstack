@@ -2,8 +2,8 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { ToastProvider } from '../Toast';
-import { AdminDashboard } from './AdminDashboard';
+import { ToastProvider } from '../../Toast';
+import { AdminDashboard } from '../AdminDashboard';
 
 const noop = () => Promise.resolve();
 
