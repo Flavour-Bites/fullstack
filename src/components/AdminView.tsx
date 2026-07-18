@@ -8,6 +8,7 @@ import { t } from '../i18n';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useRecovery } from '../hooks/useRecovery';
 import { useReviews } from '../hooks/useReviews';
+import { useCategories } from '../hooks/useCategories';
 import { useAdminData } from './admin/useAdminData';
 import { AdminDashboard } from './admin/AdminDashboard';
 import AdminOrders from './admin/AdminOrders';
@@ -46,12 +47,13 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
   const admin = useAdminData(currentUser || null);
   const recovery = useRecovery();
   const reviews = useReviews();
+  const categories = useCategories();
   const { requests, loading, refreshing, isAdmin, stats, totalRevenue, pendingCount, activeCount } = admin;
 
   useEffect(() => {
     if (currentTab === 'users' && isAdmin) admin.fetchUsers();
     if (currentTab === 'menu') admin.fetchGallery();
-    if (currentTab === 'categories') { admin.fetchCategories(); admin.fetchGallery(); }
+    if (currentTab === 'categories') { categories.fetchCategories(); admin.fetchGallery(); }
     if (currentTab === 'reviews') reviews.fetchReviews();
     if (currentTab === 'recovery' && isAdmin) recovery.fetchRecoveryRequests();
   }, [currentTab]);
@@ -154,7 +156,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
           <AdminMenu
             galleryItems={admin.galleryItems}
             galleryLoading={admin.galleryLoading}
-            categories={admin.categories}
+            categories={categories.categories}
             handleSaveGalleryItem={admin.handleSaveGalleryItem}
             handleDeleteGalleryItem={admin.handleDeleteGalleryItem}
           />
@@ -162,12 +164,12 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
 
         {currentTab === 'categories' && (
           <AdminCategories
-            categories={admin.categories}
-            categoriesLoading={admin.categoriesLoading}
-            handleSaveCategory={admin.handleSaveCategory}
-            handleDeleteCategory={admin.handleDeleteCategory}
-            handleToggleCategoryActive={admin.handleToggleCategoryActive}
-            fetchCategories={admin.fetchCategories}
+            categories={categories.categories}
+            categoriesLoading={categories.categoriesLoading}
+            handleSaveCategory={categories.handleSaveCategory}
+            handleDeleteCategory={categories.handleDeleteCategory}
+            handleToggleCategoryActive={categories.handleToggleCategoryActive}
+            fetchCategories={categories.fetchCategories}
           />
         )}
 
