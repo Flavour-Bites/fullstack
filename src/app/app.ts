@@ -4,6 +4,7 @@ import { createServer as createViteServer } from 'vite';
 import { webhookCallback } from 'grammy';
 import { bot } from '../bot/index.js';
 import cookieParser from 'cookie-parser';
+import morgan from 'morgan';
 import { securityConfig } from './config/security.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { verifyTelegramWebhookSecret } from '../integrations/telegram/telegramWebhook.js';
@@ -13,6 +14,11 @@ import apiRoutes from './routes.js';
 export async function registerWebhook() {
   if (!process.env.TELEGRAM_BOT_TOKEN || !process.env.APP_URL || !process.env.TELEGRAM_WEBHOOK_SECRET) {
     console.warn('[Telegram] Webhook env vars missing, skipping registration.');
+    return;
+  }
+
+  if (!/^[\x21-\x7E]+$/.test(process.env.TELEGRAM_WEBHOOK_SECRET)) {
+    console.error('[Telegram] TELEGRAM_WEBHOOK_SECRET contains invalid characters. Use only ASCII printable characters (no spaces, quotes, hashes, backslashes). Generate with: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
     return;
   }
 
@@ -42,7 +48,11 @@ export async function createApp() {
 
   app.use(securityConfig);
   app.use(cookieParser());
+  app.use(morgan('combined'));
   app.use(express.json({ limit: '1mb' }));
+
+  // Health check for Render platform monitoring
+  app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
   app.post(
     '/bot/webhook',

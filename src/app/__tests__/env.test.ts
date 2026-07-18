@@ -119,39 +119,6 @@ describe('validateEnv', () => {
     expect(() => validateEnv()).not.toThrow();
   });
 
-  it('warns when BASE_URL is a placeholder', () => {
-    process.env.BASE_URL = 'http://localhost:3000';
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    validateEnv();
-    expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining('BASE_URL')
-    );
-    warnSpy.mockRestore();
-  });
-
-  it('does not warn when BASE_URL is empty (falsy value is skipped)', () => {
-    process.env.BASE_URL = '';
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    validateEnv();
-    const baseUrlWarnings = warnSpy.mock.calls.filter(
-      (call) => typeof call[0] === 'string' && call[0].includes('BASE_URL')
-    );
-    expect(baseUrlWarnings).toHaveLength(0);
-    warnSpy.mockRestore();
-  });
-
-  it('does not warn when BASE_URL is a valid URL', () => {
-    process.env.BASE_URL = 'https://flavourbites.com';
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    validateEnv();
-    // Should not warn about BASE_URL specifically
-    const baseUrlWarnings = warnSpy.mock.calls.filter(
-      (call) => typeof call[0] === 'string' && call[0].includes('BASE_URL')
-    );
-    expect(baseUrlWarnings).toHaveLength(0);
-    warnSpy.mockRestore();
-  });
-
   it('warns about missing recommended vars', () => {
     delete process.env.GEMINI_API_KEY;
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});

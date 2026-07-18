@@ -6,12 +6,6 @@ const ALLOWED_SCRIPT_SRC = [
   'https://apis.google.com',
 ];
 
-const ALLOWED_STYLE_SRC = [
-  "'self'",
-  "'unsafe-inline'",
-  'https://fonts.googleapis.com',
-];
-
 const ALLOWED_FONT_SRC = [
   "'self'",
   'https://fonts.gstatic.com',
@@ -29,12 +23,22 @@ const ALLOWED_CONNECT_SRC = [
   'https://api.cloudinary.com',
 ];
 
+// In dev mode Vite/Tailwind injects inline styles for HMR. In production
+// Vite extracts CSS to static files so unsafe-inline is unnecessary.
+const styleSrc = [
+  "'self'",
+  'https://fonts.googleapis.com',
+];
+if (process.env.NODE_ENV !== 'production') {
+  styleSrc.push("'unsafe-inline'");
+}
+
 export const securityConfig = helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ALLOWED_SCRIPT_SRC,
-      styleSrc: ALLOWED_STYLE_SRC,
+      styleSrc,
       fontSrc: ALLOWED_FONT_SRC,
       imgSrc: ALLOWED_IMG_SRC,
       connectSrc: ALLOWED_CONNECT_SRC,

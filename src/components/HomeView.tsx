@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Calendar, ChevronRight, ChevronLeft, Star, Heart, Check, Award, Clock, Users, ArrowUpRight, ShieldCheck } from 'lucide-react';
+import { Calendar, ChevronRight, ChevronLeft, Star, Heart, Check, Award, ShieldCheck } from 'lucide-react';
 import { PageType, CakeGalleryItem } from '../types';
 import { GALLERY_ITEMS, TESTIMONIALS } from '../data';
 import { t } from '../i18n';

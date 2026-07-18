@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { authService } from './auth.service.js';
-import { authLimiter } from '../../app/config/rateLimiter.js';
 import { asyncHandler } from '../../app/middleware/asyncHandler.js';
 
 export const authController = {

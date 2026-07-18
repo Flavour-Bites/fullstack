@@ -80,7 +80,6 @@ class MemoryStore implements KeyValueStore {
 export class RedisStore implements KeyValueStore {
   private url: URL;
   private socket: RedisSocket | null = null;
-  private connecting = false;
   private connectPromise: Promise<RedisSocket> | null = null;
 
   constructor(redisUrl = process.env.REDIS_URL) {
@@ -94,13 +93,11 @@ export class RedisStore implements KeyValueStore {
     if (this.socket && !this.socket.destroyed) return this.socket;
     if (this.connectPromise) return this.connectPromise;
 
-    this.connecting = true;
     this.connectPromise = this.createSocket();
     try {
       this.socket = await this.connectPromise;
       return this.socket;
     } finally {
-      this.connecting = false;
       this.connectPromise = null;
     }
   }
