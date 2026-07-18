@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import {
   Package, Image, Layers, Users, ShieldCheck, Star,
-  BarChart2, RefreshCw, Download, Database, Loader2
+  BarChart2, RefreshCw, Download, Loader2
 } from 'lucide-react';
-import { useToast } from './Toast';
 import { t } from '../i18n';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { useRecovery } from '../hooks/useRecovery';
+import { useReviews } from '../hooks/useReviews';
+import { useCategories } from '../hooks/useCategories';
+import { useGallery } from '../hooks/useGallery';
+import { useUsers } from '../hooks/useUsers';
+import { useOrders } from '../hooks/useOrders';
 import { useAdminData } from './admin/useAdminData';
 import { AdminDashboard } from './admin/AdminDashboard';
 import AdminOrders from './admin/AdminOrders';
@@ -35,24 +40,31 @@ const TABS = [
 
 export default function AdminView({ activeTab, onTabChange, currentUser }: AdminViewProps) {
   usePageTitle("Admin");
-  const { showToast } = useToast();
+
 
   const [internalTab, setInternalTab] = useState<'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users' | 'recovery'>('dashboard');
   const currentTab = activeTab || internalTab;
   const setCurrentTab = onTabChange || setInternalTab;
 
   const admin = useAdminData(currentUser || null);
-  const { requests, loading, refreshing, seeding, isAdmin, stats, totalRevenue, pendingCount, activeCount } = admin;
+  const recovery = useRecovery();
+  const reviews = useReviews();
+  const categories = useCategories();
+  const gallery = useGallery();
+  const usersPage = useUsers();
+  const orders = useOrders(() => admin.fetchStats());
+  const { isAdmin, stats } = admin;
+  const { requests, loading, refreshing, totalRevenue, pendingCount, activeCount } = orders;
 
   useEffect(() => {
-    if (currentTab === 'users' && isAdmin) admin.fetchUsers();
-    if (currentTab === 'menu') admin.fetchGallery();
-    if (currentTab === 'categories') { admin.fetchCategories(); admin.fetchGallery(); }
-    if (currentTab === 'reviews') admin.fetchReviews();
-    if (currentTab === 'recovery' && isAdmin) admin.fetchRecoveryRequests();
+    if (currentTab === 'users' && isAdmin) usersPage.fetchUsers();
+    if (currentTab === 'menu') gallery.fetchGallery();
+    if (currentTab === 'categories') { categories.fetchCategories(); gallery.fetchGallery(); }
+    if (currentTab === 'reviews') reviews.fetchReviews();
+    if (currentTab === 'recovery' && isAdmin) recovery.fetchRecoveryRequests();
   }, [currentTab]);
 
-  const refreshAll = () => { admin.fetchRequests(); admin.fetchStats(); };
+  const refreshAll = () => { orders.fetchRequests(); admin.fetchStats(); };
 
   return (
     <div className="bg-stone-50 dark:bg-[#171412] dark:text-stone-100 min-h-screen py-16 px-4 sm:px-6 relative selection:bg-lux-gold/30 selection:text-white dark:selection:text-white">
@@ -95,17 +107,6 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
             <Download className="w-3.5 h-3.5" />
             {t('admin.exportCSV')}
           </button>
-
-          {isAdmin && (
-            <button
-              onClick={admin.handleDatabaseSeed}
-              disabled={seeding}
-              className="px-4 py-2.5 bg-lux-gold/10 hover:bg-lux-gold text-lux-gold hover:text-stone-950 border border-lux-gold/25 hover:border-lux-gold rounded-sm font-mono text-[10px] uppercase font-bold tracking-wider flex items-center gap-2 transition-all cursor-pointer"
-            >
-              {seeding ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Database className="w-3.5 h-3.5" />}
-              Seed Demo Data
-            </button>
-          )}
         </div>
       </div>
 
@@ -136,14 +137,12 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
             requests={requests}
             stats={stats}
             loading={loading}
-            seeding={seeding}
             refreshing={refreshing}
             totalRevenue={totalRevenue}
             pendingCount={pendingCount}
             activeCount={activeCount}
             isAdmin={isAdmin}
-            handleDatabaseSeed={admin.handleDatabaseSeed}
-            fetchRequests={admin.fetchRequests}
+            fetchRequests={orders.fetchRequests}
             fetchStats={admin.fetchStats}
           />
         )}
@@ -153,64 +152,64 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
             requests={requests}
             loading={loading}
             refreshing={refreshing}
-            handleDeleteRequest={admin.handleDeleteRequest}
-            saveRequestUpdates={admin.saveRequestUpdates}
-            advanceStatus={admin.advanceStatus}
+            handleDeleteRequest={orders.handleDeleteRequest}
+            saveRequestUpdates={orders.saveRequestUpdates}
+            advanceStatus={orders.advanceStatus}
           />
         )}
 
         {currentTab === 'menu' && (
           <AdminMenu
-            galleryItems={admin.galleryItems}
-            galleryLoading={admin.galleryLoading}
-            categories={admin.categories}
-            handleSaveGalleryItem={admin.handleSaveGalleryItem}
-            handleDeleteGalleryItem={admin.handleDeleteGalleryItem}
+            galleryItems={gallery.galleryItems}
+            galleryLoading={gallery.galleryLoading}
+            categories={categories.categories}
+            handleSaveGalleryItem={gallery.handleSaveGalleryItem}
+            handleDeleteGalleryItem={gallery.handleDeleteGalleryItem}
           />
         )}
 
         {currentTab === 'categories' && (
           <AdminCategories
-            categories={admin.categories}
-            categoriesLoading={admin.categoriesLoading}
-            handleSaveCategory={admin.handleSaveCategory}
-            handleDeleteCategory={admin.handleDeleteCategory}
-            handleToggleCategoryActive={admin.handleToggleCategoryActive}
-            fetchCategories={admin.fetchCategories}
+            categories={categories.categories}
+            categoriesLoading={categories.categoriesLoading}
+            handleSaveCategory={categories.handleSaveCategory}
+            handleDeleteCategory={categories.handleDeleteCategory}
+            handleToggleCategoryActive={categories.handleToggleCategoryActive}
+            fetchCategories={categories.fetchCategories}
           />
         )}
 
         {currentTab === 'reviews' && (
           <AdminReviews
-            reviewItems={admin.reviewItems}
-            reviewsLoading={admin.reviewsLoading}
-            handleDeleteReview={admin.handleDeleteReview}
-            handleSaveReview={admin.handleSaveReview}
-            fetchReviews={admin.fetchReviews}
+            reviewItems={reviews.reviewItems}
+            reviewsLoading={reviews.reviewsLoading}
+            handleDeleteReview={reviews.handleDeleteReview}
+            handleSaveReview={reviews.handleSaveReview}
+            fetchReviews={reviews.fetchReviews}
           />
         )}
 
         {currentTab === 'users' && (
           <AdminUsers
-            users={admin.users}
-            usersLoading={admin.usersLoading}
+            users={usersPage.users}
+            usersLoading={usersPage.usersLoading}
             isAdmin={isAdmin}
             currentUser={currentUser || null}
-            saveUserRole={admin.saveUserRole}
-            deleteUser={admin.deleteUser}
-            fetchUsers={admin.fetchUsers}
+            saveUserRole={usersPage.saveUserRole}
+            deleteUser={usersPage.deleteUser}
+            fetchUsers={usersPage.fetchUsers}
           />
         )}
 
         {currentTab === 'recovery' && (
           <AdminRecovery
             isAdmin={isAdmin}
-            recoveryRequests={admin.recoveryRequests}
-            recoveryLoading={admin.recoveryLoading}
-            recoveryStatusFilter={admin.recoveryStatusFilter}
-            setRecoveryStatusFilter={admin.setRecoveryStatusFilter}
-            fetchRecoveryRequests={admin.fetchRecoveryRequests}
-            handleRecoveryStatus={admin.handleRecoveryStatus}
+            recoveryRequests={recovery.recoveryRequests}
+            recoveryLoading={recovery.recoveryLoading}
+            recoveryStatusFilter={recovery.recoveryStatusFilter}
+            setRecoveryStatusFilter={recovery.setRecoveryStatusFilter}
+            fetchRecoveryRequests={recovery.fetchRecoveryRequests}
+            handleRecoveryStatus={recovery.handleRecoveryStatus}
           />
         )}
       </div>

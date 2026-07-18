@@ -1,4 +1,4 @@
-import type { OrderStatus, PaymentStatus, PrismaClient } from '@prisma/client';
+import type { OrderStatus, PrismaClient } from '@prisma/client';
 import { makeId } from '../../shared/utils/ids.js';
 
 export type OrderActor = {
@@ -6,25 +6,6 @@ export type OrderActor = {
   source: 'admin_api' | 'staff_api' | 'customer_api' | 'telegram_bot' | 'system';
   note?: string | null;
 };
-
-function calculatePaymentState(input: { finalPrice?: number | null; depositAmount?: number | null }) {
-  const finalPrice = Math.max(0, input.finalPrice ?? 0);
-  const depositAmount = Math.max(0, input.depositAmount ?? 0);
-
-  if (depositAmount > finalPrice && finalPrice > 0) {
-    throw new Error('Money paid cannot be more than the final cake price.');
-  }
-
-  const remainingBalance = Math.max(finalPrice - depositAmount, 0);
-  const paymentStatus: 'unpaid' | 'partial' | 'paid' =
-    finalPrice <= 0 || depositAmount <= 0
-      ? 'unpaid'
-      : remainingBalance === 0
-        ? 'paid'
-        : 'partial';
-
-  return { depositAmount, remainingBalance, paymentStatus };
-}
 
 export async function createOrder(
   prisma: PrismaClient,
@@ -71,8 +52,6 @@ export async function createOrder(
       referenceImageBytes: data.referenceImageBytes ?? null,
       requestDate: data.requestDate,
       status: 'Received',
-      remainingBalance: 0,
-      paymentStatus: 'unpaid',
     },
     include: { user: true },
   });
@@ -163,10 +142,6 @@ export async function updateOrderCommercials(
       input.depositAmount !== undefined
         ? input.depositAmount
         : current.depositAmount;
-    const payment = calculatePaymentState({
-      finalPrice: nextFinalPrice ?? 0,
-      depositAmount: nextDeposit ?? 0,
-    });
 
     return tx.customCakeRequest.update({
       where: { id: orderId },
@@ -175,9 +150,8 @@ export async function updateOrderCommercials(
         ...(input.finalPrice !== undefined ? { finalPrice: input.finalPrice } : {}),
         ...(input.priceConfirmedAt !== undefined ? { priceConfirmedAt: input.priceConfirmedAt } : {}),
         ...(input.depositPaidAt !== undefined ? { depositPaidAt: input.depositPaidAt } : {}),
-        depositAmount: payment.depositAmount,
-        remainingBalance: payment.remainingBalance,
-        paymentStatus: payment.paymentStatus as PaymentStatus,
+        depositAmount: nextDeposit,
+        remainingBalance: Math.max((nextFinalPrice ?? 0) - (nextDeposit ?? 0), 0),
       },
     });
   });

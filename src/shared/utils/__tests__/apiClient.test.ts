@@ -1,64 +1,66 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { setToken, clearToken, apiFetch } from '../apiClient.js';
+// @vitest-environment jsdom
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { setToken, clearToken, apiFetch } from '../apiClient';
 
-describe('apiClient', () => {
-  beforeEach(() => {
+afterEach(() => {
+  vi.unstubAllGlobals();
+  clearToken();
+});
+
+describe('setToken / clearToken', () => {
+  it('can be called without errors', () => {
+    setToken('abc');
     clearToken();
   });
+});
 
-  describe('setToken / clearToken', () => {
-    it('setToken stores a token', async () => {
-      setToken('my-test-token');
-      global.fetch = vi.fn().mockResolvedValue({ ok: true });
-      await apiFetch('/test');
-      const call = (global.fetch as any).mock.calls[0];
-      expect(call[1].headers.Authorization).toBe('Bearer my-test-token');
-    });
+describe('apiFetch', () => {
+  let mock: ReturnType<typeof vi.fn>;
 
-    it('clearToken removes the stored token', async () => {
-      setToken('temp-token');
-      clearToken();
-      global.fetch = vi.fn().mockResolvedValue({ ok: true });
-      await apiFetch('/test');
-      const call = (global.fetch as any).mock.calls[0];
-      expect(call[1].headers.Authorization).toBeUndefined();
-    });
+  beforeEach(() => {
+    mock = vi.fn((_url: string, _init?: RequestInit) => new Response(null, { status: 200 }));
   });
 
-  describe('apiFetch', () => {
-    it('sends a fetch request with JSON headers', async () => {
-      global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => ({ success: true }) });
-      const res = await apiFetch('/api/test');
-      expect(res.ok).toBe(true);
-      const body = await res.json();
-      expect(body.success).toBe(true);
-    });
+  it('adds Authorization header when token is set', async () => {
+    setToken('test-token-123');
+    vi.stubGlobal('fetch', mock);
 
-    it('includes bearer token when set', async () => {
-      setToken('secret-token');
-      global.fetch = vi.fn().mockResolvedValue({ ok: true });
-      await apiFetch('/api/protected');
-      const call = (global.fetch as any).mock.calls[0];
-      expect(call[0]).toBe('/api/protected');
-      expect(call[1].headers['Content-Type']).toBe('application/json');
-      expect(call[1].headers.Authorization).toBe('Bearer secret-token');
-    });
+    await apiFetch('/api/test');
 
-    it('merges additional headers', async () => {
-      global.fetch = vi.fn().mockResolvedValue({ ok: true });
-      await apiFetch('/api/test', { headers: { 'X-Custom': 'value' } });
-      const call = (global.fetch as any).mock.calls[0];
-      expect(call[1].headers['Content-Type']).toBe('application/json');
-      expect(call[1].headers['X-Custom']).toBe('value');
-    });
+    expect(mock).toHaveBeenCalledWith('/api/test', expect.objectContaining({
+      headers: expect.objectContaining({ Authorization: 'Bearer test-token-123' }),
+    }));
+  });
 
-    it('passes through other options like method, body', async () => {
-      global.fetch = vi.fn().mockResolvedValue({ ok: true });
-      const body = JSON.stringify({ name: 'test' });
-      await apiFetch('/api/submit', { method: 'POST', body });
-      const call = (global.fetch as any).mock.calls[0];
-      expect(call[1].method).toBe('POST');
-      expect(call[1].body).toBe(body);
-    });
+  it('omits Authorization when token is not set', async () => {
+    vi.stubGlobal('fetch', mock);
+
+    await apiFetch('/api/test');
+
+    const headers = (mock.mock.calls[0] as [string, RequestInit])[1].headers as Record<string, string>;
+    expect(headers.Authorization).toBeUndefined();
+  });
+
+  it('merges custom headers', async () => {
+    setToken('tok');
+    vi.stubGlobal('fetch', mock);
+
+    await apiFetch('/api/test', { headers: { 'X-Custom': 'val' } });
+
+    const headers = (mock.mock.calls[0] as [string, RequestInit])[1].headers as Record<string, string>;
+    expect(headers['Content-Type']).toBe('application/json');
+    expect(headers.Authorization).toBe('Bearer tok');
+    expect(headers['X-Custom']).toBe('val');
+  });
+
+  it('forwards options like method and body', async () => {
+    setToken('tok');
+    vi.stubGlobal('fetch', mock);
+
+    await apiFetch('/api/data', { method: 'POST', body: '{"x":1}' });
+
+    const opts = (mock.mock.calls[0] as [string, RequestInit])[1];
+    expect(opts.method).toBe('POST');
+    expect(opts.body).toBe('{"x":1}');
   });
 });

@@ -1,12 +1,8 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { securityConfig } from '../config/security.js';
 
 describe('securityConfig CSP', () => {
   it('does not include unsafe-inline in scriptSrc', () => {
-    const directives = (securityConfig as any).config?.contentSecurityPolicy?.directives
-      ?? (securityConfig as any).directives;
-    // helmet v5+ exposes directives differently — find them
-    const csp = (securityConfig as any);
     // The helmet middleware is pre-configured; extract CSP from the function
     // We test by checking the serialized header
     const headerParts: string[] = [];
