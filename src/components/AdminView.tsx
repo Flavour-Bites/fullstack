@@ -9,6 +9,7 @@ import { usePageTitle } from '../hooks/usePageTitle';
 import { useRecovery } from '../hooks/useRecovery';
 import { useReviews } from '../hooks/useReviews';
 import { useCategories } from '../hooks/useCategories';
+import { useGallery } from '../hooks/useGallery';
 import { useAdminData } from './admin/useAdminData';
 import { AdminDashboard } from './admin/AdminDashboard';
 import AdminOrders from './admin/AdminOrders';
@@ -48,12 +49,13 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
   const recovery = useRecovery();
   const reviews = useReviews();
   const categories = useCategories();
+  const gallery = useGallery();
   const { requests, loading, refreshing, isAdmin, stats, totalRevenue, pendingCount, activeCount } = admin;
 
   useEffect(() => {
     if (currentTab === 'users' && isAdmin) admin.fetchUsers();
-    if (currentTab === 'menu') admin.fetchGallery();
-    if (currentTab === 'categories') { categories.fetchCategories(); admin.fetchGallery(); }
+    if (currentTab === 'menu') gallery.fetchGallery();
+    if (currentTab === 'categories') { categories.fetchCategories(); gallery.fetchGallery(); }
     if (currentTab === 'reviews') reviews.fetchReviews();
     if (currentTab === 'recovery' && isAdmin) recovery.fetchRecoveryRequests();
   }, [currentTab]);
@@ -154,11 +156,11 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
 
         {currentTab === 'menu' && (
           <AdminMenu
-            galleryItems={admin.galleryItems}
-            galleryLoading={admin.galleryLoading}
+            galleryItems={gallery.galleryItems}
+            galleryLoading={gallery.galleryLoading}
             categories={categories.categories}
-            handleSaveGalleryItem={admin.handleSaveGalleryItem}
-            handleDeleteGalleryItem={admin.handleDeleteGalleryItem}
+            handleSaveGalleryItem={gallery.handleSaveGalleryItem}
+            handleDeleteGalleryItem={gallery.handleDeleteGalleryItem}
           />
         )}
 

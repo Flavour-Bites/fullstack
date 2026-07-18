@@ -17,10 +17,6 @@ export function useAdminData(currentUser: User | null) {
   const [users, setUsers] = useState<SystemUser[]>([]);
   const [usersLoading, setUsersLoading] = useState(false);
 
-  // Menu state
-  const [galleryItems, setGalleryItems] = useState<any[]>([]);
-  const [galleryLoading, setGalleryLoading] = useState(false);
-
   // Stats
   const [stats, setStats] = useState<Stats | null>(null);
 
@@ -50,16 +46,6 @@ export function useAdminData(currentUser: User | null) {
       if (data.success) setUsers(data.users || []);
     } catch (e) { /* ignore */ }
     finally { setUsersLoading(false); }
-  }, []);
-
-  const fetchGallery = useCallback(async () => {
-    setGalleryLoading(true);
-    try {
-      const res = await fetch('/api/gallery');
-      const data = await res.json();
-      if (data.success) setGalleryItems(data.items || []);
-    } catch (e) { /* ignore */ }
-    finally { setGalleryLoading(false); }
   }, []);
 
   const fetchStats = useCallback(async () => {
@@ -155,63 +141,6 @@ export function useAdminData(currentUser: User | null) {
     return false;
   }, []);
 
-  // ── Gallery CRUD Actions ────────────────────────────────
-  const handleSaveGalleryItem = useCallback(async (galleryForm: any, editingGalleryId: string | null) => {
-    if (!galleryForm.name.trim() || !galleryForm.priceEstimate.trim()) {
-      showToast('Validation', 'Name and price are required.', 'error'); return false;
-    }
-    try {
-      const body: Record<string, unknown> = {
-        name: galleryForm.name,
-        description: galleryForm.description,
-        categoryId: galleryForm.categoryId || undefined,
-        flavors: galleryForm.flavors.split(',').map((f: string) => f.trim()).filter(Boolean),
-        priceEstimate: galleryForm.priceEstimate,
-        image: galleryForm.image || undefined,
-        servingCount: galleryForm.servingCount || undefined,
-        tags: galleryForm.tags.split(',').map((t: string) => t.trim()).filter(Boolean),
-      };
-      if (editingGalleryId) {
-        const res = await fetch(`/api/gallery/${editingGalleryId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        });
-        const data = await res.json();
-        if (data.success) {
-          showToast('Gallery Item Updated', `"${galleryForm.name}" updated.`, 'success');
-        } else throw new Error(data.error);
-      } else {
-        const res = await fetch('/api/gallery', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        });
-        const data = await res.json();
-        if (data.success) {
-          showToast('Gallery Item Created', `"${galleryForm.name}" added.`, 'success');
-        } else throw new Error(data.error);
-      }
-      fetchGallery();
-      return true;
-    } catch (e: any) { showToast('Failed', e.message, 'error'); }
-    return false;
-  }, []);
-
-  const handleDeleteGalleryItem = useCallback(async (id: string, name: string) => {
-    if (!window.confirm(`Delete gallery item "${name}"? This cannot be undone.`)) return false;
-    try {
-      const res = await fetch(`/api/gallery/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.success) {
-        showToast('Gallery Item Deleted', `"${name}" removed.`, 'warning');
-        fetchGallery();
-        return true;
-      } else throw new Error(data.error);
-    } catch (e: any) { showToast('Delete Failed', e.message, 'error'); }
-    return false;
-  }, []);
-
   // ── Effects ────────────────────────────────────────────────
   useEffect(() => { fetchRequests(true); fetchStats(); }, []);
 
@@ -222,16 +151,14 @@ export function useAdminData(currentUser: User | null) {
 
   return {
     // State
-    requests, loading, refreshing, users, usersLoading,
-    galleryItems, galleryLoading, stats,
+    requests, loading, refreshing, users, usersLoading, stats,
     // Derived
     totalRevenue, pendingCount, activeCount,
     isAdmin,
     // Fetch
-    fetchRequests, fetchUsers, fetchGallery, fetchStats,
+    fetchRequests, fetchUsers, fetchStats,
     // Actions
     handleDeleteRequest, saveRequestUpdates, advanceStatus,
     saveUserRole, deleteUser,
-    handleSaveGalleryItem, handleDeleteGalleryItem,
   };
 }
