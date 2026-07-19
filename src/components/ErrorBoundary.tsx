@@ -26,7 +26,7 @@ export default class ErrorBoundary extends React.Component<Props, State> {
 
   render() {
     const { fallback, children } = this.p();
-    const { hasError, error } = this.s();
+    const { hasError } = this.s();
     if (hasError) {
       if (fallback) return fallback;
       return (

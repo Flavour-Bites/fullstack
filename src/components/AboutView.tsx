@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Award, Utensils, Compass, ChevronRight } from 'lucide-react';
 import { IngredientSpotlight } from '../types';

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PageType, CakeGalleryItem, User } from './types';
 import { clearToken } from './shared/utils/apiClient';
@@ -130,7 +130,7 @@ export default function App() {
           adminTab={adminTab}
           isAdminMode={isAdminMode}
           onNavigate={navigateTo}
-          onAdminTabChange={setAdminTab}
+          onAdminTabChange={(tab) => setAdminTab(tab as typeof adminTab)}
           onToggleDarkMode={() => setDarkMode(d => !d)}
           onToggleLocale={handleToggleLocale}
           onLogout={handleLogout}
@@ -179,7 +179,7 @@ export default function App() {
                 )
               )}
               {activePage === 'about' && <AboutView />}
-              {activePage === 'testimonials' && <TestimonialsView currentUser={currentUser} />}
+              {activePage === 'testimonials' && <TestimonialsView />}
               {activePage === 'contact' && <ContactView />}
               {(activePage === 'profile' || activePage === 'orders') && (
                 currentUser ? (

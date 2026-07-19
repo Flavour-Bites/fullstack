@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ChevronRight, Cake, Info, Search, Tag, RotateCcw } from 'lucide-react';
 import { CakeGalleryItem } from '../types';
@@ -41,7 +41,7 @@ const cardVariants = {
     y: 0,
     scale: 1,
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 110,
       damping: 16
     }
@@ -49,7 +49,7 @@ const cardVariants = {
   exit: {
     opacity: 0,
     scale: 0.96,
-    transition: { duration: 0.12, ease: 'easeInOut' }
+    transition: { duration: 0.12, ease: 'easeInOut' as const }
   }
 };
 

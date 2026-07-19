@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, X, Send, Sparkles, Trash2, ShieldAlert, Cake } from 'lucide-react';
 import { t } from '../i18n';
