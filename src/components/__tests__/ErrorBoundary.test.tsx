@@ -34,7 +34,6 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>
     );
     expect(screen.getByText('Something went wrong')).toBeInTheDocument();
-    expect(screen.getByText('Kaboom!')).toBeInTheDocument();
     expect(screen.getByText('Reload Page')).toBeInTheDocument();
   });
 

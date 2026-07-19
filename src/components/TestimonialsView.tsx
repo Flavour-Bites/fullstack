@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Sparkles, Quote, Award } from 'lucide-react';
+import { Quote, Award } from 'lucide-react';
 import { TESTIMONIALS } from '../data';
 import { t } from '../i18n';
 import { usePageTitle } from '../hooks/usePageTitle';
@@ -20,10 +20,6 @@ export default function TestimonialsView() {
     <div className="space-y-24 pb-16">
       {/* Editorial Header */}
       <section className="text-center max-w-2xl mx-auto pt-6 px-4">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-lux-gold/20 bg-lux-gold/10 mb-4 font-sans">
-          <Sparkles className="w-3.5 h-3.5 text-lux-gold" />
-          <span className="text-[10px] uppercase tracking-[0.25em] text-lux-gold font-medium font-semibold">{t('testimonials.trustStories')}</span>
-        </div>
         <h1 className="text-4xl sm:text-5xl font-serif text-warm-950 dark:text-stone-100 mb-3">{t('testimonials.title')}</h1>
         <p className="text-sm sm:text-base text-stone-600 dark:text-stone-300 font-light leading-relaxed max-w-lg mx-auto font-sans">
           {t('testimonials.subtitle')}

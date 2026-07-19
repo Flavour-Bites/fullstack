@@ -103,7 +103,7 @@ export default function ProfileView({ currentUser, onLogout, onNavigate }: Profi
       const data = await res.json();
       if (data.success) {
         if (data.alreadyExists) {
-          showToast('Request Already Exists', 'A pending recovery request for these IDs already exists.', 'info');
+          showToast('Request Already Exists', 'A pending recovery request is already being reviewed. No need to submit again.', 'info');
         } else {
           showToast('Recovery Request Submitted', 'An admin will review your request shortly.', 'success');
           setShowRecoveryForm(false);
@@ -113,7 +113,7 @@ export default function ProfileView({ currentUser, onLogout, onNavigate }: Profi
         throw new Error(data.error || 'Failed to submit request');
       }
     } catch (err: any) {
-      showToast('Submission Failed', err.message, 'error');
+      showToast('Submission Failed', err.message + ' Please try again.', 'error');
     } finally {
       setRecoverySubmitting(false);
     }
@@ -260,12 +260,8 @@ export default function ProfileView({ currentUser, onLogout, onNavigate }: Profi
         {/* Editorial Subheader */}
         <div className="text-center md:text-left border-b border-stone-200/50 dark:border-stone-800/80 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-lux-gold/20 bg-lux-gold/5 mb-2 font-sans">
-              <Sparkles className="w-3 h-3 text-lux-gold" />
-              <span className="text-[9px] uppercase tracking-[0.2em] text-lux-gold font-bold">{t('profile.customerDashboard')}</span>
-            </div>
-            <h1 className="text-3xl font-serif text-warm-950 dark:text-stone-100">{t('profile.accountDashboard')}</h1>
-            <p className="text-xs text-stone-500 dark:text-stone-400 font-light mt-1">
+            <h1 className="text-3xl font-serif text-warm-950 dark:text-stone-100 mb-1">{t('profile.accountDashboard')}</h1>
+            <p className="text-xs text-stone-500 dark:text-stone-400 font-light">
               {t('profile.dashboardDescription')}
             </p>
           </div>

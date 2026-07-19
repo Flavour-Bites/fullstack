@@ -8,8 +8,8 @@ import AboutView from '../AboutView';
 describe('AboutView', () => {
   it('renders hero section', () => {
     render(<AboutView />);
-    expect(screen.getByText('MEET YOUR BAKER')).toBeInTheDocument();
     expect(screen.getByText('Yodit Ashenafi')).toBeInTheDocument();
+    expect(screen.getByText(/Baking Custom Cakes with Love/)).toBeInTheDocument();
   });
 
   it('renders highlights block', () => {

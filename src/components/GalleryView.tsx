@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, X, ChevronRight, Cake, Info, Search, Tag, RotateCcw } from 'lucide-react';
+import { X, ChevronRight, Cake, Info, Search, Tag, RotateCcw } from 'lucide-react';
 import { CakeGalleryItem } from '../types';
 import { GALLERY_ITEMS } from '../data';
 import { t } from '../i18n';
@@ -148,10 +148,6 @@ export default function GalleryView({
     <div className="space-y-12 pb-16">
       {/* Intro Header */}
       <section className="text-center max-w-2xl mx-auto pt-6 px-4">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-lux-gold/20 bg-lux-gold/10 mb-4 font-sans font-medium">
-          <Sparkles className="w-3.5 h-3.5 text-lux-gold" />
-          <span className="text-[10px] uppercase tracking-[0.25em] text-lux-gold font-semibold">{t('gallery.bespokeCatalog')}</span>
-        </div>
         <h1 className="text-4xl sm:text-5xl font-serif text-warm-950 dark:text-stone-100 mb-7">{t('gallery.customGallery')}</h1>
         <p className="text-sm sm:text-base text-stone-600 dark:text-stone-300 font-light leading-relaxed max-w-lg mx-auto font-sans">
           {t('gallery.galleryDescription')}

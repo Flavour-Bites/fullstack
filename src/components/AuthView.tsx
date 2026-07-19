@@ -71,13 +71,13 @@ export default function AuthView({
         }
         setToken(result.token);
         localStorage.setItem('flavourbites_user', JSON.stringify(result.user));
-        showToast(t('auth.welcome'), `Hello, ${result.user.name}.`, 'success');
+        showToast(t('auth.welcome'), `Hello, ${result.user.name}. You're all set.`, 'success');
         onAuthSuccess(result.user);
       } else {
         throw new Error(result.error || 'Sign in failed.');
       }
     } catch (err: any) {
-      showToast(t('auth.signInFailed'), err.message || t('auth.checkDetails'), 'error');
+      showToast(t('auth.signInFailed'), err.message || t('auth.checkDetails') + ' Try again.', 'error');
     } finally {
       setLoading(false);
     }
@@ -100,13 +100,13 @@ export default function AuthView({
       if (data.success) {
         setToken(data.token);
         localStorage.setItem('flavourbites_user', JSON.stringify(data.user));
-        showToast(t('auth.welcomeBack'), `Hello, ${data.user.name}.`, 'success');
+        showToast(t('auth.welcomeBack'), `Hello, ${data.user.name}. Welcome back.`, 'success');
         onAuthSuccess(data.user);
       } else {
         throw new Error(data.error || 'Sign in failed.');
       }
     } catch (err: any) {
-      showToast(t('auth.signInFailed'), err.message || t('auth.checkDetails'), 'error');
+      showToast(t('auth.signInFailed'), err.message || t('auth.checkDetails') + ' Try again.', 'error');
     } finally {
       setLoading(false);
     }

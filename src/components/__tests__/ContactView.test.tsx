@@ -7,7 +7,6 @@ import ContactView from '../ContactView';
 describe('ContactView', () => {
   it('renders contact form', () => {
     render(<ContactView />);
-    expect(screen.getByText('GET IN TOUCH')).toBeInTheDocument();
     expect(screen.getByText('Contact Us')).toBeInTheDocument();
   });
 

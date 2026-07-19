@@ -8,7 +8,8 @@ export type PageType =
     | "orders"
     | "admin"
     | "auth"
-    | "profile";
+    | "profile"
+    | "not-found";
 
 export interface User {
   id: string;
