@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, X, Send, Sparkles, Trash2, ShieldAlert, Cake } from 'lucide-react';
 import { t } from '../i18n';
+import type { PageType } from '../types';
 
 interface ChatMessage {
   id: string;
@@ -18,7 +19,11 @@ const PRESET_QUESTIONS = [
   { text: "🌱 Do you offer gluten-free or egg-free options?", label: t('bot.dietaryCustomization') }
 ];
 
-export default function CakeAssistantBot() {
+interface CakeAssistantBotProps {
+  activePage?: PageType;
+}
+
+export default function CakeAssistantBot({ activePage }: CakeAssistantBotProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -34,7 +39,8 @@ export default function CakeAssistantBot() {
 
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
 
-  // Auto scroll to bottom
+  const HIDE_ON_PAGES: PageType[] = ['request', 'admin'];
+
   useEffect(() => {
     if (endOfMessagesRef.current) {
       endOfMessagesRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -119,7 +125,6 @@ export default function CakeAssistantBot() {
         content = trimmed.replace(/^[\*\-]\s*/, '');
       }
 
-      // Simple parse of bold **text**
       const parts = content.split(/(\*\*.*?\*\*)/g);
       const elements = parts.map((part, pIdx) => {
         if (part.startsWith('**') && part.endsWith('**')) {
@@ -147,6 +152,10 @@ export default function CakeAssistantBot() {
       );
     });
   };
+
+  if (activePage && HIDE_ON_PAGES.includes(activePage)) {
+    return null;
+  }
 
   return (
     <>

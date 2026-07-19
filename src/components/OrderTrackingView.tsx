@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'motion/react';
 import { Activity, Clock, Filter, Trash2 } from 'lucide-react';
 import { t } from '../i18n';

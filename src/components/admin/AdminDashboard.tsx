@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Package, Coins, Clock, Activity, BarChart2, Sparkles,
   Database, Users, Loader2, RefreshCw

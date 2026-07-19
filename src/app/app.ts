@@ -17,6 +17,11 @@ export async function registerWebhook() {
     return;
   }
 
+  if (process.env.APP_URL.startsWith('http://localhost') || process.env.APP_URL === 'http://127.0.0.1') {
+    console.log('[Telegram] Skipping webhook registration (local dev).');
+    return;
+  }
+
   if (!/^[\x21-\x7E]+$/.test(process.env.TELEGRAM_WEBHOOK_SECRET)) {
     console.error('[Telegram] TELEGRAM_WEBHOOK_SECRET contains invalid characters. Use only ASCII printable characters (no spaces, quotes, hashes, backslashes). Generate with: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
     return;
@@ -48,8 +53,14 @@ export async function createApp() {
 
   app.use(securityConfig);
   app.use(cookieParser());
-  app.use(morgan('combined'));
   app.use(express.json({ limit: '1mb' }));
+
+  // Morgan request logging — skip Vite dev-server requests to avoid log spam
+  if (process.env.NODE_ENV !== 'production') {
+    app.use(morgan('dev', { skip: req => !req.url.startsWith('/api/') }));
+  } else {
+    app.use(morgan('combined'));
+  }
 
   // Health check for Render platform monitoring
   app.get('/health', (_req, res) => res.json({ status: 'ok' }));

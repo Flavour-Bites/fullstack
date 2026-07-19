@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Search, Filter, FilterX, Shield, ArrowRight, Edit3, Trash2,

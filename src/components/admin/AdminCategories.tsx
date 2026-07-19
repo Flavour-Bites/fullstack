@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Layers, Plus, Save, Loader2, Edit3, Trash2, ToggleRight, ToggleLeft } from 'lucide-react';
 import { t } from '../../i18n';
 import { SkeletonTable } from '../Skeleton';

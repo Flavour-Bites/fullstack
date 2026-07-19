@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { MessageSquare, Star, Edit3, Trash2, Save, Loader2 } from 'lucide-react';
 import { t } from '../../i18n';
 import { SkeletonCard } from '../Skeleton';

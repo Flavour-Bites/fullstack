@@ -1,4 +1,3 @@
-import React from 'react';
 import { ShieldCheck, RefreshCw, Loader2, X, Clock } from 'lucide-react';
 import { t } from '../../i18n';
 

@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import React from 'react';
 import AdminRecovery from '../AdminRecovery';
 
 const noop = () => Promise.resolve();

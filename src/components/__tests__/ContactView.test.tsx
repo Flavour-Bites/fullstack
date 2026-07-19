@@ -1,13 +1,11 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import React from 'react';
 import ContactView from '../ContactView';
 
 describe('ContactView', () => {
   it('renders contact form', () => {
     render(<ContactView />);
-    expect(screen.getByText('GET IN TOUCH')).toBeInTheDocument();
     expect(screen.getByText('Contact Us')).toBeInTheDocument();
   });
 

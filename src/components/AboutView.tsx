@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Award, Utensils, Compass, ChevronRight } from 'lucide-react';
+import { Award, Utensils, Compass, ChevronRight } from 'lucide-react';
 import { IngredientSpotlight } from '../types';
 import { INGREDIENT_SPOTLIGHTS } from '../data';
 import { t } from '../i18n';
@@ -16,15 +16,12 @@ export default function AboutView() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
         {/* Biography Column */}
         <div className="lg:col-span-7 space-y-8">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-lux-gold/20 bg-lux-gold/10 font-sans">
-            <Sparkles className="w-3.5 h-3.5 text-lux-gold" />
-            <span className="text-[10px] uppercase tracking-[0.25em] text-lux-gold font-medium font-semibold">{t('about.meetYourBaker')}</span>
+          <div className="space-y-1">
+            <h1 className="text-4xl sm:text-5xl font-serif text-warm-950 dark:text-stone-100 leading-tight">
+              Yodit Ashenafi
+            </h1>
+            <p className="italic font-light text-lux-gold font-sans text-xl tracking-normal">{t('about.bakingWithLove')}</p>
           </div>
-
-          <h1 className="text-4xl sm:text-5xl font-serif text-warm-950 dark:text-stone-100 leading-tight">
-            Yodit Ashenafi <br />
-            <span className="italic font-light text-lux-gold font-sans text-2xl tracking-normal">{t('about.bakingWithLove')}</span>
-          </h1>
 
           <div className="h-[2px] w-20 bg-lux-gold" />
 
