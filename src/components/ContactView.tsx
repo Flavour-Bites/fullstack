@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Send, Mail, MapPin, Phone, HelpCircle, Check, ChevronDown, CheckCircle2, Calculator, Map, ShieldAlert, Search, Loader2 } from 'lucide-react';
+import { Send, Mail, MapPin, Phone, HelpCircle, Check, ChevronDown, CheckCircle2, Calculator, Map, ShieldAlert, Search, Loader2 } from 'lucide-react';
 import { FAQS } from '../data';
 import { t } from '../i18n';
 import { usePageTitle } from '../hooks/usePageTitle';
@@ -94,13 +94,9 @@ export default function ContactView() {
     <div className="space-y-24 pb-16">
       {/* Intro Header */}
       <section className="text-center max-w-2xl mx-auto pt-6 px-4">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-lux-gold/20 bg-lux-gold/10 mb-4 font-sans font-medium">
-          <Sparkles className="w-3.5 h-3.5 text-lux-gold" />
-          <span className="text-[10px] uppercase tracking-[0.25em] text-lux-gold font-semibold">{t('contact.getInTouch')}</span>
-        </div>
         <h1 className="text-4xl sm:text-5xl font-serif text-warm-950 dark:text-stone-100 mb-3">{t('contact.title')}</h1>
         <p className="text-sm sm:text-base text-stone-600 dark:text-stone-300 font-light leading-relaxed max-w-lg mx-auto font-sans">
-          Message us here or on Telegram. Yodit Ashenafi checks your messages daily to find booking times.
+          {t('contact.getInTouch')} — Yodit checks messages daily to find booking times.
         </p>
         <div className="h-[1px] w-24 bg-stone-300 mx-auto mt-6" />
       </section>

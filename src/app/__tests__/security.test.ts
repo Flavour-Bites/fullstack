@@ -1,107 +1,73 @@
 import { describe, it, expect } from 'vitest';
-import { securityConfig } from '../config/security.js';
+import { securityConfig, createSecurityConfig } from '../config/security.js';
+
+function runMiddleware(middleware: any) {
+  const headers: Record<string, string> = {};
+  const res = {
+    setHeader: (name: string, value: string) => { headers[name] = value; },
+    removeHeader: (name: string) => { delete headers[name]; },
+  } as any;
+  const req = {} as any;
+  middleware(req, res, () => {});
+  return headers;
+}
 
 describe('securityConfig CSP', () => {
-  it('does not include unsafe-inline in scriptSrc', () => {
-    // The helmet middleware is pre-configured; extract CSP from the function
-    // We test by checking the serialized header
-    const headerParts: string[] = [];
-    const res = {
-      setHeader: (name: string, value: string) => {
-        if (name === 'Content-Security-Policy') headerParts.push(value);
-      },
-      removeHeader: () => {},
-    } as any;
-    const req = {} as any;
-    const next = () => {};
+  it('does not include unsafe-inline in scriptSrc when NODE_ENV=production', () => {
+    const origEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+    const prodConfig = createSecurityConfig();
+    process.env.NODE_ENV = origEnv;
 
-    securityConfig(req, res, next);
-
-    if (headerParts.length > 0) {
-      const csp = headerParts[0];
-      const scriptMatch = csp.match(/script-src\s+([^;]+)/);
-      if (scriptMatch) {
-        expect(scriptMatch[1]).not.toContain("'unsafe-inline'");
-      }
+    const headers = runMiddleware(prodConfig);
+    const csp = headers['Content-Security-Policy'] || '';
+    const scriptMatch = csp.match(/script-src\s+([^;]+)/);
+    if (scriptMatch) {
+      expect(scriptMatch[1]).not.toContain("'unsafe-inline'");
     }
   });
 
   it('allows unsafe-inline in styleSrc (needed for Tailwind)', () => {
-    const headerParts: string[] = [];
-    const res = {
-      setHeader: (name: string, value: string) => {
-        if (name === 'Content-Security-Policy') headerParts.push(value);
-      },
-      removeHeader: () => {},
-    } as any;
-    const req = {} as any;
-    const next = () => {};
-
-    securityConfig(req, res, next);
-
-    if (headerParts.length > 0) {
-      const csp = headerParts[0];
-      const styleMatch = csp.match(/style-src\s+([^;]+)/);
-      if (styleMatch) {
-        expect(styleMatch[1]).toContain("'unsafe-inline'");
-      }
+    const headers = runMiddleware(securityConfig);
+    const csp = headers['Content-Security-Policy'] || '';
+    const styleMatch = csp.match(/style-src\s+([^;]+)/);
+    if (styleMatch) {
+      expect(styleMatch[1]).toContain("'unsafe-inline'");
     }
   });
 
   it('sets default-src to self', () => {
-    const headerParts: string[] = [];
-    const res = {
-      setHeader: (name: string, value: string) => {
-        if (name === 'Content-Security-Policy') headerParts.push(value);
-      },
-      removeHeader: () => {},
-    } as any;
-    const req = {} as any;
-    const next = () => {};
-
-    securityConfig(req, res, next);
-
-    if (headerParts.length > 0) {
-      const csp = headerParts[0];
-      expect(csp).toContain("default-src 'self'");
-    }
+    const headers = runMiddleware(securityConfig);
+    const csp = headers['Content-Security-Policy'] || '';
+    expect(csp).toContain("default-src 'self'");
   });
 
-  it('blocks frame embedding', () => {
-    const headerParts: string[] = [];
-    const res = {
-      setHeader: (name: string, value: string) => {
-        if (name === 'Content-Security-Policy') headerParts.push(value);
-      },
-      removeHeader: () => {},
-    } as any;
-    const req = {} as any;
-    const next = () => {};
-
-    securityConfig(req, res, next);
-
-    if (headerParts.length > 0) {
-      const csp = headerParts[0];
-      expect(csp).toContain("frame-src 'none'");
+  it('allows Telegram frames including oauth.telegram.org', () => {
+    const headers = runMiddleware(securityConfig);
+    const csp = headers['Content-Security-Policy'] || '';
+    const frameMatch = csp.match(/frame-src\s+([^;]+)/);
+    expect(frameMatch).not.toBeNull();
+    if (frameMatch) {
+      expect(frameMatch[1]).toContain('https://telegram.org');
+      expect(frameMatch[1]).toContain('https://oauth.telegram.org');
     }
   });
 
   it('allows Cloudinary images', () => {
-    const headerParts: string[] = [];
-    const res = {
-      setHeader: (name: string, value: string) => {
-        if (name === 'Content-Security-Policy') headerParts.push(value);
-      },
-      removeHeader: () => {},
-    } as any;
-    const req = {} as any;
-    const next = () => {};
+    const headers = runMiddleware(securityConfig);
+    const csp = headers['Content-Security-Policy'] || '';
+    expect(csp).toContain('https://res.cloudinary.com');
+  });
 
-    securityConfig(req, res, next);
+  it('does not set X-Frame-Options (frameguard disabled for Telegram OAuth)', () => {
+    const headers = runMiddleware(securityConfig);
+    expect(headers['X-Frame-Options']).toBeUndefined();
+  });
 
-    if (headerParts.length > 0) {
-      const csp = headerParts[0];
-      expect(csp).toContain('https://res.cloudinary.com');
-    }
+  it('does not set cross-origin headers that block Telegram OAuth', () => {
+    const headers = runMiddleware(securityConfig);
+    expect(headers['Cross-Origin-Embedder-Policy']).toBeUndefined();
+    expect(headers['Cross-Origin-Opener-Policy']).toBeUndefined();
+    expect(headers['Cross-Origin-Resource-Policy']).toBeUndefined();
   });
 });

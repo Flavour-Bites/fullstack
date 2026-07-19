@@ -2,14 +2,13 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 import AboutView from '../AboutView';
 
 describe('AboutView', () => {
   it('renders hero section', () => {
     render(<AboutView />);
-    expect(screen.getByText('MEET YOUR BAKER')).toBeInTheDocument();
     expect(screen.getByText('Yodit Ashenafi')).toBeInTheDocument();
+    expect(screen.getByText(/Baking Custom Cakes with Love/)).toBeInTheDocument();
   });
 
   it('renders highlights block', () => {
