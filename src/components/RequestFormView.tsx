@@ -41,6 +41,7 @@ export default function RequestFormView({
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const getMinDateString = () => {
     const minDate = new Date();
@@ -108,6 +109,11 @@ export default function RequestFormView({
     setUploadError(null);
     const file = e.target.files?.[0];
     if (!file) return;
+    await uploadFile(file);
+  };
+
+  const uploadFile = async (file: File) => {
+    setUploadError(null);
     setUploading(true);
     try {
       const reader = new FileReader();
@@ -131,6 +137,31 @@ export default function RequestFormView({
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer.types.includes('Files')) setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.currentTarget === e.target) setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) uploadFile(file);
   };
 
   const deleteRequest = async (id: string) => {
@@ -427,12 +458,19 @@ export default function RequestFormView({
 
                   <div>
                     <label className="text-[10px] uppercase font-mono tracking-widest text-stone-500 dark:text-stone-400 font-bold block mb-1">{t('order.uploadReference')}</label>
-                    <div className={`border border-dashed rounded-sm p-6 text-center relative transition-colors font-sans ${
-                      uploading ? 'border-lux-gold bg-lux-gold/5'
-                        : uploadedImageUrl ? 'border-emerald-400/50 bg-emerald-500/5'
-                        : uploadError ? 'border-red-400/50 bg-red-500/5'
-                        : 'border-stone-300 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-900/30'
-                    }`}>
+                    <div
+                      onDragOver={handleDragOver}
+                      onDragEnter={handleDragEnter}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      className={`border border-dashed rounded-sm p-6 text-center relative transition-colors font-sans ${
+                        isDragging ? 'border-lux-gold bg-lux-gold/10 scale-[1.02]'
+                          : uploading ? 'border-lux-gold bg-lux-gold/5'
+                          : uploadedImageUrl ? 'border-emerald-400/50 bg-emerald-500/5'
+                          : uploadError ? 'border-red-400/50 bg-red-500/5'
+                          : 'border-stone-300 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-900/30'
+                      }`}
+                    >
                       <input
                         type="file"
                         accept="image/*"
@@ -440,7 +478,14 @@ export default function RequestFormView({
                         disabled={uploading}
                         className="absolute inset-0 opacity-0 cursor-pointer w-full h-full disabled:cursor-not-allowed"
                       />
-                      {uploading ? (
+                      {isDragging ? (
+                        <>
+                          <div className="w-8 h-8 rounded-full bg-lux-gold/20 flex items-center justify-center mx-auto mb-2">
+                            <Paperclip className="w-4 h-4 text-lux-gold" />
+                          </div>
+                          <p className="text-xs text-lux-gold font-semibold">Drop your image here</p>
+                        </>
+                      ) : uploading ? (
                         <>
                           <Loader2 className="w-6 h-6 text-lux-gold mx-auto mb-2 animate-spin" />
                           <p className="text-xs text-lux-gold font-semibold">Uploading...</p>

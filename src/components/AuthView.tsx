@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Shield, Key, LogIn, Loader2, ArrowLeft } from 'lucide-react';
 import { useToast } from './Toast';
 import { User as UserType } from '../types';
@@ -145,10 +146,11 @@ export default function AuthView({
               </div>
             </div>
 
-            <button
+            <motion.button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-stone-900 hover:bg-lux-gold text-white hover:text-stone-950 font-bold text-xs tracking-widest uppercase transition-all duration-300 rounded-sm flex items-center justify-center gap-2 cursor-pointer border border-stone-800"
+              whileTap={{ scale: 0.97 }}
+              className="w-full py-2.5 bg-stone-900 hover:bg-lux-gold text-white hover:text-stone-950 font-bold text-xs tracking-widest uppercase transition-all duration-300 rounded-sm flex items-center justify-center gap-2 cursor-pointer border border-stone-800 disabled:opacity-60"
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -156,7 +158,7 @@ export default function AuthView({
                 <LogIn className="w-4 h-4" />
               )}
               {loading ? t('auth.pleaseWait') : t('auth.signIn')}
-            </button>
+            </motion.button>
           </form>
 
           <button
@@ -191,6 +193,23 @@ export default function AuthView({
         <div className="space-y-4">
           <TelegramLoginButton onSuccess={handleTelegramSuccess} />
         </div>
+
+        <AnimatePresence>
+          {loading && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-white/90 dark:bg-[#111111]/90 backdrop-blur-sm flex flex-col items-center justify-center z-10 rounded-md"
+            >
+              <div className="w-14 h-14 bg-stone-900 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                <Loader2 className="w-7 h-7 text-lux-gold animate-spin" />
+              </div>
+              <p className="text-sm font-serif text-stone-900 dark:text-stone-100">Signing you in...</p>
+              <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-1">Verifying with Telegram</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
