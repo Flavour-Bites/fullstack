@@ -1,5 +1,6 @@
-import { motion } from 'motion/react';
-import { Activity, Clock, Filter, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Activity, Clock, Filter, Trash2, AlertTriangle, X } from 'lucide-react';
 import { t } from '../i18n';
 import type { CustomCakeRequest } from '../types';
 
@@ -10,6 +11,9 @@ interface OrderTrackingViewProps {
 }
 
 export default function OrderTrackingView({ requests, dbConnected, onDelete }: OrderTrackingViewProps) {
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
+  const pendingDelete = confirmDeleteId ? requests.find(r => r.id === confirmDeleteId) : null;
   return (
     <section className="pt-8 border-t border-stone-200/80 dark:border-stone-800">
       <div className="bg-stone-50 dark:bg-[#111111] border border-stone-200 dark:border-stone-850 p-6 sm:p-10 rounded-sm shadow-xs space-y-8">
@@ -107,10 +111,10 @@ export default function OrderTrackingView({ requests, dbConnected, onDelete }: O
                     </td>
                     <td className="py-4 px-4 text-center border-stone-100 dark:border-stone-850">
                       <button
-                        onClick={() => onDelete(req.id)}
+                        onClick={() => setConfirmDeleteId(req.id)}
                         className="p-1 px-2.5 border border-stone-200 dark:border-stone-800 rounded-sm hover:border-red-350 dark:hover:border-red-900 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 text-stone-500 dark:text-stone-400 font-medium font-mono text-[10px] transition-all cursor-pointer inline-flex items-center gap-1"
                       >
-                        <Trash2 className="w-3.5 h-3.5 animate-pulse" />
+                        <Trash2 className="w-3.5 h-3.5" />
                         {t('order.cancelRequest')}
                       </button>
                     </td>
@@ -121,6 +125,60 @@ export default function OrderTrackingView({ requests, dbConnected, onDelete }: O
           )}
         </div>
       </div>
+
+      <AnimatePresence>
+        {pendingDelete && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9998] bg-black/50 flex items-center justify-center p-4"
+            onClick={() => setConfirmDeleteId(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm p-6 max-w-sm w-full shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-950/30 flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-red-500" />
+                </div>
+                <div>
+                  <h3 className="font-serif text-lg text-stone-900 dark:text-stone-100">Cancel this request?</h3>
+                  <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono">{pendingDelete.id}</p>
+                </div>
+                <button
+                  onClick={() => setConfirmDeleteId(null)}
+                  className="ml-auto p-1 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-sm transition-colors"
+                >
+                  <X className="w-4 h-4 text-stone-400" />
+                </button>
+              </div>
+              <p className="text-xs text-stone-600 dark:text-stone-300 mb-6 leading-relaxed">
+                This will permanently cancel your {pendingDelete.eventType} cake request for {pendingDelete.deliveryDate}. This action cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setConfirmDeleteId(null)}
+                  className="flex-1 py-2.5 border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-300 text-xs font-medium rounded-sm hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors cursor-pointer"
+                >
+                  Keep Request
+                </button>
+                <button
+                  onClick={() => { onDelete(pendingDelete.id); setConfirmDeleteId(null); }}
+                  className="flex-1 py-2.5 bg-red-600 text-white text-xs font-medium rounded-sm hover:bg-red-700 transition-colors cursor-pointer"
+                >
+                  Yes, Cancel
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
