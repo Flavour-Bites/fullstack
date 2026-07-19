@@ -260,7 +260,7 @@ export default function ProfileView({ currentUser, onLogout, onNavigate }: Profi
         {/* Editorial Subheader */}
         <div className="text-center md:text-left border-b border-stone-200/50 dark:border-stone-800/80 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-serif text-warm-950 dark:text-stone-100 mb-1">{t('profile.accountDashboard')}</h1>
+            <h1 className="text-3xl font-serif text-warm-950 dark:text-stone-100 mb-1">{t('profile.myProfile')}</h1>
             <p className="text-xs text-stone-500 dark:text-stone-400 font-light">
               {t('profile.dashboardDescription')}
             </p>

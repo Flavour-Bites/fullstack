@@ -269,6 +269,7 @@ export const am = {
     completedOrders: 'የተጠናቀቁ',
     customerDashboard: 'የደንበኛ ዳሽቦርድ አካባቢ',
     accountDashboard: 'የመለያ ዳሽቦርድዎ',
+    myProfile: 'የእኔ መገለጫ',
     dashboardDescription: 'መለያዎን ያስተዳድሩ፣ ውብ የኬክ ንድፎችን ይመልከቱ እና ንቁ ትዕዛዞችን ያረጋግጡ።',
     staffAdmin: 'የሰራተኛ አስተዳደር ፓነል',
     signatureClient: 'ዋና ደንበኛ',

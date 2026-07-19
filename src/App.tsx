@@ -17,6 +17,7 @@ import AuthView from './components/AuthView';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import NotFoundView from './components/NotFoundView';
+import SearchModal from './components/SearchModal';
 
 import { setLocale, getLocale } from './i18n';
 import type { Locale } from './i18n';
@@ -30,6 +31,18 @@ export default function App() {
   const [darkMode, setDarkMode] = useState<boolean>(() => localStorage.getItem('theme') === 'dark');
   const [selectedCake, setSelectedCake] = useState<CakeGalleryItem | null>(null);
   const [prefilledCake, setPrefilledCake] = useState<CakeGalleryItem | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   useEffect(() => {
     if (darkMode) {
@@ -134,6 +147,7 @@ export default function App() {
           onToggleDarkMode={() => setDarkMode(d => !d)}
           onToggleLocale={handleToggleLocale}
           onLogout={handleLogout}
+          onSearchOpen={() => setSearchOpen(true)}
         />
 
         <main id="main-content" className="flex-grow">
@@ -217,6 +231,7 @@ export default function App() {
 
         <Footer isAdminMode={isAdminMode} onNavigate={navigateTo} />
         <ErrorBoundary><CakeAssistantBot activePage={activePage} /></ErrorBoundary>
+        <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} onNavigate={navigateTo} />
       </div>
     </>
   );

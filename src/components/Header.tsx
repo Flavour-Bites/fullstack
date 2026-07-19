@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Cake, CalendarDays, LogOut, LogIn, User as UserIcon,
-  Sun, Moon, HelpCircle, Compass, ShieldCheck, ShoppingBag, Menu, X, Globe
+  Sun, Moon, HelpCircle, Compass, ShieldCheck, ShoppingBag, Menu, X, Globe, Search
 } from 'lucide-react';
 import type { Locale } from '../i18n';
 import type { PageType, User } from '../types';
@@ -19,11 +19,12 @@ interface HeaderProps {
   onToggleDarkMode: () => void;
   onToggleLocale: () => void;
   onLogout: () => void;
+  onSearchOpen: () => void;
 }
 
 export default function Header({
   currentUser, darkMode, locale, activePage, adminTab, isAdminMode,
-  onNavigate, onAdminTabChange, onToggleDarkMode, onToggleLocale, onLogout,
+  onNavigate, onAdminTabChange, onToggleDarkMode, onToggleLocale, onLogout, onSearchOpen,
 }: HeaderProps) {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -136,6 +137,21 @@ export default function Header({
 
         {/* Far Right Action Cluster */}
         <div className="hidden lg:flex items-center gap-3">
+          {/* Search */}
+          {!isAdminMode && (
+            <button
+              onClick={onSearchOpen}
+              className={`p-2 rounded-sm transition-all cursor-pointer ${
+                darkMode
+                  ? 'text-stone-400 hover:text-lux-gold hover:bg-stone-900/50'
+                  : 'text-stone-500 hover:text-lux-gold hover:bg-stone-100'
+              }`}
+              aria-label="Search"
+              title="Search (⌘K)"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+          )}
           <div
             className="relative shrink-0"
             onMouseEnter={() => setProfileDropdownOpen(true)}
@@ -396,10 +412,10 @@ export default function Header({
                   <button
                     key={tab.id}
                     onClick={() => { onAdminTabChange(tab.id as any); setMobileMenuOpen(false); }}
-                    className={`text-left text-xs uppercase tracking-widest font-semibold py-2 border-b cursor-pointer ${
+                    className={`text-left text-xs uppercase tracking-widest font-semibold py-2 border-b cursor-pointer transition-all ${
                       adminTab === tab.id
-                        ? 'text-lux-gold border-lux-gold/30 pl-2 font-bold'
-                        : 'text-stone-400 border-stone-800/40'
+                        ? 'text-lux-gold border-lux-gold/30 pl-3 font-bold border-l-2 bg-lux-gold/5'
+                        : 'text-stone-400 border-stone-800/40 hover:text-stone-200'
                     }`}
                   >
                     {tab.label}
@@ -416,17 +432,27 @@ export default function Header({
                   <button
                     key={item.page}
                     onClick={() => { onNavigate(item.page); setMobileMenuOpen(false); }}
-                    className={`text-left text-xs uppercase tracking-widest font-semibold py-2 border-b cursor-pointer ${
+                    className={`text-left text-xs uppercase tracking-widest font-semibold py-2 border-b cursor-pointer transition-all ${
                       activePage === item.page
-                        ? 'text-lux-gold pl-2 border-lux-gold/20 font-bold'
+                        ? 'text-lux-gold pl-3 border-lux-gold/30 font-bold border-l-2 bg-lux-gold/5'
                         : isAdminMode || darkMode
-                          ? 'text-stone-400 border-stone-800/45'
-                          : 'text-stone-600 border-stone-100'
+                          ? 'text-stone-400 border-stone-800/45 hover:text-stone-200'
+                          : 'text-stone-600 border-stone-100 hover:text-stone-900'
                     }`}
                   >
                     {item.label}
                   </button>
                 ))
+              )}
+
+              {!isAdminMode && (
+                <button
+                  onClick={() => { onSearchOpen(); setMobileMenuOpen(false); }}
+                  className={`flex items-center gap-2 py-2 border-b text-left text-xs uppercase tracking-widest font-semibold cursor-pointer ${isAdminMode || darkMode ? 'border-stone-800 text-stone-400 hover:text-stone-200' : 'border-stone-100 text-stone-600 hover:text-stone-900'}`}
+                >
+                  <Search className="w-3.5 h-3.5 text-lux-gold" />
+                  Search Cakes & FAQs
+                </button>
               )}
 
               <div className={`pt-2 border-b pb-2 flex justify-between items-center ${isAdminMode || darkMode ? 'border-stone-800' : 'border-stone-150'}`}>
@@ -441,7 +467,7 @@ export default function Header({
               </div>
 
               <div className={`pt-2 border-b pb-2 flex justify-between items-center ${isAdminMode || darkMode ? 'border-stone-800' : 'border-stone-150'}`}>
-                <span className="text-xs font-semibold text-stone-400 uppercase tracking-wider">Atmosphere Tone</span>
+                <span className="text-xs font-semibold text-stone-400 uppercase tracking-wider">Theme</span>
                 <button onClick={onToggleDarkMode} className="flex items-center gap-1.5 px-3 py-1.5 border border-stone-800 rounded-sm text-xs text-lux-gold font-mono cursor-pointer">
                   {darkMode ? <><Sun className="w-3.5 h-3.5" /><span>Light Mode</span></> : <><Moon className="w-3.5 h-3.5" /><span>Dark Mode</span></>}
                 </button>

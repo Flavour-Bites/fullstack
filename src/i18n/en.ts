@@ -269,6 +269,7 @@ export const en = {
     completedOrders: 'Completed',
     customerDashboard: 'Customer Dashboard Area',
     accountDashboard: 'Your Account Dashboard',
+    myProfile: 'My Profile',
     dashboardDescription: 'Manage your account, look at beautiful cake designs, and check active orders.',
     staffAdmin: 'Staff Admin Panel',
     signatureClient: 'Signature Client',

@@ -22,6 +22,6 @@ describe('ProfileView', () => {
         <ProfileView currentUser={mockUser} onLogout={vi.fn()} onNavigate={vi.fn()} />
       </ToastProvider>
     );
-    expect(screen.getByText('Your Account Dashboard')).toBeInTheDocument();
+    expect(screen.getByText('My Profile')).toBeInTheDocument();
   });
 });

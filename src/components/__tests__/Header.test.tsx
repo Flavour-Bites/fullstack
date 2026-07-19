@@ -17,6 +17,7 @@ const baseProps = {
   onToggleDarkMode: vi.fn(),
   onToggleLocale: vi.fn(),
   onLogout: vi.fn(),
+  onSearchOpen: vi.fn(),
 };
 
 describe('Header', () => {
