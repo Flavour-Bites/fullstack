@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, X, Cake, HelpCircle, ArrowRight, Command } from 'lucide-react';
+import { Search, X, HelpCircle, ArrowRight, Command } from 'lucide-react';
 import { GALLERY_ITEMS, FAQS } from '../data';
 import type { PageType } from '../types';
 

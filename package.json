@@ -9,7 +9,7 @@
     "build": "vite build && esbuild src/app/server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
     "start": "node dist/server.cjs",
     "postinstall": "npx prisma generate; true",
-    "db:seed": "tsx prisma/seed.ts",
+    "db:seed": "tsx prisma/seed/index.ts",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",

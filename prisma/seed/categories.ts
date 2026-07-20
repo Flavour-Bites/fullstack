@@ -1,0 +1,38 @@
+export const CATEGORY_SEEDS = [
+  {
+    id: 'cat-celebration',
+    name: 'Celebration',
+    slug: 'celebration',
+    description: 'Luxury celebration cakes for weddings, anniversaries, and special events.',
+    color: '#c5a880',
+    icon: 'sparkles',
+    sortOrder: 1,
+  },
+  {
+    id: 'cat-birthday',
+    name: 'Birthday',
+    slug: 'birthday',
+    description: 'Birthday cakes for kids and adults.',
+    color: '#d4a373',
+    icon: 'party-popper',
+    sortOrder: 2,
+  },
+  {
+    id: 'cat-kids',
+    name: 'Kids',
+    slug: 'kids',
+    description: 'Fun and colorful cakes for children.',
+    color: '#8ecae6',
+    icon: 'baby',
+    sortOrder: 3,
+  },
+  {
+    id: 'cat-treats',
+    name: 'Treats',
+    slug: 'treats',
+    description: 'Macarons, platters, and sweet add-ons.',
+    color: '#b08968',
+    icon: 'cookie',
+    sortOrder: 4,
+  },
+];
