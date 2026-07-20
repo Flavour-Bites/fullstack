@@ -13,7 +13,7 @@ interface OrderTrackingViewProps {
 export default function OrderTrackingView({ requests, dbConnected, onDelete }: OrderTrackingViewProps) {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
-  const pendingDelete = confirmDeleteId ? requests.find(r => r.id === confirmDeleteId) : null;
+  const pendingDelete = confirmDeleteId ? (requests ?? []).find(r => r.id === confirmDeleteId) : null;
   return (
     <section className="pt-8 border-t border-stone-200/80 dark:border-stone-800">
       <div className="bg-stone-50 dark:bg-[#111111] border border-stone-200 dark:border-stone-850 p-6 sm:p-10 rounded-sm shadow-xs space-y-8">
@@ -45,7 +45,7 @@ export default function OrderTrackingView({ requests, dbConnected, onDelete }: O
         </div>
 
         <div className="overflow-x-auto">
-          {requests.length === 0 ? (
+          {(requests ?? []).length === 0 ? (
             <div className="text-center py-10 bg-white dark:bg-[#111111] border border-dashed border-stone-200 dark:border-stone-800 rounded-sm font-sans">
               <Filter className="w-10 h-10 text-stone-300 dark:text-stone-600 mx-auto mb-3" />
               <p className="text-sm font-serif italic text-stone-500 dark:text-stone-400">{t('order.noActiveRequests')}</p>
@@ -65,7 +65,7 @@ export default function OrderTrackingView({ requests, dbConnected, onDelete }: O
                 </tr>
               </thead>
               <tbody className="divide-y divide-stone-150/60 dark:divide-stone-800 bg-white dark:bg-[#111111] font-sans">
-                {requests.map((req) => (
+                {(requests ?? []).map((req) => (
                   <motion.tr
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}

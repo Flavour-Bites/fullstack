@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, waitFor } from '@testing-library/react';
 import { ToastProvider } from '../Toast';
 import AdminView from '../AdminView';
 
@@ -24,28 +24,36 @@ function renderView(props = {}) {
 }
 
 describe('AdminView', () => {
-  it('renders tab navigation buttons', () => {
+  it('renders tab navigation buttons', async () => {
     renderView();
-    expect(screen.getByText('Dashboard')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Dashboard')).toBeInTheDocument();
+    });
     expect(screen.getByText('Orders')).toBeInTheDocument();
     expect(screen.getByText('Menu')).toBeInTheDocument();
     expect(screen.getByText('Categories')).toBeInTheDocument();
     expect(screen.getByText('Reviews')).toBeInTheDocument();
   });
 
-  it('shows dashboard content by default', () => {
+  it('shows dashboard content by default', async () => {
     renderView();
-    expect(screen.getByText('Total Orders')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Total Orders')).toBeInTheDocument();
+    });
   });
 
-  it('shows Users and Recovery tabs for admin', () => {
+  it('shows Users and Recovery tabs for admin', async () => {
     renderView();
-    expect(screen.getByText('Users')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Users')).toBeInTheDocument();
+    });
     expect(screen.getByText('Recovery')).toBeInTheDocument();
   });
 
-  it('renders system administration badge for admin', () => {
+  it('renders system administration badge for admin', async () => {
     renderView();
-    expect(screen.getByText('System Administration')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('System Administration')).toBeInTheDocument();
+    });
   });
 });

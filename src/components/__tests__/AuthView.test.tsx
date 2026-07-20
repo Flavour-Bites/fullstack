@@ -1,12 +1,12 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup, waitFor } from '@testing-library/react';
+import { render, screen, cleanup, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ToastProvider } from '../Toast';
 import AuthView from '../AuthView';
 
 beforeEach(() => {
-  vi.stubGlobal('fetch', vi.fn());
+  vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response('{"success":true}', { headers: { 'Content-Type': 'application/json' } }))));
   localStorage.clear();
 });
 
@@ -24,15 +24,19 @@ function renderAuthView(props = {}) {
 }
 
 describe('AuthView', () => {
-  it('renders the telegram login step by default', () => {
+  it('renders the telegram login step by default', async () => {
     renderAuthView();
-    expect(screen.getByText('Sign In')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Sign In')).toBeInTheDocument();
+    });
     expect(screen.getByText(/Sign in with Telegram/i)).toBeInTheDocument();
   });
 
-  it('renders custom title and subtitle', () => {
+  it('renders custom title and subtitle', async () => {
     renderAuthView({ title: 'Custom Title', subtitle: 'Custom Subtitle' });
-    expect(screen.getByText('Custom Title')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Custom Title')).toBeInTheDocument();
+    });
     expect(screen.getByText('Custom Subtitle')).toBeInTheDocument();
   });
 
@@ -46,8 +50,10 @@ describe('AuthView', () => {
 
     renderAuthView();
 
-    const telegramData = { id: 12345, first_name: 'Test', auth_date: Date.now(), hash: 'abc' };
-    await (window as any).onTelegramAuth(telegramData);
+    await act(async () => {
+      const telegramData = { id: 12345, first_name: 'Test', auth_date: Date.now(), hash: 'abc' };
+      await (window as any).onTelegramAuth(telegramData);
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Enter Your Password')).toBeInTheDocument();
@@ -65,7 +71,9 @@ describe('AuthView', () => {
 
     renderAuthView({ onAuthSuccess });
 
-    await (window as any).onTelegramAuth({ id: 12345, first_name: 'Test', auth_date: Date.now(), hash: 'abc' });
+    await act(async () => {
+      await (window as any).onTelegramAuth({ id: 12345, first_name: 'Test', auth_date: Date.now(), hash: 'abc' });
+    });
 
     await waitFor(() => {
       expect(onAuthSuccess).toHaveBeenCalledWith({ id: '1', name: 'Test', role: 'customer' });
@@ -85,7 +93,9 @@ describe('AuthView', () => {
 
     renderAuthView({ onAuthSuccess });
 
-    await (window as any).onTelegramAuth({ id: 12345, first_name: 'Test', auth_date: Date.now(), hash: 'abc' });
+    await act(async () => {
+      await (window as any).onTelegramAuth({ id: 12345, first_name: 'Test', auth_date: Date.now(), hash: 'abc' });
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Enter Your Password')).toBeInTheDocument();
@@ -110,7 +120,9 @@ describe('AuthView', () => {
 
     renderAuthView();
 
-    await (window as any).onTelegramAuth({ id: 12345, first_name: 'Test', auth_date: Date.now(), hash: 'abc' });
+    await act(async () => {
+      await (window as any).onTelegramAuth({ id: 12345, first_name: 'Test', auth_date: Date.now(), hash: 'abc' });
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Use a different Telegram account')).toBeInTheDocument();

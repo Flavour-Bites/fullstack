@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, waitFor } from '@testing-library/react';
 import { ToastProvider } from '../Toast';
 import RequestFormView from '../RequestFormView';
 
@@ -14,12 +14,14 @@ afterEach(() => {
 });
 
 describe('RequestFormView', () => {
-  it('renders request form', () => {
+  it('renders request form', async () => {
     render(
       <ToastProvider>
         <RequestFormView prefilledCake={null} onClearPrefilledCake={vi.fn()} />
       </ToastProvider>
     );
-    expect(screen.getByText('Request a Custom Cake')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Request a Custom Cake')).toBeInTheDocument();
+    });
   });
 });

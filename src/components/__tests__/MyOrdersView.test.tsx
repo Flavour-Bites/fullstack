@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, waitFor } from '@testing-library/react';
 import MyOrdersView from '../MyOrdersView';
 
 beforeEach(() => {
@@ -13,8 +13,10 @@ afterEach(() => {
 });
 
 describe('MyOrdersView', () => {
-  it('renders page title', () => {
+  it('renders page title', async () => {
     render(<MyOrdersView currentUser={{ id: '1', email: 'a@b.com', name: 'Test', role: 'customer' }} />);
-    expect(screen.getByText('Order Updates')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Order Updates')).toBeInTheDocument();
+    });
   });
 });
