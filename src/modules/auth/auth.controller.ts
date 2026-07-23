@@ -16,6 +16,7 @@ export const authController = {
       sameSite: 'lax' as const,
       secure: process.env.NODE_ENV === 'production',
       maxAge: 10 * 60 * 1000, // 10 minutes
+      path: '/',
     };
 
     res.cookie('oidc_state', state, tempCookieOptions);
@@ -51,9 +52,9 @@ export const authController = {
       redirectUri,
     });
 
-    res.clearCookie('oidc_state');
-    res.clearCookie('oidc_nonce');
-    res.clearCookie('oidc_code_verifier');
+    res.clearCookie('oidc_state', { path: '/' });
+    res.clearCookie('oidc_nonce', { path: '/' });
+    res.clearCookie('oidc_code_verifier', { path: '/' });
 
     if (result.token) {
       res.cookie('auth_token', result.token, authService.authCookieOptions);
