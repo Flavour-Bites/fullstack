@@ -54,11 +54,18 @@ export const authService = {
       throw new Error('TELEGRAM_OPENID_CONNECT_CLIENT_ID is not configured.');
     }
 
+    const botToken = process.env.TELEGRAM_BOT_TOKEN?.trim();
+    const botId = botToken?.split(':')[0];
+    if (!botId) {
+      throw new Error('TELEGRAM_BOT_TOKEN is not configured or invalid.');
+    }
+
     const state = generateState();
     const nonce = generateNonce();
     const { codeVerifier, codeChallenge } = generatePkcePair();
 
     const authUrl = new URL(config.authorization_endpoint);
+    authUrl.searchParams.set('bot_id', botId);
     authUrl.searchParams.set('client_id', clientId);
     authUrl.searchParams.set('redirect_uri', redirectUri);
     authUrl.searchParams.set('response_type', 'code');
