@@ -12,6 +12,7 @@ import TestimonialsView from './components/TestimonialsView';
 import ContactView from './components/ContactView';
 import CakeAssistantBot from './components/CakeAssistantBot';
 import ProfileView from './components/ProfileView';
+import MyOrdersView from './components/MyOrdersView';
 import AdminView from './components/AdminView';
 import { AuthView } from './components/AuthView';
 import Header from './components/Header';
@@ -77,9 +78,7 @@ export default function App() {
   }, []);
 
   const navigateTo = (page: PageType) => {
-    let targetPage = page;
-    if (page === 'orders') targetPage = 'profile';
-    setActivePage(targetPage);
+    setActivePage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -195,13 +194,24 @@ export default function App() {
               {activePage === 'about' && <AboutView />}
               {activePage === 'testimonials' && <TestimonialsView />}
               {activePage === 'contact' && <ContactView />}
-              {(activePage === 'profile' || activePage === 'orders') && (
+              {activePage === 'profile' && (
                 currentUser ? (
                   <ProfileView currentUser={currentUser} onLogout={handleLogout} onNavigate={navigateTo} />
                 ) : (
                   <AuthView
                     onAuthSuccess={(user) => { setCurrentUser(user); navigateTo('profile'); }}
-                    title="Atelier Profile & Orders"
+                    title="Account Profile"
+                    subtitle="Log in to view and manage your account details."
+                  />
+                )
+              )}
+              {activePage === 'orders' && (
+                currentUser ? (
+                  <MyOrdersView currentUser={currentUser} />
+                ) : (
+                  <AuthView
+                    onAuthSuccess={(user) => { setCurrentUser(user); navigateTo('orders'); }}
+                    title="My Orders"
                     subtitle="Log in to view live statuses and custom design files for your inquiries."
                   />
                 )

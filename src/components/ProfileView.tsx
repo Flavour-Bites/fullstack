@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { User, LogOut, CheckCircle, Smartphone, Info } from 'lucide-react';
+import { User, LogOut, CheckCircle, Smartphone, Info, ShoppingBag } from 'lucide-react';
 import { t } from '../i18n';
 import { usePageTitle } from '../hooks/usePageTitle';
 
@@ -66,6 +66,13 @@ export default function ProfileView({ currentUser, onLogout, onNavigate }: Profi
               </div>
 
               <div className="space-y-3 pt-4 border-t border-stone-100 dark:border-stone-850">
+                <button
+                  onClick={() => onNavigate('orders')}
+                  className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-lux-gold hover:text-stone-900 dark:hover:text-white font-semibold transition-colors cursor-pointer"
+                >
+                  <ShoppingBag className="w-3.5 h-3.5" />
+                  {t('profile.activeOrders')}
+                </button>
                 <button
                   onClick={onLogout}
                   className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-red-600 dark:text-red-400 hover:text-red-700 font-semibold transition-colors cursor-pointer"

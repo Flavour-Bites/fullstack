@@ -105,7 +105,7 @@ const SIMULATED_ORDERS: SimulatedOrder[] = [
 interface MyOrdersViewProps {
   currentUser: {
     id: string;
-    email: string;
+    email?: string;
     name: string;
     role: string;
   };
