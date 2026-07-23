@@ -65,12 +65,10 @@ describe('authController.initiateTelegramLogin', () => {
     vi.clearAllMocks();
   });
 
-  it('sets OIDC state, nonce, and code_verifier cookies and redirects to authorizationUrl', async () => {
+  it('redirects to Telegram authorizationUrl', async () => {
     vi.mocked(authService.initiateOidcFlow).mockResolvedValueOnce({
       authorizationUrl: 'https://oauth.telegram.org/auth?client_id=123',
-      state: 'state_123',
-      nonce: 'nonce_123',
-      codeVerifier: 'verifier_123',
+      state: 'state_jwt',
     });
 
     const req = mockReq();
@@ -78,18 +76,13 @@ describe('authController.initiateTelegramLogin', () => {
 
     await authController.initiateTelegramLogin(req, res, vi.fn());
 
-    expect(res.cookie).toHaveBeenCalledWith('oidc_state', 'state_123', expect.any(Object));
-    expect(res.cookie).toHaveBeenCalledWith('oidc_nonce', 'nonce_123', expect.any(Object));
-    expect(res.cookie).toHaveBeenCalledWith('oidc_code_verifier', 'verifier_123', expect.any(Object));
     expect(res.redirect).toHaveBeenCalledWith('https://oauth.telegram.org/auth?client_id=123');
   });
 
   it('returns JSON authorizationUrl when requested via JSON Accept header', async () => {
     vi.mocked(authService.initiateOidcFlow).mockResolvedValueOnce({
       authorizationUrl: 'https://oauth.telegram.org/auth?client_id=123',
-      state: 'state_123',
-      nonce: 'nonce_123',
-      codeVerifier: 'verifier_123',
+      state: 'state_jwt',
     });
 
     const req = mockReq({ headers: { accept: 'application/json' } });
@@ -109,7 +102,7 @@ describe('authController.handleTelegramCallback', () => {
     vi.clearAllMocks();
   });
 
-  it('handles callback, sets auth_token cookie, clears temp cookies, and redirects', async () => {
+  it('handles callback, sets auth_token cookie, and redirects', async () => {
     vi.mocked(authService.handleOidcCallback).mockResolvedValueOnce({
       success: true,
       token: 'jwt_app_token',
@@ -119,15 +112,11 @@ describe('authController.handleTelegramCallback', () => {
     const req = mockReq({
       method: 'GET',
       query: { code: 'c_123', state: 's_123' },
-      cookies: { oidc_state: 's_123', oidc_nonce: 'n_123', oidc_code_verifier: 'v_123' },
     });
     const res = mockRes();
 
     await authController.handleTelegramCallback(req, res, vi.fn());
 
-    expect(res.clearCookie).toHaveBeenCalledWith('oidc_state');
-    expect(res.clearCookie).toHaveBeenCalledWith('oidc_nonce');
-    expect(res.clearCookie).toHaveBeenCalledWith('oidc_code_verifier');
     expect(res.cookie).toHaveBeenCalledWith('auth_token', 'jwt_app_token', expect.any(Object));
     expect(res.redirect).toHaveBeenCalledWith('/');
   });

@@ -126,8 +126,7 @@ describe('authService.initiateOidcFlow', () => {
     expect(result.authorizationUrl).toContain('code_challenge_method=S256');
     expect(result.authorizationUrl).toContain('scope=openid');
     expect(result.state).toBeDefined();
-    expect(result.nonce).toBeDefined();
-    expect(result.codeVerifier).toBeDefined();
+    expect(result.state.length).toBe(32);
   });
 
   it('throws when CLIENT_ID is missing', async () => {
@@ -139,21 +138,11 @@ describe('authService.initiateOidcFlow', () => {
 });
 
 describe('authService.handleOidcCallback', () => {
-  it('throws on state mismatch (CSRF)', async () => {
+  it('throws on unknown state (CSRF)', async () => {
     await expect(authService.handleOidcCallback({
       code: 'c_123',
-      state: 'state_a',
-      storedState: 'state_b',
+      state: 'unknown_state_not_in_map',
       redirectUri: 'https://example.com/callback',
     })).rejects.toThrow('Invalid OAuth state');
-  });
-
-  it('throws on missing code verifier (PKCE)', async () => {
-    await expect(authService.handleOidcCallback({
-      code: 'c_123',
-      state: 'state_123',
-      storedState: 'state_123',
-      redirectUri: 'https://example.com/callback',
-    })).rejects.toThrow('Missing PKCE code verifier');
   });
 });
