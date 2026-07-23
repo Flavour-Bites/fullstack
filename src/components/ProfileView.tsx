@@ -90,7 +90,7 @@ export default function ProfileView({ currentUser, onLogout, onNavigate }: Profi
   const [newTelegramId, setNewTelegramId] = useState('');
   const [recoverySubmitting, setRecoverySubmitting] = useState(false);
 
-  const handleRecoverySubmit = async (e: React.FormEvent) => {
+  const handleRecoverySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!newTelegramId.trim()) return;
     setRecoverySubmitting(true);
@@ -187,7 +187,7 @@ export default function ProfileView({ currentUser, onLogout, onNavigate }: Profi
     }
   }, [liveOrders]);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSearchError(false);
     

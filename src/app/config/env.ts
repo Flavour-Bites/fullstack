@@ -4,6 +4,8 @@ const required = [
   'TELEGRAM_BOT_TOKEN',
   'APP_URL',
   'TELEGRAM_WEBHOOK_SECRET',
+  'TELEGRAM_OPENID_CONNECT_CLIENT_ID',
+  'TELEGRAM_OPENID_CONNECT_CLIENT_SECRET',
 ] as const;
 
 const cloudinaryRequired = [
