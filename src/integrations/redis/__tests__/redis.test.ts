@@ -1,14 +1,20 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { setRedisStoreForTests, getRedisStore } from '../redisClient.js';
 
 const MEMORY_STORE_MAX_ENTRIES = 10_000;
 
 describe('MemoryStore', () => {
   let store: ReturnType<typeof getRedisStore>;
+  const savedRedisUrl = process.env.REDIS_URL;
 
   beforeEach(() => {
+    delete process.env.REDIS_URL;
     setRedisStoreForTests(null);
     store = getRedisStore();
+  });
+
+  afterEach(() => {
+    if (savedRedisUrl) process.env.REDIS_URL = savedRedisUrl;
   });
 
   it('sets and gets a value', async () => {
@@ -120,6 +126,8 @@ describe('getRedisStore / setRedisStoreForTests', () => {
 
 describe('getRedisStore fallback warning', () => {
   it('logs warning when REDIS_URL is not set', () => {
+    const savedUrl = process.env.REDIS_URL;
+    delete process.env.REDIS_URL;
     setRedisStoreForTests(null);
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
@@ -134,6 +142,7 @@ describe('getRedisStore fallback warning', () => {
       expect.stringContaining('in-memory store')
     );
     warnSpy.mockRestore();
+    if (savedUrl) process.env.REDIS_URL = savedUrl;
   });
 
   it('does not log warning when REDIS_URL is set', () => {
@@ -154,6 +163,8 @@ describe('getRedisStore fallback warning', () => {
 
 describe('MemoryStore eviction boundary', () => {
   it('evicts 10% of entries when at capacity', async () => {
+    const savedUrl = process.env.REDIS_URL;
+    delete process.env.REDIS_URL;
     setRedisStoreForTests(null);
     const store = getRedisStore();
 
@@ -174,6 +185,7 @@ describe('MemoryStore eviction boundary', () => {
     expect(await store.get('key-999')).toBeNull();
     // key-1000 should still exist (beyond the 10% eviction window)
     expect(await store.get('key-1000')).toBe('value-1000');
+    if (savedUrl) process.env.REDIS_URL = savedUrl;
   });
 });
 

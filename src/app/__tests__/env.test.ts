@@ -14,6 +14,8 @@ describe('validateEnv', () => {
       APP_URL: 'https://flavourbites.com',
       TELEGRAM_WEBHOOK_SECRET: 'super-secret-token-123',
       CLOUDINARY_URL: 'cloudinary://key:secret@cloud',
+      TELEGRAM_OPENID_CONNECT_CLIENT_ID: 'test_client_id',
+      TELEGRAM_OPENID_CONNECT_CLIENT_SECRET: 'test_client_secret',
     };
   });
 
