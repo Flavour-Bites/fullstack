@@ -23,7 +23,7 @@ describe('ProfileView', () => {
       </ToastProvider>
     );
     await waitFor(() => {
-      expect(screen.getByText('My Profile')).toBeInTheDocument();
+      expect(screen.getByText('Your Profile')).toBeInTheDocument();
     });
   });
 });

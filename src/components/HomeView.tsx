@@ -76,24 +76,24 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
           
           {/* Left Text Column */}
           <div className="w-full lg:w-[52%] xl:w-[48%] space-y-7 text-left shrink-0">
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.1 }}
-              className="text-4xl sm:text-5xl md:text-6xl font-serif tracking-tight leading-[1.08] text-white"
-            >
-              Made for Moments <br />
-              <span className="italic font-light text-lux-gold block sm:inline">Worth Celebrating</span>
-            </motion.h1>
+              <motion.h1
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.1 }}
+                className="text-4xl sm:text-5xl md:text-6xl font-serif tracking-tight leading-[1.08] text-white"
+              >
+                {t('home.heroTitle')} <br />
+                <span className="italic font-light text-lux-gold block sm:inline">{t('home.heroSubtitle')}</span>
+              </motion.h1>
 
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-stone-300 text-sm sm:text-base font-light leading-relaxed max-w-xl font-sans"
-            >
-              At Flavour Bites, custom cake designer Yodit Ashenafi handcrafts intensely focused, recipe-art masterpieces using organic highland butter and gorgeous decorative botanicals. We bake with absolute care for your milestones.
-            </motion.p>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="text-stone-300 text-sm sm:text-base font-light leading-relaxed max-w-xl font-sans"
+              >
+                {t('home.heroDescription')}
+              </motion.p>
 
             {/* Action buttons */}
             <motion.div
@@ -165,10 +165,10 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { icon: <Star className="w-5 h-5 text-lux-gold" />, value: "500+", label: "Cakes Handcrafted" },
-              { icon: <Heart className="w-5 h-5 text-lux-gold" />, value: "100%", label: "Made with Pure Love" },
-              { icon: <Check className="w-5 h-5 text-lux-gold" />, value: "Fresh", label: "Premium Local Ingredients" },
-              { icon: <Award className="w-5 h-5 text-lux-gold" />, value: "5-Star", label: "Happy Client Reviews" },
+              { icon: <Star className="w-5 h-5 text-lux-gold" />, value: "500+", label: t('home.statsCakesHandcrafted') },
+              { icon: <Heart className="w-5 h-5 text-lux-gold" />, value: "100%", label: t('home.statsMadeWithLove') },
+              { icon: <Check className="w-5 h-5 text-lux-gold" />, value: "Fresh", label: t('home.statsPremiumIngredients') },
+              { icon: <Award className="w-5 h-5 text-lux-gold" />, value: "5-Star", label: t('home.statsHappyClients') },
             ].map((item, idx) => (
               <div key={idx} className="flex items-center gap-3.5 pl-2 sm:pl-4">
                 <div className="w-10 h-10 rounded-full bg-lux-gold/10 flex items-center justify-center shrink-0 border border-lux-gold/15">
@@ -191,7 +191,7 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
           <h2 className="text-3xl sm:text-4xl font-serif text-stone-900 dark:text-stone-100">{t('home.collectionsTitle')}</h2>
           <div className="h-[2px] w-12 bg-lux-gold mx-auto mt-4" />
           <p className="text-stone-550 dark:text-stone-400 text-xs font-light mt-3 leading-relaxed max-w-sm mx-auto">
-            Each creation represents a dedicated design partnership. We bring high-care customized flavor and visual aesthetics to your table.
+            {t('home.collectionsDesc')}
           </p>
         </div>
 
@@ -212,12 +212,12 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
                 />
                 <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors duration-300" />
                 <div className="absolute top-4 left-4 inline-block bg-stone-900/95 backdrop-blur-md px-3 py-1 text-[9px] uppercase tracking-widest font-mono text-lux-gold rounded-full font-semibold">
-                  Bespoke
+                  {t('home.bespokeBadge')}
                 </div>
               </div>
-              <h3 className="text-xl font-serif text-stone-900 dark:text-stone-100 mb-2">Celebration Sculptures</h3>
+              <h3 className="text-xl font-serif text-stone-900 dark:text-stone-100 mb-2">{t('home.celebrationSculptures')}</h3>
               <p className="text-xs text-stone-600 dark:text-stone-400 font-light leading-relaxed mb-6 font-sans">
-                Breathtaking tiered custom milestone structures crafted with hand-pressed structural sugar flowers, elegant velvet textures, and custom design details.
+                {t('home.celebrationSculpturesDesc')}
               </p>
             </div>
             <button
@@ -244,12 +244,12 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
                 />
                 <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors duration-300" />
                 <div className="absolute top-4 left-4 inline-block bg-stone-900/95 backdrop-blur-md px-3 py-1 text-[9px] uppercase tracking-widest font-mono text-lux-gold rounded-full font-semibold">
-                  Milestones
+                  {t('home.milestonesBadge')}
                 </div>
               </div>
-              <h3 className="text-xl font-serif text-stone-900 dark:text-stone-100 mb-2">Milestones & Birthdays</h3>
+              <h3 className="text-xl font-serif text-stone-900 dark:text-stone-100 mb-2">{t('home.milestonesBirthdays')}</h3>
               <p className="text-xs text-stone-600 dark:text-stone-400 font-light leading-relaxed mb-6 font-sans">
-                Modern, custom-colored multi-layered cakes, incorporating elegant watercolor style, personalized motifs, and custom toppers.
+                {t('home.milestonesBirthdaysDesc')}
               </p>
             </div>
             <button
@@ -276,12 +276,12 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
                 />
                 <div className="absolute inset-0 bg-black/5 group-hover:bg-black/0 transition-colors duration-300" />
                 <div className="absolute top-4 left-4 inline-block bg-stone-900/95 backdrop-blur-md px-3 py-1 text-[9px] uppercase tracking-widest font-mono text-lux-gold rounded-full font-semibold">
-                  Petit Fours
+                  {t('home.petitFoursBadge')}
                 </div>
               </div>
-              <h3 className="text-xl font-serif text-stone-900 dark:text-stone-100 mb-2">Cookies & Treats</h3>
+              <h3 className="text-xl font-serif text-stone-900 dark:text-stone-100 mb-2">{t('home.cookiesTreats')}</h3>
               <p className="text-xs text-stone-600 dark:text-stone-400 font-light leading-relaxed mb-6 font-sans">
-                Freshly baked biscuits, macarons, and custom cookies for luxury celebration platters. Sized perfectly to pair with champagne.
+                {t('home.cookiesTreatsDesc')}
               </p>
             </div>
             <button
@@ -307,34 +307,34 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
             <div className="space-y-8">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-stone-900/80 border border-lux-gold/25 rounded-sm">
                 <ShieldCheck className="w-4 h-4 text-lux-gold" />
-                <span className="text-[10px] uppercase tracking-[0.25em] font-mono text-lux-gold font-bold">The Standard of Excellence</span>
+                <span className="text-[10px] uppercase tracking-[0.25em] font-mono text-lux-gold font-bold">{t('home.standardOfExcellence')}</span>
               </div>
               
               <h2 className="text-4xl sm:text-5xl font-serif tracking-tight text-white leading-[1.12]">
-                One Baker. One Cake at a Time. <span className="italic text-lux-gold block">No Exceptions.</span>
+                {t('home.oneBakerTitle')} <span className="italic text-lux-gold block">{t('home.noExceptions')}</span>
               </h2>
               <div className="h-[2px] w-16 bg-lux-gold" />
               
               <p className="text-stone-300 font-light leading-relaxed text-sm sm:text-base tracking-wide font-sans">
-                Unlike commercial assembly-line operations, Flavour Bites operates on a strict custom-commission model. Yodit Ashenafi designs and handcrafts each element personally in her home studio, ensuring that every layer possesses absolute aesthetic integrity and culinary depth.
+                {t('home.philosophyDesc1')}
               </p>
               <p className="text-stone-300 font-light leading-relaxed text-sm tracking-wide font-sans">
-                By sourcing organic flour from the Bale Highlands and churned highland butter dairy, we establish a flavor baseline that is profoundly authentic, rich, and naturally moist.
+                {t('home.philosophyDesc2')}
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
                 <div className="flex flex-col sm:flex-row items-start gap-3">
                   <span className="text-lux-gold font-serif text-4xl font-light leading-none">100%</span>
                   <div>
-                    <h4 className="text-sm font-semibold tracking-wide text-white">Pure Handmade</h4>
-                    <p className="text-xs text-stone-400 font-light mt-0.5 leading-snug">No pre-made industrial stabilizers, zero shortcut additives.</p>
+                    <h4 className="text-sm font-semibold tracking-wide text-white">{t('home.pureHandmade')}</h4>
+                    <p className="text-xs text-stone-400 font-light mt-0.5 leading-snug">{t('home.pureHandmadeDesc')}</p>
                   </div>
                 </div>
                 <div className="flex flex-col sm:flex-row items-start gap-3">
                   <span className="text-lux-gold font-serif text-4xl font-light leading-none">Local</span>
                   <div>
-                    <h4 className="text-sm font-semibold tracking-wide text-white">Highland Organic Sourced</h4>
-                    <p className="text-xs text-stone-400 font-light mt-0.5 leading-snug">Utilizing pure grass-fed custom dairy churn and local premium grain.</p>
+                    <h4 className="text-sm font-semibold tracking-wide text-white">{t('home.highlandOrganic')}</h4>
+                    <p className="text-xs text-stone-400 font-light mt-0.5 leading-snug">{t('home.highlandOrganicDesc')}</p>
                   </div>
                 </div>
               </div>
@@ -355,8 +355,8 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
               {/* Floating Solid Gold Badge "8+ Years of Craft" */}
               <div className="absolute -bottom-6 -left-6 bg-[#c5a880] text-stone-950 p-5 rounded-xs shadow-2xl max-w-[210px] text-left border border-white/10">
                 <p className="font-serif text-3xl font-bold text-stone-950 leading-none">8+ Yrs</p>
-                <p className="text-[10px] font-sans font-bold uppercase tracking-widest text-stone-900/80 mt-1">Dedicated Studio Craft</p>
-                <p className="text-[9px] text-stone-850 font-light mt-1.5 font-sans leading-snug">Chef Yodit orchestrates each step from baseline bake to final ribboning.</p>
+                <p className="text-[10px] font-sans font-bold uppercase tracking-widest text-stone-900/80 mt-1">{t('home.dedicatedStudio')}</p>
+                <p className="text-[9px] text-stone-850 font-light mt-1.5 font-sans leading-snug">{t('home.dedicatedStudioDesc')}</p>
               </div>
             </div>
           </div>
@@ -366,11 +366,11 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
       {/* 5. PROCESS SECTION: Dashed Guidelines and Steps */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-xl mx-auto mb-16">
-          <span className="text-[10px] uppercase tracking-[0.25em] text-lux-gold font-bold block mb-2 font-mono">The Recipe of Collaboration</span>
+          <span className="text-[10px] uppercase tracking-[0.25em] text-lux-gold font-bold block mb-2 font-mono">{t('home.processSubtitle')}</span>
           <h2 className="text-3xl sm:text-4xl font-serif text-stone-900 dark:text-stone-100">{t('home.processTitle')}</h2>
           <div className="h-[2px] w-12 bg-lux-gold mx-auto mt-4" />
           <p className="text-stone-550 dark:text-stone-400 text-xs font-light mt-3 leading-relaxed max-w-sm mx-auto">
-            From natural concept to final centerpiece setup, Yodit ensures a high-fidelity design process.
+            {t('home.processDesc')}
           </p>
         </div>
 
@@ -383,9 +383,9 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
             <div className="w-16 h-16 rounded-full bg-white dark:bg-stone-900 border border-lux-gold text-lux-gold flex items-center justify-center mx-auto text-xl font-serif shadow-md">
               01
             </div>
-            <h3 className="text-lg font-serif font-semibold text-[#1c1917] dark:text-stone-100">Inspiration & Request</h3>
+            <h3 className="text-lg font-serif font-semibold text-[#1c1917] dark:text-stone-100">{t('home.step1Title')}</h3>
             <p className="text-xs text-stone-600 dark:text-stone-400 font-light leading-relaxed max-w-xs mx-auto">
-              Submit your target date, serving metrics, and decorative references on our request form. Mention favorite flavors or allergen constraints.
+              {t('home.step1Desc')}
             </p>
           </div>
 
@@ -394,9 +394,9 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
             <div className="w-16 h-16 rounded-full bg-lux-gold text-stone-950 flex items-center justify-center mx-auto text-xl font-serif shadow-lg">
               02
             </div>
-            <h3 className="text-lg font-serif font-semibold text-[#1c1917] dark:text-stone-100">Direct Consultation</h3>
+            <h3 className="text-lg font-serif font-semibold text-[#1c1917] dark:text-stone-100">{t('home.step2Title')}</h3>
             <p className="text-xs text-stone-600 dark:text-stone-400 font-light leading-relaxed max-w-xs mx-auto">
-              Yodit personally reviews your proposal, confirms material and delivery logistics, and phones or Telegrams you with an exact price sketch and timeline.
+              {t('home.step2Desc')}
             </p>
           </div>
 
@@ -405,9 +405,9 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
             <div className="w-16 h-16 rounded-full bg-white dark:bg-stone-900 border border-lux-gold text-lux-gold flex items-center justify-center mx-auto text-xl font-serif shadow-md">
               03
             </div>
-            <h3 className="text-lg font-serif font-semibold text-[#1c1917] dark:text-stone-100">Baking & Celebration</h3>
+            <h3 className="text-lg font-serif font-semibold text-[#1c1917] dark:text-stone-100">{t('home.step3Title')}</h3>
             <p className="text-xs text-stone-600 dark:text-stone-400 font-light leading-relaxed max-w-xs mx-auto">
-              Your cake is slow-baked with highland organic resources, hand-painted with detailing, and safely handed over in protective studio boxes.
+              {t('home.step3Desc')}
             </p>
           </div>
         </div>
@@ -428,8 +428,8 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-end mb-12 border-b border-stone-200 dark:border-stone-850 pb-6 text-left">
             <div>
-              <span className="text-[10px] uppercase tracking-[0.3em] text-lux-gold font-bold block mb-2 font-mono">Bespoke Architectural Portfolio</span>
-              <h2 className="text-3xl font-serif text-stone-900 dark:text-stone-100">A Taste of What We Bake</h2>
+              <span className="text-[10px] uppercase tracking-[0.3em] text-lux-gold font-bold block mb-2 font-mono">{t('home.portfolioSubtitle')}</span>
+              <h2 className="text-3xl font-serif text-stone-900 dark:text-stone-100">{t('home.portfolioTitle')}</h2>
             </div>
             <button
               onClick={() => onNavigate('gallery')}
@@ -482,7 +482,7 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
         </div>
 
         <div className="max-w-4xl mx-auto px-6 relative z-10 text-center font-sans">
-          <span className="text-[10px] uppercase tracking-[0.25em] text-lux-gold font-mono block mb-8 font-semibold">SWEETEST CELEBRATIONS</span>
+          <span className="text-[10px] uppercase tracking-[0.25em] text-lux-gold font-mono block mb-8 font-semibold">{t('home.sweetestCelebrations')}</span>
 
           <div className="relative min-h-[290px] sm:min-h-[260px] flex items-center justify-center">
             <AnimatePresence mode="wait">
@@ -569,7 +569,7 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
         </div>
 
         <div className="relative z-10 max-w-3xl mx-auto px-5 text-center font-sans space-y-6">
-          <span className="text-[10px] uppercase tracking-[0.35em] text-lux-gold font-bold font-mono">YOUR OCCASION DESERVES AN ARTPIECE</span>
+          <span className="text-[10px] uppercase tracking-[0.35em] text-lux-gold font-bold font-mono">{t('home.ctaSuperTitle')}</span>
           
           <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight">
             {t('home.ctaTitle')} <br />
@@ -577,7 +577,7 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
           </h2>
           
           <p className="text-stone-300 font-light text-sm sm:text-base mb-10 max-w-md mx-auto leading-relaxed">
-            Submit your timeline objectives and color concepts today. Chef Yodit will personally review ingredient/flower spots and follow up within 24 hours.
+            {t('home.ctaDesc')}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">

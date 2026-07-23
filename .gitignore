@@ -18,3 +18,4 @@ coverage/
 *.jsonl
 *skills*
 graphify-out/
+/*.md

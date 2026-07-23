@@ -305,7 +305,7 @@ export default function GalleryView({
                         {cake.name}
                       </h3>
                       <span className="font-mono text-xs text-lux-gold font-light bg-lux-cream/50 dark:bg-stone-900/60 px-2 py-1 rounded-sm border border-lux-gold/10 whitespace-nowrap">
-                        Est: {cake.priceEstimate}
+                        {t('gallery.est')}: {cake.priceEstimate}
                       </span>
                     </div>
                     <p className="text-stone-500 dark:text-stone-400 text-xs font-light mt-2 line-clamp-2 leading-relaxed">

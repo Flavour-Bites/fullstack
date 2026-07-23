@@ -96,7 +96,7 @@ export default function ContactView() {
       <section className="text-center max-w-2xl mx-auto pt-6 px-4">
         <h1 className="text-4xl sm:text-5xl font-serif text-warm-950 dark:text-stone-100 mb-3">{t('contact.title')}</h1>
         <p className="text-sm sm:text-base text-stone-600 dark:text-stone-300 font-light leading-relaxed max-w-lg mx-auto font-sans">
-          {t('contact.getInTouch')} — Yodit checks messages daily to find booking times.
+          {t('contact.getInTouch')} — {t('contact.yoditChecks')}
         </p>
         <div className="h-[1px] w-24 bg-stone-300 mx-auto mt-6" />
       </section>
@@ -115,10 +115,10 @@ export default function ContactView() {
                   <MapPin className="w-5 h-5 text-lux-gold shrink-0 mt-0.5" />
                   <div>
                     <label className="text-[10px] uppercase font-mono tracking-widest text-stone-400 dark:text-stone-500 font-semibold block mb-0.5">{t('contact.studioLocation')}</label>
-                    <p className="text-stone-850 dark:text-stone-150 font-medium">Flavour Bites Custom Studio</p>
+                    <p className="text-stone-850 dark:text-stone-150 font-medium">{t('contact.studioName')}</p>
                     {/* [NEEDS INPUT: specific city / sub-city details - current Bole, Addis Ababa is placeholder] */}
-                    <p className="dark:text-stone-300">Bole Sub-City</p>
-                    <p className="dark:text-stone-300">Addis Ababa, Ethiopia</p>
+                    <p className="dark:text-stone-300">{t('contact.boleSubCity')}</p>
+                    <p className="dark:text-stone-300">{t('contact.addisAbabaEt')}</p>
                   </div>
                 </div>
 
@@ -133,7 +133,7 @@ export default function ContactView() {
                         @flavourbites_placeholder
                       </a>
                     </p>
-                    <span className="text-[11px] text-stone-400 dark:text-stone-500">Our preferred and quickest notification channel.</span>
+                    <span className="text-[11px] text-stone-400 dark:text-stone-500">{t('contact.quickestChannel')}</span>
                   </div>
                 </div>
 
@@ -142,7 +142,7 @@ export default function ContactView() {
                   <div>
                     <label className="text-[10px] uppercase font-mono tracking-widest text-stone-400 dark:text-stone-500 font-semibold block mb-0.5">{t('contact.inquiriesMailbox')}</label>
                     {/* [NEEDS INPUT: actual professional email] */}
-                    <p className="font-mono dark:text-stone-300">hello@flavourbites_placeholder.com</p>
+                    <p className="font-mono dark:text-stone-300">{t('contact.emailAddress')}</p>
                   </div>
                 </div>
 
@@ -151,8 +151,8 @@ export default function ContactView() {
                   <div>
                     <label className="text-[10px] uppercase font-mono tracking-widest text-stone-400 dark:text-stone-500 font-semibold block mb-0.5">{t('contact.directVoice')}</label>
                     {/* [NEEDS INPUT: actual phone number] */}
-                    <p className="font-mono text-stone-800 dark:text-stone-150 font-semibold">+251 911 000 000</p>
-                    <p className="text-xs text-stone-400 dark:text-stone-500 font-light">(Tuesday — Saturday, 10:00 - 18:00)</p>
+                    <p className="font-mono text-stone-800 dark:text-stone-150 font-semibold">{t('contact.phoneNumber')}</p>
+                    <p className="text-xs text-stone-400 dark:text-stone-500 font-light">{t('contact.workingHours')}</p>
                   </div>
                 </div>
               </div>
@@ -171,7 +171,7 @@ export default function ContactView() {
               <form onSubmit={handleSubCityCheck} className="flex gap-2 font-sans">
                 <input
                   type="text"
-                  placeholder="e.g. Bole, Kirkos"
+                  placeholder={t('contact.subCityPlaceholder')}
                   aria-label="Sub-city lookup"
                   value={subCityInput}
                   onChange={(e) => setSubCityInput(e.target.value)}
@@ -192,11 +192,11 @@ export default function ContactView() {
                   className="p-4 bg-stone-850 rounded-xs border border-stone-800 space-y-2 text-xs font-sans"
                 >
                   <div className="flex justify-between items-center">
-                    <span className="font-mono text-stone-400 text-[10px] uppercase">Jurisdiction Area</span>
+                    <span className="font-mono text-stone-400 text-[10px] uppercase">{t('contact.jurisdictionArea')}</span>
                     <span className="font-mono text-lux-gold font-semibold">{calcResult.zone}</span>
                   </div>
                   <div className="flex justify-between items-center border-t border-stone-800 pt-2">
-                    <span className="font-mono text-stone-400 text-[10px] uppercase">Logistic Rate</span>
+                    <span className="font-mono text-stone-400 text-[10px] uppercase">{t('contact.logisticRate')}</span>
                     <span className="text-sm font-serif font-semibold text-white">{calcResult.price}</span>
                   </div>
                   <p className="text-[11px] text-stone-400 leading-relaxed pt-1 border-t border-stone-800">
@@ -222,7 +222,7 @@ export default function ContactView() {
                   </div>
                   <h3 className="text-2xl font-serif text-stone-900 dark:text-stone-100">{t('contact.messageReceived')}</h3>
                   <p className="text-sm text-stone-600 dark:text-stone-300 max-w-md mx-auto font-light leading-relaxed">
-                    Yodit Ashenafi has received your message. She answers questions daily and will message you back on phone or Telegram within 24 hours.
+                    {t('contact.messageReceivedDesc')}
                   </p>
                   <button
                     onClick={() => setFormSubmitted(false)}
@@ -240,9 +240,9 @@ export default function ContactView() {
                     </div>
                   )}
                   <div className="space-y-2">
-                    <span className="text-[10px] uppercase tracking-widest text-[#c5a880] font-mono block font-semibold">DIRECT MESSAGE LINK</span>
+                    <span className="text-[10px] uppercase tracking-widest text-[#c5a880] font-mono block font-semibold">{t('contact.directMessageLink')}</span>
                       <h2 className="font-serif text-2xl text-stone-900 dark:text-stone-100">{t('contact.sendStudioNote')}</h2>
-                    <p className="text-xs text-stone-500 dark:text-stone-400 font-light font-sans">Have general questions or custom recipe questions?</p>
+                    <p className="text-xs text-stone-500 dark:text-stone-400 font-light font-sans">{t('contact.generalQuestions')}</p>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -253,7 +253,7 @@ export default function ContactView() {
                         required
                         value={contactForm.name}
                         onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-                        placeholder="e.g. Sabontu Tesfaye"
+                        placeholder={t('contact.namePlaceholder')}
                         className="w-full border border-stone-200 dark:border-stone-800 p-3 text-sm focus:outline-none focus:border-lux-gold bg-stone-50/50 dark:bg-stone-900/60 rounded-sm text-stone-850 dark:text-stone-100 placeholder-stone-400"
                       />
                     </div>
@@ -264,7 +264,7 @@ export default function ContactView() {
                         required
                         value={contactForm.email}
                         onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                        placeholder="e.g. sabontu@example.com"
+                        placeholder={t('contact.emailPlaceholder')}
                         className="w-full border border-stone-200 dark:border-stone-800 p-3 text-sm focus:outline-none focus:border-lux-gold bg-stone-50/50 dark:bg-stone-900/60 rounded-sm text-stone-850 dark:text-stone-100 placeholder-stone-400"
                       />
                     </div>
@@ -277,9 +277,9 @@ export default function ContactView() {
                       onChange={(e) => setContactForm({ ...contactForm, subject: e.target.value })}
                       className="w-full border border-stone-200 dark:border-stone-800 p-3 text-sm focus:outline-none focus:border-lux-gold bg-white dark:bg-stone-900 rounded-sm text-stone-850 dark:text-stone-100"
                     >
-                      <option value="Consultation">Custom Design Review</option>
-                      <option value="Dietary">Diet Requirements</option>
-                      <option value="Other">General Questions</option>
+                      <option value="Consultation">{t('contact.customDesignReview')}</option>
+                      <option value="Dietary">{t('contact.dietRequirements')}</option>
+                      <option value="Other">{t('contact.generalQuestionsOpt')}</option>
                     </select>
                   </div>
 
@@ -290,7 +290,7 @@ export default function ContactView() {
                       value={contactForm.message}
                       onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
                       rows={4}
-                      placeholder="Type your message here..."
+                      placeholder={t('contact.messagePlaceholder')}
                       className="w-full border border-stone-200 dark:border-stone-800 p-3 text-sm focus:outline-none focus:border-lux-gold bg-stone-50/50 dark:bg-stone-900/60 rounded-sm text-stone-850 dark:text-stone-100 placeholder-stone-400"
                     />
                   </div>
@@ -301,7 +301,7 @@ export default function ContactView() {
                     className="w-full py-4 bg-stone-900 dark:bg-stone-800 hover:bg-stone-850 dark:hover:bg-stone-700 text-white font-medium text-xs tracking-[0.25em] uppercase rounded-sm transition-all shadow-md cursor-pointer flex items-center justify-center gap-2 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {sending ? <Loader2 className="w-4 h-4 text-lux-gold animate-spin" /> : <Send className="w-4 h-4 text-lux-gold" />}
-                    {sending ? 'Sending...' : t('contact.send')}
+                    {sending ? t('contact.sending') : t('contact.send')}
                   </button>
                 </form>
               )}
@@ -321,16 +321,16 @@ export default function ContactView() {
               </div>
               <h2 className="text-3xl sm:text-4xl font-serif text-white">{t('contact.addisAbabaIngress')}</h2>
               <p className="text-sm text-stone-400 font-light leading-relaxed font-sans">
-                Operating from our home custom studio in Bole Sub-City, we manage secure collection schedule slots. All our custom cakes are packaged in high-care secure travel-boxes to survive transit. Optional delivery within the perimeter can be custom-coordinated on request slots.
+                {t('contact.operatingInfo')}
               </p>
               <div className="space-y-3 pt-2 text-xs font-light text-stone-300 font-sans">
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-lux-gold shrink-0" />
-                  <span>Inner Sub-City Coordinates: Bole, Kirkos, Arada, Lideta, Yeka.</span>
+                  <span>{t('contact.innerCoordinates')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-lux-gold shrink-0" />
-                  <span>Outer Perimeter: Nifas Silk-Lafto, Gullele, Kolfe Keranio, Akaki Kality.</span>
+                  <span>{t('contact.outerPerimeter')}</span>
                 </div>
               </div>
             </div>
@@ -349,19 +349,19 @@ export default function ContactView() {
 
                 {/* Coordinates */}
                 <circle cx="200" cy="150" r="5" fill="#c5a880" />
-                <text x="210" y="146" fill="#c5a880" fontSize="9" fontWeight="bold" fontFamily="monospace" letterSpacing="1">BOLE (STUDIO)</text>
+                <text x="210" y="146" fill="#c5a880" fontSize="9" fontWeight="bold" fontFamily="monospace" letterSpacing="1">{t('contact.boleStudio')}</text>
 
                 <circle cx="150" cy="120" r="3" fill="#ffffff" fillOpacity="0.7" />
-                <text x="110" y="115" fill="#ffffff" fillOpacity="0.6" fontSize="8" fontFamily="sans-serif">Arada Zone</text>
+                <text x="110" y="115" fill="#ffffff" fillOpacity="0.6" fontSize="8" fontFamily="sans-serif">{t('contact.aradaZone')}</text>
 
                 <circle cx="250" cy="180" r="3" fill="#ffffff" fillOpacity="0.7" />
-                <text x="258" y="184" fill="#ffffff" fillOpacity="0.6" fontSize="8" fontFamily="sans-serif">Yeka Zone</text>
+                <text x="258" y="184" fill="#ffffff" fillOpacity="0.6" fontSize="8" fontFamily="sans-serif">{t('contact.yekaZone')}</text>
 
                 <circle cx="100" cy="200" r="3" fill="#ffffff" fillOpacity="0.5" />
-                <text x="108" y="203" fill="#ffffff" fillOpacity="0.4" fontSize="7" fontFamily="sans-serif">Nifas Silk Area</text>
+                <text x="108" y="203" fill="#ffffff" fillOpacity="0.4" fontSize="7" fontFamily="sans-serif">{t('contact.nifasSilkArea')}</text>
 
                 <circle cx="290" cy="90" r="3" fill="#ffffff" fillOpacity="0.5" />
-                <text x="298" y="93" fill="#ffffff" fillOpacity="0.4" fontSize="7" fontFamily="sans-serif">Lemi Kura Ring</text>
+                <text x="298" y="93" fill="#ffffff" fillOpacity="0.4" fontSize="7" fontFamily="sans-serif">{t('contact.lemiKuraRing')}</text>
 
                 {/* Pulse circle for Bole center */}
                 <circle cx="200" cy="150" r="10" stroke="#c5a880" strokeWidth="1">
@@ -370,7 +370,7 @@ export default function ContactView() {
                 </circle>
               </svg>
               <div className="absolute top-4 left-4 text-[9px] uppercase tracking-widest text-stone-400 font-mono bg-stone-900/90 py-1 px-2 border border-stone-800">
-                Studio Coordinate Grid 0.0
+                {t('contact.studioGrid')}
               </div>
             </div>
           </div>
@@ -381,7 +381,7 @@ export default function ContactView() {
       <section className="max-w-4xl mx-auto px-4 sm:px-6 font-sans">
         <div className="text-center max-w-xl mx-auto mb-10">
           <span className="text-[10px] uppercase tracking-[0.3em] text-lux-gold font-mono block mb-2 font-semibold font-bold">{t('contact.studioPolicies')}</span>
-          <h2 className="text-3xl font-serif text-warm-950 dark:text-stone-100">Frequently Asked Questions</h2>
+          <h2 className="text-3xl font-serif text-warm-950 dark:text-stone-100">{t('contact.faqHeader')}</h2>
           <p className="text-xs text-stone-500 dark:text-stone-400 font-light mt-2 font-sans">{t('contact.faqDescription')}</p>
           <div className="h-[2px] w-12 bg-lux-gold mx-auto mt-4" />
         </div>
@@ -403,10 +403,10 @@ export default function ContactView() {
           <div className="flex flex-wrap justify-center gap-1.5 pt-2">
             {[
               { id: 'all', label: t('contact.allPolicies') },
-              { id: 'Lead-Times & Process', label: 'Lead Times & Booking' },
-              { id: 'Pricing & Estimates', label: 'Pricing & Costs' },
-              { id: 'Delivery & Logistics', label: 'Delivery & Logistics' },
-              { id: 'Ingredients & Dietary', label: 'Ingredients & Dietary' }
+              { id: 'Lead-Times & Process', label: t('contact.leadTimesBooking') },
+              { id: 'Pricing & Estimates', label: t('contact.pricingCosts') },
+              { id: 'Delivery & Logistics', label: t('contact.deliveryLogistics') },
+              { id: 'Ingredients & Dietary', label: t('contact.ingredientsDietary') }
             ].map((cat) => {
               const isActive = faqCategory === cat.id;
               return (
