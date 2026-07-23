@@ -1,13 +1,19 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
+import crypto from 'crypto';
+import * as jose from 'jose';
 import {
   hashPassword,
   verifyPassword,
   signToken,
   verifyToken,
-  verifyTelegramAuth,
   getTokenFromRequest,
   authCookieOptions,
 } from '../auth.js';
+
+vi.mock('jose', () => ({
+  jwtVerify: vi.fn(),
+  createRemoteJWKSet: vi.fn(),
+}));
 
 vi.mock('jsonwebtoken', () => ({
   default: {
@@ -90,52 +96,84 @@ describe('verifyToken', () => {
   });
 });
 
-describe('verifyTelegramAuth', () => {
+import {
+  generateState,
+  generateNonce,
+  generatePkcePair,
+  verifyOidcIdToken,
+  TELEGRAM_ISSUER,
+} from '../auth.js';
+
+describe('OIDC Security Generators', () => {
+  it('generates random hex state', () => {
+    const s1 = generateState();
+    const s2 = generateState();
+    expect(typeof s1).toBe('string');
+    expect(s1.length).toBe(64);
+    expect(s1).not.toBe(s2);
+  });
+
+  it('generates random hex nonce', () => {
+    const n1 = generateNonce();
+    const n2 = generateNonce();
+    expect(typeof n1).toBe('string');
+    expect(n1.length).toBe(64);
+    expect(n1).not.toBe(n2);
+  });
+
+  it('generates PKCE verifier and challenge (S256)', () => {
+    const { codeVerifier, codeChallenge } = generatePkcePair();
+    expect(typeof codeVerifier).toBe('string');
+    expect(codeVerifier.length).toBeGreaterThanOrEqual(43);
+    expect(typeof codeChallenge).toBe('string');
+    const computed = crypto.createHash('sha256').update(codeVerifier).digest('base64url');
+    expect(codeChallenge).toBe(computed);
+  });
+});
+
+describe('verifyOidcIdToken', () => {
   beforeAll(() => {
-    process.env.TELEGRAM_BOT_TOKEN = 'test_bot_token_123';
+    process.env.TELEGRAM_OPENID_CONNECT_CLIENT_ID = 'test_client_id';
   });
 
-  it('returns false when bot token is missing', () => {
-    delete process.env.TELEGRAM_BOT_TOKEN;
-    const result = verifyTelegramAuth({
-      id: 12345,
-      first_name: 'Test',
-      auth_date: Math.floor(Date.now() / 1000),
-      hash: 'abc123',
-    });
-    expect(result).toBe(false);
-    process.env.TELEGRAM_BOT_TOKEN = 'test_bot_token_123';
+  it('throws error when CLIENT_ID env is missing', async () => {
+    delete process.env.TELEGRAM_OPENID_CONNECT_CLIENT_ID;
+    await expect(verifyOidcIdToken('dummy_token')).rejects.toThrow('TELEGRAM_OPENID_CONNECT_CLIENT_ID is not configured');
+    process.env.TELEGRAM_OPENID_CONNECT_CLIENT_ID = 'test_client_id';
   });
 
-  it('returns false when hash is missing', () => {
-    const result = verifyTelegramAuth({
-      id: 12345,
-      first_name: 'Test',
-      auth_date: Math.floor(Date.now() / 1000),
-      hash: '',
-    });
-    expect(result).toBe(false);
-  });
-
-  it('returns false when auth_date is expired (>24h)', () => {
-    const oldDate = Math.floor(Date.now() / 1000) - 90000;
-    const result = verifyTelegramAuth({
-      id: 12345,
-      first_name: 'Test',
-      auth_date: oldDate,
-      hash: 'abc123',
-    });
-    expect(result).toBe(false);
-  });
-
-  it('returns false when id is falsy', () => {
-    const result = verifyTelegramAuth({
-      id: 0,
-      first_name: 'Test',
-      auth_date: Math.floor(Date.now() / 1000),
-      hash: 'abc123',
+  it('verifies signed JWT against supplied JWKS', async () => {
+    const mockJwks = vi.fn().mockResolvedValue({} as any);
+    vi.mocked(jose.jwtVerify).mockResolvedValueOnce({
+      payload: {
+        iss: TELEGRAM_ISSUER,
+        aud: 'test_client_id',
+        sub: '123456789',
+        id: 123456789,
+        name: 'Jane Doe',
+        nonce: 'test_nonce',
+      },
+      protectedHeader: { alg: 'RS256' },
     } as any);
-    expect(result).toBe(false);
+
+    const claims = await verifyOidcIdToken('valid_jwt_token', 'test_nonce', mockJwks);
+    expect(claims.sub).toBe('123456789');
+    expect(claims.name).toBe('Jane Doe');
+  });
+
+  it('rejects token with mismatched nonce', async () => {
+    const mockJwks = vi.fn().mockResolvedValue({} as any);
+    vi.mocked(jose.jwtVerify).mockResolvedValueOnce({
+      payload: {
+        iss: TELEGRAM_ISSUER,
+        aud: 'test_client_id',
+        sub: '123456789',
+        nonce: 'bad_nonce',
+      },
+      protectedHeader: { alg: 'RS256' },
+    } as any);
+
+    await expect(verifyOidcIdToken('valid_jwt_token', 'expected_nonce', mockJwks)).rejects.toThrow('Invalid nonce in ID token.');
   });
 });
 
