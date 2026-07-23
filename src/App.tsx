@@ -13,7 +13,7 @@ import ContactView from './components/ContactView';
 import CakeAssistantBot from './components/CakeAssistantBot';
 import ProfileView from './components/ProfileView';
 import AdminView from './components/AdminView';
-import AuthView from './components/AuthView';
+import { AuthView } from './components/AuthView';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import NotFoundView from './components/NotFoundView';
@@ -214,7 +214,6 @@ export default function App() {
                     onAuthSuccess={(user) => { setCurrentUser(user); navigateTo(user.role === 'admin' || user.role === 'staff' ? 'admin' : 'home'); }}
                     title="Yodit's Direct Control Board"
                     subtitle="Access restricted to Flavour Bites staff or admin. Enter authorized credentials."
-                    defaultMode="login"
                   />
                 )
               )}
