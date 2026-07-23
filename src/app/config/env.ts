@@ -28,8 +28,6 @@ const PLACEHOLDER_JWT_SECRETS = new Set([
 
 const PLACEHOLDER_URLS = new Set([
   'MY_APP_URL',
-  'http://localhost:3000',
-  'https://localhost:3000',
   'changeme',
   'your-app-url',
 ]);
