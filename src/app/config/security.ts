@@ -13,11 +13,12 @@ function createSecurityConfig() {
         // Dev only: Vite injects inline scripts (React preamble, HMR client).
         scriptSrc: [
           "'self'",
+          'blob:',
           'https://accounts.google.com',
           'https://apis.google.com',
           'https://telegram.org',
           "'unsafe-eval'",
-          ...(isDev ? ["'unsafe-inline'"] : []),
+          ...(isDev ? ["'unsafe-inline'", 'http://localhost:*', 'http://127.0.0.1:*'] : []),
         ],
         // --- styles ---
         // Dev only: Vite/Tailwind injects inline styles for HMR.
@@ -54,6 +55,12 @@ function createSecurityConfig() {
         mediaSrc: ["'none'"],
         // Telegram login widget renders an iframe from telegram.org and oauth.telegram.org.
         frameSrc: ['https://telegram.org', 'https://oauth.telegram.org'],
+        frameAncestors: [
+          "'self'",
+          'https://telegram.org',
+          'https://oauth.telegram.org',
+          ...(isDev ? ['http://localhost:*', 'http://127.0.0.1:*'] : []),
+        ],
       },
     },
     // Disable X-Frame-Options — we rely on CSP frame-src instead.
