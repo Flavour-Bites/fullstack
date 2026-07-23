@@ -1,6 +1,6 @@
 import { Bot } from "grammy";
 import { getPrisma } from "../app/config/prisma.js";
-import { createOrder } from "../modules/orders/orders.operations.js";
+import { createOrder } from "../features/orders/api/orders.operations";
 import { notifyStaffNewOrder } from "../integrations/telegram/telegramNotifications.js";
 import { getConversationStore } from "../integrations/redis/conversationState.js";
 import { formatRequestDate } from "../shared/utils/dateFormat.js";

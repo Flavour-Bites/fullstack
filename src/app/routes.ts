@@ -1,15 +1,15 @@
 import { Router } from 'express';
-import authRoutes from '../modules/auth/auth.routes.js';
-import ordersRoutes from '../modules/orders/orders.routes.js';
-import usersRoutes from '../modules/users/users.routes.js';
-import categoriesRoutes from '../modules/categories/categories.routes.js';
-import galleryRoutes from '../modules/gallery/gallery.routes.js';
-import uploadsRoutes from '../modules/uploads/uploads.routes.js';
-import recoveryRoutes from '../modules/recovery/recovery.routes.js';
-import reviewsRoutes from '../modules/reviews/reviews.routes.js';
-import statsRoutes from '../modules/stats/stats.routes.js';
-import chatbotRoutes from '../modules/chatbot/chatbot.routes.js';
-import contactRoutes from '../modules/contact/contact.routes.js';
+import authRoutes from '../features/auth/api/auth.routes';
+import ordersRoutes from '../features/orders/api/orders.routes';
+import usersRoutes from '../features/users/api/users.routes';
+import categoriesRoutes from '../features/categories/api/categories.routes';
+import galleryRoutes from '../features/gallery/api/gallery.routes';
+import uploadsRoutes from '../features/uploads/api/uploads.routes';
+import recoveryRoutes from '../features/recovery/api/recovery.routes';
+import reviewsRoutes from '../features/reviews/api/reviews.routes';
+import statsRoutes from '../features/stats/api/stats.routes';
+import chatbotRoutes from '../features/chatbot/api/chatbot.routes';
+import contactRoutes from '../features/contact/api/contact.routes';
 
 const router = Router();
 
