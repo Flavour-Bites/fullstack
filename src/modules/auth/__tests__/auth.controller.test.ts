@@ -76,7 +76,7 @@ describe('authController.initiateTelegramLogin', () => {
     const req = mockReq();
     const res = mockRes();
 
-    await authController.initiateTelegramLogin(req, res);
+    await authController.initiateTelegramLogin(req, res, vi.fn());
 
     expect(res.cookie).toHaveBeenCalledWith('oidc_state', 'state_123', expect.any(Object));
     expect(res.cookie).toHaveBeenCalledWith('oidc_nonce', 'nonce_123', expect.any(Object));
@@ -95,7 +95,7 @@ describe('authController.initiateTelegramLogin', () => {
     const req = mockReq({ headers: { accept: 'application/json' } });
     const res = mockRes();
 
-    await authController.initiateTelegramLogin(req, res);
+    await authController.initiateTelegramLogin(req, res, vi.fn());
 
     expect(res.json).toHaveBeenCalledWith({
       success: true,
@@ -123,7 +123,7 @@ describe('authController.handleTelegramCallback', () => {
     });
     const res = mockRes();
 
-    await authController.handleTelegramCallback(req, res);
+    await authController.handleTelegramCallback(req, res, vi.fn());
 
     expect(res.clearCookie).toHaveBeenCalledWith('oidc_state');
     expect(res.clearCookie).toHaveBeenCalledWith('oidc_nonce');
@@ -148,7 +148,7 @@ describe('authController.finalizeTelegram', () => {
     const req = mockReq({ body: { telegramId: '12345', password: 'correct' } });
     const res = mockRes();
 
-    await authController.finalizeTelegram(req, res);
+    await authController.finalizeTelegram(req, res, vi.fn());
 
     expect(authService.finalizeTelegramLogin).toHaveBeenCalledWith('12345', 'correct');
     expect(res.json).toHaveBeenCalledWith({
@@ -168,7 +168,7 @@ describe('authController.finalizeTelegram', () => {
     const req = mockReq({ body: { telegramId: '12345', password: 'correct' } });
     const res = mockRes();
 
-    await authController.finalizeTelegram(req, res);
+    await authController.finalizeTelegram(req, res, vi.fn());
 
     expect(res.cookie).toHaveBeenCalledWith('auth_token', 'jwt_app_token', expect.any(Object));
   });

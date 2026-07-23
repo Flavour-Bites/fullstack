@@ -49,7 +49,7 @@ describe('AuthView', () => {
     );
     vi.stubGlobal('fetch', mockFetch);
 
-    const { container } = renderAuthView();
+    renderAuthView();
 
     await waitFor(() => {
       expect(screen.getByText('Continue with Telegram')).toBeInTheDocument();
@@ -65,9 +65,8 @@ describe('AuthView', () => {
   });
 
   it('shows loading state while redirecting', async () => {
-    let resolveFetch: (v: any) => void;
     const mockFetch = vi.fn().mockImplementation(() =>
-      new Promise((resolve) => { resolveFetch = resolve; })
+      new Promise(() => {})
     );
     vi.stubGlobal('fetch', mockFetch);
 
