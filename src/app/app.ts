@@ -1,6 +1,5 @@
 import express from 'express';
 import path from 'path';
-import { createServer as createViteServer } from 'vite';
 import { webhookCallback } from 'grammy';
 import { bot } from '../bot/index.js';
 import cookieParser from 'cookie-parser';
@@ -83,6 +82,7 @@ export async function createApp() {
   app.use(errorHandler);
 
   if (process.env.NODE_ENV !== 'production') {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({ server: { middlewareMode: true }, appType: 'spa' });
     app.use(vite.middlewares);
   } else {
