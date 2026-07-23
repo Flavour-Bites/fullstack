@@ -363,11 +363,11 @@ export default function ProfileView({ currentUser, onLogout, onNavigate }: Profi
                   <RefreshCw className="w-4 h-4 text-lux-gold" /> {t('admin.recoverAccount')}
                 </h4>
                 <p className="text-[10px] text-stone-500 dark:text-stone-400 font-light leading-relaxed mb-3">
-                  Migrate your account to a new Telegram ID if you've changed accounts.
+                  {t('profile.migrateTelegram')}
                 </p>
 
                 <div className="text-xs text-stone-500 dark:text-stone-400 font-mono mb-3">
-                  <span className="text-stone-400">Current Telegram ID: </span>
+                  <span className="text-stone-400">{t('profile.currentTelegramId')}</span>
                   <span className="text-stone-800 dark:text-stone-200 font-semibold">{currentUser.telegramId}</span>
                 </div>
 
@@ -379,7 +379,7 @@ export default function ProfileView({ currentUser, onLogout, onNavigate }: Profi
                         type="text"
                         value={newTelegramId}
                         onChange={e => setNewTelegramId(e.target.value)}
-                        placeholder="Enter your new Telegram user ID"
+                        placeholder={t('profile.newTelegramPlaceholder')}
                         className="w-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-lux-gold rounded-xs font-mono"
                         required
                       />
@@ -391,14 +391,14 @@ export default function ProfileView({ currentUser, onLogout, onNavigate }: Profi
                         className="flex-1 py-2 bg-lux-gold text-stone-950 font-bold text-[10px] uppercase tracking-wider rounded-xs transition-colors hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1"
                       >
                         {recoverySubmitting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
-                        Submit Request
+                        {t('profile.submitRequest')}
                       </button>
                       <button
                         type="button"
                         onClick={() => { setShowRecoveryForm(false); setNewTelegramId(''); }}
                         className="px-3 py-2 border border-stone-200 dark:border-stone-800 text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 text-[10px] uppercase font-mono rounded-xs cursor-pointer"
                       >
-                        Cancel
+                        {t('profile.cancel')}
                       </button>
                     </div>
                   </form>
@@ -407,7 +407,7 @@ export default function ProfileView({ currentUser, onLogout, onNavigate }: Profi
                     onClick={() => setShowRecoveryForm(true)}
                     className="w-full py-2 border border-lux-gold text-lux-gold hover:bg-lux-gold hover:text-stone-950 font-bold text-[10px] uppercase tracking-wider rounded-xs transition-colors cursor-pointer"
                   >
-                    <RefreshCw className="w-3 h-3 inline mr-1" /> Recover Account
+                    <RefreshCw className="w-3 h-3 inline mr-1" /> {t('profile.recoverAccount')}
                   </button>
                 )}
               </div>
@@ -458,7 +458,7 @@ export default function ProfileView({ currentUser, onLogout, onNavigate }: Profi
                   {/* List of active queue items - horizontally scrollable or responsive stacked list for ultra-quick selection */}
                   {loading ? (
                     <div className="py-8 text-center text-xs text-stone-400 dark:text-stone-500 font-mono flex items-center justify-center gap-1.5">
-                      <Clock className="w-4 h-4 animate-spin text-lux-gold" /> Loading your orders...
+                      <Clock className="w-4 h-4 animate-spin text-lux-gold" /> {t('profile.loadingOrders')}
                     </div>
                   ) : liveOrders.length === 0 ? (
                     <div className="py-10 text-center font-sans border border-dashed border-stone-200 dark:border-stone-800">
@@ -523,8 +523,8 @@ export default function ProfileView({ currentUser, onLogout, onNavigate }: Profi
                           <span className="text-[8px] uppercase tracking-widest font-mono text-white bg-stone-900/90 dark:bg-stone-800 px-2 py-0.5 rounded-xs font-bold inline-block mb-1">
                             {t('profile.cakeTracker')}
                           </span>
-                          <h2 className="font-serif text-lg font-semibold text-stone-900 dark:text-stone-100">{selectedOrder.cakeType} Blueprint</h2>
-                          <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono mt-0.5">Order Number: {selectedOrder.id} • Customer: {selectedOrder.clientName}</p>
+                          <h2 className="font-serif text-lg font-semibold text-stone-900 dark:text-stone-100">{selectedOrder.cakeType} {t('profile.blueprint')}</h2>
+                          <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono mt-0.5">{t('profile.orderNumber')} {selectedOrder.id} • {t('profile.customer')} {selectedOrder.clientName}</p>
                         </div>
                         <div className="sm:text-right">
                           <span className="text-[9px] uppercase tracking-wider text-stone-400 dark:text-stone-500 block font-mono">{t('profile.orderProgress')}</span>
@@ -538,7 +538,7 @@ export default function ProfileView({ currentUser, onLogout, onNavigate }: Profi
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-[#faf7f2]/50 dark:bg-stone-900/35 p-4 border border-stone-200/50 dark:border-stone-800/80 rounded-sm">
                         <div>
                           <span className="text-[8px] uppercase tracking-wider text-stone-400 dark:text-stone-500 font-mono block">{t('profile.cakeSize')}</span>
-                          <span className="text-xs text-stone-800 dark:text-stone-200 font-semibold">{selectedOrder.tierCount} Tier Cake</span>
+                          <span className="text-xs text-stone-800 dark:text-stone-200 font-semibold">{selectedOrder.tierCount} {t('profile.tierCake')}</span>
                         </div>
                         <div>
                           <span className="text-[8px] uppercase tracking-wider text-stone-400 dark:text-stone-500 font-mono block">{t('profile.flavorChoice')}</span>
@@ -599,7 +599,7 @@ export default function ProfileView({ currentUser, onLogout, onNavigate }: Profi
                       <div className="p-3.5 bg-stone-50/50 dark:bg-stone-900/20 border-l-2 border-lux-gold text-stone-600 dark:text-stone-400 text-[10px] font-sans leading-relaxed flex items-start gap-2 max-w-full">
                         <ShieldCheck className="w-4 h-4 text-lux-gold shrink-0 mt-0.5" />
                         <p className="font-light">
-                          Our bookings depend on how many cake slots we have. If you need to make changes, please call or email our studio.
+                          {t('profile.bookingPolicy')}
                         </p>
                       </div>
 
@@ -610,7 +610,7 @@ export default function ProfileView({ currentUser, onLogout, onNavigate }: Profi
                     <ShoppingBag className="w-10 h-10 text-stone-300 dark:text-stone-700 mx-auto mb-3" />
                     <h3 className="font-serif text-sm text-stone-700 dark:text-stone-400 italic">{t('common.noSelection')}</h3>
                     <p className="text-[11px] text-stone-400 dark:text-stone-500 font-light mt-1 max-w-xs mx-auto">
-                      Select an active order card from the list above to track your cake progress in real-time.
+                      {t('profile.selectOrderPrompt')}
                     </p>
                   </div>
                 )}
