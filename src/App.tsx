@@ -3,24 +3,24 @@ import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-
 import { motion, AnimatePresence } from 'motion/react';
 import { PageType, CakeGalleryItem, User } from './types';
 import { clearToken } from './shared/utils/apiClient';
-import ErrorBoundary from './components/ErrorBoundary';
+import ErrorBoundary from './shared/ui/ErrorBoundary';
 
-import HomeView from './components/HomeView';
-import GalleryView from './components/GalleryView';
-import RequestFormView from './components/RequestFormView';
-import AboutView from './components/AboutView';
-import TestimonialsView from './components/TestimonialsView';
-import ContactView from './components/ContactView';
-import CakeAssistantBot from './components/CakeAssistantBot';
-import ProfileView from './components/ProfileView';
-import MyOrdersView from './components/MyOrdersView';
-import AdminView from './components/AdminView';
-import { AuthView } from './components/AuthView';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import NotFoundView from './components/NotFoundView';
-import SearchModal from './components/SearchModal';
+import HomeView from './features/core/components/HomeView';
+import GalleryView from './features/gallery/components/GalleryView';
+import RequestFormView from './features/orders/components/RequestFormView';
+import AboutView from './features/core/components/AboutView';
+import TestimonialsView from './features/core/components/TestimonialsView';
+import ContactView from './features/contact/components/ContactView';
+import CakeAssistantBot from './features/chatbot/components/CakeAssistantBot';
+import ProfileView from './features/users/components/ProfileView';
+import MyOrdersView from './features/orders/components/MyOrdersView';
+import AdminView from './features/admin/components/AdminView';
+import { AuthView } from './features/auth/components/AuthView';
+import { ProtectedRoute } from './shared/ui/ProtectedRoute';
+import Header from './shared/ui/Header';
+import Footer from './shared/ui/Footer';
+import NotFoundView from './shared/ui/NotFoundView';
+import SearchModal from './features/search/components/SearchModal';
 
 import { setLocale, getLocale } from './i18n';
 import type { Locale } from './i18n';
@@ -171,10 +171,8 @@ export default function App() {
           currentUser={currentUser}
           darkMode={darkMode}
           locale={locale}
-          activePage={activePage}
           adminTab={adminTab}
           isAdminMode={isAdminMode}
-          onNavigate={navigateTo}
           onAdminTabChange={(tab) => setAdminTab(tab as typeof adminTab)}
           onToggleDarkMode={() => setDarkMode(d => !d)}
           onToggleLocale={handleToggleLocale}

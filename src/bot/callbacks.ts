@@ -7,7 +7,7 @@ import {
     notifyStaffQuoteAccepted,
 } from "../integrations/telegram/telegramNotifications.js";
 import { getConversationStore } from "../integrations/redis/conversationState.js";
-import { updateOrderCommercials, updateOrderStatus } from "../modules/orders/orders.operations.js";
+import { updateOrderCommercials, updateOrderStatus } from "../features/orders/api/orders.operations";
 
 const conversationStore = getConversationStore();
 
