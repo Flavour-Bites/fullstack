@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeAll } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { authService } from '../auth.service.js';
 
 const mockUser = {
@@ -115,8 +115,21 @@ describe('authService.verifyUserPassword', () => {
 });
 
 describe('authService.initiateOidcFlow', () => {
-  beforeAll(() => {
+  beforeEach(() => {
     process.env.TELEGRAM_OPENID_CONNECT_CLIENT_ID = 'test_client_id';
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({
+        issuer: 'https://oauth.telegram.org',
+        authorization_endpoint: 'https://oauth.telegram.org/auth',
+        token_endpoint: 'https://oauth.telegram.org/token',
+        jwks_uri: 'https://oauth.telegram.org/.well-known/jwks.json',
+      }),
+    }));
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('returns authorizationUrl with required OIDC params', async () => {
