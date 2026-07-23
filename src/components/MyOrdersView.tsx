@@ -252,10 +252,10 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
     <div className="bg-lux-cream/30 dark:bg-stone-900/10 min-h-screen py-16 px-4 sm:px-6">
       {/* Visual Title Header */}
       <div className="max-w-6xl mx-auto mb-16 text-center">
-        <span className="text-[10px] uppercase tracking-[0.3em] text-lux-gold font-mono block mb-2 font-bold">COMMISSION MONITOR</span>
+        <span className="text-[10px] uppercase tracking-[0.3em] text-lux-gold font-mono block mb-2 font-bold">{t('order.commissionMonitor')}</span>
         <h1 className="text-4xl font-serif text-warm-950 dark:text-stone-100 font-medium italic">{t('order.orderUpdates')}</h1>
         <p className="text-xs text-stone-500 dark:text-stone-400 font-light mt-2 max-w-lg mx-auto font-sans">
-          Review your order steps, verified payments, and your current cake design milestones.
+          {t('order.commissionMonitorDesc')}
         </p>
         <div className="h-[2px] w-12 bg-lux-gold mx-auto mt-4" />
       </div>
@@ -266,7 +266,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
           <div className="bg-white dark:bg-[#111111] p-6 border border-stone-200/60 dark:border-stone-850 rounded-xs shadow-xs space-y-4 text-left">
             <h3 className="font-serif text-base text-stone-900 dark:text-stone-100 font-medium">{t('order.orderId')}</h3>
             <p className="text-[11px] text-stone-500 dark:text-stone-400 font-light font-sans">
-              Enter your unique Order ID (like <code className="bg-stone-100 dark:bg-stone-800 px-1 rounded text-stone-600 dark:text-stone-300 font-bold">FB-9812A</code>) or the Name used to place the order.
+              {t('order.enterOrderId')}
             </p>
 
             <form onSubmit={handleSearch} className="flex gap-2 font-sans" id="order-search-form">
@@ -274,8 +274,8 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
                 <input
                   type="text"
-                  placeholder="Order ID or Client Name..."
-                  aria-label="Order ID or Client Name"
+                  placeholder={t('order.searchOrderPlaceholder')}
+                  aria-label={t('order.searchOrderPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 focus:outline-none focus:ring-1 focus:ring-lux-gold focus:border-lux-gold pl-9 pr-3 py-3 text-xs text-stone-850 dark:text-stone-100 placeholder-stone-400 rounded-sm"
@@ -292,14 +292,14 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
             {searchError && (
               <div className="p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-400 text-[11px] rounded-xs font-sans flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
-                <span>No order matches. Try searching "Saba", "Kidus" or verify your ID.</span>
+                <span>{t('order.noOrderMatches')}</span>
               </div>
             )}
           </div>
 
           <div className="bg-white dark:bg-[#111111] p-6 border border-stone-200/60 dark:border-stone-850 rounded-xs shadow-xs space-y-4 text-left">
             <div className="flex justify-between items-center pb-2 border-b border-stone-100 dark:border-stone-850">
-              <h3 className="font-serif text-sm text-stone-900 dark:text-stone-100 font-medium">Sample Orders List</h3>
+              <h3 className="font-serif text-sm text-stone-900 dark:text-stone-100 font-medium">{t('order.sampleOrdersList')}</h3>
               <span className="text-[9px] uppercase tracking-wider font-mono text-lux-gold bg-lux-gold/15 py-0.5 px-2 font-bold rounded-xs">
                 {t('common.sandbox')}
               </span>
@@ -351,13 +351,13 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-100 dark:border-stone-800 pb-5">
                   <div className="text-left">
                     <span className="text-[9px] uppercase tracking-widest font-mono text-lux-gold bg-stone-900/90 px-2 py-0.5 rounded-xs font-bold inline-block mb-1">
-                      ORDER DETAILS
+                      {t('order.orderDetailsLabel')}
                     </span>
                     <h2 className="font-serif text-xl font-medium text-stone-900 dark:text-stone-100">{selectedOrder.clientName}</h2>
                     <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono mt-1">{selectedOrder.id} • {selectedOrder.email}</p>
                   </div>
                   <div className="sm:text-right text-left">
-                    <span className="text-[10px] uppercase tracking-wider text-stone-400 dark:text-stone-500 block font-mono">Order Progress</span>
+                    <span className="text-[10px] uppercase tracking-wider text-stone-400 dark:text-stone-500 block font-mono">{t('order.orderProgressTracker')}</span>
                     <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-mono uppercase font-bold border mt-1.5 ${getStatusBadgeStyles(selectedOrder.status)}`}>
                       {selectedOrder.status}
                     </span>
@@ -367,32 +367,32 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
                 {/* Cake Configuration Matrix */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-stone-50 dark:bg-stone-900/40 p-4 border border-stone-200/60 dark:border-stone-850 rounded-sm text-left">
                   <div>
-                    <span className="text-[9px] uppercase tracking-wider text-stone-400 dark:text-stone-500 font-mono block">Cake Design</span>
+                    <span className="text-[9px] uppercase tracking-wider text-stone-400 dark:text-stone-500 font-mono block">{t('order.cakeDesignLabel')}</span>
                     <span className="text-xs text-stone-800 dark:text-stone-200 font-semibold">{selectedOrder.cakeType}</span>
                   </div>
                   <div>
-                    <span className="text-[9px] uppercase tracking-wider text-stone-400 dark:text-stone-500 font-mono block">Cake Size</span>
+                    <span className="text-[9px] uppercase tracking-wider text-stone-400 dark:text-stone-500 font-mono block">{t('order.cakeSizeLabel')}</span>
                     <span className="text-xs text-stone-800 dark:text-stone-200 font-semibold">{selectedOrder.tierCount} Tiers</span>
                   </div>
                   <div>
-                    <span className="text-[9px] uppercase tracking-wider text-stone-400 dark:text-stone-500 font-mono block">Cake Flavor</span>
+                    <span className="text-[9px] uppercase tracking-wider text-stone-400 dark:text-stone-500 font-mono block">{t('order.cakeFlavorLabel')}</span>
                     <span className="text-xs text-stone-800 dark:text-stone-200 font-semibold">{selectedOrder.flavor}</span>
                   </div>
                   <div>
-                    <span className="text-[9px] uppercase tracking-wider text-stone-400 dark:text-stone-500 font-mono block">Our Price</span>
+                    <span className="text-[9px] uppercase tracking-wider text-stone-400 dark:text-stone-500 font-mono block">{t('order.ourPriceLabel')}</span>
                     <span className="text-xs text-lux-gold font-semibold font-mono">{selectedOrder.amount}</span>
                   </div>
                 </div>
 
                 {/* Design Narrative details */}
                 <div className="space-y-1.5 text-left">
-                  <span className="text-[9px] uppercase tracking-[0.15em] text-stone-400 dark:text-stone-400 font-mono font-semibold block">Design Details Sheet</span>
+                  <span className="text-[9px] uppercase tracking-[0.15em] text-stone-400 dark:text-stone-400 font-mono font-semibold block">{t('order.designDetailsSheet')}</span>
                   <p className="text-xs text-stone-650 dark:text-stone-300 font-light leading-relaxed font-sans">{selectedOrder.details}</p>
                 </div>
 
                 {/* Visual Blueprint Steps Map - Accordion timeline */}
                 <div className="space-y-4 pt-4 border-t border-stone-100 dark:border-stone-800 text-left">
-                  <span className="text-[9px] uppercase tracking-[0.15em] text-stone-400 dark:text-stone-400 font-mono font-semibold block">Artisan Handcraft milestones</span>
+                  <span className="text-[9px] uppercase tracking-[0.15em] text-stone-400 dark:text-stone-400 font-mono font-semibold block">{t('order.artisanMilestones')}</span>
                   
                   <div className="relative pl-6 space-y-6 border-l-2 border-stone-200 dark:border-stone-800">
                     {selectedOrder.timeline.map((step, idx) => {
@@ -432,7 +432,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
                 <div className="p-4 bg-stone-100 dark:bg-stone-900/60 border-l-2 border-lux-gold text-stone-800 dark:text-white text-[11px] rounded-xs font-sans leading-relaxed tracking-normal flex items-start gap-2.5">
                   <ShieldCheck className="w-4 h-4 text-lux-gold shrink-0 mt-0.5" />
                   <p className="font-light text-stone-600 dark:text-stone-300">
-                    <strong>Need to request changes or cancel?</strong> Reschedules must be requested at least <strong className="text-white">5 days before</strong> the scheduled date.
+                    {t('order.reschedulePolicy')}
                   </p>
                 </div>
               </div>
@@ -442,7 +442,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
               <ShoppingBag className="w-12 h-12 text-stone-300 dark:text-stone-700 mx-auto mb-4" />
               <h3 className="font-serif text-lg text-stone-700 dark:text-stone-300 italic">{t('common.noSelection')}</h3>
               <p className="text-xs text-stone-400 dark:text-stone-500 font-light mt-1 max-w-sm mx-auto">
-                Select an order block from the active list or type your ID to query individual real-time milestones.
+                {t('order.selectOrderPrompt')}
               </p>
             </div>
           )}
