@@ -1,13 +1,5 @@
-import {
-  signToken,
-  verifyPassword,
-  hashPassword,
-  generateState,
-  generateNonce,
-  generatePkcePair,
-  verifyOidcIdToken,
-  authCookieOptions,
-} from '../../shared/utils/auth.js';
+import crypto from 'crypto';
+import { signToken, verifyPassword, hashPassword, generateNonce, generatePkcePair, verifyOidcIdToken, authCookieOptions } from '../../shared/utils/auth.js';
 import { authRepository } from './auth.repository.js';
 import type { LoginResponse, TelegramTokenExchangeResponse } from './auth.types.js';
 import { AuthenticationError, NotFoundError } from '../../shared/errors/index.js';
@@ -46,6 +38,10 @@ async function getOidcConfig(): Promise<OidcDiscoveryConfig> {
   return cachedOidcConfig;
 }
 
+const oidcStateStore = new Map<string, { nonce: string; codeVerifier: string }>();
+
+setInterval(() => oidcStateStore.clear(), 10 * 60 * 1000);
+
 export const authService = {
   async initiateOidcFlow(redirectUri: string) {
     const config = await getOidcConfig();
@@ -54,9 +50,12 @@ export const authService = {
       throw new Error('TELEGRAM_OPENID_CONNECT_CLIENT_ID is not configured.');
     }
 
-    const state = generateState();
+    const state = crypto.randomBytes(16).toString('hex');
     const nonce = generateNonce();
     const { codeVerifier, codeChallenge } = generatePkcePair();
+
+    oidcStateStore.set(state, { nonce, codeVerifier });
+    setTimeout(() => oidcStateStore.delete(state), 10 * 60 * 1000);
 
     const authUrl = new URL(config.authorization_endpoint);
     authUrl.searchParams.set('client_id', clientId);
@@ -71,26 +70,25 @@ export const authService = {
     return {
       authorizationUrl: authUrl.toString(),
       state,
-      nonce,
-      codeVerifier,
     };
   },
 
   async handleOidcCallback(params: {
     code: string;
     state: string;
-    storedState?: string;
-    nonce?: string;
-    storedNonce?: string;
-    codeVerifier?: string;
     redirectUri: string;
     jwksOverride?: any;
   }): Promise<LoginResponse> {
-    const { code, state, storedState, storedNonce, codeVerifier, redirectUri, jwksOverride } = params;
+    const { code, state, redirectUri, jwksOverride } = params;
 
-    if (!state || !storedState || state !== storedState) {
+    const stored = oidcStateStore.get(state);
+    oidcStateStore.delete(state);
+
+    if (!stored) {
       throw new AuthenticationError('Invalid OAuth state parameter (CSRF check failed).');
     }
+
+    const { nonce, codeVerifier } = stored;
 
     if (!codeVerifier) {
       throw new AuthenticationError('Missing PKCE code verifier.');
@@ -132,7 +130,7 @@ export const authService = {
       throw new AuthenticationError('No id_token received from Telegram OIDC token endpoint.');
     }
 
-    const claims = await verifyOidcIdToken(tokenData.id_token, storedNonce, jwksOverride);
+    const claims = await verifyOidcIdToken(tokenData.id_token, nonce, jwksOverride);
 
     const telegramUserId = String(claims.id ?? claims.sub);
     const user = await authRepository.upsertTelegramUser({

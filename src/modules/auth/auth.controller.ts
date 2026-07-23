@@ -9,18 +9,7 @@ export const authController = {
     const baseUrl = process.env.APP_URL || `${protocol}://${host}`;
     const redirectUri = `${baseUrl}/api/auth/telegram/callback`;
 
-    const { authorizationUrl, state, nonce, codeVerifier } = await authService.initiateOidcFlow(redirectUri);
-
-    const tempCookieOptions = {
-      httpOnly: true,
-      sameSite: 'lax' as const,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 10 * 60 * 1000, // 10 minutes
-    };
-
-    res.cookie('oidc_state', state, tempCookieOptions);
-    res.cookie('oidc_nonce', nonce, tempCookieOptions);
-    res.cookie('oidc_code_verifier', codeVerifier, tempCookieOptions);
+    const { authorizationUrl } = await authService.initiateOidcFlow(redirectUri);
 
     if (req.headers.accept?.includes('application/json') || req.xhr) {
       res.json({ success: true, authorizationUrl });
@@ -33,10 +22,6 @@ export const authController = {
     const code = (req.query.code || req.body?.code) as string;
     const state = (req.query.state || req.body?.state) as string;
 
-    const storedState = req.cookies?.oidc_state;
-    const storedNonce = req.cookies?.oidc_nonce;
-    const codeVerifier = req.cookies?.oidc_code_verifier;
-
     const protocol = req.protocol || 'http';
     const host = req.get('host') || 'localhost:3000';
     const baseUrl = process.env.APP_URL || `${protocol}://${host}`;
@@ -45,15 +30,8 @@ export const authController = {
     const result = await authService.handleOidcCallback({
       code,
       state,
-      storedState,
-      storedNonce,
-      codeVerifier,
       redirectUri,
     });
-
-    res.clearCookie('oidc_state');
-    res.clearCookie('oidc_nonce');
-    res.clearCookie('oidc_code_verifier');
 
     if (result.token) {
       res.cookie('auth_token', result.token, authService.authCookieOptions);
