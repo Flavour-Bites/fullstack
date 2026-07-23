@@ -1,17 +1,18 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Calendar, ChevronRight, ChevronLeft, Star, Heart, Check, Award, ShieldCheck } from 'lucide-react';
-import { PageType, CakeGalleryItem } from '../types';
+import { Link, useNavigate } from 'react-router-dom';
+import { CakeGalleryItem } from '../types';
 import { GALLERY_ITEMS, TESTIMONIALS } from '../data';
 import { t } from '../i18n';
 import { usePageTitle } from '../hooks/usePageTitle';
 
 interface HomeViewProps {
-  onNavigate: (page: PageType) => void;
   onSelectCake: (cake: CakeGalleryItem) => void;
 }
 
-export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
+export default function HomeView({ onSelectCake }: HomeViewProps) {
+  const navigate = useNavigate();
   usePageTitle("Home");
   const [activeTestimonial, setActiveTestimonial] = useState(0);
 
@@ -102,22 +103,22 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="flex flex-col sm:flex-row items-center gap-4 pt-2"
             >
-              <button
-                onClick={() => onNavigate('request')}
+              <Link
+                to="/request"
                 className="w-full sm:w-auto px-8 py-4 bg-lux-gold text-stone-950 font-semibold tracking-wider text-xs uppercase duration-300 transition-all shadow-lg hover:shadow-lux-gold/20 hover:bg-white hover:text-stone-950 cursor-pointer flex items-center justify-center gap-2 rounded-sm"
                 id="hero-request-btn"
               >
                 <Calendar className="w-4 h-4" />
                 {t('nav.bookCake')}
-              </button>
-              <button
-                onClick={() => onNavigate('gallery')}
+              </Link>
+              <Link
+                to="/gallery"
                 className="w-full sm:w-auto px-8 py-4 border border-white/20 hover:border-lux-gold bg-stone-900/40 hover:bg-stone-900/80 text-white font-medium tracking-wider text-xs transition-all duration-300 cursor-pointer flex items-center justify-center gap-1.5 rounded-sm"
                 id="hero-gallery-btn"
               >
                 {t('home.viewGallery')}
                 <ChevronRight className="w-4 h-4 text-lux-gold" />
-              </button>
+              </Link>
             </motion.div>
 
             {/* Stats */}
@@ -220,12 +221,12 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
                 {t('home.celebrationSculpturesDesc')}
               </p>
             </div>
-            <button
-              onClick={() => onNavigate('gallery')}
+            <Link
+              to="/gallery"
               className="text-lux-gold text-xs uppercase tracking-widest font-semibold hover:text-stone-900 hover:dark:text-white transition-colors flex items-center gap-1.5 self-start mt-auto font-mono cursor-pointer"
             >
               {t('home.viewElegantTiers')} <ChevronRight className="w-3.5 h-3.5" />
-            </button>
+            </Link>
           </motion.div>
 
           {/* Collection 2 */}
@@ -252,12 +253,12 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
                 {t('home.milestonesBirthdaysDesc')}
               </p>
             </div>
-            <button
-              onClick={() => onNavigate('gallery')}
+            <Link
+              to="/gallery"
               className="text-lux-gold text-xs uppercase tracking-widest font-semibold hover:text-stone-900 hover:dark:text-white transition-colors flex items-center gap-1.5 self-start mt-auto font-mono cursor-pointer"
             >
               {t('home.viewModernCakes')} <ChevronRight className="w-3.5 h-3.5" />
-            </button>
+            </Link>
           </motion.div>
 
           {/* Collection 3 */}
@@ -284,12 +285,12 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
                 {t('home.cookiesTreatsDesc')}
               </p>
             </div>
-            <button
-              onClick={() => onNavigate('gallery')}
+            <Link
+              to="/gallery"
               className="text-lux-gold text-xs uppercase tracking-widest font-semibold hover:text-stone-900 hover:dark:text-white transition-colors flex items-center gap-1.5 self-start mt-auto font-mono cursor-pointer"
             >
               {t('home.viewGourmetSweets')} <ChevronRight className="w-3.5 h-3.5" />
-            </button>
+            </Link>
           </motion.div>
         </div>
       </section>
@@ -413,13 +414,13 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
         </div>
 
         <div className="text-center mt-12">
-          <button
-            onClick={() => onNavigate('request')}
+          <Link
+            to="/request"
             className="inline-flex items-center gap-2 px-8 py-4 bg-stone-900 dark:bg-stone-150 text-white dark:text-stone-950 font-bold text-[10px] uppercase tracking-[0.2em] rounded-sm transition-all hover:bg-lux-gold hover:text-stone-950 hover:dark:bg-lux-gold hover:dark:text-stone-950 shadow-md cursor-pointer hover:translate-y-[-1.5px]"
           >
             {t('home.startRequest')}
             <ChevronRight className="w-3.5 h-3.5" />
-          </button>
+          </Link>
         </div>
       </section>
 
@@ -431,13 +432,13 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
               <span className="text-[10px] uppercase tracking-[0.3em] text-lux-gold font-bold block mb-2 font-mono">{t('home.portfolioSubtitle')}</span>
               <h2 className="text-3xl font-serif text-stone-900 dark:text-stone-100">{t('home.portfolioTitle')}</h2>
             </div>
-            <button
-              onClick={() => onNavigate('gallery')}
+            <Link
+              to="/gallery"
               className="text-stone-900 dark:text-stone-200 text-xs font-semibold uppercase tracking-widest hover:text-lux-gold dark:hover:text-lux-gold transition-colors flex items-center gap-1 mt-4 sm:mt-0 cursor-pointer font-mono"
             >
               {t('home.explorePortfolio')}
               <ChevronRight className="w-4 h-4 text-lux-gold" />
-            </button>
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -447,7 +448,7 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
                 className="group cursor-pointer text-left bg-white dark:bg-[#111111] border border-stone-200/60 dark:border-stone-850/70 p-4 rounded-sm shadow-xs transition-all duration-300 hover:shadow-xl"
                 onClick={() => {
                   onSelectCake(cake);
-                  onNavigate('gallery');
+                  navigate('/gallery');
                 }}
               >
                 <div className="aspect-[3/4] overflow-hidden mb-4 relative bg-stone-100 dark:bg-stone-900 rounded-sm">
@@ -581,18 +582,18 @@ export default function HomeView({ onNavigate, onSelectCake }: HomeViewProps) {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
-            <button
-              onClick={() => onNavigate('request')}
+            <Link
+              to="/request"
               className="bg-lux-gold text-[#120f0d] font-semibold px-8 py-4 rounded-sm hover:bg-white hover:text-stone-950 transition-all hover:shadow-[0_8px_32px_rgba(197,168,128,0.25)] flex items-center justify-center gap-2 cursor-pointer font-mono text-xs uppercase tracking-wider"
             >
               {t('home.requestCake')} <ChevronRight className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => onNavigate('contact')}
+            </Link>
+            <Link
+              to="/contact"
               className="border border-white/20 hover:border-lux-gold text-white px-8 py-4 rounded-sm hover:bg-white/5 transition-all text-xs font-semibold tracking-wider font-mono cursor-pointer uppercase"
             >
               {t('home.getInTouch')}
-            </button>
+            </Link>
           </div>
         </div>
       </section>

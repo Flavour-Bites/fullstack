@@ -1,12 +1,11 @@
 import { Cake, Send, MapPin, Clock, ArrowRight, Quote, Instagram, Mail } from 'lucide-react';
-import type { PageType } from '../types';
+import { Link } from 'react-router-dom';
 
 interface FooterProps {
   isAdminMode: boolean;
-  onNavigate: (page: PageType) => void;
 }
 
-export default function Footer({ isAdminMode, onNavigate }: FooterProps) {
+export default function Footer({ isAdminMode }: FooterProps) {
   if (isAdminMode) {
     return (
       <footer className="bg-[#111111] text-stone-500 border-t border-stone-900/60 py-6 text-[10px] relative z-10 font-sans">
@@ -91,10 +90,10 @@ export default function Footer({ isAdminMode, onNavigate }: FooterProps) {
               <div>
                 <p className="text-[10px] uppercase font-mono tracking-widest text-stone-500 font-semibold mb-2">Quick Links</p>
                 <ul className="space-y-1.5">
-                  <li><button onClick={() => onNavigate('gallery')} className="text-stone-300 hover:text-lux-gold text-xs transition-colors cursor-pointer text-left">Gallery</button></li>
-                  <li><button onClick={() => onNavigate('about')} className="text-stone-300 hover:text-lux-gold text-xs transition-colors cursor-pointer text-left">About Yodit</button></li>
-                  <li><button onClick={() => onNavigate('testimonials')} className="text-stone-300 hover:text-lux-gold text-xs transition-colors cursor-pointer text-left">Reviews</button></li>
-                  <li><button onClick={() => onNavigate('contact')} className="text-stone-300 hover:text-lux-gold text-xs transition-colors cursor-pointer text-left">Contact</button></li>
+                  <li><Link to="/gallery" className="text-stone-300 hover:text-lux-gold text-xs transition-colors cursor-pointer text-left block">Gallery</Link></li>
+                  <li><Link to="/about" className="text-stone-300 hover:text-lux-gold text-xs transition-colors cursor-pointer text-left block">About Yodit</Link></li>
+                  <li><Link to="/testimonials" className="text-stone-300 hover:text-lux-gold text-xs transition-colors cursor-pointer text-left block">Reviews</Link></li>
+                  <li><Link to="/contact" className="text-stone-300 hover:text-lux-gold text-xs transition-colors cursor-pointer text-left block">Contact</Link></li>
                 </ul>
               </div>
             </div>
@@ -125,13 +124,13 @@ export default function Footer({ isAdminMode, onNavigate }: FooterProps) {
               <h3 className="font-serif text-lg text-white mb-1">Ready to create something memorable?</h3>
               <p className="text-stone-400 text-xs font-light">Tell us about your celebration. Yodit will reach out to bring your vision to life.</p>
             </div>
-            <button
-              onClick={() => onNavigate('request')}
+            <Link
+              to="/request"
               className="shrink-0 px-8 py-3 bg-lux-gold text-stone-950 font-bold text-[11px] uppercase tracking-[0.2em] rounded-sm hover:bg-white transition-colors cursor-pointer flex items-center gap-2"
             >
               Commission Your Cake
               <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+            </Link>
           </div>
         </div>
       </div>

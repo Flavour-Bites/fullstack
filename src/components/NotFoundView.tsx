@@ -1,12 +1,9 @@
 import { motion } from 'motion/react';
 import { Home, ArrowLeft } from 'lucide-react';
-import type { PageType } from '../types';
+import { Link, useNavigate } from 'react-router-dom';
 
-interface NotFoundViewProps {
-  onNavigate: (page: PageType) => void;
-}
-
-export default function NotFoundView({ onNavigate }: NotFoundViewProps) {
+export default function NotFoundView() {
+  const navigate = useNavigate();
   return (
     <div className="min-h-[70vh] flex items-center justify-center px-4 py-20">
       <motion.div
@@ -28,15 +25,15 @@ export default function NotFoundView({ onNavigate }: NotFoundViewProps) {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <button
-            onClick={() => onNavigate('home')}
+          <Link
+            to="/"
             className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-stone-900 dark:bg-stone-800 hover:bg-lux-gold hover:text-stone-950 text-white text-xs font-mono uppercase tracking-widest font-bold rounded-sm transition-all cursor-pointer"
           >
             <Home className="w-4 h-4" />
             Back to Home
-          </button>
+          </Link>
           <button
-            onClick={() => window.history.back()}
+            onClick={() => navigate(-1)}
             className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300 hover:border-lux-gold hover:text-lux-gold text-xs font-mono uppercase tracking-widest rounded-sm transition-all cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
