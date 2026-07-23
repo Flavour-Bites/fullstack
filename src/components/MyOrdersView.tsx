@@ -199,7 +199,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
     }
   }, [currentUser]);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSearchError(false);
     

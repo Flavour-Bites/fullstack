@@ -182,7 +182,7 @@ export default function RequestFormView({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!form.contactName || !form.contactPhone || !form.deliveryDate) {
       setValError('Please fill in your name, phone, and event date.');
