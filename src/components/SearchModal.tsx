@@ -1,16 +1,16 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, X, HelpCircle, ArrowRight, Command } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { GALLERY_ITEMS, FAQS } from '../data';
-import type { PageType } from '../types';
 
 interface SearchModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onNavigate: (page: PageType) => void;
 }
 
-export default function SearchModal({ isOpen, onClose, onNavigate }: SearchModalProps) {
+export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
+  const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -137,7 +137,7 @@ export default function SearchModal({ isOpen, onClose, onNavigate }: SearchModal
                       key={cake.id}
                       onClick={() => {
                         onClose();
-                        onNavigate('gallery');
+                        navigate('/gallery');
                       }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm hover:bg-stone-50 dark:hover:bg-stone-900/50 transition-colors text-left cursor-pointer group"
                     >
@@ -164,7 +164,7 @@ export default function SearchModal({ isOpen, onClose, onNavigate }: SearchModal
                       key={faq.id}
                       onClick={() => {
                         onClose();
-                        onNavigate('contact');
+                        navigate('/contact');
                       }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm hover:bg-stone-50 dark:hover:bg-stone-900/50 transition-colors text-left cursor-pointer group"
                     >

@@ -4,6 +4,7 @@ import {
   Cake, CalendarDays, LogOut, LogIn, User as UserIcon,
   Sun, Moon, HelpCircle, Compass, ShieldCheck, ShoppingBag, Menu, X, Globe, Search
 } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import type { Locale } from '../i18n';
 import type { PageType, User } from '../types';
 
@@ -11,10 +12,8 @@ interface HeaderProps {
   currentUser: User | null;
   darkMode: boolean;
   locale: Locale;
-  activePage: PageType;
   adminTab: string;
   isAdminMode: boolean;
-  onNavigate: (page: PageType) => void;
   onAdminTabChange: (tab: string) => void;
   onToggleDarkMode: () => void;
   onToggleLocale: () => void;
@@ -23,11 +22,45 @@ interface HeaderProps {
 }
 
 export default function Header({
-  currentUser, darkMode, locale, activePage, adminTab, isAdminMode,
-  onNavigate, onAdminTabChange, onToggleDarkMode, onToggleLocale, onLogout, onSearchOpen,
-}: HeaderProps) {
+  currentUser, darkMode, locale, adminTab, isAdminMode,
+  onAdminTabChange, onToggleDarkMode, onToggleLocale, onLogout, onSearchOpen,
+}: Readonly<HeaderProps>) {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const getActivePage = () => {
+    const path = location.pathname;
+    if (path === '/' || path === '/home') return 'home';
+    if (path === '/gallery') return 'gallery';
+    if (path === '/request') return 'request';
+    if (path === '/about') return 'about';
+    if (path === '/testimonials') return 'testimonials';
+    if (path === '/contact') return 'contact';
+    if (path === '/profile') return 'profile';
+    if (path === '/orders') return 'orders';
+    if (path.startsWith('/admin')) return 'admin';
+    if (path === '/auth') return 'auth';
+    return 'home';
+  };
+  const activePage = getActivePage();
+
+  const getRoute = (page: string) => {
+    const routes: Record<string, string> = {
+      home: '/',
+      gallery: '/gallery',
+      request: '/request',
+      about: '/about',
+      testimonials: '/testimonials',
+      contact: '/contact',
+      profile: '/profile',
+      orders: '/orders',
+      admin: '/admin',
+      auth: '/auth'
+    };
+    return routes[page] || '/';
+  };
 
   const menuItems: { label: string; page: PageType }[] = [
     { label: 'Home', page: 'home' },
@@ -59,7 +92,7 @@ export default function Header({
             if (isAdminMode) {
               onAdminTabChange('dashboard');
             } else {
-              onNavigate('home');
+              navigate('/');
             }
           }}
           className="flex items-center gap-2.5 text-left cursor-pointer group"
@@ -117,9 +150,9 @@ export default function Header({
                 { label: 'REVIEWS', page: 'testimonials' as PageType },
                 { label: 'CONTACT', page: 'contact' as PageType },
               ].map((item) => (
-                <button
+                <Link
                   key={item.page}
-                  onClick={() => onNavigate(item.page)}
+                  to={getRoute(item.page)}
                   className={`text-[10px] uppercase tracking-[0.18em] font-sans font-medium transition-all duration-300 cursor-pointer py-1.5 px-2.5 relative ${
                     activePage === item.page
                       ? 'text-lux-gold font-bold border-b border-lux-gold'
@@ -129,7 +162,7 @@ export default function Header({
                   }`}
                 >
                   {item.label}
-                </button>
+                </Link>
               ))}
             </div>
           )}
@@ -223,8 +256,9 @@ export default function Header({
                     {currentUser ? (
                       isAdminMode ? (
                         <>
-                          <button
-                            onClick={() => { setProfileDropdownOpen(false); onNavigate('home'); }}
+                          <Link
+                            to="/"
+                            onClick={() => { setProfileDropdownOpen(false); }}
                             className={`w-full text-left px-3 py-1.5 text-[10px] uppercase font-sans font-semibold tracking-wider rounded-sm transition-colors cursor-pointer flex items-center gap-2 ${
                               isAdminMode || darkMode
                                 ? 'hover:bg-stone-900 text-stone-300 hover:text-white'
@@ -233,12 +267,13 @@ export default function Header({
                           >
                             <Compass className="w-3.5 h-3.5 text-lux-gold shrink-0" />
                             <span>View Live Site</span>
-                          </button>
+                          </Link>
                         </>
                       ) : (
                         <>
-                          <button
-                            onClick={() => { setProfileDropdownOpen(false); onNavigate('profile'); }}
+                          <Link
+                            to="/profile"
+                            onClick={() => { setProfileDropdownOpen(false); }}
                             className={`w-full text-left px-3 py-1.5 text-[10px] uppercase font-sans font-semibold tracking-wider rounded-sm transition-colors cursor-pointer flex items-center gap-2 ${
                               isAdminMode || darkMode
                                 ? 'hover:bg-stone-900 text-stone-300 hover:text-white'
@@ -247,9 +282,10 @@ export default function Header({
                           >
                             <UserIcon className="w-3.5 h-3.5 text-lux-gold shrink-0" />
                             <span>My Profile</span>
-                          </button>
-                          <button
-                            onClick={() => { setProfileDropdownOpen(false); onNavigate('orders'); }}
+                          </Link>
+                          <Link
+                            to="/orders"
+                            onClick={() => { setProfileDropdownOpen(false); }}
                             className={`w-full text-left px-3 py-1.5 text-[10px] uppercase font-sans font-semibold tracking-wider rounded-sm transition-colors cursor-pointer flex items-center gap-2 ${
                               isAdminMode || darkMode
                                 ? 'hover:bg-stone-900 text-stone-300 hover:text-white'
@@ -258,10 +294,11 @@ export default function Header({
                           >
                             <ShoppingBag className="w-3.5 h-3.5 text-lux-gold shrink-0" />
                             <span>My Orders</span>
-                          </button>
+                          </Link>
                           {(currentUser.role === 'admin' || currentUser.role === 'staff') && (
-                            <button
-                              onClick={() => { setProfileDropdownOpen(false); onNavigate('admin'); }}
+                            <Link
+                              to="/admin"
+                              onClick={() => { setProfileDropdownOpen(false); }}
                               className={`w-full text-left px-3 py-1.5 text-[10px] uppercase font-sans font-semibold tracking-wider rounded-sm transition-colors cursor-pointer flex items-center gap-2 ${
                                 isAdminMode || darkMode
                                   ? 'hover:bg-stone-900 text-stone-300 hover:text-white'
@@ -270,14 +307,15 @@ export default function Header({
                             >
                               <ShieldCheck className="w-3.5 h-3.5 text-lux-gold shrink-0" />
                               <span>Admin Workspace</span>
-                            </button>
+                            </Link>
                           )}
                         </>
                       )
                     ) : (
                       <>
-                        <button
-                          onClick={() => { setProfileDropdownOpen(false); onNavigate('auth'); }}
+                        <Link
+                          to="/auth"
+                          onClick={() => { setProfileDropdownOpen(false); }}
                           className={`w-full text-left px-3 py-1.5 text-[10px] uppercase font-sans font-semibold tracking-wider rounded-sm transition-colors cursor-pointer flex items-center gap-2 ${
                             isAdminMode || darkMode
                               ? 'hover:bg-stone-900 text-stone-300 hover:text-white'
@@ -286,7 +324,7 @@ export default function Header({
                         >
                           <LogIn className="w-3.5 h-3.5 text-lux-gold shrink-0" />
                           <span>Sign In / Join</span>
-                        </button>
+                        </Link>
                         <button
                           onClick={() => {
                             setProfileDropdownOpen(false);
@@ -363,14 +401,14 @@ export default function Header({
 
           {/* Book Custom Cake CTA */}
           {!isAdminMode && (
-            <button
-              onClick={() => onNavigate('request')}
+            <Link
+              to="/request"
               className="px-4 py-2.5 bg-stone-900 hover:bg-lux-gold text-white hover:text-stone-950 font-bold tracking-wider text-[10px] uppercase transition-all duration-300 rounded-sm flex items-center gap-2 cursor-pointer border border-stone-800 hover:translate-y-[-1px] shadow-xs font-sans whitespace-nowrap shrink-0"
               id="header-cta"
             >
               <CalendarDays className="w-4 h-4 text-lux-gold group-hover:text-stone-950" />
               Book Custom Cake
-            </button>
+            </Link>
           )}
         </div>
 
@@ -429,10 +467,11 @@ export default function Header({
                   { label: 'Reviews', page: 'testimonials' as PageType },
                   { label: 'Contact', page: 'contact' as PageType },
                 ].map((item) => (
-                  <button
+                  <Link
                     key={item.page}
-                    onClick={() => { onNavigate(item.page); setMobileMenuOpen(false); }}
-                    className={`text-left text-xs uppercase tracking-widest font-semibold py-2 border-b cursor-pointer transition-all ${
+                    to={getRoute(item.page)}
+                    onClick={() => { setMobileMenuOpen(false); }}
+                    className={`text-left block text-xs uppercase tracking-widest font-semibold py-2 border-b cursor-pointer transition-all ${
                       activePage === item.page
                         ? 'text-lux-gold pl-3 border-lux-gold/30 font-bold border-l-2 bg-lux-gold/5'
                         : isAdminMode || darkMode
@@ -441,7 +480,7 @@ export default function Header({
                     }`}
                   >
                     {item.label}
-                  </button>
+                  </Link>
                 ))
               )}
 
@@ -489,21 +528,22 @@ export default function Header({
                     </button>
                   </div>
                 ) : (
-                  <button onClick={() => { onNavigate('auth'); setMobileMenuOpen(false); }} className="text-xs text-lux-gold font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer">
+                  <Link to="/auth" onClick={() => { setMobileMenuOpen(false); }} className="text-xs text-lux-gold font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer">
                     <LogIn className="w-3.5 h-3.5" />
                     Sign In / Register
-                  </button>
+                  </Link>
                 )}
               </div>
 
               {!isAdminMode && (
-                <button
-                  onClick={() => { onNavigate('request'); setMobileMenuOpen(false); }}
+                <Link
+                  to="/request"
+                  onClick={() => { setMobileMenuOpen(false); }}
                   className="w-full mt-4 py-3 bg-stone-900 hover:bg-lux-gold hover:text-stone-950 text-white font-semibold text-xs tracking-widest uppercase rounded-sm flex items-center justify-center gap-2 transition-colors duration-300 cursor-pointer border border-stone-800"
                 >
                   <CalendarDays className="w-4 h-4 text-lux-gold" />
                   Book Custom Cake
-                </button>
+                </Link>
               )}
             </nav>
           </motion.div>
