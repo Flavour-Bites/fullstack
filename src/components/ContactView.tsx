@@ -25,7 +25,7 @@ export default function ContactView() {
     setActiveFaq((prev) => (prev === id ? null : id));
   };
 
-  const handleSubCityCheck = (e: React.FormEvent) => {
+  const handleSubCityCheck = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!subCityInput.trim()) return;
 
@@ -62,7 +62,7 @@ export default function ContactView() {
     }
   };
 
-  const handleContactSubmit = async (e: React.FormEvent) => {
+  const handleContactSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!contactForm.name || !contactForm.email || !contactForm.message) {
       setValError('Please fill out Name, Email, and Message.');

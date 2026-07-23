@@ -16,6 +16,18 @@ export interface LoginResponse {
   telegramId?: string;
 }
 
+export interface OidcInitResponse {
+  success: boolean;
+  authorizationUrl: string;
+}
+
+export interface TelegramTokenExchangeResponse {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  id_token: string;
+}
+
 export interface AuthPayload {
   userId: string;
   role: 'customer' | 'staff' | 'admin';

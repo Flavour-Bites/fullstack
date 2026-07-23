@@ -31,49 +31,78 @@ export function verifyToken(token: string): TokenPayload {
   return jwt.verify(token, getJwtSecret()) as TokenPayload;
 }
 
-export interface TelegramAuthData {
-  id: number;
-  first_name?: string;
-  last_name?: string;
-  username?: string;
-  photo_url?: string;
-  auth_date: number;
-  hash: string;
+import * as jose from 'jose';
+
+const TELEGRAM_JWKS_URL = 'https://oauth.telegram.org/.well-known/jwks.json';
+export const TELEGRAM_ISSUER = 'https://oauth.telegram.org';
+
+let remoteJWKS: jose.JWTVerifyGetKey | null = null;
+
+export function getTelegramJWKS() {
+  if (!remoteJWKS) {
+    remoteJWKS = jose.createRemoteJWKSet(new URL(TELEGRAM_JWKS_URL));
+  }
+  return remoteJWKS;
 }
 
-export function verifyTelegramAuth(data: TelegramAuthData): boolean {
-  const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN?.trim();
-  if (!BOT_TOKEN || !data?.hash || !data?.auth_date || !data?.id) {
-    return false;
+export function setTelegramJWKSSupplier(supplier: jose.JWTVerifyGetKey | null) {
+  remoteJWKS = supplier;
+}
+
+export function generateState(): string {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+export function generateNonce(): string {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+export function generatePkcePair() {
+  const verifier = crypto.randomBytes(32).toString('base64url');
+  const challenge = crypto.createHash('sha256').update(verifier).digest('base64url');
+  return { codeVerifier: verifier, codeChallenge: challenge };
+}
+
+export interface OidcIdTokenPayload {
+  iss: string;
+  aud: string;
+  sub: string;
+  iat: number;
+  exp: number;
+  nonce?: string;
+  id?: number;
+  name?: string;
+  given_name?: string;
+  family_name?: string;
+  preferred_username?: string;
+  picture?: string;
+  phone_number?: string;
+  phone_number_verified?: boolean;
+}
+
+export async function verifyOidcIdToken(
+  idToken: string,
+  expectedNonce?: string,
+  jwksOverride?: jose.JWTVerifyGetKey
+): Promise<OidcIdTokenPayload> {
+  const clientId = process.env.TELEGRAM_OPENID_CONNECT_CLIENT_ID?.trim();
+  if (!clientId) {
+    throw new Error('TELEGRAM_OPENID_CONNECT_CLIENT_ID is not configured.');
   }
 
-  const MAX_AGE_SECONDS = 86400;
-  const now = Math.floor(Date.now() / 1000);
-  if (now - data.auth_date > MAX_AGE_SECONDS) {
-    return false;
+  const JWKS = jwksOverride || getTelegramJWKS();
+  const { payload } = await jose.jwtVerify(idToken, JWKS, {
+    issuer: TELEGRAM_ISSUER,
+    audience: clientId,
+  });
+
+  const claims = payload as unknown as OidcIdTokenPayload;
+
+  if (expectedNonce && claims.nonce !== expectedNonce) {
+    throw new Error('Invalid nonce in ID token.');
   }
 
-  const { hash, ...rest } = data;
-  const dataCheckString = Object.keys(rest)
-    .sort()
-    .map(key => `${key}=${rest[key as keyof typeof rest]}`)
-    .join('\n');
-
-  const secretKey = crypto
-    .createHash('sha256')
-    .update(BOT_TOKEN)
-    .digest();
-
-  const expectedHash = crypto
-    .createHmac('sha256', secretKey)
-    .update(dataCheckString)
-    .digest('hex');
-
-  const expected = Buffer.from(expectedHash, 'hex');
-  const actual = Buffer.from(hash, 'hex');
-  if (expected.length !== actual.length) return false;
-
-  return crypto.timingSafeEqual(expected, actual);
+  return claims;
 }
 
 export function getTokenFromRequest(req: { cookies?: Record<string, string>; headers: Record<string, any> }) {

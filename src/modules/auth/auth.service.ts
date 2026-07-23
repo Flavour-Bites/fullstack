@@ -2,30 +2,151 @@ import {
   signToken,
   verifyPassword,
   hashPassword,
-  verifyTelegramAuth,
+  generateState,
+  generateNonce,
+  generatePkcePair,
+  verifyOidcIdToken,
   authCookieOptions,
 } from '../../shared/utils/auth.js';
 import { authRepository } from './auth.repository.js';
-import type { TelegramAuthData } from '../../shared/utils/auth.js';
-import type { LoginResponse } from './auth.types.js';
+import type { LoginResponse, TelegramTokenExchangeResponse } from './auth.types.js';
 import { AuthenticationError, NotFoundError } from '../../shared/errors/index.js';
 
+const TELEGRAM_DISCOVERY_URL = 'https://oauth.telegram.org/.well-known/openid-configuration';
+
+interface OidcDiscoveryConfig {
+  issuer: string;
+  authorization_endpoint: string;
+  token_endpoint: string;
+  jwks_uri: string;
+}
+
+let cachedOidcConfig: OidcDiscoveryConfig | null = null;
+
+async function getOidcConfig(): Promise<OidcDiscoveryConfig> {
+  if (cachedOidcConfig) return cachedOidcConfig;
+
+  try {
+    const res = await fetch(TELEGRAM_DISCOVERY_URL);
+    if (res.ok) {
+      cachedOidcConfig = (await res.json()) as OidcDiscoveryConfig;
+      return cachedOidcConfig;
+    }
+  } catch {
+    // Fallback to official Telegram OIDC spec endpoints if discovery endpoint is unreachable
+  }
+
+  cachedOidcConfig = {
+    issuer: 'https://oauth.telegram.org',
+    authorization_endpoint: 'https://oauth.telegram.org/auth',
+    token_endpoint: 'https://oauth.telegram.org/token',
+    jwks_uri: 'https://oauth.telegram.org/.well-known/jwks.json',
+  };
+
+  return cachedOidcConfig;
+}
+
 export const authService = {
-  async telegramLogin(telegramData: TelegramAuthData): Promise<LoginResponse> {
-    if (!verifyTelegramAuth(telegramData)) {
-      throw new AuthenticationError('Telegram sign in failed. Please try again.');
+  async initiateOidcFlow(redirectUri: string) {
+    const config = await getOidcConfig();
+    const clientId = process.env.TELEGRAM_OPENID_CONNECT_CLIENT_ID?.trim();
+    if (!clientId) {
+      throw new Error('TELEGRAM_OPENID_CONNECT_CLIENT_ID is not configured.');
     }
 
+    const state = generateState();
+    const nonce = generateNonce();
+    const { codeVerifier, codeChallenge } = generatePkcePair();
+
+    const authUrl = new URL(config.authorization_endpoint);
+    authUrl.searchParams.set('client_id', clientId);
+    authUrl.searchParams.set('redirect_uri', redirectUri);
+    authUrl.searchParams.set('response_type', 'code');
+    authUrl.searchParams.set('scope', 'openid profile phone telegram:bot_access');
+    authUrl.searchParams.set('state', state);
+    authUrl.searchParams.set('nonce', nonce);
+    authUrl.searchParams.set('code_challenge', codeChallenge);
+    authUrl.searchParams.set('code_challenge_method', 'S256');
+
+    return {
+      authorizationUrl: authUrl.toString(),
+      state,
+      nonce,
+      codeVerifier,
+    };
+  },
+
+  async handleOidcCallback(params: {
+    code: string;
+    state: string;
+    storedState?: string;
+    nonce?: string;
+    storedNonce?: string;
+    codeVerifier?: string;
+    redirectUri: string;
+    jwksOverride?: any;
+  }): Promise<LoginResponse> {
+    const { code, state, storedState, storedNonce, codeVerifier, redirectUri, jwksOverride } = params;
+
+    if (!state || !storedState || state !== storedState) {
+      throw new AuthenticationError('Invalid OAuth state parameter (CSRF check failed).');
+    }
+
+    if (!codeVerifier) {
+      throw new AuthenticationError('Missing PKCE code verifier.');
+    }
+
+    const clientId = process.env.TELEGRAM_OPENID_CONNECT_CLIENT_ID?.trim();
+    const clientSecret = process.env.TELEGRAM_OPENID_CONNECT_CLIENT_SECRET?.trim();
+    if (!clientId || !clientSecret) {
+      throw new Error('Telegram OIDC Client ID or Client Secret is not configured.');
+    }
+
+    const config = await getOidcConfig();
+
+    const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    const body = new URLSearchParams({
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: redirectUri,
+      client_id: clientId,
+      code_verifier: codeVerifier,
+    });
+
+    const tokenRes = await fetch(config.token_endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization: `Basic ${basicAuth}`,
+      },
+      body: body.toString(),
+    });
+
+    if (!tokenRes.ok) {
+      const errText = await tokenRes.text();
+      throw new AuthenticationError(`Token exchange failed: ${errText || tokenRes.statusText}`);
+    }
+
+    const tokenData = (await tokenRes.json()) as TelegramTokenExchangeResponse;
+    if (!tokenData.id_token) {
+      throw new AuthenticationError('No id_token received from Telegram OIDC token endpoint.');
+    }
+
+    const claims = await verifyOidcIdToken(tokenData.id_token, storedNonce, jwksOverride);
+
+    const telegramUserId = String(claims.id ?? claims.sub);
     const user = await authRepository.upsertTelegramUser({
-      id: String(telegramData.id),
-      first_name: telegramData.first_name,
-      last_name: telegramData.last_name,
-      username: telegramData.username,
-      photo_url: telegramData.photo_url,
+      id: telegramUserId,
+      name: claims.name,
+      first_name: claims.given_name,
+      last_name: claims.family_name,
+      username: claims.preferred_username,
+      photo_url: claims.picture,
+      phone_number: claims.phone_number,
     });
 
     if (user.passwordHash) {
-      return { success: true, needsPassword: true, telegramId: String(telegramData.id) };
+      return { success: true, needsPassword: true, telegramId: user.telegramId };
     }
 
     const token = signToken({ userId: user.id, role: user.role });

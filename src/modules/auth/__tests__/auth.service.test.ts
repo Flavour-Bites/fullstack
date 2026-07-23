@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeAll } from 'vitest';
 import { authService } from '../auth.service.js';
 
 const mockUser = {
@@ -25,7 +25,9 @@ vi.mock('../../../shared/utils/auth.js', () => ({
   signToken: vi.fn((payload) => `token-${payload.userId}`),
   verifyPassword: vi.fn((plain, hash) => Promise.resolve(hash === `hashed:${plain}`)),
   hashPassword: vi.fn((plain) => Promise.resolve(`hashed:${plain}`)),
-  verifyTelegramAuth: vi.fn((data) => data?.id === 12345),
+  generateState: vi.fn(() => 'mock_state_123'),
+  generateNonce: vi.fn(() => 'mock_nonce_123'),
+  generatePkcePair: vi.fn(() => ({ codeVerifier: 'mock_verifier_123', codeChallenge: 'mock_challenge_123' })),
   authCookieOptions: { httpOnly: true, sameSite: 'lax', secure: false, maxAge: 999 },
 }));
 
@@ -55,21 +57,6 @@ vi.mock('../auth.repository.js', () => ({
     })),
   },
 }));
-
-describe('authService.telegramLogin', () => {
-  it('throws when Telegram auth verification fails', async () => {
-    await expect(authService.telegramLogin({ id: 99999, auth_date: 0, hash: 'bad' } as any))
-      .rejects.toThrow('Telegram sign in failed');
-  });
-
-  it('returns token and user for successful login', async () => {
-    const result = await authService.telegramLogin({ id: 12345, auth_date: 1000, hash: 'x' } as any);
-    expect(result.success).toBe(true);
-    expect(result).toHaveProperty('token');
-    expect(result).toHaveProperty('user');
-    expect((result as any).needsPassword).toBeUndefined();
-  });
-});
 
 describe('authService.finalizeTelegramLogin', () => {
   it('throws when account not found', async () => {
@@ -124,5 +111,49 @@ describe('authService.verifyUserPassword', () => {
   it('returns false when no password set', async () => {
     const valid = await authService.verifyUserPassword('usr_123', 'anypass');
     expect(valid).toBe(false);
+  });
+});
+
+describe('authService.initiateOidcFlow', () => {
+  beforeAll(() => {
+    process.env.TELEGRAM_OPENID_CONNECT_CLIENT_ID = 'test_client_id';
+  });
+
+  it('returns authorizationUrl with required OIDC params', async () => {
+    const result = await authService.initiateOidcFlow('https://example.com/callback');
+    expect(result.authorizationUrl).toContain('client_id=test_client_id');
+    expect(result.authorizationUrl).toContain('response_type=code');
+    expect(result.authorizationUrl).toContain('code_challenge_method=S256');
+    expect(result.authorizationUrl).toContain('scope=openid');
+    expect(result.state).toBeDefined();
+    expect(result.nonce).toBeDefined();
+    expect(result.codeVerifier).toBeDefined();
+  });
+
+  it('throws when CLIENT_ID is missing', async () => {
+    delete process.env.TELEGRAM_OPENID_CONNECT_CLIENT_ID;
+    await expect(authService.initiateOidcFlow('https://example.com/callback'))
+      .rejects.toThrow('TELEGRAM_OPENID_CONNECT_CLIENT_ID is not configured');
+    process.env.TELEGRAM_OPENID_CONNECT_CLIENT_ID = 'test_client_id';
+  });
+});
+
+describe('authService.handleOidcCallback', () => {
+  it('throws on state mismatch (CSRF)', async () => {
+    await expect(authService.handleOidcCallback({
+      code: 'c_123',
+      state: 'state_a',
+      storedState: 'state_b',
+      redirectUri: 'https://example.com/callback',
+    })).rejects.toThrow('Invalid OAuth state');
+  });
+
+  it('throws on missing code verifier (PKCE)', async () => {
+    await expect(authService.handleOidcCallback({
+      code: 'c_123',
+      state: 'state_123',
+      storedState: 'state_123',
+      redirectUri: 'https://example.com/callback',
+    })).rejects.toThrow('Missing PKCE code verifier');
   });
 });
