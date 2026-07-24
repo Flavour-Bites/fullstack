@@ -48,6 +48,7 @@
     "motion": "^12.23.24",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
+    "react-router-dom": "^7.18.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -67,6 +68,7 @@
     "jsdom": "^29.1.1",
     "prisma": "^6.19.3",
     "tailwindcss": "^4.3.2",
+    "ts-morph": "^28.0.0",
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
     "vite": "^6.4.3",
