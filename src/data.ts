@@ -14,7 +14,7 @@ export const GALLERY_ITEMS: CakeGalleryItem[] = [
     category: { id: 'cat-celebration', name: 'Celebration', slug: 'celebration', color: '#c5a880', icon: 'sparkles' },
     flavors: ['Strawberry & Cream', 'Madagascar Vanilla Bean'],
     priceEstimate: '11,500 ETB',
-    image: 'https://images.unsplash.com/photo-1535254973040-607b474cb50d?auto=format&fit=crop&q=80&w=800',
+    image: '/gallery_wedding.png',
     servingCount: '75 - 100 guests',
     tags: ['Celebration', 'Floral', 'Gold Leaf', 'Classic']
   },
@@ -26,7 +26,7 @@ export const GALLERY_ITEMS: CakeGalleryItem[] = [
     category: { id: 'cat-celebration', name: 'Celebration', slug: 'celebration', color: '#c5a880', icon: 'sparkles' },
     flavors: ['Earl Grey Tea & Lavender', 'Rich Chocolate Ganache'],
     priceEstimate: '9,500 ETB',
-    image: 'https://images.unsplash.com/photo-1527529482837-4698179dc6ce?auto=format&fit=crop&q=80&w=800',
+    image: '/gallery_wedding.png',
     servingCount: '50 - 70 guests',
     tags: ['Celebration', 'Modern', 'Gold Leaf', 'Tea Accent']
   },
@@ -38,7 +38,7 @@ export const GALLERY_ITEMS: CakeGalleryItem[] = [
     category: { id: 'cat-birthday', name: 'Birthday', slug: 'birthday', color: '#d4a373', icon: 'party-popper' },
     flavors: ['Salted Caramel Pecan', 'Double Dark Belgian Chocolate'],
     priceEstimate: '2,400 ETB',
-    image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=800',
+    image: '/gallery_birthday.png',
     servingCount: '15 - 20 guests',
     tags: ['Birthday', 'Chocolate', 'Fruity', 'Gold Leaf']
   },
@@ -50,7 +50,7 @@ export const GALLERY_ITEMS: CakeGalleryItem[] = [
     category: { id: 'cat-birthday', name: 'Birthday', slug: 'birthday', color: '#d4a373', icon: 'party-popper' },
     flavors: ['Coconut & Passionfruit', 'Matcha Green Tea'],
     priceEstimate: '2,800 ETB',
-    image: 'https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&q=80&w=800',
+    image: '/gallery_birthday.png',
     servingCount: '20 - 25 guests',
     tags: ['Birthday', 'Modern', 'Gold Leaf', 'Matcha']
   },
@@ -62,7 +62,7 @@ export const GALLERY_ITEMS: CakeGalleryItem[] = [
     category: { id: 'cat-kids', name: 'Kids', slug: 'kids', color: '#8ecae6', icon: 'baby' },
     flavors: ['Vanilla Rainbow Cream', 'Milk Chocolate Fluff'],
     priceEstimate: '1,900 ETB',
-    image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=800',
+    image: '/gallery_birthday.png',
     servingCount: '12 - 15 guests',
     tags: ['Kids', 'Playful', 'Vanilla', 'Chocolate']
   },
@@ -74,7 +74,7 @@ export const GALLERY_ITEMS: CakeGalleryItem[] = [
     category: { id: 'cat-kids', name: 'Kids', slug: 'kids', color: '#8ecae6', icon: 'baby' },
     flavors: ['Classic Strawberry Shortcake', 'Sweet Honey Butter'],
     priceEstimate: '3,200 ETB',
-    image: 'https://images.unsplash.com/photo-1558961313-7f24be4c1945?auto=format&fit=crop&q=80&w=800',
+    image: '/gallery_birthday.png',
     servingCount: '25 - 30 guests',
     tags: ['Kids', 'Fairytale', 'Gold Leaf', 'Birthday']
   },
@@ -86,7 +86,7 @@ export const GALLERY_ITEMS: CakeGalleryItem[] = [
     category: { id: 'cat-treats', name: 'Treats', slug: 'treats', color: '#b08968', icon: 'cookie' },
     flavors: ['Pistachio', 'Coffee', 'Rose & Lychee'],
     priceEstimate: '850 ETB / dozen',
-    image: 'https://images.unsplash.com/photo-1517433456452-f9633a875f6f?auto=format&fit=crop&q=80&w=800',
+    image: '/gallery_treats.png',
     servingCount: 'Assorted custom platters',
     tags: ['Gourmet Treats', 'Assorted', 'Pistachio', 'Macarons']
   },
@@ -98,7 +98,7 @@ export const GALLERY_ITEMS: CakeGalleryItem[] = [
     category: { id: 'cat-treats', name: 'Treats', slug: 'treats', color: '#b08968', icon: 'cookie' },
     flavors: ['Raspberry & White Chocolate'],
     priceEstimate: '1,800 ETB',
-    image: 'https://images.unsplash.com/photo-1550617931-e17a7b70dce2?auto=format&fit=crop&q=80&w=800',
+    image: '/gallery_treats.png',
     servingCount: 'Serves up to 25 people',
     tags: ['Gourmet Treats', 'Macarons', 'Fruity', 'Gold Leaf']
   },
@@ -110,7 +110,7 @@ export const GALLERY_ITEMS: CakeGalleryItem[] = [
     category: { id: 'cat-celebration', name: 'Celebration', slug: 'celebration', color: '#c5a880', icon: 'sparkles' },
     flavors: ['Pistachio Praline', 'Lemon Curd & Meringue'],
     priceEstimate: '4,500 ETB',
-    image: 'https://images.unsplash.com/photo-1519340333755-56e9c1d04579?auto=format&fit=crop&q=80&w=800',
+    image: '/gallery_wedding.png',
     servingCount: '35 - 45 guests',
     tags: ['Celebration', 'Crystals', 'Gold Leaf', 'Pistachio']
   }

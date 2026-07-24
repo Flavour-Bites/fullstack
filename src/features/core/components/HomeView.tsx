@@ -61,37 +61,37 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
         {/* Deep, premium background texture with high contrast overlay */}
         <div className="absolute inset-0 z-0 select-none">
           <img
-            src="https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?auto=format&fit=crop&q=80&w=1600"
+            src="/hero_cake.png"
             alt="Main visual backdrop"
-            className="w-full h-full object-cover opacity-[0.32] scale-105"
+            className="w-full h-full object-cover opacity-[0.55] scale-105"
             loading="eager"
             referrerPolicy="no-referrer"
           />
           {/* Subtle gradient vignette */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#120f0d] via-[#120f0d]/85 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#120f0d] via-transparent to-[#120f0d]/40" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#120f0d] via-transparent to-[#120f0d]/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#120f0d] via-transparent to-[#120f0d]/50" />
           <div className="absolute -top-1/4 -right-1/4 w-96 h-96 rounded-full bg-lux-gold/10 blur-3xl pointer-events-none" />
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto w-full flex flex-col lg:flex-row items-center gap-8 lg:gap-0">
+        <div className="relative z-10 max-w-5xl mx-auto w-full flex flex-col items-center text-center">
           
-          {/* Left Text Column */}
-          <div className="w-full lg:w-[52%] xl:w-[48%] space-y-7 text-left shrink-0">
+          {/* Text Column */}
+          <div className="w-full space-y-7 flex flex-col items-center">
               <motion.h1
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.1 }}
-                className="text-4xl sm:text-5xl md:text-6xl font-serif tracking-tight leading-[1.08] text-white"
+                className="text-4xl sm:text-6xl md:text-7xl font-serif tracking-tight leading-[1.05] text-white max-w-4xl"
               >
                 {t('home.heroTitle')} <br />
-                <span className="italic font-light text-lux-gold block sm:inline">{t('home.heroSubtitle')}</span>
+                <span className="italic font-light text-lux-gold block mt-2">{t('home.heroSubtitle')}</span>
               </motion.h1>
 
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="text-stone-300 text-sm sm:text-base font-light leading-relaxed max-w-xl font-sans"
+                className="text-stone-200 text-sm sm:text-lg font-light leading-relaxed max-w-2xl font-sans"
               >
                 {t('home.heroDescription')}
               </motion.p>
@@ -101,11 +101,11 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="flex flex-col sm:flex-row items-center gap-4 pt-2"
+              className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
             >
               <Link
                 to="/request"
-                className="w-full sm:w-auto px-8 py-4 bg-lux-gold text-stone-950 font-semibold tracking-wider text-xs uppercase duration-300 transition-all shadow-lg hover:shadow-lux-gold/20 hover:bg-white hover:text-stone-950 cursor-pointer flex items-center justify-center gap-2 rounded-sm"
+                className="w-full sm:w-auto px-10 py-4 bg-lux-gold text-stone-950 font-semibold tracking-widest text-xs uppercase duration-300 transition-all shadow-[0_8px_30px_rgba(197,168,128,0.2)] hover:shadow-[0_8px_30px_rgba(255,255,255,0.3)] hover:bg-white hover:text-stone-950 cursor-pointer flex items-center justify-center gap-2 rounded-sm"
                 id="hero-request-btn"
               >
                 <Calendar className="w-4 h-4" />
@@ -113,7 +113,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
               </Link>
               <Link
                 to="/gallery"
-                className="w-full sm:w-auto px-8 py-4 border border-white/20 hover:border-lux-gold bg-stone-900/40 hover:bg-stone-900/80 text-white font-medium tracking-wider text-xs transition-all duration-300 cursor-pointer flex items-center justify-center gap-1.5 rounded-sm"
+                className="w-full sm:w-auto px-10 py-4 border border-white/30 hover:border-lux-gold bg-stone-950/40 backdrop-blur-sm hover:bg-stone-900/80 text-white font-medium tracking-widest text-xs transition-all duration-300 cursor-pointer flex items-center justify-center gap-1.5 rounded-sm uppercase"
                 id="hero-gallery-btn"
               >
                 {t('home.viewGallery')}
@@ -126,38 +126,20 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="flex gap-4 sm:gap-10 mt-12 pt-8 border-t border-stone-850 text-left"
+              className="flex justify-center gap-8 sm:gap-16 mt-16 pt-8 border-t border-white/10 text-center"
             >
               {[
                 { value: "500+", label: t('home.statsCakes') },
                 { value: "5.0★", label: t('home.statsRating') },
                 { value: "8+ Yrs", label: t('home.statsHeritage') },
               ].map((s) => (
-                <div key={s.label} className="space-y-1">
-                  <p className="font-serif text-3xl font-medium text-white">{s.value}</p>
-                  <p className="font-sans text-[10px] uppercase tracking-widest text-[#c5a880] font-semibold">{s.label}</p>
+                <div key={s.label} className="space-y-1.5">
+                  <p className="font-serif text-3xl sm:text-4xl font-medium text-white drop-shadow-md">{s.value}</p>
+                  <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-[#c5a880] font-semibold">{s.label}</p>
                 </div>
               ))}
             </motion.div>
           </div>
-
-          {/* Right Column: Brand Artwork — fills remaining width, capped at viewport height */}
-          <div className="w-full lg:w-[48%] xl:w-[52%] flex items-center justify-center lg:justify-end">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="w-full max-w-[380px] sm:max-w-[460px] lg:max-w-full"
-            >
-              <img
-                src="/src/assets/images/flavour_bites_hero_cupcake_1782078016174.jpg"
-                alt="Flavour Bites Stylized Cupcake Art"
-                className="w-full h-auto max-h-[55vh] object-contain mix-blend-screen"
-                referrerPolicy="no-referrer"
-              />
-            </motion.div>
-          </div>
-
         </div>
       </section>
 
@@ -206,7 +188,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
             <div>
               <div className="aspect-[4/5] overflow-hidden mb-6 relative group bg-stone-100 dark:bg-stone-900">
                 <img
-                  src="https://images.unsplash.com/photo-1535254973040-607b474cb50d?auto=format&fit=crop&q=80&w=800"
+                  src="/gallery_wedding.png"
                   alt="Celebration Sculptures"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   referrerPolicy="no-referrer"
@@ -238,7 +220,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
             <div>
               <div className="aspect-[4/5] overflow-hidden mb-6 relative group bg-stone-100 dark:bg-stone-900">
                 <img
-                  src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?auto=format&fit=crop&q=80&w=800"
+                  src="/gallery_birthday.png"
                   alt="Milestones & Birthdays"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   referrerPolicy="no-referrer"
@@ -270,7 +252,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
             <div>
               <div className="aspect-[4/5] overflow-hidden mb-6 relative group bg-stone-100 dark:bg-stone-900">
                 <img
-                  src="https://images.unsplash.com/photo-1517433456452-f9633a875f6f?auto=format&fit=crop&q=80&w=800"
+                  src="/gallery_treats.png"
                   alt="Cookies & Treats"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   referrerPolicy="no-referrer"

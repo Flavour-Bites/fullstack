@@ -33,7 +33,7 @@ export default function AboutView() {
               Growing up, Yodit learned early from her family that great baking requires pure ingredients, patience, and a deep respect for natural flavors. What began as baking beautiful treats for friends and family quickly blossomed into a dedicated custom cake studio.
             </p>
             <p>
-              Today, Yodit operates **Flavour Bites** as a boutique home-based bakery in Addis Ababa. She accepts only a very limited number of custom orders each week. This allows her to focus entirely on each design—from sketching ideas to hand-applying the final delicate gold details.
+              Today, Yodit operates <span className="font-semibold text-stone-900 dark:text-stone-100">Flavour Bites</span> as a boutique home-based bakery in Addis Ababa. She accepts only a very limited number of custom orders each week. This allows her to focus entirely on each design—from sketching ideas to hand-applying the final delicate gold details.
             </p>
           </div>
 
@@ -62,7 +62,7 @@ export default function AboutView() {
           <div className="absolute inset-0 border border-lux-gold translate-x-4 translate-y-4 z-0 rounded-xs" />
           <div className="relative z-10 aspect-[3/4] h-[320px] sm:h-[450px] lg:h-[550px] overflow-hidden rounded-xs shadow-xl min-w-full">
             <img
-              src="https://images.unsplash.com/photo-1581299894007-aaa50297cf16?auto=format&fit=crop&q=80&w=800"
+              src="/yodit_baker.png"
               alt="Yodit Ashenafi in Studio"
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-102"
               referrerPolicy="no-referrer"
