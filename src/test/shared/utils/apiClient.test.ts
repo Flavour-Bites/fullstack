@@ -9,8 +9,8 @@ afterEach(() => {
 
 describe('setToken / clearToken', () => {
   it('can be called without errors', () => {
-    setToken('abc');
-    clearToken();
+    expect(() => setToken('abc')).not.toThrow();
+    expect(() => clearToken()).not.toThrow();
   });
 });
 
@@ -59,8 +59,9 @@ describe('apiFetch', () => {
 
     await apiFetch('/api/data', { method: 'POST', body: '{"x":1}' });
 
-    const opts = (mock.mock.calls[0] as [string, RequestInit])[1];
-    expect(opts.method).toBe('POST');
-    expect(opts.body).toBe('{"x":1}');
+    const call = mock.mock.calls.find((c) => c[0] === '/api/data') as [string, RequestInit];
+    expect(call).toBeDefined();
+    expect(call[1].method).toBe('POST');
+    expect(call[1].body).toBe('{"x":1}');
   });
 });

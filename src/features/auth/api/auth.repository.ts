@@ -11,6 +11,8 @@ export type PublicUser = {
   telegramPhone: string | null;
   telegramPhoto: string | null;
   notifyViaTelegram: boolean;
+  dietaryPreferences: string[];
+  language: string;
   createdAt: string;
 };
 
@@ -24,7 +26,9 @@ function toPublic(user: User): PublicUser {
     telegramPhone: user.telegramPhone,
     telegramPhoto: user.telegramPhoto,
     notifyViaTelegram: user.notifyViaTelegram,
-    createdAt: user.createdAt?.toISOString?.() ?? '',
+    dietaryPreferences: user.dietaryPreferences ?? [],
+    language: user.language ?? 'en',
+    createdAt: user.createdAt?.toISOString() ?? '',
   };
 }
 
@@ -77,6 +81,14 @@ export const authRepository = {
     return prisma.user.update({
       where: { id: userId },
       data: { passwordHash },
+    });
+  },
+
+  async updateProfile(userId: string, data: { name?: string; telegramPhone?: string; notifyViaTelegram?: boolean; dietaryPreferences?: string[]; language?: string; }) {
+    const prisma = getPrisma();
+    return prisma.user.update({
+      where: { id: userId },
+      data,
     });
   },
 

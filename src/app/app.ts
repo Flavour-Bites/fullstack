@@ -9,6 +9,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { verifyTelegramWebhookSecret } from '../integrations/telegram/telegramWebhook.js';
 import { fetchWithTimeout } from '../shared/utils/fetchWithTimeout.js';
 import apiRoutes from './routes.js';
+import { doubleCsrfProtection, generateToken } from './config/csrf.js';
 
 export async function registerWebhook() {
   if (!process.env.TELEGRAM_BOT_TOKEN || !process.env.APP_URL || !process.env.TELEGRAM_WEBHOOK_SECRET) {
@@ -77,7 +78,11 @@ export async function createApp() {
     webhookCallback(bot, 'express'),
   );
 
-  app.use('/api', apiRoutes);
+  app.get('/api/csrf-token', (req, res) => {
+    res.json({ token: generateToken(req, res) });
+  });
+
+  app.use('/api', doubleCsrfProtection, apiRoutes);
 
   app.use(errorHandler);
 

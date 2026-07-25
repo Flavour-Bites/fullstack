@@ -1,8 +1,10 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { signToken, verifyPassword, hashPassword, generateNonce, generatePkcePair, verifyOidcIdToken, authCookieOptions } from '../../../shared/utils/auth';
 import { authRepository } from './auth.repository';
 import type { LoginResponse, TelegramTokenExchangeResponse } from './auth.types';
 import { AuthenticationError, NotFoundError } from '../../../shared/errors/index';
+import { getRedisStore } from '../../../integrations/redis/redisClient';
+import type * as jose from 'jose';
 
 const TELEGRAM_DISCOVERY_URL = 'https://oauth.telegram.org/.well-known/openid-configuration';
 
@@ -38,9 +40,9 @@ async function getOidcConfig(): Promise<OidcDiscoveryConfig> {
   return cachedOidcConfig;
 }
 
-const oidcStateStore = new Map<string, { nonce: string; codeVerifier: string }>();
+import { TEN_MINUTES_SECONDS } from '../../../shared/constants/index';
 
-setInterval(() => oidcStateStore.clear(), 10 * 60 * 1000);
+const oidcStateKey = (state: string) => `fb:oidc:state:${state}`;
 
 export const authService = {
   async initiateOidcFlow(redirectUri: string) {
@@ -54,8 +56,11 @@ export const authService = {
     const nonce = generateNonce();
     const { codeVerifier, codeChallenge } = generatePkcePair();
 
-    oidcStateStore.set(state, { nonce, codeVerifier });
-    setTimeout(() => oidcStateStore.delete(state), 10 * 60 * 1000);
+    await getRedisStore().set(
+      oidcStateKey(state),
+      JSON.stringify({ nonce, codeVerifier }),
+      TEN_MINUTES_SECONDS
+    );
 
     const authUrl = new URL(config.authorization_endpoint);
     authUrl.searchParams.set('client_id', clientId);
@@ -77,15 +82,24 @@ export const authService = {
     code: string;
     state: string;
     redirectUri: string;
-    jwksOverride?: any;
+    jwksOverride?: jose.JWTVerifyGetKey;
   }): Promise<LoginResponse> {
     const { code, state, redirectUri, jwksOverride } = params;
 
-    const stored = oidcStateStore.get(state);
-    oidcStateStore.delete(state);
+    const key = oidcStateKey(state);
+    const store = getRedisStore();
+    const raw = await store.get(key);
+    await store.del(key);
 
-    if (!stored) {
+    if (!raw) {
       throw new AuthenticationError('Invalid OAuth state parameter (CSRF check failed).');
+    }
+
+    let stored: { nonce: string; codeVerifier: string };
+    try {
+      stored = JSON.parse(raw);
+    } catch {
+      throw new AuthenticationError('Invalid OAuth state data.');
     }
 
     const { nonce, codeVerifier } = stored;
@@ -190,6 +204,11 @@ export const authService = {
   async getCurrentUser(userId: string): Promise<LoginResponse['user']> {
     const user = await authRepository.findById(userId);
     if (!user) throw new NotFoundError('Account not found.');
+    return authRepository.toPublic(user);
+  },
+
+  async updateProfile(userId: string, data: { name?: string; telegramPhone?: string; notifyViaTelegram?: boolean; dietaryPreferences?: string[]; language?: string; }) {
+    const user = await authRepository.updateProfile(userId, data);
     return authRepository.toPublic(user);
   },
 

@@ -2,27 +2,7 @@ import { sendMessage } from './telegramClient.js';
 import { getPrisma } from '../../app/config/prisma.js';
 import type { CustomCakeRequest, User } from '@prisma/client';
 
-const STATUS_EMOJI: Record<string, string> = {
-  Received: '📬',
-  Designing: '✏️',
-  Quoted: '💰',
-  Confirmed: '✅',
-  InProgress: '🔥',
-  Ready: '🎂',
-  Completed: '🌟',
-  Cancelled: '❌',
-};
-
-const STATUS_LABEL: Record<string, string> = {
-  Received: 'Request Received',
-  Designing: 'Being Designed',
-  Quoted: 'Quote Ready for Review',
-  Confirmed: 'Order Confirmed',
-  InProgress: 'Being Baked',
-  Ready: 'Ready for Pickup / Delivery',
-  Completed: 'Order Completed',
-  Cancelled: 'Cancelled',
-};
+import { STATUS_EMOJI, STATUS_LABEL } from '../../shared/constants/orderStatus.js';
 
 const etb = (n: number) => `${n.toLocaleString()} ETB`;
 
@@ -52,6 +32,8 @@ export async function notifyStaffNewOrder(
   order: CustomCakeRequest & { user?: User | null },
 ): Promise<void> {
   const emoji = order.deliveryOption === 'delivery' ? '🚗' : '🏠';
+  const deliveryTypeStr = order.deliveryOption === 'delivery' ? 'Delivery to:' : 'Pickup';
+  const addressStr = order.deliveryAddress ? ' ' + order.deliveryAddress : '';
 
   const text = [
     `<b>🎂 New Cake Request! ${order.id}</b>`,
@@ -69,14 +51,14 @@ export async function notifyStaffNewOrder(
     `<b>Flavour:</b> ${order.flavor}`,
     `<b>Style:</b> ${order.designStyle}`,
     '',
-    `${emoji} <b>${order.deliveryOption === 'delivery' ? 'Delivery to:' : 'Pickup'}</b>${order.deliveryAddress ? ` ${order.deliveryAddress}` : ''}`,
+    `${emoji} <b>${deliveryTypeStr}</b>${addressStr}`,
     `<b>Price:</b> ${etb(getOrderPrice(order))}`,
     '',
     order.specialInstructions
       ? `<b>Special instructions:</b>\n${order.specialInstructions}`
       : '<i>No special instructions</i>',
   ]
-    .filter((line) => line)
+    .filter(Boolean)
     .join('\n');
 
   const buttons = [

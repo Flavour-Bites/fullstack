@@ -7,6 +7,6 @@ import { requireAuth } from '../../../app/middleware/requireAuth';
 
 const router = Router();
 
-router.post('/', requireAuth, chatLimiter, validate(chatSchema), chatbotController.chat);
+router.post('/', chatLimiter, requireAuth, validate(chatSchema), chatbotController.chat);
 
 export default router;

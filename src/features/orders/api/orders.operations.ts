@@ -1,11 +1,7 @@
 import type { OrderStatus, PrismaClient } from '@prisma/client';
 import { makeId } from '../../../shared/utils/ids';
 
-export type OrderActor = {
-  userId?: string | null;
-  source: 'admin_api' | 'staff_api' | 'customer_api' | 'telegram_bot' | 'system';
-  note?: string | null;
-};
+import type { OrderActor } from './orders.types';
 
 export async function createOrder(
   prisma: PrismaClient,
@@ -134,14 +130,8 @@ export async function updateOrderCommercials(
     });
     if (!current || current.deletedAt) throw new Error('Order not found.');
 
-    const nextFinalPrice =
-      input.finalPrice !== undefined
-        ? input.finalPrice
-        : current.finalPrice;
-    const nextDeposit =
-      input.depositAmount !== undefined
-        ? input.depositAmount
-        : current.depositAmount;
+    const nextFinalPrice = input.finalPrice ?? current.finalPrice;
+    const nextDeposit = input.depositAmount ?? current.depositAmount;
 
     return tx.customCakeRequest.update({
       where: { id: orderId },
