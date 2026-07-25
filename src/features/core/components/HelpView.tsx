@@ -1,137 +1,242 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { HelpCircle, Package, MessageSquare, ChevronDown, Clock, ShieldCheck } from 'lucide-react';
+import { HelpCircle, ChevronDown, Search, ArrowRight, ShieldCheck, UserCircle, MessageSquare, CheckCircle2 } from 'lucide-react';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { Link } from 'react-router-dom';
-
-const FAQS = [
-  {
-    question: "How far in advance should I order my custom cake?",
-    answer: "For bespoke custom designs, we highly recommend placing your order at least 2 weeks in advance. Since every cake is handcrafted by Yodit and our slots are extremely limited, popular dates fill up quickly."
-  },
-  {
-    question: "Do you offer delivery or is it pick-up only?",
-    answer: "We offer both! You can select delivery (within Addis Ababa) or studio pick-up during your request. Note that complex multi-tier cakes may require special transport arrangements."
-  },
-  {
-    question: "How do deposits and payments work?",
-    answer: "A 50% non-refundable deposit is required to secure your booking date on our calendar. The remaining balance is due exactly 3 days before your scheduled pickup/delivery."
-  },
-  {
-    question: "Can I request allergy-friendly options?",
-    answer: "While we take the utmost care with our ingredients, our kitchen handles dairy, gluten, and nuts. Therefore, we cannot guarantee a 100% allergen-free environment for severe allergies."
-  }
-];
+import { FAQS } from '../../../data';
+import { t } from '../../../i18n/index';
 
 export default function HelpView() {
-  usePageTitle("Help & FAQ");
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
+  usePageTitle("Help & Guide");
+
+  // Accordion faq category state and search inputs
+  const [activeFaq, setActiveFaq] = useState<string | null>(null);
+  const [faqCategory, setFaqCategory] = useState<string>('all');
+  const [faqSearch, setFaqSearch] = useState<string>('');
+
+  const toggleFaq = (id: string) => {
+    setActiveFaq((prev) => (prev === id ? null : id));
+  };
 
   return (
-    <div className="space-y-24 pb-16">
+    <div className="space-y-24 pb-16 font-sans">
       {/* Hero Section */}
       <section className="bg-stone-900 text-white py-20 relative overflow-hidden">
         <div className="absolute top-1/2 right-0 -translate-y-1/2 w-[30vw] h-[30vw] rounded-full border border-white/5 pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 text-center">
-          <span className="text-[10px] uppercase tracking-[0.3em] text-lux-gold font-mono block mb-2 font-semibold">Support</span>
-          <h1 className="text-4xl sm:text-5xl font-serif text-white mb-6">How can we help you?</h1>
+          <span className="text-[10px] uppercase tracking-[0.3em] text-lux-gold font-mono block mb-2 font-bold">Support & Guide</span>
+          <h1 className="text-4xl sm:text-5xl font-serif text-white mb-6">How to Use Flavour Bites</h1>
           <div className="h-[2px] w-12 bg-lux-gold mx-auto mb-6" />
-          <p className="text-stone-400 text-sm font-light max-w-lg mx-auto font-sans leading-relaxed">
-            From commissioning your dream cake to tracking your order, find all the information you need to make your celebration memorable.
+          <p className="text-stone-400 text-sm font-light max-w-lg mx-auto leading-relaxed">
+            A step-by-step guide to ordering, tracking, and understanding our custom cake process. Save time by finding exactly what you need right here.
           </p>
         </div>
       </section>
 
-      {/* Guide Cards */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Card 1: Ordering */}
-          <div className="bg-white dark:bg-stone-950 p-8 border border-stone-200/60 dark:border-stone-850 rounded-sm shadow-xs group hover:border-lux-gold/40 transition-colors">
-            <div className="w-12 h-12 bg-stone-100 dark:bg-stone-900 rounded-sm flex items-center justify-center text-lux-gold mb-6 group-hover:scale-110 transition-transform">
-              <Package className="w-5 h-5" />
+      {/* Specific Guides Section */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-6">
+        <div className="space-y-16">
+          
+          {/* Guide 1: Requesting a Cake */}
+          <div className="bg-white dark:bg-stone-950 border border-stone-200/60 dark:border-stone-850 rounded-sm p-8 md:p-10 shadow-xs relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-stone-50 dark:bg-stone-900 rounded-full blur-3xl -z-10" />
+            <h2 className="text-2xl md:text-3xl font-serif text-stone-900 dark:text-stone-100 mb-2">How to Request a Custom Cake</h2>
+            <p className="text-stone-500 dark:text-stone-400 font-light mb-8 text-sm">Follow these exact steps to commission your dream cake without the hassle.</p>
+            
+            <div className="space-y-6">
+              <div className="flex gap-4">
+                <div className="w-8 h-8 rounded-full bg-stone-900 dark:bg-stone-800 text-white flex items-center justify-center font-mono font-bold text-xs shrink-0 border border-stone-800 dark:border-stone-700">1</div>
+                <div>
+                  <h4 className="font-serif text-lg text-stone-900 dark:text-stone-200 mb-1">Browse or Create Your Design</h4>
+                  <p className="text-sm text-stone-600 dark:text-stone-400 font-light">Look through our <Link to="/gallery" className="text-lux-gold hover:underline">Cake Gallery</Link> to find inspiration, or click "Order a Custom Cake" to start from scratch. Note the style, colors, and flavors you want.</p>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <div className="w-8 h-8 rounded-full bg-stone-900 dark:bg-stone-800 text-white flex items-center justify-center font-mono font-bold text-xs shrink-0 border border-stone-800 dark:border-stone-700">2</div>
+                <div>
+                  <h4 className="font-serif text-lg text-stone-900 dark:text-stone-200 mb-1">Fill out the Request Form</h4>
+                  <p className="text-sm text-stone-600 dark:text-stone-400 font-light">Navigate to the <Link to="/request" className="text-lux-gold hover:underline">Order Form</Link>. We need your exact event date, the estimated number of guests, and whether you want pickup or delivery.</p>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <div className="w-8 h-8 rounded-full bg-stone-900 dark:bg-stone-800 text-white flex items-center justify-center font-mono font-bold text-xs shrink-0 border border-stone-800 dark:border-stone-700">3</div>
+                <div>
+                  <h4 className="font-serif text-lg text-stone-900 dark:text-stone-200 mb-1">Wait for Yodit's Review & Quote</h4>
+                  <p className="text-sm text-stone-600 dark:text-stone-400 font-light">Once you submit, your order status becomes <span className="font-mono text-xs bg-stone-100 dark:bg-stone-800 px-1 rounded text-stone-600 dark:text-stone-300">Request Received</span>. Yodit will review your design and reply directly to your Phone or Telegram within 24 hours with an exact price.</p>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <div className="w-8 h-8 rounded-full bg-stone-900 dark:bg-stone-800 text-white flex items-center justify-center font-mono font-bold text-xs shrink-0 border border-stone-800 dark:border-stone-700">4</div>
+                <div>
+                  <h4 className="font-serif text-lg text-stone-900 dark:text-stone-200 mb-1">Confirm and Bake</h4>
+                  <p className="text-sm text-stone-600 dark:text-stone-400 font-light">After you confirm the quote and pay the deposit, your status updates to <span className="font-mono text-xs bg-stone-100 dark:bg-stone-800 px-1 rounded text-stone-600 dark:text-stone-300">Order Confirmed</span>. We will start baking your cake 48 hours before your event!</p>
+                </div>
+              </div>
             </div>
-            <h3 className="font-serif text-xl text-stone-900 dark:text-stone-100 mb-3">How to Order</h3>
-            <p className="text-stone-500 dark:text-stone-400 font-light text-sm mb-6 leading-relaxed">
-              Browse our Gallery to find a design you love, or go straight to the Request page to detail your custom vision. Yodit will review and provide a personalized quote.
-            </p>
-            <Link to="/request" className="text-lux-gold text-xs font-mono uppercase tracking-wider font-semibold hover:text-stone-900 dark:hover:text-white transition-colors">
-              Start a Request &rarr;
-            </Link>
+
+            <div className="mt-8 pt-6 border-t border-stone-100 dark:border-stone-850">
+              <Link to="/request" className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] font-mono font-bold text-lux-gold hover:text-stone-900 dark:hover:text-stone-100 transition-colors">
+                Start a Request Now <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
 
-          {/* Card 2: Tracking */}
-          <div className="bg-white dark:bg-stone-950 p-8 border border-stone-200/60 dark:border-stone-850 rounded-sm shadow-xs group hover:border-lux-gold/40 transition-colors">
-            <div className="w-12 h-12 bg-stone-100 dark:bg-stone-900 rounded-sm flex items-center justify-center text-lux-gold mb-6 group-hover:scale-110 transition-transform">
-              <Clock className="w-5 h-5" />
+          {/* Guide 2: Tracking an Order */}
+          <div className="bg-stone-50 dark:bg-stone-900/40 border border-stone-200/60 dark:border-stone-850 rounded-sm p-8 md:p-10 shadow-xs">
+            <h2 className="text-2xl md:text-3xl font-serif text-stone-900 dark:text-stone-100 mb-2">How to Track Your Active Order</h2>
+            <p className="text-stone-500 dark:text-stone-400 font-light mb-8 text-sm">Don't call to ask if your cake is ready! You can see its live status right on our website.</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-3">
+                <UserCircle className="w-8 h-8 text-lux-gold mb-2" />
+                <h4 className="font-serif text-base text-stone-900 dark:text-stone-200">1. Sign In</h4>
+                <p className="text-xs text-stone-600 dark:text-stone-400 font-light">Click 'Sign In' at the top right of the website. For security and notifications, you must authenticate using your Telegram account.</p>
+              </div>
+
+              <div className="space-y-3">
+                <ShieldCheck className="w-8 h-8 text-lux-gold mb-2" />
+                <h4 className="font-serif text-base text-stone-900 dark:text-stone-200">2. Go to My Profile</h4>
+                <p className="text-xs text-stone-600 dark:text-stone-400 font-light">Once signed in, click on your profile to access your dashboard. Your active requests and orders are listed securely there.</p>
+              </div>
+
+              <div className="space-y-3">
+                <CheckCircle2 className="w-8 h-8 text-lux-gold mb-2" />
+                <h4 className="font-serif text-base text-stone-900 dark:text-stone-200">3. View Live Status</h4>
+                <p className="text-xs text-stone-600 dark:text-stone-400 font-light">Click on any order to see if it is <span className="font-mono">Being Designed</span>, <span className="font-mono">Being Baked</span>, or <span className="font-mono">Ready for Pickup</span>.</p>
+              </div>
             </div>
-            <h3 className="font-serif text-xl text-stone-900 dark:text-stone-100 mb-3">Track Your Order</h3>
-            <p className="text-stone-500 dark:text-stone-400 font-light text-sm mb-6 leading-relaxed">
-              Login securely via Telegram to view real-time updates on your cake's progress. You can check invoices, update details, and view baker notes directly from your dashboard.
-            </p>
-            <Link to="/auth" className="text-lux-gold text-xs font-mono uppercase tracking-wider font-semibold hover:text-stone-900 dark:hover:text-white transition-colors">
-              Login to Portal &rarr;
-            </Link>
+
+            <div className="mt-8 pt-6 border-t border-stone-200 dark:border-stone-800">
+              <Link to="/auth" className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] font-mono font-bold text-lux-gold hover:text-stone-900 dark:hover:text-stone-100 transition-colors">
+                Sign in to Track Orders <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
 
-          {/* Card 3: Contact */}
-          <div className="bg-white dark:bg-stone-950 p-8 border border-stone-200/60 dark:border-stone-850 rounded-sm shadow-xs group hover:border-lux-gold/40 transition-colors">
-            <div className="w-12 h-12 bg-stone-100 dark:bg-stone-900 rounded-sm flex items-center justify-center text-lux-gold mb-6 group-hover:scale-110 transition-transform">
-              <MessageSquare className="w-5 h-5" />
-            </div>
-            <h3 className="font-serif text-xl text-stone-900 dark:text-stone-100 mb-3">Still Need Help?</h3>
-            <p className="text-stone-500 dark:text-stone-400 font-light text-sm mb-6 leading-relaxed">
-              Have a specific question not covered here? Feel free to reach out to us directly through our contact form or chat with our AI assistant for instant answers.
-            </p>
-            <Link to="/contact" className="text-lux-gold text-xs font-mono uppercase tracking-wider font-semibold hover:text-stone-900 dark:hover:text-white transition-colors">
-              Contact Us &rarr;
-            </Link>
-          </div>
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="max-w-3xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-12">
-          <HelpCircle className="w-8 h-8 text-lux-gold mx-auto mb-4 opacity-80" />
-          <h2 className="text-3xl font-serif text-stone-900 dark:text-stone-100">Frequently Asked Questions</h2>
+      {/* FAQs Panel Migrated from ContactView */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 font-sans">
+        <div className="text-center max-w-xl mx-auto mb-10">
+          <span className="text-[10px] uppercase tracking-[0.3em] text-lux-gold font-mono block mb-2 font-semibold font-bold">{t('contact.studioPolicies')}</span>
+          <h2 className="text-3xl font-serif text-warm-950 dark:text-stone-100">{t('contact.faqHeader')}</h2>
+          <p className="text-xs text-stone-500 dark:text-stone-400 font-light mt-2 font-sans">{t('contact.faqDescription')}</p>
+          <div className="h-[2px] w-12 bg-lux-gold mx-auto mt-4" />
         </div>
 
-        <div className="space-y-4">
-          {FAQS.map((faq, idx) => (
-            <div 
-              key={idx} 
-              className="border border-stone-200/80 dark:border-stone-800 rounded-sm bg-white dark:bg-stone-950 overflow-hidden"
-            >
-              <button
-                className="w-full flex items-center justify-between p-5 text-left cursor-pointer"
-                onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-              >
-                <span className="font-serif text-lg text-stone-900 dark:text-stone-200 pr-8">{faq.question}</span>
-                <ChevronDown 
-                  className={`w-5 h-5 text-stone-400 transition-transform duration-300 ${openFaq === idx ? 'rotate-180 text-lux-gold' : ''}`} 
-                />
-              </button>
-              
-              <AnimatePresence>
-                {openFaq === idx && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <div className="p-5 pt-0 text-stone-500 dark:text-stone-400 font-light text-sm leading-relaxed border-t border-stone-100 dark:border-stone-850 mt-2">
-                      <div className="pt-3 flex gap-3 items-start">
-                        <ShieldCheck className="w-4 h-4 text-lux-gold mt-0.5 shrink-0" />
-                        <p>{faq.answer}</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          ))}
+        {/* Dynamic FAQ Search and Category Filters */}
+        <div className="mb-10 space-y-4">
+          <div className="relative max-w-md mx-auto">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+            <input
+              type="text"
+              placeholder={t('contact.searchPolicies')}
+              aria-label={t('contact.searchPolicies')}
+              value={faqSearch}
+              onChange={(e) => setFaqSearch(e.target.value)}
+              className="w-full bg-stone-50/75 dark:bg-stone-900/60 border border-stone-250/70 dark:border-stone-800 pl-10 pr-4 py-3 text-xs focus:outline-none focus:ring-1 focus:ring-lux-gold focus:border-lux-gold rounded-sm transition-all text-stone-850 dark:text-stone-100 placeholder-stone-400"
+            />
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-1.5 pt-2">
+            {[
+              { id: 'all', label: t('contact.allPolicies') },
+              { id: 'Lead-Times & Process', label: t('contact.leadTimesBooking') },
+              { id: 'Pricing & Estimates', label: t('contact.pricingCosts') },
+              { id: 'Delivery & Logistics', label: t('contact.deliveryLogistics') },
+              { id: 'Ingredients & Dietary', label: t('contact.ingredientsDietary') }
+            ].map((cat) => {
+              const isActive = faqCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => {
+                    setFaqCategory(cat.id);
+                    setActiveFaq(null); // Close active question when switching category
+                  }}
+                  className={`px-3 py-1.5 text-[10px] uppercase font-mono tracking-widest font-bold border rounded-xs transition-all duration-200 cursor-pointer ${
+                    isActive
+                      ? 'bg-lux-gold text-stone-950 border-lux-gold shadow-xs'
+                      : 'bg-white dark:bg-stone-950 hover:bg-stone-50 dark:hover:bg-stone-900 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 border-stone-200 dark:border-stone-800'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
+
+        {/* Accordion List Display */}
+        {(() => {
+          const filteredFaqs = FAQS.filter((faq) => {
+            const matchesCategory = faqCategory === 'all' || faq.category === faqCategory;
+            const matchesSearch =
+              faq.question.toLowerCase().includes(faqSearch.toLowerCase()) ||
+              faq.answer.toLowerCase().includes(faqSearch.toLowerCase());
+            return matchesCategory && matchesSearch;
+          });
+
+          if (filteredFaqs.length === 0) {
+            return (
+              <div className="text-center py-12 bg-stone-50 dark:bg-stone-900/40 border border-dashed border-stone-200 dark:border-stone-800 rounded-sm">
+                <HelpCircle className="w-8 h-8 text-stone-300 dark:text-stone-700 mx-auto mb-2" />
+                <p className="text-xs text-stone-500 dark:text-stone-400 font-light font-sans">{t('contact.noMatching')}</p>
+                <button
+                  onClick={() => { setFaqSearch(''); setFaqCategory('all'); }}
+                  className="text-[10px] uppercase tracking-wider font-mono text-lux-gold font-bold underline mt-2 cursor-pointer"
+                >
+                  {t('contact.resetFilter')}
+                </button>
+              </div>
+            );
+          }
+
+          return (
+            <div className="space-y-3">
+              {filteredFaqs.map((faq) => {
+                const isOpen = activeFaq === faq.id;
+                return (
+                  <div key={faq.id} className="bg-white dark:bg-stone-950 border border-stone-200/70 dark:border-stone-800 rounded-xs shadow-xs overflow-hidden transition-all duration-200 hover:border-stone-300 dark:hover:border-stone-700">
+                    <button
+                      onClick={() => toggleFaq(faq.id)}
+                      className="w-full text-left p-5 flex items-center justify-between gap-4 cursor-pointer hover:bg-stone-50/30 dark:hover:bg-stone-900/40 transition-colors font-sans"
+                    >
+                      <div className="flex items-center gap-3">
+                        <MessageSquare className="w-4 h-4 text-lux-gold shrink-0" />
+                        <span className="font-serif text-base text-stone-900 dark:text-stone-105 font-medium font-serif">{faq.question}</span>
+                      </div>
+                      <ChevronDown className={`w-4 h-4 text-stone-400 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180 text-stone-900 dark:text-stone-200' : ''}`} />
+                    </button>
+
+                    <AnimatePresence initial={false}>
+                      {isOpen && (
+                        <motion.div
+                          initial={{ height: 0 }}
+                          animate={{ height: 'auto' }}
+                          exit={{ height: 0 }}
+                          transition={{ duration: 0.25, ease: 'easeInOut' }}
+                          className="overflow-hidden"
+                        >
+                          <div className="p-5 pt-0 border-t border-stone-100/70 dark:border-stone-800/70 text-xs text-stone-600 dark:text-stone-400 font-light leading-relaxed space-y-2 font-sans text-left">
+                            <p className="font-sans text-stone-650 dark:text-stone-300 leading-relaxed">{faq.answer}</p>
+                            <span className="inline-block text-[10px] uppercase tracking-widest font-mono text-lux-gold bg-lux-gold/10 px-2.5 py-0.5 rounded-sm mt-3 font-semibold font-bold">
+                              {t('contact.topic')}: {faq.category}
+                            </span>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
       </section>
     </div>
   );

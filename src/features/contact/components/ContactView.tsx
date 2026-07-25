@@ -1,30 +1,20 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Send, Mail, MapPin, Phone, HelpCircle, Check, ChevronDown, CheckCircle2, Calculator, Map, ShieldAlert, Search, Loader2 } from 'lucide-react';
-import { FAQS } from '../../../data';
+import { Send, Mail, MapPin, Phone, Check, CheckCircle2, Calculator, Map, ShieldAlert, Loader2 } from 'lucide-react';
 import { t } from '../../../i18n/index';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
 import { BUSINESS_INFO } from '../../../shared/constants';
 
 export default function ContactView() {
   usePageTitle("Contact");
-  const [activeFaq, setActiveFaq] = useState<string | null>(null);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
   const [contactForm, setContactForm] = useState({ name: '', email: '', subject: 'Consultation', message: '' });
   const [valError, setValError] = useState<string | null>(null);
 
-  // Accordion faq category state and search inputs
-  const [faqCategory, setFaqCategory] = useState<string>('all');
-  const [faqSearch, setFaqSearch] = useState<string>('');
-
   // Sub-City Delivery calculator state
   const [subCityInput, setSubCityInput] = useState('');
   const [calcResult, setCalcResult] = useState<{ zone: string; price: string; info: string; success: boolean } | null>(null);
-
-  const toggleFaq = (id: string) => {
-    setActiveFaq((prev) => (prev === id ? null : id));
-  };
 
   const handleSubCityCheck = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -378,124 +368,17 @@ export default function ContactView() {
         </div>
       </section>
 
-      {/* FAQs Panel */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 font-sans">
-        <div className="text-center max-w-xl mx-auto mb-10">
-          <span className="text-[10px] uppercase tracking-[0.3em] text-lux-gold font-mono block mb-2 font-semibold font-bold">{t('contact.studioPolicies')}</span>
-          <h2 className="text-3xl font-serif text-warm-950 dark:text-stone-100">{t('contact.faqHeader')}</h2>
-          <p className="text-xs text-stone-500 dark:text-stone-400 font-light mt-2 font-sans">{t('contact.faqDescription')}</p>
-          <div className="h-[2px] w-12 bg-lux-gold mx-auto mt-4" />
+      {/* FAQ Banner Link */}
+      <section className="max-w-3xl mx-auto px-4 sm:px-6">
+        <div className="bg-stone-50 dark:bg-stone-900/40 border border-stone-200/60 dark:border-stone-850 rounded-sm p-8 text-center shadow-xs">
+          <h3 className="font-serif text-xl text-stone-900 dark:text-stone-100 mb-2">Have specific questions?</h3>
+          <p className="text-stone-500 dark:text-stone-400 font-light text-sm mb-6 max-w-md mx-auto">
+            Check our Support & Guide page for detailed instructions on ordering, tracking, and our frequently asked questions.
+          </p>
+          <a href="/help" className="inline-flex items-center justify-center px-6 py-2.5 bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-stone-800 dark:text-stone-200 font-medium text-xs tracking-widest uppercase rounded-sm hover:border-lux-gold dark:hover:border-lux-gold transition-colors font-semibold">
+            Visit the Help Guide
+          </a>
         </div>
-
-        {/* Dynamic FAQ Search and Category Filters */}
-        <div className="mb-10 space-y-4">
-          <div className="relative max-w-md mx-auto">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
-            <input
-              type="text"
-              placeholder={t('contact.searchPolicies')}
-              aria-label={t('contact.searchPolicies')}
-              value={faqSearch}
-              onChange={(e) => setFaqSearch(e.target.value)}
-              className="w-full bg-stone-50/75 dark:bg-stone-900/60 border border-stone-250/70 dark:border-stone-800 pl-10 pr-4 py-3 text-xs focus:outline-none focus:ring-1 focus:ring-lux-gold focus:border-lux-gold rounded-sm transition-all text-stone-850 dark:text-stone-100 placeholder-stone-400"
-            />
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-1.5 pt-2">
-            {[
-              { id: 'all', label: t('contact.allPolicies') },
-              { id: 'Lead-Times & Process', label: t('contact.leadTimesBooking') },
-              { id: 'Pricing & Estimates', label: t('contact.pricingCosts') },
-              { id: 'Delivery & Logistics', label: t('contact.deliveryLogistics') },
-              { id: 'Ingredients & Dietary', label: t('contact.ingredientsDietary') }
-            ].map((cat) => {
-              const isActive = faqCategory === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => {
-                    setFaqCategory(cat.id);
-                    setActiveFaq(null); // Close active question when switching category
-                  }}
-                  className={`px-3 py-1.5 text-[10px] uppercase font-mono tracking-widest font-bold border rounded-xs transition-all duration-200 cursor-pointer ${
-                    isActive
-                      ? 'bg-lux-gold text-stone-950 border-lux-gold shadow-xs'
-                      : 'bg-white dark:bg-stone-950 hover:bg-stone-50 dark:hover:bg-stone-900 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 border-stone-200 dark:border-stone-800'
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Accordion List Display */}
-        {(() => {
-          const filteredFaqs = FAQS.filter((faq) => {
-            const matchesCategory = faqCategory === 'all' || faq.category === faqCategory;
-            const matchesSearch =
-              faq.question.toLowerCase().includes(faqSearch.toLowerCase()) ||
-              faq.answer.toLowerCase().includes(faqSearch.toLowerCase());
-            return matchesCategory && matchesSearch;
-          });
-
-          if (filteredFaqs.length === 0) {
-            return (
-              <div className="text-center py-12 bg-stone-50 dark:bg-stone-900/40 border border-dashed border-stone-200 dark:border-stone-800 rounded-sm">
-                <HelpCircle className="w-8 h-8 text-stone-300 dark:text-stone-700 mx-auto mb-2" />
-                <p className="text-xs text-stone-500 dark:text-stone-400 font-light font-sans">{t('contact.noMatching')}</p>
-                <button
-                  onClick={() => { setFaqSearch(''); setFaqCategory('all'); }}
-                  className="text-[10px] uppercase tracking-wider font-mono text-lux-gold font-bold underline mt-2"
-                >
-                  {t('contact.resetFilter')}
-                </button>
-              </div>
-            );
-          }
-
-          return (
-            <div className="space-y-3">
-              {filteredFaqs.map((faq) => {
-                const isOpen = activeFaq === faq.id;
-                return (
-                  <div key={faq.id} className="bg-white dark:bg-stone-950 border border-stone-200/70 dark:border-stone-800 rounded-xs shadow-xs overflow-hidden transition-all duration-200 hover:border-stone-300 dark:hover:border-stone-700">
-                    <button
-                      onClick={() => toggleFaq(faq.id)}
-                      className="w-full text-left p-5 flex items-center justify-between gap-4 cursor-pointer hover:bg-stone-50/30 dark:hover:bg-stone-900/40 transition-colors font-sans"
-                    >
-                      <div className="flex items-center gap-3">
-                        <HelpCircle className="w-4 h-4 text-lux-gold shrink-0" />
-                        <span className="font-serif text-base text-stone-900 dark:text-stone-105 font-medium font-serif">{faq.question}</span>
-                      </div>
-                      <ChevronDown className={`w-4 h-4 text-stone-400 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180 text-stone-900 dark:text-stone-200' : ''}`} />
-                    </button>
-
-                    <AnimatePresence initial={false}>
-                      {isOpen && (
-                        <motion.div
-                          initial={{ height: 0 }}
-                          animate={{ height: 'auto' }}
-                          exit={{ height: 0 }}
-                          transition={{ duration: 0.25, ease: 'easeInOut' }}
-                          className="overflow-hidden"
-                        >
-                          <div className="p-5 pt-0 border-t border-stone-100/70 dark:border-stone-800/70 text-xs text-stone-600 dark:text-stone-400 font-light leading-relaxed space-y-2 font-sans text-left">
-                            <p className="font-sans text-stone-650 dark:text-stone-300 leading-relaxed">{faq.answer}</p>
-                            <span className="inline-block text-[10px] uppercase tracking-widest font-mono text-lux-gold bg-lux-gold/10 px-2.5 py-0.5 rounded-sm mt-3 font-semibold font-bold">
-                              {t('contact.topic')}: {faq.category}
-                            </span>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })()}
       </section>
     </div>
   );
