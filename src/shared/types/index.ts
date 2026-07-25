@@ -1,16 +1,3 @@
-export type PageType =
-  | 'home'
-  | 'gallery'
-  | 'request'
-  | 'about'
-  | 'testimonials'
-  | 'contact'
-  | 'orders'
-  | 'admin'
-  | 'auth'
-  | 'profile'
-  | 'not-found';
-
 export interface User {
   id: string;
   name: string;

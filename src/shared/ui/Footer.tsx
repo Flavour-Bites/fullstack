@@ -1,28 +1,10 @@
 import { Cake, Send, MapPin, Clock, ArrowRight, Quote, Instagram, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { BUSINESS_INFO } from '../constants';
 
-interface FooterProps {
-  isAdminMode: boolean;
-}
-
-export default function Footer({ isAdminMode }: FooterProps) {
-  if (isAdminMode) {
-    return (
-      <footer className="bg-[#111111] text-stone-500 border-t border-stone-900/60 py-6 text-[10px] relative z-10 font-sans">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row justify-between items-center gap-3">
-          <div>
-            <p>&copy; {new Date().getFullYear()} Flavour Bites &bull; Staff Portal Active &bull; Yodit Ashenafi</p>
-          </div>
-          <div className="flex gap-4 font-mono uppercase text-[9px] tracking-widest text-[#c5a880] items-center">
-            <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live</span>
-          </div>
-        </div>
-      </footer>
-    );
-  }
-
+export default function Footer() {
   return (
-    <footer className="bg-[#111111] text-stone-300 relative z-10 font-sans overflow-hidden">
+    <footer className="bg-stone-950 text-stone-300 relative z-10 font-sans overflow-hidden">
       {/* Decorative top accent */}
       <div className="h-px w-full bg-gradient-to-r from-transparent via-lux-gold/40 to-transparent" />
 
@@ -44,13 +26,13 @@ export default function Footer({ isAdminMode }: FooterProps) {
               Commission-only artisan bakery in Addis Ababa. Every cake is hand-crafted to order by Yodit Ashenafi — no shelves, no stock, just your vision brought to life.
             </p>
             <div className="flex gap-3 pt-1">
-              <a href="https://t.me/flavourbites_placeholder" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-sm bg-stone-800/60 flex items-center justify-center text-stone-400 hover:text-lux-gold hover:bg-stone-800 transition-all border border-stone-700/30" aria-label="Follow on Telegram">
+              <a href={BUSINESS_INFO.social.telegram.link} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-sm bg-stone-800/60 flex items-center justify-center text-stone-400 hover:text-lux-gold hover:bg-stone-800 transition-all border border-stone-700/30" aria-label="Follow on Telegram">
                 <Send className="w-4 h-4 rotate-[-25deg]" />
               </a>
-              <a href="https://instagram.com/flavourbites" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-sm bg-stone-800/60 flex items-center justify-center text-stone-400 hover:text-lux-gold hover:bg-stone-800 transition-all border border-stone-700/30" aria-label="Follow on Instagram">
+              <a href={BUSINESS_INFO.social.instagram.link} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-sm bg-stone-800/60 flex items-center justify-center text-stone-400 hover:text-lux-gold hover:bg-stone-800 transition-all border border-stone-700/30" aria-label="Follow on Instagram">
                 <Instagram className="w-4 h-4" />
               </a>
-              <a href="mailto:hello@flavourbites.et" className="w-9 h-9 rounded-sm bg-stone-800/60 flex items-center justify-center text-stone-400 hover:text-lux-gold hover:bg-stone-800 transition-all border border-stone-700/30" aria-label="Email us">
+              <a href={`mailto:${BUSINESS_INFO.email}`} className="w-9 h-9 rounded-sm bg-stone-800/60 flex items-center justify-center text-stone-400 hover:text-lux-gold hover:bg-stone-800 transition-all border border-stone-700/30" aria-label="Email us">
                 <Mail className="w-4 h-4" />
               </a>
             </div>
@@ -93,6 +75,7 @@ export default function Footer({ isAdminMode }: FooterProps) {
                   <li><Link to="/gallery" className="text-stone-300 hover:text-lux-gold text-xs transition-colors cursor-pointer text-left block">Gallery</Link></li>
                   <li><Link to="/about" className="text-stone-300 hover:text-lux-gold text-xs transition-colors cursor-pointer text-left block">About Yodit</Link></li>
                   <li><Link to="/testimonials" className="text-stone-300 hover:text-lux-gold text-xs transition-colors cursor-pointer text-left block">Reviews</Link></li>
+                  <li><Link to="/help" className="text-stone-300 hover:text-lux-gold text-xs transition-colors cursor-pointer text-left block">Help & FAQ</Link></li>
                   <li><Link to="/contact" className="text-stone-300 hover:text-lux-gold text-xs transition-colors cursor-pointer text-left block">Contact</Link></li>
                 </ul>
               </div>

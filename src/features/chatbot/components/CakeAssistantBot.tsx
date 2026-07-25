@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, X, Send, Sparkles, Trash2, ShieldAlert, Cake } from 'lucide-react';
 import { t } from '../../../i18n/index';
-import type { PageType } from '../../../types';
+import { useLocation } from 'react-router-dom';
 
 interface ChatMessage {
   id: string;
@@ -19,11 +19,7 @@ const PRESET_QUESTIONS = [
   { text: "🌱 Do you offer gluten-free or egg-free options?", label: t('bot.dietaryCustomization') }
 ];
 
-interface CakeAssistantBotProps {
-  activePage?: PageType;
-}
-
-export default function CakeAssistantBot({ activePage }: CakeAssistantBotProps) {
+export default function CakeAssistantBot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -39,7 +35,8 @@ export default function CakeAssistantBot({ activePage }: CakeAssistantBotProps) 
 
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
 
-  const HIDE_ON_PAGES: PageType[] = ['request', 'admin'];
+  const location = useLocation();
+  const HIDE_ON_PATHS = ['/request', '/admin'];
 
   useEffect(() => {
     if (endOfMessagesRef.current) {
@@ -122,13 +119,14 @@ export default function CakeAssistantBot({ activePage }: CakeAssistantBotProps) 
       const isBullet = trimmed.startsWith('*') || trimmed.startsWith('-');
       let content = line;
       if (isBullet) {
-        content = trimmed.replace(/^[\*\-]\s*/, '');
+        content = trimmed.replace(/^[*-]\s*/, '');
       }
 
       const parts = content.split(/(\*\*.*?\*\*)/g);
       const elements = parts.map((part, pIdx) => {
         if (part.startsWith('**') && part.endsWith('**')) {
           return (
+            // eslint-disable-next-line react/no-array-index-key
             <strong key={pIdx} className="font-semibold text-stone-900 underline decoration-lux-gold/30">
               {part.slice(2, -2)}
             </strong>
@@ -139,6 +137,7 @@ export default function CakeAssistantBot({ activePage }: CakeAssistantBotProps) 
 
       if (isBullet) {
         return (
+          // eslint-disable-next-line react/no-array-index-key
           <li key={idx} className="ml-4 list-disc text-stone-750 font-light text-xs my-0.5 font-sans leading-relaxed">
             {elements}
           </li>
@@ -146,6 +145,7 @@ export default function CakeAssistantBot({ activePage }: CakeAssistantBotProps) 
       }
 
       return (
+        // eslint-disable-next-line react/no-array-index-key
         <p key={idx} className="text-stone-750 font-light text-xs my-1 font-sans leading-relaxed min-h-[0.8em]">
           {elements}
         </p>
@@ -153,7 +153,7 @@ export default function CakeAssistantBot({ activePage }: CakeAssistantBotProps) 
     });
   };
 
-  if (activePage && HIDE_ON_PAGES.includes(activePage)) {
+  if (HIDE_ON_PATHS.some(path => location.pathname.startsWith(path))) {
     return null;
   }
 
@@ -215,7 +215,7 @@ export default function CakeAssistantBot({ activePage }: CakeAssistantBotProps) 
             className="fixed bottom-24 right-4 sm:right-6 w-[92vw] sm:w-[410px] h-[600px] max-h-[75vh] bg-white border border-stone-200 shadow-2xl rounded-sm z-50 overflow-hidden flex flex-col font-sans"
           >
             {/* Elegant Premium Atelier Header */}
-            <div className="bg-[#1e1a15] text-white p-4 flex items-center justify-between border-b border-lux-gold/25 relative">
+            <div className="bg-stone-900 text-white p-4 flex items-center justify-between border-b border-lux-gold/25 relative">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-md bg-stone-900 border border-lux-gold/30 flex items-center justify-center text-lux-gold">
                   <Cake className="w-4.5 h-4.5 stroke-[1.5]" />
@@ -274,7 +274,7 @@ export default function CakeAssistantBot({ activePage }: CakeAssistantBotProps) 
                       <div className={`p-3.5 rounded-sm relative text-xs leading-relaxed border ${
                         isBot 
                           ? 'bg-white border-stone-200 text-stone-850 rounded-tl-none shadow-xs' 
-                          : 'bg-[#1e1a15] border-stone-800 text-white rounded-br-none shadow-sm'
+                          : 'bg-stone-900 border-stone-800 text-white rounded-br-none shadow-sm'
                       }`}>
                         {isBot ? (
                           <div className="space-y-2">{renderMessageTextPart(msg.text)}</div>
@@ -326,9 +326,9 @@ export default function CakeAssistantBot({ activePage }: CakeAssistantBotProps) 
             {/* Quick-reply Suggestion Drawer Chips: only shown when loading is false */}
             {!isLoading && (
               <div className="px-3 py-2 bg-stone-50/80 border-t border-b border-stone-150 flex gap-1.5 overflow-x-auto no-scrollbar scroll-smooth">
-                {PRESET_QUESTIONS.map((q, idx) => (
+                {PRESET_QUESTIONS.map((q) => (
                   <button
-                    key={idx}
+                    key={q.label}
                     onClick={() => handleSendMessage(q.text)}
                     className="shrink-0 px-2.5 py-1 bg-white hover:bg-stone-100 border border-stone-200 text-[10px] text-stone-650 hover:text-stone-900 rounded-full transition-colors cursor-pointer font-sans"
                   >

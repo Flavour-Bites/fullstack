@@ -56,6 +56,8 @@ function getDateInputStyles(dateError: string | null, deliveryDate: string): str
   return 'border-stone-200 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/40 focus:border-lux-gold';
 }
 
+
+
 export default function RequestFormView({
   prefilledCake,
   onClearPrefilledCake,
@@ -113,7 +115,7 @@ export default function RequestFormView({
       setDbConnected(false);
       const list = localStorage.getItem('fb_request_commissions');
       if (list) {
-        try { setActiveRequests(JSON.parse(list)); } catch {}
+        try { setActiveRequests(JSON.parse(list)); } catch (parseErr) { console.error('Failed to parse cached requests from localStorage:', parseErr); }
       }
     }
   };
@@ -160,6 +162,7 @@ export default function RequestFormView({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fileName: file.name, mimeType: file.type, size: file.size, dataBase64 }),
       });
+      if (!res.ok) throw new Error(`Upload failed with status ${res.status}`);
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Upload failed');
       setUploadedImageUrl(data.image.url);
@@ -206,7 +209,7 @@ export default function RequestFormView({
           const data = await res.json();
           if (data.success) { deletedOnBackend = true; fetchRequests(); }
         }
-      } catch {}
+      } catch (deleteErr) { console.error(`Failed to delete request ${id} from backend:`, deleteErr); }
     }
     if (!deletedOnBackend) {
       const updated = activeRequests.filter((item) => item.id !== id);
@@ -265,7 +268,7 @@ export default function RequestFormView({
           const data = await res.json();
           if (data.success) { savedOnBackend = true; fetchRequests(); }
         }
-      } catch {}
+      } catch (saveErr) { console.error('Failed to save request to backend:', saveErr); }
     }
 
     if (!savedOnBackend) {
@@ -292,7 +295,7 @@ export default function RequestFormView({
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start text-left">
-        <div className="lg:col-span-7 bg-white dark:bg-[#111111] p-6 sm:p-10 border border-stone-200/60 dark:border-stone-850 rounded-sm shadow-xs">
+        <div className="lg:col-span-7 bg-white dark:bg-stone-950 p-6 sm:p-10 border border-stone-200/60 dark:border-stone-850 rounded-sm shadow-xs">
           <AnimatePresence mode="wait">
             {formSubmitted ? (
               <RequestSuccessView

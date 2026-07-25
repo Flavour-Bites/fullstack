@@ -51,7 +51,7 @@ export default function AdminCategories({
 
   return (
     <div className="max-w-7xl mx-auto space-y-5 relative z-10 font-sans">
-      <div className="flex justify-between items-center bg-stone-50 dark:bg-[#1d1916] p-5 border border-stone-200 dark:border-stone-800 rounded-sm">
+      <div className="flex justify-between items-center bg-stone-50 dark:bg-stone-900 p-5 border border-stone-200 dark:border-stone-800 rounded-sm">
         <h2 className="font-serif text-xl text-stone-900 dark:text-white flex items-center gap-2">
           <Layers className="w-5 h-5 text-lux-gold" /> {t('admin.categories')} ({categories.length})
         </h2>
@@ -64,34 +64,34 @@ export default function AdminCategories({
       </div>
 
       {showCategoryForm && (
-        <div className="bg-white dark:bg-[#1e1a17] border border-lux-gold/30 dark:border-[#c5a880]/30 rounded-sm p-6 space-y-4">
+        <div className="bg-white dark:bg-stone-900 border border-lux-gold/30 dark:border-lux-gold/30 rounded-sm p-6 space-y-4">
           <h3 className="font-serif text-base text-stone-900 dark:text-white font-medium">
             {editingCategoryId ? t('admin.editCategory') : t('admin.addCategory')}
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.categoryName')}</label>
-              <input value={categoryForm.name} onChange={e => setCategoryForm(f => ({ ...f, name: e.target.value }))} className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+              <input value={categoryForm.name} onChange={e => setCategoryForm(f => ({ ...f, name: e.target.value }))} className="w-full bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
             </div>
             <div>
               <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.categorySlug')}</label>
-              <input value={categoryForm.slug} onChange={e => setCategoryForm(f => ({ ...f, slug: e.target.value }))} placeholder="Auto-generated if empty" className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+              <input value={categoryForm.slug} onChange={e => setCategoryForm(f => ({ ...f, slug: e.target.value }))} placeholder="Auto-generated if empty" className="w-full bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
             </div>
             <div className="sm:col-span-2">
               <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.categoryDescription')}</label>
-              <textarea value={categoryForm.description} onChange={e => setCategoryForm(f => ({ ...f, description: e.target.value }))} rows={2} className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+              <textarea value={categoryForm.description} onChange={e => setCategoryForm(f => ({ ...f, description: e.target.value }))} rows={2} className="w-full bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
             </div>
             <div>
               <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.categoryColor')}</label>
-              <input value={categoryForm.color} onChange={e => setCategoryForm(f => ({ ...f, color: e.target.value }))} placeholder="#c5a880" className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+              <input value={categoryForm.color} onChange={e => setCategoryForm(f => ({ ...f, color: e.target.value }))} placeholder="#c5a880" className="w-full bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
             </div>
             <div>
               <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.categoryIcon')}</label>
-              <input value={categoryForm.icon} onChange={e => setCategoryForm(f => ({ ...f, icon: e.target.value }))} placeholder="Cake" className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+              <input value={categoryForm.icon} onChange={e => setCategoryForm(f => ({ ...f, icon: e.target.value }))} placeholder="Cake" className="w-full bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
             </div>
             <div>
               <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.categorySortOrder')}</label>
-              <input type="number" value={categoryForm.sortOrder} onChange={e => setCategoryForm(f => ({ ...f, sortOrder: parseInt(e.target.value) || 0 }))} className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+              <input type="number" value={categoryForm.sortOrder} onChange={e => setCategoryForm(f => ({ ...f, sortOrder: parseInt(e.target.value) || 0 }))} className="w-full bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-2">
@@ -106,15 +106,15 @@ export default function AdminCategories({
       {categoriesLoading ? (
         <SkeletonTable rows={4} cols={3} />
       ) : categories.length === 0 ? (
-        <div className="text-center py-16 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
+        <div className="text-center py-16 bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm">
           <Layers className="w-10 h-10 text-stone-400 dark:text-stone-500 mx-auto mb-3" />
           <p className="text-sm font-serif text-stone-600 dark:text-stone-300 italic">{t('admin.noCategories')}</p>
         </div>
       ) : (
-        <div className="bg-[#1e1a17] border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden">
+        <div className="bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-stone-100 dark:bg-[#15110f] text-stone-400 dark:text-stone-400 uppercase font-mono tracking-wider font-semibold border-b border-stone-200 dark:border-stone-800">
+              <thead className="bg-stone-100 dark:bg-stone-950 text-stone-400 dark:text-stone-400 uppercase font-mono tracking-wider font-semibold border-b border-stone-200 dark:border-stone-800">
                 <tr>
                   <th className="px-5 py-4">{t('admin.categoryName')}</th>
                   <th className="px-5 py-4">{t('admin.categorySlug')}</th>

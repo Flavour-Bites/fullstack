@@ -4,6 +4,7 @@ import { Send, Mail, MapPin, Phone, HelpCircle, Check, ChevronDown, CheckCircle2
 import { FAQS } from '../../../data';
 import { t } from '../../../i18n/index';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
+import { BUSINESS_INFO } from '../../../shared/constants';
 
 export default function ContactView() {
   usePageTitle("Contact");
@@ -106,7 +107,7 @@ export default function ContactView() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           {/* Contact Details Column */}
           <div className="lg:col-span-5 space-y-8">
-            <div className="bg-white dark:bg-[#111111] p-8 border border-stone-200/60 dark:border-stone-850 rounded-sm shadow-xs space-y-6">
+            <div className="bg-white dark:bg-stone-950 p-8 border border-stone-200/60 dark:border-stone-850 rounded-sm shadow-xs space-y-6">
               <h2 className="font-serif text-2xl text-warm-950 dark:text-stone-100">{t('contact.coordinates')}</h2>
               <div className="h-[2px] w-12 bg-lux-gold" />
 
@@ -126,11 +127,11 @@ export default function ContactView() {
                 <div className="flex gap-4 items-start">
                   <Send className="w-5 h-5 text-lux-gold shrink-0 mt-0.5 rotate-[-25deg]" />
                   <div>
-                    <label className="text-[10px] uppercase font-mono tracking-widest text-[#c5a880] font-semibold block mb-0.5">{t('contact.telegramChannel')}</label>
+                    <label className="text-[10px] uppercase font-mono tracking-widest text-lux-gold font-semibold block mb-0.5">{t('contact.telegramChannel')}</label>
                     {/* [NEEDS INPUT: actual Telegram handle/link] */}
                     <p className="font-semibold text-stone-800 dark:text-stone-200">
-                      <a href="https://t.me/flavourbites_placeholder" target="_blank" rel="noopener noreferrer" className="hover:text-lux-gold transition-colors underline">
-                        @flavourbites_placeholder
+                      <a href={BUSINESS_INFO.social.telegram.link} target="_blank" rel="noopener noreferrer" className="hover:text-lux-gold transition-colors underline">
+                        {BUSINESS_INFO.social.telegram.handle}
                       </a>
                     </p>
                     <span className="text-[11px] text-stone-400 dark:text-stone-500">{t('contact.quickestChannel')}</span>
@@ -142,7 +143,7 @@ export default function ContactView() {
                   <div>
                     <label className="text-[10px] uppercase font-mono tracking-widest text-stone-400 dark:text-stone-500 font-semibold block mb-0.5">{t('contact.inquiriesMailbox')}</label>
                     {/* [NEEDS INPUT: actual professional email] */}
-                    <p className="font-mono dark:text-stone-300">{t('contact.emailAddress')}</p>
+                    <p className="font-mono dark:text-stone-300">{BUSINESS_INFO.email}</p>
                   </div>
                 </div>
 
@@ -151,7 +152,7 @@ export default function ContactView() {
                   <div>
                     <label className="text-[10px] uppercase font-mono tracking-widest text-stone-400 dark:text-stone-500 font-semibold block mb-0.5">{t('contact.directVoice')}</label>
                     {/* [NEEDS INPUT: actual phone number] */}
-                    <p className="font-mono text-stone-800 dark:text-stone-150 font-semibold">{t('contact.phoneNumber')}</p>
+                    <p className="font-mono text-stone-800 dark:text-stone-150 font-semibold">{BUSINESS_INFO.phone}</p>
                     <p className="text-xs text-stone-400 dark:text-stone-500 font-light">{t('contact.workingHours')}</p>
                   </div>
                 </div>
@@ -208,7 +209,7 @@ export default function ContactView() {
           </div>
 
           {/* Interactive general Contact Form Column */}
-          <div className="lg:col-span-7 bg-white dark:bg-[#111111] p-8 sm:p-10 border border-stone-200/60 dark:border-stone-850 rounded-sm shadow-xs text-left">
+          <div className="lg:col-span-7 bg-white dark:bg-stone-950 p-8 sm:p-10 border border-stone-200/60 dark:border-stone-850 rounded-sm shadow-xs text-left">
             <AnimatePresence mode="wait">
               {formSubmitted ? (
                 <motion.div
@@ -240,7 +241,7 @@ export default function ContactView() {
                     </div>
                   )}
                   <div className="space-y-2">
-                    <span className="text-[10px] uppercase tracking-widest text-[#c5a880] font-mono block font-semibold">{t('contact.directMessageLink')}</span>
+                    <span className="text-[10px] uppercase tracking-widest text-lux-gold font-mono block font-semibold">{t('contact.directMessageLink')}</span>
                       <h2 className="font-serif text-2xl text-stone-900 dark:text-stone-100">{t('contact.sendStudioNote')}</h2>
                     <p className="text-xs text-stone-500 dark:text-stone-400 font-light font-sans">{t('contact.generalQuestions')}</p>
                   </div>
@@ -312,7 +313,7 @@ export default function ContactView() {
 
       {/* Stylized Vector Addis Ababa Service Area Map Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="bg-[#1e1a15] text-white p-8 sm:p-12 rounded-sm border border-stone-800 relative z-10 overflow-hidden font-sans">
+        <div className="bg-stone-900 text-white p-8 sm:p-12 rounded-sm border border-stone-800 relative z-10 overflow-hidden font-sans">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/10 bg-white/5 font-sans">
@@ -419,7 +420,7 @@ export default function ContactView() {
                   className={`px-3 py-1.5 text-[10px] uppercase font-mono tracking-widest font-bold border rounded-xs transition-all duration-200 cursor-pointer ${
                     isActive
                       ? 'bg-lux-gold text-stone-950 border-lux-gold shadow-xs'
-                      : 'bg-white dark:bg-[#111111] hover:bg-stone-50 dark:hover:bg-stone-900 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 border-stone-200 dark:border-stone-800'
+                      : 'bg-white dark:bg-stone-950 hover:bg-stone-50 dark:hover:bg-stone-900 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 border-stone-200 dark:border-stone-800'
                   }`}
                 >
                   {cat.label}
@@ -459,7 +460,7 @@ export default function ContactView() {
               {filteredFaqs.map((faq) => {
                 const isOpen = activeFaq === faq.id;
                 return (
-                  <div key={faq.id} className="bg-white dark:bg-[#111111] border border-stone-200/70 dark:border-stone-800 rounded-xs shadow-xs overflow-hidden transition-all duration-200 hover:border-stone-300 dark:hover:border-stone-700">
+                  <div key={faq.id} className="bg-white dark:bg-stone-950 border border-stone-200/70 dark:border-stone-800 rounded-xs shadow-xs overflow-hidden transition-all duration-200 hover:border-stone-300 dark:hover:border-stone-700">
                     <button
                       onClick={() => toggleFaq(faq.id)}
                       className="w-full text-left p-5 flex items-center justify-between gap-4 cursor-pointer hover:bg-stone-50/30 dark:hover:bg-stone-900/40 transition-colors font-sans"

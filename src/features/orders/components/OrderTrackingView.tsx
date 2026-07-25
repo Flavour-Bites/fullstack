@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Activity, Clock, Filter, Trash2, AlertTriangle, X } from 'lucide-react';
 import { t } from '../../../i18n/index';
 import type { CustomCakeRequest } from '../../../types';
+import { getStatusStyles } from '../../../shared/utils/statusStyles';
 
 interface OrderTrackingViewProps {
   requests: CustomCakeRequest[];
@@ -16,7 +17,7 @@ export default function OrderTrackingView({ requests, dbConnected, onDelete }: O
   const pendingDelete = confirmDeleteId ? (requests ?? []).find(r => r.id === confirmDeleteId) : null;
   return (
     <section className="pt-8 border-t border-stone-200/80 dark:border-stone-800">
-      <div className="bg-stone-50 dark:bg-[#111111] border border-stone-200 dark:border-stone-850 p-6 sm:p-10 rounded-sm shadow-xs space-y-8">
+      <div className="bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-850 p-6 sm:p-10 rounded-sm shadow-xs space-y-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-left">
           <div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-stone-300 dark:border-stone-800 bg-white dark:bg-stone-900 mb-2">
@@ -46,7 +47,7 @@ export default function OrderTrackingView({ requests, dbConnected, onDelete }: O
 
         <div className="overflow-x-auto">
           {(requests ?? []).length === 0 ? (
-            <div className="text-center py-10 bg-white dark:bg-[#111111] border border-dashed border-stone-200 dark:border-stone-800 rounded-sm font-sans">
+            <div className="text-center py-10 bg-white dark:bg-stone-950 border border-dashed border-stone-200 dark:border-stone-800 rounded-sm font-sans">
               <Filter className="w-10 h-10 text-stone-300 dark:text-stone-600 mx-auto mb-3" />
               <p className="text-sm font-serif italic text-stone-500 dark:text-stone-400">{t('order.noActiveRequests')}</p>
               <p className="text-xs text-stone-400 dark:text-stone-500 mt-1 font-light">Fill out the custom builder above to start your first design.</p>
@@ -64,7 +65,7 @@ export default function OrderTrackingView({ requests, dbConnected, onDelete }: O
                   <th className="py-3 px-4 font-semibold text-center">{t('order.action')}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-150/60 dark:divide-stone-800 bg-white dark:bg-[#111111] font-sans">
+              <tbody className="divide-y divide-stone-150/60 dark:divide-stone-800 bg-white dark:bg-stone-950 font-sans">
                 {(requests ?? []).map((req) => (
                   <motion.tr
                     initial={{ opacity: 0 }}
@@ -90,17 +91,7 @@ export default function OrderTrackingView({ requests, dbConnected, onDelete }: O
                     </td>
                     <td className="py-4 px-4 border-stone-100 dark:border-stone-850 text-left">
                       <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] uppercase font-semibold font-mono rounded-full ${
-                          req.status === 'Ready'
-                            ? 'bg-green-100 dark:bg-green-950/40 text-green-850 dark:text-green-300 border border-green-200 dark:border-green-900/30'
-                            : req.status === 'InProgress'
-                            ? 'bg-blue-100 dark:bg-blue-950/40 text-blue-850 dark:text-blue-300 border border-blue-200 dark:border-blue-900/30'
-                            : req.status === 'Designing'
-                            ? 'bg-amber-100 dark:bg-amber-955/40 text-amber-850 dark:text-amber-300 border border-amber-250 dark:border-amber-900/30'
-                            : req.status === 'Quoted'
-                            ? 'bg-purple-100 dark:bg-purple-955/40 text-purple-850 dark:text-purple-300 border border-purple-250 dark:border-purple-900/30'
-                            : 'bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 border border-stone-250 dark:border-stone-700/55'
-                        }`}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] uppercase font-semibold font-mono rounded-full ${getStatusStyles(req.status)}`}
                       >
                         <span className="w-1.5 h-1.5 rounded-full bg-current" />
                         {req.status}

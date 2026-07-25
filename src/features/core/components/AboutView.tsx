@@ -38,7 +38,7 @@ export default function AboutView() {
           </div>
 
           {/* Key highlights block */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white dark:bg-[#111111] p-5 border border-stone-200/50 dark:border-stone-850 rounded-sm font-sans">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white dark:bg-stone-950 p-5 border border-stone-200/50 dark:border-stone-850 rounded-sm font-sans">
             <div className="flex gap-3">
               <Compass className="w-5 h-5 text-lux-gold mt-1 shrink-0" />
               <div>
@@ -163,15 +163,15 @@ export default function AboutView() {
         </p>
         <div className="h-[2px] w-12 bg-lux-gold mx-auto" />
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 pt-6 font-sans">
-          <div className="p-4 bg-white dark:bg-[#111111] border border-stone-150 dark:border-stone-850 rounded-sm shadow-xs">
+          <div className="p-4 bg-white dark:bg-stone-950 border border-stone-150 dark:border-stone-850 rounded-sm shadow-xs">
             <h4 className="font-serif text-lg text-stone-900 dark:text-stone-100 mb-2">{t('about.uncutFreshness')}</h4>
             <p className="text-xs text-stone-500 dark:text-stone-400 font-light leading-relaxed font-sans">We do not freeze pre-made cakes. Every tier is baked fresh, layered, and decorated immediately before pickup.</p>
           </div>
-          <div className="p-4 bg-white dark:bg-[#111111] border border-stone-150 dark:border-stone-850 rounded-sm shadow-xs">
+          <div className="p-4 bg-white dark:bg-stone-950 border border-stone-150 dark:border-stone-850 rounded-sm shadow-xs">
             <h4 className="font-serif text-lg text-stone-900 dark:text-stone-100 mb-2">{t('about.organicIntegrity')}</h4>
             <p className="text-xs text-stone-500 dark:text-stone-400 font-light leading-relaxed font-sans">We partner with local organic Highland growers and small-scale cooperatives to source pure, high-quality ingredients.</p>
           </div>
-          <div className="p-4 bg-white dark:bg-[#111111] border border-stone-150 dark:border-stone-850 rounded-sm shadow-xs">
+          <div className="p-4 bg-white dark:bg-stone-950 border border-stone-150 dark:border-stone-850 rounded-sm shadow-xs">
             <h4 className="font-serif text-lg text-stone-900 dark:text-stone-100 mb-2 font-serif font-medium">{t('about.bespokeCuration')}</h4>
             <p className="text-xs text-stone-500 dark:text-stone-400 font-light leading-relaxed font-sans">Yodit coordinates each pre-scheduled pickup. We provide detailed travel recommendations to ensure your cake stays beautiful and perfect.</p>
           </div>

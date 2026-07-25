@@ -3,7 +3,7 @@ import { ArrowRight } from 'lucide-react';
 export default function RequestSidebar() {
   return (
     <div className="lg:col-span-4 space-y-6">
-      <div className="bg-white dark:bg-[#111111] p-6 border border-stone-200/60 dark:border-stone-850 rounded-sm space-y-4">
+      <div className="bg-white dark:bg-stone-950 p-6 border border-stone-200/60 dark:border-stone-850 rounded-sm space-y-4">
         <h4 className="font-serif text-lg text-stone-900 dark:text-stone-100 font-medium">How it works</h4>
         <ul className="space-y-3.5 text-xs text-stone-600 dark:text-stone-300 font-light font-sans text-left">
           <li className="flex items-start gap-2.5">
@@ -21,7 +21,7 @@ export default function RequestSidebar() {
         </ul>
       </div>
 
-      <div className="bg-white dark:bg-[#111111] p-6 border border-stone-200/60 dark:border-stone-850 rounded-sm space-y-4">
+      <div className="bg-white dark:bg-stone-950 p-6 border border-stone-200/60 dark:border-stone-850 rounded-sm space-y-4">
         <h4 className="font-serif text-lg text-stone-900 dark:text-stone-100 font-medium">Why Flavour Bites?</h4>
         <ul className="space-y-3.5 text-xs text-stone-600 dark:text-stone-300 font-light font-sans text-left">
           <li className="flex items-start gap-2.5">

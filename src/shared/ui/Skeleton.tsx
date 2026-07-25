@@ -18,7 +18,7 @@ export function SkeletonBlock({ className = "" }: SkeletonProps) {
 
 export function SkeletonCard() {
   return (
-    <div className="bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm p-5 space-y-3">
+    <div className="bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm p-5 space-y-3">
       <SkeletonLine className="w-1/3 h-4" />
       <SkeletonLine className="w-2/3 h-3" />
       <SkeletonLine className="w-full h-3" />
@@ -29,8 +29,8 @@ export function SkeletonCard() {
 
 export function SkeletonTable({ rows = 5, cols = 4 }: { rows?: number; cols?: number }) {
   return (
-    <div className="bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden">
-      <div className="bg-stone-100 dark:bg-[#15110f] p-4 border-b border-stone-200 dark:border-stone-800">
+    <div className="bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden">
+      <div className="bg-stone-100 dark:bg-stone-950 p-4 border-b border-stone-200 dark:border-stone-800">
         <div className="flex gap-8">
           {Array.from({ length: cols }).map((_1, i) => (
             <SkeletonLine key={i} className="h-3 flex-1" />
@@ -52,7 +52,7 @@ export function SkeletonGrid({ items = 6 }: { items?: number }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {Array.from({ length: items }).map((_, i) => (
-        <div key={i} className="bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden">
+        <div key={i} className="bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden">
           <SkeletonBlock className="aspect-[3/4] w-full rounded-none" />
           <div className="p-4 space-y-2">
             <SkeletonLine className="w-1/2 h-4" />

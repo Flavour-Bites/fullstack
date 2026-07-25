@@ -19,6 +19,7 @@ let csrfToken: string | null = null;
 export async function fetchCsrfToken() {
   try {
     const res = await fetch('/api/csrf-token', { credentials: 'same-origin' });
+    if (!res.ok) throw new Error(`CSRF token fetch failed: ${res.status}`);
     const data = await res.json();
     if (data.token) csrfToken = data.token;
   } catch (err) {

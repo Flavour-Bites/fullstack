@@ -29,7 +29,7 @@ export default class ErrorBoundary extends React.Component<Props, State> {
     if (hasError) {
       if (fallback) return fallback;
       return (
-        <div className="min-h-screen flex items-center justify-center px-4 py-20 bg-stone-50 dark:bg-[#111111] relative overflow-hidden">
+        <div className="min-h-screen flex items-center justify-center px-4 py-20 bg-stone-50 dark:bg-stone-950 relative overflow-hidden">
           
           {/* Subtle animated smoke/fire background */}
           <div className="absolute inset-0 pointer-events-none opacity-20 dark:opacity-10 mix-blend-multiply dark:mix-blend-screen flex items-end justify-center">

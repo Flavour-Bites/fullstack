@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
-import { PageType, CakeGalleryItem, User } from './types';
+import { CakeGalleryItem, User } from './types';
 import { clearToken } from './shared/utils/apiClient';
-import ErrorBoundary from './shared/ui/ErrorBoundary';
 import AnimatedPage from './shared/ui/AnimatedPage';
 
 import HomeView from './features/core/components/HomeView';
@@ -12,16 +11,17 @@ import RequestFormView from './features/orders/components/RequestFormView';
 import AboutView from './features/core/components/AboutView';
 import TestimonialsView from './features/core/components/TestimonialsView';
 import ContactView from './features/contact/components/ContactView';
-import CakeAssistantBot from './features/chatbot/components/CakeAssistantBot';
 import ProfileView from './features/users/components/ProfileView';
 import MyOrdersView from './features/orders/components/MyOrdersView';
 import AdminView from './features/admin/components/AdminView';
 import { AuthView } from './features/auth/components/AuthView';
 import { ProtectedRoute } from './shared/ui/ProtectedRoute';
-import Header from './shared/ui/Header';
-import Footer from './shared/ui/Footer';
 import NotFoundView from './shared/ui/NotFoundView';
 import SearchModal from './features/search/components/SearchModal';
+import HelpView from './features/core/components/HelpView';
+
+import CustomerLayout from './shared/layouts/CustomerLayout';
+import AdminLayout from './shared/layouts/AdminLayout';
 
 import { setLocale as setI18nLocale, getLocale } from './i18n';
 import type { Locale } from './i18n';
@@ -69,6 +69,12 @@ export default function App() {
         if (data.success && data.user) {
           setCurrentUser(data.user);
           localStorage.setItem('flavourbites_user', JSON.stringify(data.user));
+          
+          if (data.user.language && data.user.language !== locale) {
+            const userLocale = data.user.language as Locale;
+            setLocale(userLocale);
+            setI18nLocale(userLocale);
+          }
         } else {
           setCurrentUser(null);
           localStorage.removeItem('flavourbites_user');
@@ -81,45 +87,26 @@ export default function App() {
       .finally(() => setAuthChecked(true));
   }, []);
 
-  const getActivePage = (): PageType => {
-    const path = location.pathname;
-    if (path === '/' || path === '/home') return 'home';
-    if (path === '/gallery') return 'gallery';
-    if (path === '/request') return 'request';
-    if (path === '/about') return 'about';
-    if (path === '/testimonials') return 'testimonials';
-    if (path === '/contact') return 'contact';
-    if (path === '/profile') return 'profile';
-    if (path === '/orders') return 'orders';
-    if (path.startsWith('/admin')) return 'admin';
-    if (path === '/auth') return 'auth';
-    return 'not-found';
+  const handleUpdateUser = (user: User) => {
+    setCurrentUser(user);
+    localStorage.setItem('flavourbites_user', JSON.stringify(user));
+    
+    if (user.language && user.language !== locale) {
+      const userLocale = user.language as Locale;
+      setLocale(userLocale);
+      setI18nLocale(userLocale);
+    }
   };
 
-  const activePage = getActivePage();
-
-  const navigateTo = (page: PageType) => {
-    const routes: Record<PageType, string> = {
-      home: '/',
-      gallery: '/gallery',
-      request: '/request',
-      about: '/about',
-      testimonials: '/testimonials',
-      contact: '/contact',
-      profile: '/profile',
-      orders: '/orders',
-      admin: '/admin',
-      auth: '/auth',
-      'not-found': '/404'
-    };
-    navigate(routes[page] || '/');
+  const navigateTo = (path: string) => {
+    navigate(path);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCommissionCake = (cake: CakeGalleryItem) => {
     setPrefilledCake(cake);
     setSelectedCake(null);
-    navigateTo('request');
+    navigateTo('/request');
   };
 
   const handleLogout = () => {
@@ -127,7 +114,7 @@ export default function App() {
     localStorage.removeItem('flavourbites_user');
     clearToken();
     setCurrentUser(null);
-    navigateTo('home');
+    navigateTo('/');
   };
 
   const handleToggleLocale = () => {
@@ -136,12 +123,10 @@ export default function App() {
     setI18nLocale(next);
   };
 
-  const isAdminMode = currentUser && (currentUser.role === 'admin' || currentUser.role === 'staff') && activePage === 'admin';
-
   if (!authChecked) {
     return (
       <div className={`min-h-screen flex flex-col justify-center items-center ${
-        darkMode ? 'bg-[#111111]' : 'bg-lux-cream'
+        darkMode ? 'bg-stone-950' : 'bg-lux-cream'
       }`}>
         <div className="h-1 w-full bg-gradient-to-r from-stone-900 via-lux-gold to-stone-900 fixed top-0 left-0 z-[1000]" />
         <div className="flex flex-col items-center gap-4">
@@ -164,109 +149,59 @@ export default function App() {
         Skip to main content
       </a>
       <div className={`min-h-screen flex flex-col justify-between selection:bg-lux-gold transition-colors duration-300 relative overflow-x-hidden ${
-        darkMode ? 'bg-[#111111] text-stone-100' : 'bg-lux-cream text-stone-800'
+        darkMode ? 'bg-stone-950 text-stone-100' : 'bg-lux-cream text-stone-800'
       }`}>
         <div className="h-1 w-full bg-gradient-to-r from-stone-900 via-lux-gold to-stone-900 fixed top-0 left-0 z-[1000]" />
 
-        <Header
-          currentUser={currentUser}
-          darkMode={darkMode}
-          locale={locale}
-          adminTab={adminTab}
-          isAdminMode={isAdminMode}
-          onAdminTabChange={(tab) => setAdminTab(tab as typeof adminTab)}
-          onToggleDarkMode={() => setDarkMode(d => !d)}
-          onToggleLocale={handleToggleLocale}
-          onLogout={handleLogout}
-          onSearchOpen={() => setSearchOpen(true)}
-        />
-
-        <main id="main-content" className="flex-grow">
-          <ErrorBoundary>
-          <AnimatePresence mode="wait">
-            <Routes location={location} key={location.pathname}>
-              <Route path="/" element={
-                <AnimatedPage>
-                  <HomeView onSelectCake={(cake) => { setSelectedCake(cake); navigateTo('gallery'); }} />
-                </AnimatedPage>
-              } />
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            
+            {/* Customer Layout (Public & Protected Customer Routes) */}
+            <Route element={
+              <CustomerLayout
+                currentUser={currentUser}
+                darkMode={darkMode}
+                locale={locale}
+                onToggleDarkMode={() => setDarkMode(d => !d)}
+                onToggleLocale={handleToggleLocale}
+                onLogout={handleLogout}
+                onSearchOpen={() => setSearchOpen(true)}
+              />
+            }>
+              <Route path="/" element={<AnimatedPage><HomeView onSelectCake={(cake) => { setSelectedCake(cake); navigateTo('/gallery'); }} /></AnimatedPage>} />
+              <Route path="/gallery" element={<AnimatedPage><GalleryView selectedCake={selectedCake} onClearSelectedCake={() => setSelectedCake(null)} onSelectCake={setSelectedCake} onCommissionCake={handleCommissionCake} /></AnimatedPage>} />
+              <Route path="/request" element={<AnimatedPage><ProtectedRoute currentUser={currentUser}><RequestFormView prefilledCake={prefilledCake} onClearPrefilledCake={() => setPrefilledCake(null)} currentUser={currentUser!} /></ProtectedRoute></AnimatedPage>} />
+              <Route path="/about" element={<AnimatedPage><AboutView /></AnimatedPage>} />
+              <Route path="/testimonials" element={<AnimatedPage><TestimonialsView /></AnimatedPage>} />
+              <Route path="/help" element={<AnimatedPage><HelpView /></AnimatedPage>} />
+              <Route path="/contact" element={<AnimatedPage><ContactView /></AnimatedPage>} />
+              <Route path="/profile" element={<AnimatedPage><ProtectedRoute currentUser={currentUser}><ProfileView currentUser={currentUser!} onLogout={handleLogout} onUpdateUser={handleUpdateUser} /></ProtectedRoute></AnimatedPage>} />
+              <Route path="/orders" element={<AnimatedPage><MyOrdersView currentUser={currentUser!} /></AnimatedPage>} />
               
-              <Route path="/gallery" element={
-                <AnimatedPage>
-                  <GalleryView selectedCake={selectedCake} onClearSelectedCake={() => setSelectedCake(null)} onSelectCake={setSelectedCake} onCommissionCake={handleCommissionCake} />
-                </AnimatedPage>
-              } />
-
-              <Route path="/request" element={
-                <AnimatedPage>
-                  <ProtectedRoute currentUser={currentUser}>
-                    <RequestFormView prefilledCake={prefilledCake} onClearPrefilledCake={() => setPrefilledCake(null)} currentUser={currentUser!} />
-                  </ProtectedRoute>
-                </AnimatedPage>
-              } />
-
-              <Route path="/about" element={
-                <AnimatedPage>
-                  <AboutView />
-                </AnimatedPage>
-              } />
-
-              <Route path="/testimonials" element={
-                <AnimatedPage>
-                  <TestimonialsView />
-                </AnimatedPage>
-              } />
-
-              <Route path="/contact" element={
-                <AnimatedPage>
-                  <ContactView />
-                </AnimatedPage>
-              } />
-
-              <Route path="/profile" element={
-                <AnimatedPage>
-                  <ProtectedRoute currentUser={currentUser}>
-                    <ProfileView currentUser={currentUser!} onLogout={handleLogout} />
-                  </ProtectedRoute>
-                </AnimatedPage>
-              } />
-
-              <Route path="/orders" element={
-                <AnimatedPage>
-                  <MyOrdersView currentUser={currentUser!} />
-                </AnimatedPage>
-              } />
-
-              <Route path="/admin" element={
-                <AnimatedPage>
-                  <ProtectedRoute currentUser={currentUser} requireAdmin>
-                    <AdminView activeTab={adminTab} onTabChange={setAdminTab} currentUser={currentUser!} />
-                  </ProtectedRoute>
-                </AnimatedPage>
-              } />
-
               <Route path="/auth" element={
                 <AnimatedPage>
                   {currentUser ? (
                     <Navigate to={currentUser.role === 'admin' || currentUser.role === 'staff' ? '/admin' : '/'} replace />
                   ) : (
-                    <AuthView onAuthSuccess={(user) => { setCurrentUser(user); navigateTo(user.role === 'admin' || user.role === 'staff' ? 'admin' : 'home'); }} />
+                    <AuthView onAuthSuccess={(user) => { setCurrentUser(user); navigateTo(user.role === 'admin' || user.role === 'staff' ? '/admin' : '/'); }} />
                   )}
                 </AnimatedPage>
               } />
+              <Route path="*" element={<AnimatedPage><NotFoundView /></AnimatedPage>} />
+            </Route>
 
-              <Route path="*" element={
+            {/* Admin Layout (Protected Admin Routes) */}
+            <Route element={<AdminLayout currentUser={currentUser} />}>
+              <Route path="/admin" element={
                 <AnimatedPage>
-                  <NotFoundView />
+                  <AdminView activeTab={adminTab} onTabChange={setAdminTab} currentUser={currentUser!} />
                 </AnimatedPage>
               } />
-            </Routes>
-          </AnimatePresence>
-          </ErrorBoundary>
-        </main>
+            </Route>
+            
+          </Routes>
+        </AnimatePresence>
 
-        <Footer isAdminMode={isAdminMode} />
-        <ErrorBoundary><CakeAssistantBot activePage={activePage} /></ErrorBoundary>
         <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
       </div>
     </>

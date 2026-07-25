@@ -35,7 +35,7 @@ export default function TestimonialsView() {
             className={`px-6 py-2 text-xs tracking-widest uppercase transition-all duration-300 rounded-full cursor-pointer ${
               filter === 'all'
                 ? 'bg-stone-900 dark:bg-stone-800 text-white shadow-md font-semibold'
-                : 'bg-white dark:bg-[#111111] border border-stone-200 dark:border-stone-850 text-stone-600 dark:text-stone-450 hover:text-stone-950 dark:hover:text-white'
+                : 'bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-850 text-stone-600 dark:text-stone-450 hover:text-stone-950 dark:hover:text-white'
             }`}
           >
             {t('testimonials.allTributes')}
@@ -45,7 +45,7 @@ export default function TestimonialsView() {
             className={`px-6 py-2 text-xs tracking-widest uppercase transition-all duration-300 rounded-full cursor-pointer ${
               filter === 'celebration'
                 ? 'bg-stone-900 dark:bg-stone-800 text-white shadow-md font-semibold'
-                : 'bg-white dark:bg-[#111111] border border-stone-200 dark:border-stone-850 text-stone-600 dark:text-stone-450 hover:text-stone-950 dark:hover:text-white'
+                : 'bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-850 text-stone-600 dark:text-stone-450 hover:text-stone-950 dark:hover:text-white'
             }`}
           >
             {t('testimonials.milestoneCelebrations')}
@@ -55,7 +55,7 @@ export default function TestimonialsView() {
             className={`px-6 py-2 text-xs tracking-widest uppercase transition-all duration-300 rounded-full cursor-pointer ${
               filter === 'birthday'
                 ? 'bg-stone-900 dark:bg-stone-800 text-white shadow-md font-semibold'
-                : 'bg-white dark:bg-[#111111] border border-stone-200 dark:border-stone-850 text-stone-600 dark:text-stone-450 hover:text-stone-950 dark:hover:text-white'
+                : 'bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-850 text-stone-600 dark:text-stone-450 hover:text-stone-950 dark:hover:text-white'
             }`}
           >
             {t('testimonials.birthdaysParties')}
@@ -74,7 +74,7 @@ export default function TestimonialsView() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
                 key={t.id}
-                className={`${mdSpan} bg-white dark:bg-[#111111] p-8 border border-stone-200/60 dark:border-stone-850 rounded-sm shadow-xs flex flex-col justify-between relative overflow-hidden group hover:shadow-lg hover:border-lux-gold/30 transition-all duration-400`}
+                className={`${mdSpan} bg-white dark:bg-stone-950 p-8 border border-stone-200/60 dark:border-stone-850 rounded-sm shadow-xs flex flex-col justify-between relative overflow-hidden group hover:shadow-lg hover:border-lux-gold/30 transition-all duration-400`}
               >
                 {/* Vintage Watermark Quote Icon */}
                 <Quote className="absolute right-6 top-6 w-16 h-16 text-stone-150 dark:text-stone-800 opacity-[0.4] dark:opacity-[0.1] select-none pointer-events-none group-hover:scale-110 transition-transform duration-500" />
@@ -151,7 +151,7 @@ export default function TestimonialsView() {
 
             {/* Spotlight 4 */}
             <div className="space-y-4">
-              <div className="flex items-center justify-center md:justify-start gap-1 font-mono uppercase tracking-widest text-[#faf7f2]/90 font-bold text-lg mb-2">
+              <div className="flex items-center justify-center md:justify-start gap-1 font-mono uppercase tracking-widest text-lux-cream/90 font-bold text-lg mb-2">
                 <Award className="w-5 h-5 text-lux-gold" />
                 <span>DIETARY CARE</span>
               </div>

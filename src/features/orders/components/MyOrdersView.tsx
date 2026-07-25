@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Search, AlertCircle, ShoppingBag, ShieldCheck } from 'lucide-react';
 import { t } from '../../../i18n/index';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
+import { getStatusStyles } from '../../../shared/utils/statusStyles';
 
 interface SimulatedOrder {
   id: string;
@@ -126,6 +127,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
       try {
         // Fetch real requests from Neon Postgres
         const res = await fetch('/api/requests');
+        if (!res.ok) throw new Error(`Failed to load orders: ${res.status}`);
         const dbData = await res.json();
         let dbRequests: any[] = [];
         if (dbData.success && Array.isArray(dbData.requests)) {
@@ -224,30 +226,6 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
     }
   };
 
-  const getStatusBadgeStyles = (status: string) => {
-    switch (status) {
-      case 'Received':
-      case 'Pending':
-        return 'bg-amber-100 border-amber-300 text-amber-800';
-      case 'Designing':
-        return 'bg-blue-100 border-blue-300 text-blue-800';
-      case 'Quoted':
-        return 'bg-indigo-100 border-indigo-300 text-indigo-800';
-      case 'Confirmed':
-        return 'bg-emerald-100 border-emerald-300 text-emerald-800';
-      case 'InProgress':
-        return 'bg-purple-100 border-purple-300 text-purple-800';
-      case 'Ready':
-        return 'bg-teal-100 border-teal-300 text-teal-800';
-      case 'Completed':
-        return 'bg-green-100 border-green-300 text-green-800';
-      case 'Cancelled':
-        return 'bg-red-100 border-red-300 text-red-800';
-      default:
-        return 'bg-stone-100 border-stone-300 text-stone-800';
-    }
-  };
-
   return (
     <div className="bg-lux-cream/30 dark:bg-stone-900/10 min-h-screen py-16 px-4 sm:px-6">
       {/* Visual Title Header */}
@@ -263,7 +241,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Search & Overview List - left */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="bg-white dark:bg-[#111111] p-6 border border-stone-200/60 dark:border-stone-850 rounded-xs shadow-xs space-y-4 text-left">
+          <div className="bg-white dark:bg-stone-950 p-6 border border-stone-200/60 dark:border-stone-850 rounded-xs shadow-xs space-y-4 text-left">
             <h3 className="font-serif text-base text-stone-900 dark:text-stone-100 font-medium">{t('order.orderId')}</h3>
             <p className="text-[11px] text-stone-500 dark:text-stone-400 font-light font-sans">
               {t('order.enterOrderId')}
@@ -297,7 +275,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
             )}
           </div>
 
-          <div className="bg-white dark:bg-[#111111] p-6 border border-stone-200/60 dark:border-stone-850 rounded-xs shadow-xs space-y-4 text-left">
+          <div className="bg-white dark:bg-stone-950 p-6 border border-stone-200/60 dark:border-stone-850 rounded-xs shadow-xs space-y-4 text-left">
             <div className="flex justify-between items-center pb-2 border-b border-stone-100 dark:border-stone-850">
               <h3 className="font-serif text-sm text-stone-900 dark:text-stone-100 font-medium">{t('order.sampleOrdersList')}</h3>
               <span className="text-[9px] uppercase tracking-wider font-mono text-lux-gold bg-lux-gold/15 py-0.5 px-2 font-bold rounded-xs">
@@ -320,7 +298,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
                 >
                   <div className="flex justify-between items-center mb-1.5">
                     <span className="font-mono text-[11px] font-semibold text-stone-900 dark:text-stone-100">{ord.id}</span>
-                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-mono uppercase font-bold border ${getStatusBadgeStyles(ord.status)}`}>
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-mono uppercase font-bold border ${getStatusStyles(ord.status)}`}>
                       {ord.status}
                     </span>
                   </div>
@@ -341,7 +319,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="bg-white dark:bg-[#111111] border border-stone-200/70 dark:border-stone-850 shadow-sm rounded-xs overflow-hidden"
+              className="bg-white dark:bg-stone-950 border border-stone-200/70 dark:border-stone-850 shadow-sm rounded-xs overflow-hidden"
             >
               {/* Gold status bar */}
               <div className="h-1 bg-lux-gold w-full" />
@@ -358,7 +336,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
                   </div>
                   <div className="sm:text-right text-left">
                     <span className="text-[10px] uppercase tracking-wider text-stone-400 dark:text-stone-500 block font-mono">{t('order.orderProgressTracker')}</span>
-                    <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-mono uppercase font-bold border mt-1.5 ${getStatusBadgeStyles(selectedOrder.status)}`}>
+                    <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-mono uppercase font-bold border mt-1.5 ${getStatusStyles(selectedOrder.status)}`}>
                       {selectedOrder.status}
                     </span>
                   </div>
@@ -438,7 +416,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
               </div>
             </motion.div>
           ) : (
-            <div className="bg-white dark:bg-[#111111] border border-dashed border-stone-200/80 dark:border-stone-800 rounded-xs py-24 text-center font-sans">
+            <div className="bg-white dark:bg-stone-950 border border-dashed border-stone-200/80 dark:border-stone-800 rounded-xs py-24 text-center font-sans">
               <ShoppingBag className="w-12 h-12 text-stone-300 dark:text-stone-700 mx-auto mb-4" />
               <h3 className="font-serif text-lg text-stone-700 dark:text-stone-300 italic">{t('common.noSelection')}</h3>
               <p className="text-xs text-stone-400 dark:text-stone-500 font-light mt-1 max-w-sm mx-auto">

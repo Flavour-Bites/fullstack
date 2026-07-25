@@ -37,6 +37,7 @@ export async function registerWebhook() {
         secret_token: process.env.TELEGRAM_WEBHOOK_SECRET,
       }),
     }, 10_000);
+    if (!res.ok) throw new Error(`Telegram webhook registration failed: ${res.status}`);
     const data = await res.json();
     if (data.ok) {
       console.log('[Telegram] Webhook registered successfully.');

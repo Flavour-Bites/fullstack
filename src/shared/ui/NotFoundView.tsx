@@ -37,7 +37,7 @@ export default function NotFoundView() {
                transition={{ duration: 1.5, delay: 0.2 }}
                d="M100 40 C 150 40, 180 60, 180 90 C 180 95, 178 100, 175 105 L 175 150 C 175 180, 150 190, 100 190 C 50 190, 25 180, 25 150 L 25 105 C 22 100, 20 95, 20 90 C 20 60, 50 40, 100 40 Z" 
                fill="#FDE68A" 
-               className="dark:fill-[#2d2416]"
+               className="dark:fill-stone-850"
              />
              <path d="M25 105 C 50 115, 150 115, 175 105" stroke="#D97706" strokeWidth="4" fill="none" className="dark:stroke-lux-gold opacity-50"/>
              
@@ -48,7 +48,7 @@ export default function NotFoundView() {
                transition={{ duration: 1.2, delay: 1, ease: "anticipate" }}
                d="M100 40 L 160 100 C 140 110, 100 112, 100 112 Z" 
                fill="#FEF3C7" 
-               className="dark:fill-[#111111]"
+               className="dark:fill-stone-950"
                style={{ transformOrigin: "100px 40px" }}
              />
              
@@ -56,9 +56,9 @@ export default function NotFoundView() {
              <path d="M100 40 L 160 100 C 140 110, 100 112, 100 112 Z" fill="#D97706" className="dark:fill-lux-gold opacity-10"/>
              
              {/* Decor */}
-             <circle cx="60" cy="65" r="8" fill="#EF4444" className="dark:fill-[#EF4444]" />
-             <circle cx="140" cy="65" r="8" fill="#EF4444" className="dark:fill-[#EF4444]" />
-             <circle cx="100" cy="75" r="8" fill="#EF4444" className="dark:fill-[#EF4444]" />
+             <circle cx="60" cy="65" r="8" fill="#EF4444" className="dark:fill-red-500" />
+             <circle cx="140" cy="65" r="8" fill="#EF4444" className="dark:fill-red-500" />
+             <circle cx="100" cy="75" r="8" fill="#EF4444" className="dark:fill-red-500" />
              
              {/* Missing Decor */}
              <motion.circle 
