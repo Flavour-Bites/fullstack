@@ -44,7 +44,7 @@ export const AuthView: React.FC<AuthViewProps> = ({
     }
   };
 
-  const handlePasswordSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handlePasswordSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!password) {
       showToast(t('auth.formIncomplete'), t('auth.enterPassword'), 'warning');

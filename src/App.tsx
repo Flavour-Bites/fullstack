@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
+import { AnimatePresence } from 'motion/react';
 import { PageType, CakeGalleryItem, User } from './types';
 import { clearToken } from './shared/utils/apiClient';
 import ErrorBoundary from './shared/ui/ErrorBoundary';
+import AnimatedPage from './shared/ui/AnimatedPage';
 
 import HomeView from './features/core/components/HomeView';
 import GalleryView from './features/gallery/components/GalleryView';
@@ -22,7 +23,7 @@ import Footer from './shared/ui/Footer';
 import NotFoundView from './shared/ui/NotFoundView';
 import SearchModal from './features/search/components/SearchModal';
 
-import { setLocale, getLocale } from './i18n';
+import { setLocale as setI18nLocale, getLocale } from './i18n';
 import type { Locale } from './i18n';
 
 export default function App() {
@@ -31,7 +32,7 @@ export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const [adminTab, setAdminTab] = useState<'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users' | 'recovery'>('dashboard');
-  const [locale, setLocaleState] = useState<Locale>(() => getLocale());
+  const [locale, setLocale] = useState<Locale>(() => getLocale());
   const [darkMode, setDarkMode] = useState<boolean>(() => localStorage.getItem('theme') === 'dark');
   const [selectedCake, setSelectedCake] = useState<CakeGalleryItem | null>(null);
   const [prefilledCake, setPrefilledCake] = useState<CakeGalleryItem | null>(null);
@@ -131,8 +132,8 @@ export default function App() {
 
   const handleToggleLocale = () => {
     const next: Locale = locale === 'en' ? 'am' : 'en';
-    setLocaleState(next);
     setLocale(next);
+    setI18nLocale(next);
   };
 
   const isAdminMode = currentUser && (currentUser.role === 'admin' || currentUser.role === 'staff') && activePage === 'admin';
@@ -185,81 +186,79 @@ export default function App() {
           <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
               <Route path="/" element={
-                <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.35, ease: 'easeInOut' }}>
+                <AnimatedPage>
                   <HomeView onSelectCake={(cake) => { setSelectedCake(cake); navigateTo('gallery'); }} />
-                </motion.div>
+                </AnimatedPage>
               } />
               
               <Route path="/gallery" element={
-                <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.35, ease: 'easeInOut' }}>
+                <AnimatedPage>
                   <GalleryView selectedCake={selectedCake} onClearSelectedCake={() => setSelectedCake(null)} onSelectCake={setSelectedCake} onCommissionCake={handleCommissionCake} />
-                </motion.div>
+                </AnimatedPage>
               } />
 
               <Route path="/request" element={
-                <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.35, ease: 'easeInOut' }}>
+                <AnimatedPage>
                   <ProtectedRoute currentUser={currentUser}>
                     <RequestFormView prefilledCake={prefilledCake} onClearPrefilledCake={() => setPrefilledCake(null)} currentUser={currentUser!} />
                   </ProtectedRoute>
-                </motion.div>
+                </AnimatedPage>
               } />
 
               <Route path="/about" element={
-                <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.35, ease: 'easeInOut' }}>
+                <AnimatedPage>
                   <AboutView />
-                </motion.div>
+                </AnimatedPage>
               } />
 
               <Route path="/testimonials" element={
-                <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.35, ease: 'easeInOut' }}>
+                <AnimatedPage>
                   <TestimonialsView />
-                </motion.div>
+                </AnimatedPage>
               } />
 
               <Route path="/contact" element={
-                <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.35, ease: 'easeInOut' }}>
+                <AnimatedPage>
                   <ContactView />
-                </motion.div>
+                </AnimatedPage>
               } />
 
               <Route path="/profile" element={
-                <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.35, ease: 'easeInOut' }}>
+                <AnimatedPage>
                   <ProtectedRoute currentUser={currentUser}>
                     <ProfileView currentUser={currentUser!} onLogout={handleLogout} />
                   </ProtectedRoute>
-                </motion.div>
+                </AnimatedPage>
               } />
 
               <Route path="/orders" element={
-                <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.35, ease: 'easeInOut' }}>
-                  <ProtectedRoute currentUser={currentUser}>
-                    <MyOrdersView currentUser={currentUser!} />
-                  </ProtectedRoute>
-                </motion.div>
+                <AnimatedPage>
+                  <MyOrdersView currentUser={currentUser!} />
+                </AnimatedPage>
               } />
 
               <Route path="/admin" element={
-                <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.35, ease: 'easeInOut' }}>
+                <AnimatedPage>
                   <ProtectedRoute currentUser={currentUser} requireAdmin>
                     <AdminView activeTab={adminTab} onTabChange={setAdminTab} currentUser={currentUser!} />
                   </ProtectedRoute>
-                </motion.div>
+                </AnimatedPage>
               } />
 
               <Route path="/auth" element={
-                <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.35, ease: 'easeInOut' }}>
+                <AnimatedPage>
                   {currentUser ? (
                     <Navigate to={currentUser.role === 'admin' || currentUser.role === 'staff' ? '/admin' : '/'} replace />
                   ) : (
                     <AuthView onAuthSuccess={(user) => { setCurrentUser(user); navigateTo(user.role === 'admin' || user.role === 'staff' ? 'admin' : 'home'); }} />
                   )}
-                </motion.div>
+                </AnimatedPage>
               } />
 
               <Route path="*" element={
-                <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -15 }} transition={{ duration: 0.35, ease: 'easeInOut' }}>
+                <AnimatedPage>
                   <NotFoundView />
-                </motion.div>
+                </AnimatedPage>
               } />
             </Routes>
           </AnimatePresence>

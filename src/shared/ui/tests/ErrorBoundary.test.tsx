@@ -32,8 +32,8 @@ describe('ErrorBoundary', () => {
         <Bomb shouldThrow={true} />
       </ErrorBoundary>
     );
-    expect(screen.getByText('Something went wrong')).toBeInTheDocument();
-    expect(screen.getByText('Reload Page')).toBeInTheDocument();
+    expect(screen.getByText('Kitchen Disaster!')).toBeInTheDocument();
+    expect(screen.getByText('Try Reloading')).toBeInTheDocument();
   });
 
   it('renders custom fallback when provided', () => {
@@ -43,6 +43,6 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>
     );
     expect(screen.getByText('Custom Error UI')).toBeInTheDocument();
-    expect(screen.queryByText('Something went wrong')).not.toBeInTheDocument();
+    expect(screen.queryByText('Kitchen Disaster!')).not.toBeInTheDocument();
   });
 });
