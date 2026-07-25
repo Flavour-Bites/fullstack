@@ -242,5 +242,11 @@ export const FAQS: FaqItem[] = [
     question: 'How do I store my cake after pickup?',
     answer: 'Buttercream cakes should be refrigerated and removed 2 hours before serving. Fondant cakes can be stored at room temperature away from direct sunlight. We provide detailed care instructions with every pickup.',
     category: 'care'
+  },
+  {
+    id: 'faq-08',
+    question: 'How much does a custom cake cost?',
+    answer: 'Our custom cakes are priced based on the number of servings, design complexity, and specific ingredients used. Our single-tier celebration cakes typically start at 2,400 ETB. Please submit a request form with your design ideas for a personalized quote.',
+    category: 'pricing'
   }
 ];

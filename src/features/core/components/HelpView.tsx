@@ -144,11 +144,11 @@ export default function HelpView() {
 
           <div className="flex flex-wrap justify-center gap-1.5 pt-2">
             {[
-              { id: 'all', label: t('contact.allPolicies') },
-              { id: 'Lead-Times & Process', label: t('contact.leadTimesBooking') },
-              { id: 'Pricing & Estimates', label: t('contact.pricingCosts') },
-              { id: 'Delivery & Logistics', label: t('contact.deliveryLogistics') },
-              { id: 'Ingredients & Dietary', label: t('contact.ingredientsDietary') }
+              { id: 'all', label: t('contact.allPolicies'), match: ['all'] },
+              { id: 'booking', label: t('contact.leadTimesBooking'), match: ['booking', 'ordering', 'cancellation'] },
+              { id: 'pricing', label: t('contact.pricingCosts'), match: ['pricing'] },
+              { id: 'delivery', label: t('contact.deliveryLogistics'), match: ['delivery', 'studio'] },
+              { id: 'dietary', label: t('contact.ingredientsDietary'), match: ['dietary', 'care'] }
             ].map((cat) => {
               const isActive = faqCategory === cat.id;
               return (
@@ -173,8 +173,16 @@ export default function HelpView() {
 
         {/* Accordion List Display */}
         {(() => {
+          const activeCategoryObj = [
+            { id: 'all', match: ['all'] },
+            { id: 'booking', match: ['booking', 'ordering', 'cancellation'] },
+            { id: 'pricing', match: ['pricing'] },
+            { id: 'delivery', match: ['delivery', 'studio'] },
+            { id: 'dietary', match: ['dietary', 'care'] }
+          ].find(c => c.id === faqCategory) || { match: ['all'] };
+
           const filteredFaqs = FAQS.filter((faq) => {
-            const matchesCategory = faqCategory === 'all' || faq.category === faqCategory;
+            const matchesCategory = faqCategory === 'all' || activeCategoryObj.match.includes(faq.category);
             const matchesSearch =
               faq.question.toLowerCase().includes(faqSearch.toLowerCase()) ||
               faq.answer.toLowerCase().includes(faqSearch.toLowerCase());
