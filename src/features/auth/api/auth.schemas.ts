@@ -18,3 +18,11 @@ export const telegramPasswordSchema = z.object({
   telegramId: z.string().min(1),
   password: z.string().min(1),
 });
+
+export const updateProfileSchema = z.object({
+  name: z.string().optional(),
+  telegramPhone: z.string().optional(),
+  notifyViaTelegram: z.boolean().optional(),
+  dietaryPreferences: z.array(z.string()).optional(),
+  language: z.string().optional(),
+});
