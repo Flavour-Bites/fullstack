@@ -2,6 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup, waitFor } from '@testing-library/react';
 import MyOrdersView from '@/features/orders/components/MyOrdersView';
+import { ToastProvider } from '@/shared/ui/Toast';
 
 beforeEach(() => {
   vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response('{"success":true,"requests":[]}'))));
@@ -14,7 +15,11 @@ afterEach(() => {
 
 describe('MyOrdersView', () => {
   it('renders page title', async () => {
-    render(<MyOrdersView currentUser={{ id: '1', email: 'a@b.com', name: 'Test', role: 'customer' }} />);
+    render(
+      <ToastProvider>
+        <MyOrdersView currentUser={{ id: '1', email: 'a@b.com', name: 'Test', role: 'customer' }} />
+      </ToastProvider>
+    );
     await waitFor(() => {
       expect(screen.getByText('Order Updates')).toBeInTheDocument();
     });
