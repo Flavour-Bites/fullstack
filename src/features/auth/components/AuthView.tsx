@@ -4,7 +4,8 @@ import { Shield, Key, LogIn, Loader2, ArrowLeft } from 'lucide-react';
 import { useToast } from '../../../shared/ui/Toast';
 import { User as UserType } from '../../../types';
 import { t } from '../../../i18n/index';
-import { setToken, apiFetch } from '../../../shared/utils/apiClient';
+import { http, type ApiResponse } from '@/shared/api';
+import { setToken } from '@/shared/auth';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
 
 interface AuthViewProps {
@@ -29,10 +30,9 @@ export const AuthView: React.FC<AuthViewProps> = ({
   const handleTelegramOidcLogin = async () => {
     setLoading(true);
     try {
-      const res = await apiFetch('/api/auth/telegram/login', {
+      const { data } = await http.get<ApiResponse<{ authorizationUrl?: string }>>('/api/auth/telegram/login', {
         headers: { Accept: 'application/json' },
       });
-      const data = await res.json();
       if (data.success && data.authorizationUrl) {
         window.location.href = data.authorizationUrl;
       } else {
@@ -53,12 +53,10 @@ export const AuthView: React.FC<AuthViewProps> = ({
     }
     setLoading(true);
     try {
-      const res = await apiFetch('/api/auth/telegram/finalize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ telegramId, password }),
+      const { data } = await http.post<ApiResponse<{ token: string; user: UserType }>>('/api/auth/telegram/finalize', {
+        telegramId,
+        password,
       });
-      const data = await res.json();
       if (data.success) {
         setToken(data.token);
         localStorage.setItem('flavourbites_user', JSON.stringify(data.user));

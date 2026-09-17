@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, X, Send, Sparkles, Trash2, ShieldAlert, Cake } from 'lucide-react';
 import { t } from '../../../i18n/index';
 import { useLocation } from 'react-router-dom';
-import { apiFetch } from '../../../shared/utils/apiClient';
+import { http, type ApiResponse } from '@/shared/api';
 
 interface ChatMessage {
   id: string;
@@ -66,17 +66,8 @@ export default function CakeAssistantBot() {
         text: msg.text
       }));
 
-      const response = await apiFetch('/api/chat', {
-        method: 'POST',
-        body: JSON.stringify({ messages: historyToSend })
-      });
+      const { data } = await http.post<ApiResponse<{ text: string }>>('/api/chat', { messages: historyToSend });
 
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || 'Server responded with an error');
-      }
-
-      const data = await response.json();
       if (data.success && data.text) {
         setMessages(prev => [
           ...prev,

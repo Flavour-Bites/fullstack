@@ -4,7 +4,7 @@ import { Send, Loader2 } from 'lucide-react';
 import { CustomCakeRequest, CakeGalleryItem, User } from '../../../types';
 import { useToast } from '../../../shared/ui/Toast';
 import { t } from '../../../i18n/index';
-import { apiFetch } from '../../../shared/utils/apiClient';
+import { http, type ApiResponse } from '@/shared/api';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
 import OrderTrackingView from './OrderTrackingView';
 import RequestSuccessView from './RequestSuccessView';
@@ -104,9 +104,7 @@ export default function RequestFormView({
 
   const fetchRequests = async () => {
     try {
-      const res = await apiFetch('/api/requests');
-      if (!res.ok) throw new Error('Server unavailable');
-      const data = await res.json();
+      const { data } = await http.get<ApiResponse<{ requests: CustomCakeRequest[] }>>('/api/requests');
       if (data.success) {
         setActiveRequests(data.requests);
         setDbConnected(true);
@@ -157,13 +155,12 @@ export default function RequestFormView({
         reader.onerror = () => reject(new Error('Failed to read file'));
         reader.readAsDataURL(file);
       });
-      const res = await apiFetch('/api/uploads/image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileName: file.name, mimeType: file.type, size: file.size, dataBase64 }),
+      const { data } = await http.post<ApiResponse<{ image: { url: string } }>>('/api/uploads/image', {
+        fileName: file.name,
+        mimeType: file.type,
+        size: file.size,
+        dataBase64,
       });
-      if (!res.ok) throw new Error(`Upload failed with status ${res.status}`);
-      const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Upload failed');
       setUploadedImageUrl(data.image.url);
       showToast('Image Uploaded', 'Your reference image is ready. Submit when you are.', 'success');
@@ -204,11 +201,8 @@ export default function RequestFormView({
     let deletedOnBackend = false;
     if (dbConnected) {
       try {
-        const res = await apiFetch(`/api/requests/${id}`, { method: 'DELETE' });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success) { deletedOnBackend = true; fetchRequests(); }
-        }
+        const { data } = await http.delete<ApiResponse>(`/api/requests/${id}`);
+        if (data.success) { deletedOnBackend = true; fetchRequests(); }
       } catch (deleteErr) { console.error(`Failed to delete request ${id} from backend:`, deleteErr); }
     }
     if (!deletedOnBackend) {
@@ -260,14 +254,8 @@ export default function RequestFormView({
     let savedOnBackend = false;
     if (dbConnected) {
       try {
-        const res = await apiFetch('/api/requests', {
-          method: 'POST',
-          body: JSON.stringify(newInquiry)
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success) { savedOnBackend = true; fetchRequests(); }
-        }
+        const { data } = await http.post<ApiResponse>('/api/requests', newInquiry);
+        if (data.success) { savedOnBackend = true; fetchRequests(); }
       } catch (saveErr) { console.error('Failed to save request to backend:', saveErr); }
     }
 

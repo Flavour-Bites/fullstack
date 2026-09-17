@@ -251,7 +251,7 @@ status: draft
 > - ✅ **Clean error hierarchy** (`AppError` + 4 typed subclasses)
 > - ✅ **Broad test coverage**: 52 files across most modules
 > - ✅ **Realistic, idempotent seed**: 4 categories, 9 gallery items, 3 Ethiopian-context orders
-> - ✅ **No missing dependency bloat** — custom Redis client, minimal deps
+> - ✅ **Purpose-built integrations** — custom Redis client, centralized HTTP client
 > - ✅ **DB resilience**: Neon cold-start retry + graceful shutdown
 > - ✅ **Zero TODO/FIXME/HACK comments** in the codebase
 

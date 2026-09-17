@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '../../../shared/ui/Toast';
-import { apiFetch } from '../../../shared/utils/apiClient';
+import { http, type ApiResponse } from '@/shared/api';
 import type { CakeRequest } from '../../admin/components/types';
 import { orderPrice } from '../../admin/components/types';
 
@@ -14,8 +14,7 @@ export function useOrders(onMutation?: () => void) {
   const fetchRequests = useCallback(async (silent = false) => {
     if (!silent) setRefreshing(true);
     try {
-      const res = await apiFetch('/api/requests');
-      const data = await res.json();
+      const { data } = await http.get<ApiResponse<{ requests: CakeRequest[] }>>('/api/requests');
       if (data.success) {
         setRequests(data.requests || []);
         if (!silent) showToast('Orders Refreshed', `Loaded ${data.requests?.length || 0} orders.`, 'info');
@@ -32,8 +31,7 @@ export function useOrders(onMutation?: () => void) {
   const handleDeleteRequest = useCallback(async (id: string, name: string) => {
     if (!window.confirm(`Delete order from ${name}? This cannot be undone.`)) return;
     try {
-      const res = await apiFetch(`/api/requests/${id}`, { method: 'DELETE' });
-      const data = await res.json();
+      const { data } = await http.delete<ApiResponse>(`/api/requests/${id}`);
       if (data.success) {
         showToast('Order Deleted', `${name}'s order has been removed.`, 'warning');
         fetchRequests(true);
@@ -48,11 +46,7 @@ export function useOrders(onMutation?: () => void) {
     try {
       const body: Record<string, any> = { status: editStatus };
       if (editCost > 0) body.quotedPrice = editCost;
-      const res = await apiFetch(`/api/requests/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify(body)
-      });
-      const data = await res.json();
+      const { data } = await http.patch<ApiResponse>(`/api/requests/${id}`, body);
       if (data.success) {
         showToast('Order Updated', `${name}'s order updated — status: ${editStatus}, price: ${editCost.toLocaleString()} ETB.`, 'success');
         fetchRequests(true);
@@ -65,11 +59,7 @@ export function useOrders(onMutation?: () => void) {
 
   const advanceStatus = useCallback(async (req: CakeRequest, next: string) => {
     try {
-      const res = await apiFetch(`/api/requests/${req.id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ status: next })
-      });
-      const data = await res.json();
+      const { data } = await http.patch<ApiResponse>(`/api/requests/${req.id}`, { status: next });
       if (data.success) {
         showToast('Status Updated', `${req.contactName}'s order moved to "${next}".`, 'success');
         fetchRequests(true);

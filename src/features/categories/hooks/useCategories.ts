@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '../../../shared/ui/Toast';
-import { apiFetch } from '../../../shared/utils/apiClient';
+import { http, type ApiResponse } from '@/shared/api';
 import type { Category } from '../../admin/components/types';
 
 export function useCategories() {
@@ -11,8 +11,7 @@ export function useCategories() {
   const fetchCategories = useCallback(async () => {
     setCategoriesLoading(true);
     try {
-      const res = await apiFetch('/api/categories?includeInactive=true');
-      const data = await res.json();
+      const { data } = await http.get<ApiResponse<{ categories: Category[] }>>('/api/categories?includeInactive=true');
       if (data.success) setCategories(data.categories || []);
     } catch (e) { /* ignore */ }
     finally { setCategoriesLoading(false); }
@@ -24,20 +23,12 @@ export function useCategories() {
       const slug = categoryForm.slug || categoryForm.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
       const body: Record<string, unknown> = { ...categoryForm, slug };
       if (editingCategoryId) {
-        const res = await apiFetch(`/api/categories/${editingCategoryId}`, {
-          method: 'PATCH',
-          body: JSON.stringify(body),
-        });
-        const data = await res.json();
+        const { data } = await http.patch<ApiResponse>(`/api/categories/${editingCategoryId}`, body);
         if (data.success) {
           showToast('Category Updated', `"${categoryForm.name}" updated.`, 'success');
         } else throw new Error(data.error);
       } else {
-        const res = await apiFetch('/api/categories', {
-          method: 'POST',
-          body: JSON.stringify(body),
-        });
-        const data = await res.json();
+        const { data } = await http.post<ApiResponse>('/api/categories', body);
         if (data.success) {
           showToast('Category Created', `"${categoryForm.name}" added.`, 'success');
         } else throw new Error(data.error);
@@ -51,8 +42,7 @@ export function useCategories() {
   const handleDeleteCategory = useCallback(async (id: string, name: string) => {
     if (!window.confirm(`Delete category "${name}"? Gallery items in it will become uncategorized.`)) return false;
     try {
-      const res = await apiFetch(`/api/categories/${id}`, { method: 'DELETE' });
-      const data = await res.json();
+      const { data } = await http.delete<ApiResponse>(`/api/categories/${id}`);
       if (data.success) {
         showToast('Category Deleted', `"${name}" removed.`, 'warning');
         fetchCategories();
@@ -64,11 +54,7 @@ export function useCategories() {
 
   const handleToggleCategoryActive = useCallback(async (cat: Category) => {
     try {
-      const res = await apiFetch(`/api/categories/${cat.id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ isActive: !cat.isActive }),
-      });
-      const data = await res.json();
+      const { data } = await http.patch<ApiResponse>(`/api/categories/${cat.id}`, { isActive: !cat.isActive });
       if (data.success) {
         showToast('Category Updated', `"${cat.name}" is now ${cat.isActive ? 'inactive' : 'active'}.`, 'success');
         fetchCategories();
