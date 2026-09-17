@@ -1,4 +1,5 @@
 import { categoriesRepository } from './categories.repository';
+import { categorySchema, categoryUpdateSchema } from './categories.schemas';
 
 export const categoriesService = {
   async findAll(includeInactive = false) {
@@ -6,11 +7,13 @@ export const categoriesService = {
   },
 
   async create(data: Record<string, unknown>) {
-    return categoriesRepository.create(data as any);
+    const validatedData = categorySchema.parse(data);
+    return categoriesRepository.create(validatedData as any);
   },
 
   async update(id: string, data: Record<string, unknown>) {
-    return categoriesRepository.update(id, data);
+    const validatedData = categoryUpdateSchema.parse(data);
+    return categoriesRepository.update(id, validatedData);
   },
 
   async delete(id: string) {

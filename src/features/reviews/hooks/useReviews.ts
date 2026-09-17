@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '../../../shared/ui/Toast';
+import { apiFetch } from '../../../shared/utils/apiClient';
 import type { ReviewItem } from '../../admin/components/types';
 
 export function useReviews() {
@@ -20,7 +21,7 @@ export function useReviews() {
   const handleDeleteReview = useCallback(async (id: string, author: string) => {
     if (!window.confirm(`Delete review by ${author}? This cannot be undone.`)) return false;
     try {
-      const res = await fetch(`/api/reviews/${id}`, { method: 'DELETE' });
+      const res = await apiFetch(`/api/reviews/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
         showToast('Review Deleted', `Review by ${author} removed.`, 'warning');
@@ -33,9 +34,8 @@ export function useReviews() {
 
   const handleSaveReview = useCallback(async (id: string, content: string, rating: number) => {
     try {
-      const res = await fetch(`/api/reviews/${id}`, {
+      const res = await apiFetch(`/api/reviews/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content, rating }),
       });
       const data = await res.json();

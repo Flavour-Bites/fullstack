@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '../../../shared/ui/Toast';
+import { apiFetch } from '../../../shared/utils/apiClient';
 
 export function useRecovery() {
   const { showToast } = useToast();
@@ -20,9 +21,8 @@ export function useRecovery() {
 
   const handleRecoveryStatus = useCallback(async (id: string, status: string) => {
     try {
-      const res = await fetch(`/api/recovery/${id}`, {
+      const res = await apiFetch(`/api/recovery/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
       });
       const data = await res.json();

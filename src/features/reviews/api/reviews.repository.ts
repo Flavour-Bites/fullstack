@@ -40,6 +40,8 @@ export const reviewsRepository = {
 
   async update(id: string, data: Record<string, unknown>) {
     const prisma = getPrisma();
-    return prisma.review.update({ where: { id }, data });
+    const { updateReviewSchema } = await import('./reviews.schemas');
+    const validatedData = updateReviewSchema.parse(data);
+    return prisma.review.update({ where: { id }, data: validatedData });
   },
 };

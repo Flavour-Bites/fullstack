@@ -1,4 +1,5 @@
 const TOKEN_KEY = 'flavourbites_token';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 let authToken: string | null = (() => {
   try { return localStorage.getItem(TOKEN_KEY); } catch { return null; }
@@ -18,7 +19,7 @@ let csrfToken: string | null = null;
 
 export async function fetchCsrfToken() {
   try {
-    const res = await fetch('/api/csrf-token', { credentials: 'same-origin' });
+    const res = await fetch(`${API_BASE}/api/csrf-token`, { credentials: 'include' });
     if (!res.ok) throw new Error(`CSRF token fetch failed: ${res.status}`);
     const data = await res.json();
     if (data.token) csrfToken = data.token;
@@ -33,9 +34,11 @@ export async function apiFetch(path: string, options: RequestInit = {}): Promise
     await fetchCsrfToken();
   }
 
-  return fetch(path, {
+  const fullPath = path.startsWith('/') ? `${API_BASE}${path}` : path;
+
+  return fetch(fullPath, {
     ...options,
-    credentials: 'same-origin',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
       ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),

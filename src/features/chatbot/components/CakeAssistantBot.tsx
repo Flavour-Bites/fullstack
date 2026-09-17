@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, X, Send, Sparkles, Trash2, ShieldAlert, Cake } from 'lucide-react';
 import { t } from '../../../i18n/index';
 import { useLocation } from 'react-router-dom';
+import { apiFetch } from '../../../shared/utils/apiClient';
 
 interface ChatMessage {
   id: string;
@@ -65,9 +66,8 @@ export default function CakeAssistantBot() {
         text: msg.text
       }));
 
-      const response = await fetch('/api/chat', {
+      const response = await apiFetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: historyToSend })
       });
 

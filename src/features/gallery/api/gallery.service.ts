@@ -1,5 +1,6 @@
 import { galleryRepository } from './gallery.repository';
 import { deleteImageFromCloudinary } from '../../../integrations/cloudinary/cloudinaryClient';
+import { gallerySchema, galleryUpdateSchema } from './gallery.schemas';
 
 export const galleryService = {
   async findAll(categorySlug?: string) {
@@ -7,41 +8,43 @@ export const galleryService = {
   },
 
   async create(data: Record<string, unknown>) {
-    const categoryId = await galleryRepository.resolveCategoryId(data as any);
-    const flavors = Array.isArray(data.flavors) ? data.flavors : [data.flavors];
-    const tags = Array.isArray(data.tags) ? data.tags : data.tags ? [data.tags] : [];
+    const validatedData = gallerySchema.parse(data);
+    const categoryId = await galleryRepository.resolveCategoryId(validatedData as any);
+    const flavors = Array.isArray(validatedData.flavors) ? validatedData.flavors : [validatedData.flavors];
+    const tags = Array.isArray(validatedData.tags) ? validatedData.tags : validatedData.tags ? [validatedData.tags] : [];
 
     return galleryRepository.create({
-      id: data.id as string | undefined,
-      name: data.name as string,
-      description: data.description as string,
+      id: validatedData.id,
+      name: validatedData.name,
+      description: validatedData.description,
       categoryId,
       flavors,
-      priceEstimate: data.priceEstimate as string,
-      image: data.image as string | undefined,
-      imagePublicId: data.imagePublicId as string | null | undefined,
-      servingCount: data.servingCount as string | undefined,
+      priceEstimate: validatedData.priceEstimate,
+      image: validatedData.image,
+      imagePublicId: validatedData.imagePublicId,
+      servingCount: validatedData.servingCount,
       tags,
     });
   },
 
   async update(id: string, data: Record<string, unknown>) {
+    const validatedData = galleryUpdateSchema.parse(data);
     const updateData: Record<string, unknown> = {};
 
-    if (data.name !== undefined) updateData.name = data.name;
-    if (data.description !== undefined) updateData.description = data.description;
-    if (data.categoryId || data.categorySlug || data.category) {
-      updateData.categoryId = await galleryRepository.resolveCategoryId(data as any);
+    if (validatedData.name !== undefined) updateData.name = validatedData.name;
+    if (validatedData.description !== undefined) updateData.description = validatedData.description;
+    if (validatedData.categoryId || validatedData.categorySlug || validatedData.category) {
+      updateData.categoryId = await galleryRepository.resolveCategoryId(validatedData as any);
     }
-    if (data.flavors !== undefined) {
-      updateData.flavors = Array.isArray(data.flavors) ? data.flavors : [data.flavors];
+    if (validatedData.flavors !== undefined) {
+      updateData.flavors = Array.isArray(validatedData.flavors) ? validatedData.flavors : [validatedData.flavors];
     }
-    if (data.priceEstimate !== undefined) updateData.priceEstimate = data.priceEstimate;
-    if (data.image !== undefined) updateData.image = data.image;
-    if (data.imagePublicId !== undefined) updateData.imagePublicId = data.imagePublicId;
-    if (data.servingCount !== undefined) updateData.servingCount = data.servingCount;
-    if (data.tags !== undefined) {
-      updateData.tags = Array.isArray(data.tags) ? data.tags : data.tags ? [data.tags] : [];
+    if (validatedData.priceEstimate !== undefined) updateData.priceEstimate = validatedData.priceEstimate;
+    if (validatedData.image !== undefined) updateData.image = validatedData.image;
+    if (validatedData.imagePublicId !== undefined) updateData.imagePublicId = validatedData.imagePublicId;
+    if (validatedData.servingCount !== undefined) updateData.servingCount = validatedData.servingCount;
+    if (validatedData.tags !== undefined) {
+      updateData.tags = Array.isArray(validatedData.tags) ? validatedData.tags : validatedData.tags ? [validatedData.tags] : [];
     }
 
     return galleryRepository.update(id, updateData);

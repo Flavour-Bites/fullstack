@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '../../../shared/ui/Toast';
+import { apiFetch } from '../../../shared/utils/apiClient';
 import type { CakeRequest } from '../../admin/components/types';
 import { orderPrice } from '../../admin/components/types';
 
@@ -13,7 +14,7 @@ export function useOrders(onMutation?: () => void) {
   const fetchRequests = useCallback(async (silent = false) => {
     if (!silent) setRefreshing(true);
     try {
-      const res = await fetch('/api/requests');
+      const res = await apiFetch('/api/requests');
       const data = await res.json();
       if (data.success) {
         setRequests(data.requests || []);
@@ -31,7 +32,7 @@ export function useOrders(onMutation?: () => void) {
   const handleDeleteRequest = useCallback(async (id: string, name: string) => {
     if (!window.confirm(`Delete order from ${name}? This cannot be undone.`)) return;
     try {
-      const res = await fetch(`/api/requests/${id}`, { method: 'DELETE' });
+      const res = await apiFetch(`/api/requests/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
         showToast('Order Deleted', `${name}'s order has been removed.`, 'warning');
@@ -47,9 +48,8 @@ export function useOrders(onMutation?: () => void) {
     try {
       const body: Record<string, any> = { status: editStatus };
       if (editCost > 0) body.quotedPrice = editCost;
-      const res = await fetch(`/api/requests/${id}`, {
+      const res = await apiFetch(`/api/requests/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
       const data = await res.json();
@@ -65,9 +65,8 @@ export function useOrders(onMutation?: () => void) {
 
   const advanceStatus = useCallback(async (req: CakeRequest, next: string) => {
     try {
-      const res = await fetch(`/api/requests/${req.id}`, {
+      const res = await apiFetch(`/api/requests/${req.id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: next })
       });
       const data = await res.json();

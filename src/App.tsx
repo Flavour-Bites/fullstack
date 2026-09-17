@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
 import { CakeGalleryItem, User } from './types';
-import { clearToken } from './shared/utils/apiClient';
+import { clearToken, apiFetch } from './shared/utils/apiClient';
 import AnimatedPage from './shared/ui/AnimatedPage';
 
 import HomeView from './features/core/components/HomeView';
@@ -110,7 +110,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
-    fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+    apiFetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
     localStorage.removeItem('flavourbites_user');
     clearToken();
     setCurrentUser(null);
