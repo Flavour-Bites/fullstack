@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '../../../shared/ui/Toast';
+import { apiFetch } from '../../../shared/utils/apiClient';
 import type { SystemUser } from '../../admin/components/types';
 
 export function useUsers() {
@@ -19,9 +20,8 @@ export function useUsers() {
 
   const saveUserRole = useCallback(async (userId: string, userName: string, newRole: string) => {
     try {
-      const res = await fetch(`/api/users/${userId}`, {
+      const res = await apiFetch(`/api/users/${userId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: newRole })
       });
       const data = await res.json();
@@ -37,7 +37,7 @@ export function useUsers() {
   const deleteUser = useCallback(async (userId: string, userName: string) => {
     if (!window.confirm(`Delete user "${userName}"? All their data will be removed.`)) return false;
     try {
-      const res = await fetch(`/api/users/${userId}`, { method: 'DELETE' });
+      const res = await apiFetch(`/api/users/${userId}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
         showToast('User Deleted', `${userName} has been removed from the system.`, 'warning');

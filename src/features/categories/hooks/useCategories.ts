@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '../../../shared/ui/Toast';
+import { apiFetch } from '../../../shared/utils/apiClient';
 import type { Category } from '../../admin/components/types';
 
 export function useCategories() {
@@ -10,7 +11,7 @@ export function useCategories() {
   const fetchCategories = useCallback(async () => {
     setCategoriesLoading(true);
     try {
-      const res = await fetch('/api/categories?includeInactive=true');
+      const res = await apiFetch('/api/categories?includeInactive=true');
       const data = await res.json();
       if (data.success) setCategories(data.categories || []);
     } catch (e) { /* ignore */ }
@@ -23,9 +24,8 @@ export function useCategories() {
       const slug = categoryForm.slug || categoryForm.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
       const body: Record<string, unknown> = { ...categoryForm, slug };
       if (editingCategoryId) {
-        const res = await fetch(`/api/categories/${editingCategoryId}`, {
+        const res = await apiFetch(`/api/categories/${editingCategoryId}`, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
         });
         const data = await res.json();
@@ -33,9 +33,8 @@ export function useCategories() {
           showToast('Category Updated', `"${categoryForm.name}" updated.`, 'success');
         } else throw new Error(data.error);
       } else {
-        const res = await fetch('/api/categories', {
+        const res = await apiFetch('/api/categories', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
         });
         const data = await res.json();
@@ -52,7 +51,7 @@ export function useCategories() {
   const handleDeleteCategory = useCallback(async (id: string, name: string) => {
     if (!window.confirm(`Delete category "${name}"? Gallery items in it will become uncategorized.`)) return false;
     try {
-      const res = await fetch(`/api/categories/${id}`, { method: 'DELETE' });
+      const res = await apiFetch(`/api/categories/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
         showToast('Category Deleted', `"${name}" removed.`, 'warning');
@@ -65,9 +64,8 @@ export function useCategories() {
 
   const handleToggleCategoryActive = useCallback(async (cat: Category) => {
     try {
-      const res = await fetch(`/api/categories/${cat.id}`, {
+      const res = await apiFetch(`/api/categories/${cat.id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isActive: !cat.isActive }),
       });
       const data = await res.json();

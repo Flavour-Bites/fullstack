@@ -56,7 +56,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
     <div className="space-y-24 pb-16 overflow-hidden">
       
       {/* 1. HERO SECTION: Full-Bleed Dark & High-End Dramatic Mood */}
-      <section className="relative min-h-[85vh] sm:min-h-[90vh] flex items-center justify-center overflow-hidden bg-[#111111] text-white pt-28 pb-20 px-4 sm:px-6 lg:px-8">
+      <section className="relative min-h-[85vh] sm:min-h-[90vh] flex items-center justify-center overflow-hidden bg-stone-950 text-white pt-28 pb-20 px-4 sm:px-6 lg:px-8">
         
         {/* Deep, premium background texture with high contrast overlay */}
         <div className="absolute inset-0 z-0 select-none">
@@ -68,8 +68,8 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
             referrerPolicy="no-referrer"
           />
           {/* Subtle gradient vignette */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#120f0d] via-transparent to-[#120f0d]/30" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#120f0d] via-transparent to-[#120f0d]/50" />
+          <div className="absolute inset-0 bg-gradient-to-r from-stone-950 via-transparent to-stone-950/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-transparent to-stone-950/50" />
           <div className="absolute -top-1/4 -right-1/4 w-96 h-96 rounded-full bg-lux-gold/10 blur-3xl pointer-events-none" />
         </div>
 
@@ -135,7 +135,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
               ].map((s) => (
                 <div key={s.label} className="space-y-1.5">
                   <p className="font-serif text-3xl sm:text-4xl font-medium text-white drop-shadow-md">{s.value}</p>
-                  <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-[#c5a880] font-semibold">{s.label}</p>
+                  <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-lux-gold font-semibold">{s.label}</p>
                 </div>
               ))}
             </motion.div>
@@ -144,7 +144,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
       </section>
 
       {/* 2. SOCIAL PROOF STRIP: Elegant Trust Seals */}
-      <section className="bg-stone-50 dark:bg-[#111111] border-y border-stone-200/50 dark:border-stone-850/80 py-8 relative z-10">
+      <section className="bg-stone-50 dark:bg-stone-950 border-y border-stone-200/50 dark:border-stone-850/80 py-8 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {[
@@ -183,7 +183,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
           <motion.div
             whileHover={{ y: -6 }}
             transition={{ duration: 0.3 }}
-            className="bg-white dark:bg-[#111111] p-6 shadow-sm hover:shadow-xl border border-stone-200/50 dark:border-stone-850 rounded-sm flex flex-col justify-between text-left"
+            className="bg-white dark:bg-stone-950 p-6 shadow-sm hover:shadow-xl border border-stone-200/50 dark:border-stone-850 rounded-sm flex flex-col justify-between text-left"
           >
             <div>
               <div className="aspect-[4/5] overflow-hidden mb-6 relative group bg-stone-100 dark:bg-stone-900">
@@ -215,7 +215,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
           <motion.div
             whileHover={{ y: -6 }}
             transition={{ duration: 0.3 }}
-            className="bg-white dark:bg-[#111111] p-6 shadow-sm hover:shadow-xl border border-stone-200/50 dark:border-stone-850 rounded-sm flex flex-col justify-between text-left"
+            className="bg-white dark:bg-stone-950 p-6 shadow-sm hover:shadow-xl border border-stone-200/50 dark:border-stone-850 rounded-sm flex flex-col justify-between text-left"
           >
             <div>
               <div className="aspect-[4/5] overflow-hidden mb-6 relative group bg-stone-100 dark:bg-stone-900">
@@ -247,7 +247,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
           <motion.div
             whileHover={{ y: -6 }}
             transition={{ duration: 0.3 }}
-            className="bg-white dark:bg-[#111111] p-6 shadow-sm hover:shadow-xl border border-stone-200/50 dark:border-stone-850 rounded-sm flex flex-col justify-between text-left"
+            className="bg-white dark:bg-stone-950 p-6 shadow-sm hover:shadow-xl border border-stone-200/50 dark:border-stone-850 rounded-sm flex flex-col justify-between text-left"
           >
             <div>
               <div className="aspect-[4/5] overflow-hidden mb-6 relative group bg-stone-100 dark:bg-stone-900">
@@ -278,7 +278,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
       </section>
 
       {/* 4. THE BESPOKE PHILOSOPHY: The Standard of Excellence & Sourcing */}
-      <section className="bg-[#111111] text-white py-24 relative overflow-hidden">
+      <section className="bg-stone-950 text-white py-24 relative overflow-hidden">
         {/* Soft, glowing radial backdrops */}
         <div className="absolute top-[-10%] left-[-10%] w-[45vw] h-[45vw] rounded-full border border-white/5 pointer-events-none" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[35vw] h-[35vw] rounded-full border border-white/5 pointer-events-none" />
@@ -336,7 +336,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
               </div>
               
               {/* Floating Solid Gold Badge "8+ Years of Craft" */}
-              <div className="absolute -bottom-6 -left-6 bg-[#c5a880] text-stone-950 p-5 rounded-xs shadow-2xl max-w-[210px] text-left border border-white/10">
+              <div className="absolute -bottom-6 -left-6 bg-lux-gold text-stone-950 p-5 rounded-xs shadow-2xl max-w-[210px] text-left border border-white/10">
                 <p className="font-serif text-3xl font-bold text-stone-950 leading-none">8+ Yrs</p>
                 <p className="text-[10px] font-sans font-bold uppercase tracking-widest text-stone-900/80 mt-1">{t('home.dedicatedStudio')}</p>
                 <p className="text-[9px] text-stone-850 font-light mt-1.5 font-sans leading-snug">{t('home.dedicatedStudioDesc')}</p>
@@ -366,7 +366,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
             <div className="w-16 h-16 rounded-full bg-white dark:bg-stone-900 border border-lux-gold text-lux-gold flex items-center justify-center mx-auto text-xl font-serif shadow-md">
               01
             </div>
-            <h3 className="text-lg font-serif font-semibold text-[#1c1917] dark:text-stone-100">{t('home.step1Title')}</h3>
+            <h3 className="text-lg font-serif font-semibold text-stone-900 dark:text-stone-100">{t('home.step1Title')}</h3>
             <p className="text-xs text-stone-600 dark:text-stone-400 font-light leading-relaxed max-w-xs mx-auto">
               {t('home.step1Desc')}
             </p>
@@ -377,7 +377,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
             <div className="w-16 h-16 rounded-full bg-lux-gold text-stone-950 flex items-center justify-center mx-auto text-xl font-serif shadow-lg">
               02
             </div>
-            <h3 className="text-lg font-serif font-semibold text-[#1c1917] dark:text-stone-100">{t('home.step2Title')}</h3>
+            <h3 className="text-lg font-serif font-semibold text-stone-900 dark:text-stone-100">{t('home.step2Title')}</h3>
             <p className="text-xs text-stone-600 dark:text-stone-400 font-light leading-relaxed max-w-xs mx-auto">
               {t('home.step2Desc')}
             </p>
@@ -388,7 +388,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
             <div className="w-16 h-16 rounded-full bg-white dark:bg-stone-900 border border-lux-gold text-lux-gold flex items-center justify-center mx-auto text-xl font-serif shadow-md">
               03
             </div>
-            <h3 className="text-lg font-serif font-semibold text-[#1c1917] dark:text-stone-100">{t('home.step3Title')}</h3>
+            <h3 className="text-lg font-serif font-semibold text-stone-900 dark:text-stone-100">{t('home.step3Title')}</h3>
             <p className="text-xs text-stone-600 dark:text-stone-400 font-light leading-relaxed max-w-xs mx-auto">
               {t('home.step3Desc')}
             </p>
@@ -407,7 +407,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
       </section>
 
       {/* 6. CURATED SHOWCASE (Bento Asymmetrical Preview Grid) */}
-      <section className="bg-stone-50 dark:bg-[#111111] py-20 relative border-y border-stone-200/50 dark:border-stone-850/80">
+      <section className="bg-stone-50 dark:bg-stone-950 py-20 relative border-y border-stone-200/50 dark:border-stone-850/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-end mb-12 border-b border-stone-200 dark:border-stone-850 pb-6 text-left">
             <div>
@@ -427,7 +427,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
             {featuredCakes.map((cake) => (
               <div
                 key={cake.id}
-                className="group cursor-pointer text-left bg-white dark:bg-[#111111] border border-stone-200/60 dark:border-stone-850/70 p-4 rounded-sm shadow-xs transition-all duration-300 hover:shadow-xl"
+                className="group cursor-pointer text-left bg-white dark:bg-stone-950 border border-stone-200/60 dark:border-stone-850/70 p-4 rounded-sm shadow-xs transition-all duration-300 hover:shadow-xl"
                 onClick={() => {
                   onSelectCake(cake);
                   navigate('/gallery');
@@ -458,7 +458,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
       </section>
 
       {/* 7. SWEETEST STORIES: Refined Quotation Carousel */}
-      <section className="relative bg-[#1a1613] py-24 text-white overflow-hidden">
+      <section className="relative bg-stone-900 py-24 text-white overflow-hidden">
         {/* Ambient background watermark watermark label */}
         <div className="absolute top-1/2 left-1/2 -track-wide -translate-x-1/2 -translate-y-1/2 opacity-[0.015] font-serif text-[18rem] uppercase select-none pointer-events-none">
           Custom
@@ -482,7 +482,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
                   >
                     <div className="flex justify-center gap-0.5">
                       {Array.from({ length: t.rating }).map((_, i) => (
-                        <Star key={i} size={15} className="fill-[#c5a880] text-[#c5a880]" />
+                        <Star key={i} size={15} className="fill-lux-gold text-lux-gold" />
                       ))}
                     </div>
 
@@ -539,7 +539,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
       </section>
 
       {/* 8. FINAL CTA: Dramatic espresso canvas with gold heading */}
-      <section className="relative py-28 overflow-hidden rounded-xs bg-[#111111]">
+      <section className="relative py-28 overflow-hidden rounded-xs bg-stone-950">
         <div className="absolute inset-0 select-none opacity-20">
           <img
             src="https://images.unsplash.com/photo-1527529482837-4698179dc6ce?auto=format&fit=crop&q=80&w=1200"
@@ -548,7 +548,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
             loading="lazy"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-[#111111]/80" />
+          <div className="absolute inset-0 bg-stone-950/80" />
         </div>
 
         <div className="relative z-10 max-w-3xl mx-auto px-5 text-center font-sans space-y-6">
@@ -556,7 +556,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
           
           <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight">
             {t('home.ctaTitle')} <br />
-            <span className="text-[#c5a880] italic">{t('home.ctaSubtitle')}</span>
+            <span className="text-lux-gold italic">{t('home.ctaSubtitle')}</span>
           </h2>
           
           <p className="text-stone-300 font-light text-sm sm:text-base mb-10 max-w-md mx-auto leading-relaxed">
@@ -566,7 +566,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
             <Link
               to="/request"
-              className="bg-lux-gold text-[#120f0d] font-semibold px-8 py-4 rounded-sm hover:bg-white hover:text-stone-950 transition-all hover:shadow-[0_8px_32px_rgba(197,168,128,0.25)] flex items-center justify-center gap-2 cursor-pointer font-mono text-xs uppercase tracking-wider"
+              className="bg-lux-gold text-stone-950 font-semibold px-8 py-4 rounded-sm hover:bg-white hover:text-stone-950 transition-all hover:shadow-[0_8px_32px_rgba(197,168,128,0.25)] flex items-center justify-center gap-2 cursor-pointer font-mono text-xs uppercase tracking-wider"
             >
               {t('home.requestCake')} <ChevronRight className="w-4 h-4" />
             </Link>

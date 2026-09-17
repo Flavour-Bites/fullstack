@@ -128,3 +128,59 @@ If implementing a feature exposes architectural weaknesses:
 ### Expected Standard
 
 Write code as if it will be maintained by a senior engineering team for years. Every implementation should be production-ready, modular, readable, extensible, and aligned with clean software engineering principles rather than short-term convenience.
+
+## Context Discipline (STRICT)
+
+**Every agent must manage context efficiently. Disk is your infinite context window.**
+
+### Session Start: MANDATORY
+
+1. Read `AGENTS.md` (this file)
+2. Read `LEARNINGS.md` — project patterns, tooling, recurring issues
+3. Check the todo list for pending work
+
+This costs 30 seconds. Skipping it wastes 10+ minutes rediscovering patterns.
+
+### During Work: Write-Back Rule
+
+After every meaningful decision, write it to persistent files immediately:
+
+| Decision Type | Write To |
+|--------------|----------|
+| Library quirks, lint patterns, tooling gotchas | `LEARNINGS.md` |
+| Architecture decisions, new rules | `AGENTS.md` |
+| Task state, what's left to do | Todo list |
+
+Format: `- [YYYY-MM-DD] Category: What was learned`
+
+### Context Budget
+
+**Keep in context:**
+- Current task and active files
+- Patterns from LEARNINGS.md relevant to this task
+- Test results (pass/fail count only, not full output)
+
+**Discard from context (don't re-read):**
+- File contents after editing is complete
+- Search results already acted on
+- Git status after committing
+- Error messages after fixing
+
+**Re-read from disk when needed:**
+- LEARNINGS.md before each new subtask
+- AGENTS.md when switching branches
+- Source files only if persistent files lack the answer
+
+### Task Transition
+
+Before switching files or subtasks:
+1. Write new learnings to LEARNINGS.md
+2. Check LEARNINGS.md for patterns before reading source
+3. Update todo list
+
+### Session End
+
+Before session ends:
+1. Write ALL new learnings to LEARNINGS.md
+2. Update AGENTS.md if rules changed
+3. Note incomplete work in todo list

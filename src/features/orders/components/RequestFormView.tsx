@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Send, Paperclip, CheckCircle2, Loader2, ArrowRight } from 'lucide-react';
+import { Send, Loader2 } from 'lucide-react';
 import { CustomCakeRequest, CakeGalleryItem, User } from '../../../types';
 import { useToast } from '../../../shared/ui/Toast';
 import { t } from '../../../i18n/index';
 import { apiFetch } from '../../../shared/utils/apiClient';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
 import OrderTrackingView from './OrderTrackingView';
+import RequestSuccessView from './RequestSuccessView';
+import ReferenceImageUploader from './ReferenceImageUploader';
+import RequestSidebar from './RequestSidebar';
 
 interface RequestFormViewProps {
-  prefilledCake: CakeGalleryItem | null;
-  onClearPrefilledCake: () => void;
-  currentUser?: User | null;
+  readonly prefilledCake: CakeGalleryItem | null;
+  readonly onClearPrefilledCake: () => void;
+  readonly currentUser?: User | null;
 }
 
 const DEFAULT_FORM = {
@@ -23,11 +26,43 @@ const DEFAULT_FORM = {
   deliveryAddress: '',
 };
 
+function generateRequestId(): string {
+  const cryptoObj = typeof window !== 'undefined' ? window.crypto : undefined;
+  let num: number;
+  let charCode: number;
+
+  if (cryptoObj?.getRandomValues) {
+    const array = new Uint32Array(2);
+    cryptoObj.getRandomValues(array);
+    num = 1000 + (array[0] % 9000);
+    charCode = 65 + (array[1] % 26);
+  } else {
+    // Fallback to time-based value if crypto is unavailable (avoids PRNG security warnings)
+    const now = Date.now();
+    num = 1000 + (now % 9000);
+    charCode = 65 + (now % 26);
+  }
+
+  return `FB-${num}${String.fromCodePoint(charCode)}`;
+}
+
+function getDateInputStyles(dateError: string | null, deliveryDate: string): string {
+  if (dateError) {
+    return 'border-red-300 dark:border-red-900 bg-red-50/30 dark:bg-red-950/20 focus:border-red-500';
+  }
+  if (deliveryDate) {
+    return 'border-emerald-300 dark:border-emerald-800 bg-emerald-50/10 dark:bg-emerald-950/10 focus:border-emerald-600';
+  }
+  return 'border-stone-200 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/40 focus:border-lux-gold';
+}
+
+
+
 export default function RequestFormView({
   prefilledCake,
   onClearPrefilledCake,
   currentUser
-}: RequestFormViewProps) {
+}: Readonly<RequestFormViewProps>) {
   usePageTitle("Request a Cake");
   const { showToast } = useToast();
   const [form, setForm] = useState(DEFAULT_FORM);
@@ -69,7 +104,7 @@ export default function RequestFormView({
 
   const fetchRequests = async () => {
     try {
-      const res = await fetch('/api/requests');
+      const res = await apiFetch('/api/requests');
       if (!res.ok) throw new Error('Server unavailable');
       const data = await res.json();
       if (data.success) {
@@ -80,7 +115,7 @@ export default function RequestFormView({
       setDbConnected(false);
       const list = localStorage.getItem('fb_request_commissions');
       if (list) {
-        try { setActiveRequests(JSON.parse(list)); } catch {}
+        try { setActiveRequests(JSON.parse(list)); } catch (parseErr) { console.error('Failed to parse cached requests from localStorage:', parseErr); }
       }
     }
   };
@@ -127,6 +162,7 @@ export default function RequestFormView({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fileName: file.name, mimeType: file.type, size: file.size, dataBase64 }),
       });
+      if (!res.ok) throw new Error(`Upload failed with status ${res.status}`);
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Upload failed');
       setUploadedImageUrl(data.image.url);
@@ -161,19 +197,19 @@ export default function RequestFormView({
     e.stopPropagation();
     setIsDragging(false);
     const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith('image/')) uploadFile(file);
+    if (file?.type.startsWith('image/')) uploadFile(file);
   };
 
   const deleteRequest = async (id: string) => {
     let deletedOnBackend = false;
     if (dbConnected) {
       try {
-        const res = await fetch(`/api/requests/${id}`, { method: 'DELETE' });
+        const res = await apiFetch(`/api/requests/${id}`, { method: 'DELETE' });
         if (res.ok) {
           const data = await res.json();
           if (data.success) { deletedOnBackend = true; fetchRequests(); }
         }
-      } catch {}
+      } catch (deleteErr) { console.error(`Failed to delete request ${id} from backend:`, deleteErr); }
     }
     if (!deletedOnBackend) {
       const updated = activeRequests.filter((item) => item.id !== id);
@@ -182,7 +218,7 @@ export default function RequestFormView({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!form.contactName || !form.contactPhone || !form.deliveryDate) {
       setValError('Please fill in your name, phone, and event date.');
@@ -198,7 +234,7 @@ export default function RequestFormView({
     setDateError(null);
     setSubmitting(true);
 
-    const uniqueId = `FB-${Math.floor(1000 + Math.random() * 9000)}${String.fromCharCode(65 + Math.floor(Math.random() * 26))}`;
+    const uniqueId = generateRequestId();
 
     const newInquiry: CustomCakeRequest = {
       id: uniqueId,
@@ -224,16 +260,15 @@ export default function RequestFormView({
     let savedOnBackend = false;
     if (dbConnected) {
       try {
-        const res = await fetch('/api/requests', {
+        const res = await apiFetch('/api/requests', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newInquiry)
         });
         if (res.ok) {
           const data = await res.json();
           if (data.success) { savedOnBackend = true; fetchRequests(); }
         }
-      } catch {}
+      } catch (saveErr) { console.error('Failed to save request to backend:', saveErr); }
     }
 
     if (!savedOnBackend) {
@@ -260,37 +295,13 @@ export default function RequestFormView({
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start text-left">
-        <div className="lg:col-span-7 bg-white dark:bg-[#111111] p-6 sm:p-10 border border-stone-200/60 dark:border-stone-850 rounded-sm shadow-xs">
+        <div className="lg:col-span-7 bg-white dark:bg-stone-950 p-6 sm:p-10 border border-stone-200/60 dark:border-stone-850 rounded-sm shadow-xs">
           <AnimatePresence mode="wait">
             {formSubmitted ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0 }}
-                className="text-center py-16 space-y-6"
-              >
-                <div className="w-20 h-20 bg-green-50 dark:bg-green-950/30 rounded-full flex items-center justify-center mx-auto border border-green-200 dark:border-green-900">
-                  <CheckCircle2 className="w-10 h-10 text-green-600 dark:text-green-400" />
-                </div>
-                <h3 className="text-2xl font-serif text-stone-900 dark:text-stone-100">{t('order.thankYou')}</h3>
-                <p className="text-sm text-stone-600 dark:text-stone-300 max-w-lg mx-auto font-sans font-light leading-relaxed">
-                  Your request <span className="font-mono text-lux-gold font-semibold">{submittedId}</span> has been received. Yodit will review it and reach out within 24 hours to discuss your cake.
-                </p>
-                <div className="p-4 bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 text-xs text-stone-500 dark:text-stone-400 rounded-sm text-left max-w-md mx-auto">
-                  <p className="font-semibold mb-1">{t('order.whatHappensNext')}</p>
-                  <ol className="list-decimal pl-4 space-y-1">
-                    <li>Yodit reviews your request and checks availability.</li>
-                    <li>She reaches out by phone or Telegram to discuss flavours, design, and pricing.</li>
-                    <li>Once confirmed, your cake enters production and you can track it below.</li>
-                  </ol>
-                </div>
-                <button
-                  onClick={() => { setFormSubmitted(false); setForm(DEFAULT_FORM); setUploadedImageUrl(null); }}
-                  className="px-6 py-2.5 bg-stone-900 dark:bg-stone-800 hover:bg-lux-gold hover:text-stone-950 text-white font-medium text-xs tracking-widest uppercase rounded-sm transition-all cursor-pointer"
-                >
-                  {t('order.createAnother')}
-                </button>
-              </motion.div>
+              <RequestSuccessView
+                submittedId={submittedId}
+                onReset={() => { setFormSubmitted(false); setForm(DEFAULT_FORM); setUploadedImageUrl(null); }}
+              />
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6" id="cake-custom-form">
                 {valError && (
@@ -363,7 +374,7 @@ export default function RequestFormView({
                       </label>
                       {form.deliveryDate && !dateError && (
                         <span className="text-[9px] uppercase font-mono text-emerald-600 dark:text-emerald-400 font-bold tracking-wider flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />{' '}
                           Notice Met
                         </span>
                       )}
@@ -375,13 +386,7 @@ export default function RequestFormView({
                       onChange={handleInputChange}
                       min={getMinDateString()}
                       required
-                      className={`w-full border p-3 text-sm focus:outline-none rounded-sm font-mono transition-colors text-stone-850 dark:text-stone-100 ${
-                        dateError
-                          ? 'border-red-300 dark:border-red-900 bg-red-50/30 dark:bg-red-950/20 focus:border-red-500'
-                          : form.deliveryDate
-                          ? 'border-emerald-300 dark:border-emerald-800 bg-emerald-50/10 dark:bg-emerald-950/10 focus:border-emerald-600'
-                          : 'border-stone-200 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/40 focus:border-lux-gold'
-                      }`}
+                      className={`w-full border p-3 text-sm focus:outline-none rounded-sm font-mono transition-colors text-stone-850 dark:text-stone-100 ${getDateInputStyles(dateError, form.deliveryDate)}`}
                     />
                     {dateError ? (
                       <p className="text-[10px] text-red-500 dark:text-red-400 font-sans mt-1 leading-normal font-medium">{dateError}</p>
@@ -391,8 +396,9 @@ export default function RequestFormView({
                   </div>
 
                   <div>
-                    <label className="text-[10px] uppercase font-mono tracking-widest text-stone-500 dark:text-stone-400 font-bold block mb-1">Tell us about your cake *</label>
+                    <label htmlFor="cakeDescription" className="text-[10px] uppercase font-mono tracking-widest text-stone-500 dark:text-stone-400 font-bold block mb-1">Tell us about your cake *</label>
                     <textarea
+                      id="cakeDescription"
                       name="cakeDescription"
                       value={form.cakeDescription}
                       onChange={handleInputChange}
@@ -436,9 +442,10 @@ export default function RequestFormView({
                       initial={{ opacity: 0, y: -5 }}
                       animate={{ opacity: 1, y: 0 }}
                     >
-                      <label className="text-[10px] uppercase font-mono tracking-widest text-stone-500 dark:text-stone-400 font-bold block mb-1">Delivery Address *</label>
+                      <label htmlFor="deliveryAddress" className="text-[10px] uppercase font-mono tracking-widest text-stone-500 dark:text-stone-400 font-bold block mb-1">Delivery Address *</label>
                       <input
                         type="text"
+                        id="deliveryAddress"
                         name="deliveryAddress"
                         value={form.deliveryAddress}
                         onChange={handleInputChange}
@@ -456,61 +463,17 @@ export default function RequestFormView({
                     <h3 className="font-serif text-lg text-stone-900 dark:text-stone-100 uppercase tracking-wide">Reference (Optional)</h3>
                   </div>
 
-                  <div>
-                    <label className="text-[10px] uppercase font-mono tracking-widest text-stone-500 dark:text-stone-400 font-bold block mb-1">{t('order.uploadReference')}</label>
-                    <div
-                      onDragOver={handleDragOver}
-                      onDragEnter={handleDragEnter}
-                      onDragLeave={handleDragLeave}
-                      onDrop={handleDrop}
-                      className={`border border-dashed rounded-sm p-6 text-center relative transition-colors font-sans ${
-                        isDragging ? 'border-lux-gold bg-lux-gold/10 scale-[1.02]'
-                          : uploading ? 'border-lux-gold bg-lux-gold/5'
-                          : uploadedImageUrl ? 'border-emerald-400/50 bg-emerald-500/5'
-                          : uploadError ? 'border-red-400/50 bg-red-500/5'
-                          : 'border-stone-300 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-900/30'
-                      }`}
-                    >
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        disabled={uploading}
-                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full disabled:cursor-not-allowed"
-                      />
-                      {isDragging ? (
-                        <>
-                          <div className="w-8 h-8 rounded-full bg-lux-gold/20 flex items-center justify-center mx-auto mb-2">
-                            <Paperclip className="w-4 h-4 text-lux-gold" />
-                          </div>
-                          <p className="text-xs text-lux-gold font-semibold">Drop your image here</p>
-                        </>
-                      ) : uploading ? (
-                        <>
-                          <Loader2 className="w-6 h-6 text-lux-gold mx-auto mb-2 animate-spin" />
-                          <p className="text-xs text-lux-gold font-semibold">Uploading...</p>
-                        </>
-                      ) : uploadedImageUrl ? (
-                        <>
-                          <CheckCircle2 className="w-6 h-6 text-emerald-500 mx-auto mb-2" />
-                          <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">Image uploaded</p>
-                          <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-1">Click to replace</p>
-                        </>
-                      ) : uploadError ? (
-                        <>
-                          <p className="text-xs text-red-500 font-semibold">Upload failed — click to retry</p>
-                        </>
-                      ) : (
-                        <>
-                          <Paperclip className="w-6 h-6 text-stone-400 dark:text-stone-600 mx-auto mb-2" />
-                          <p className="text-xs text-stone-600 dark:text-stone-300 font-semibold">
-                            Drag or click to upload a reference image
-                          </p>
-                          <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-1">JPG, PNG up to 10MB</p>
-                        </>
-                      )}
-                    </div>
-                  </div>
+                  <ReferenceImageUploader
+                    uploading={uploading}
+                    uploadedImageUrl={uploadedImageUrl}
+                    uploadError={uploadError}
+                    isDragging={isDragging}
+                    onFileChange={handleFileChange}
+                    onDragOver={handleDragOver}
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                  />
                 </div>
 
                 <button
@@ -530,52 +493,7 @@ export default function RequestFormView({
           </AnimatePresence>
         </div>
 
-        <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white dark:bg-[#111111] p-6 border border-stone-200/60 dark:border-stone-850 rounded-sm space-y-4">
-            <h4 className="font-serif text-lg text-stone-900 dark:text-stone-100 font-medium">How it works</h4>
-            <ul className="space-y-3.5 text-xs text-stone-600 dark:text-stone-300 font-light font-sans text-left">
-              <li className="flex items-start gap-2.5">
-                <div className="text-lux-gold font-mono mt-0.5">1</div>
-                <p>Submit your request with a date and cake description.</p>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <div className="text-lux-gold font-mono mt-0.5">2</div>
-                <p>Yodit reaches out to discuss flavours, design, and pricing.</p>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <div className="text-lux-gold font-mono mt-0.5">3</div>
-                <p>Once confirmed, your cake enters production and you track it live.</p>
-              </li>
-            </ul>
-          </div>
-
-          <div className="bg-white dark:bg-[#111111] p-6 border border-stone-200/60 dark:border-stone-850 rounded-sm space-y-4">
-            <h4 className="font-serif text-lg text-stone-900 dark:text-stone-100 font-medium">Why Flavour Bites?</h4>
-            <ul className="space-y-3.5 text-xs text-stone-600 dark:text-stone-300 font-light font-sans text-left">
-              <li className="flex items-start gap-2.5">
-                <div className="text-lux-gold font-mono mt-0.5">&#10003;</div>
-                <p>A few orders each week, so every cake gets full attention.</p>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <div className="text-lux-gold font-mono mt-0.5">&#10003;</div>
-                <p>Pure ingredients, no stabilizers, entirely handcrafted.</p>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <div className="text-lux-gold font-mono mt-0.5">&#10003;</div>
-                <p>Dietary requirements (eggless, dairy-free) strictly isolated.</p>
-              </li>
-            </ul>
-          </div>
-
-          <a
-            href="#gallery"
-            onClick={(e) => { e.preventDefault(); window.history.back(); }}
-            className="flex items-center justify-center gap-2 py-3 border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300 hover:border-lux-gold hover:text-lux-gold text-xs font-medium tracking-wider uppercase rounded-sm transition-all cursor-pointer"
-          >
-            Browse the Gallery
-            <ArrowRight className="w-3.5 h-3.5" />
-          </a>
-        </div>
+        <RequestSidebar />
       </div>
 
       <OrderTrackingView requests={activeRequests} dbConnected={dbConnected} onDelete={deleteRequest} />

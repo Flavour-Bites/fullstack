@@ -67,7 +67,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
   const refreshAll = () => { orders.fetchRequests(); admin.fetchStats(); };
 
   return (
-    <div className="bg-stone-50 dark:bg-[#171412] dark:text-stone-100 min-h-screen py-16 px-4 sm:px-6 relative selection:bg-lux-gold/30 selection:text-white dark:selection:text-white">
+    <div className="bg-stone-50 dark:bg-stone-900 dark:text-stone-100 min-h-screen py-16 px-4 sm:px-6 relative selection:bg-lux-gold/30 selection:text-white dark:selection:text-white">
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-lux-gold/[0.02] rounded-full blur-[140px] pointer-events-none" />
 
       {/* Header */}

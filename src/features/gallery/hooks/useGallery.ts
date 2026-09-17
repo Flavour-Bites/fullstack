@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '../../../shared/ui/Toast';
+import { apiFetch } from '../../../shared/utils/apiClient';
 
 export function useGallery() {
   const { showToast } = useToast();
@@ -32,9 +33,8 @@ export function useGallery() {
         tags: galleryForm.tags.split(',').map((t: string) => t.trim()).filter(Boolean),
       };
       if (editingGalleryId) {
-        const res = await fetch(`/api/gallery/${editingGalleryId}`, {
+        const res = await apiFetch(`/api/gallery/${editingGalleryId}`, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
         });
         const data = await res.json();
@@ -42,9 +42,8 @@ export function useGallery() {
           showToast('Gallery Item Updated', `"${galleryForm.name}" updated.`, 'success');
         } else throw new Error(data.error);
       } else {
-        const res = await fetch('/api/gallery', {
+        const res = await apiFetch('/api/gallery', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body),
         });
         const data = await res.json();
@@ -61,7 +60,7 @@ export function useGallery() {
   const handleDeleteGalleryItem = useCallback(async (id: string, name: string) => {
     if (!window.confirm(`Delete gallery item "${name}"? This cannot be undone.`)) return false;
     try {
-      const res = await fetch(`/api/gallery/${id}`, { method: 'DELETE' });
+      const res = await apiFetch(`/api/gallery/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
         showToast('Gallery Item Deleted', `"${name}" removed.`, 'warning');

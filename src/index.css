@@ -14,9 +14,14 @@
   --color-lux-gold: #c5a880;
   --color-lux-cream: #faf7f2;
   
+  --color-stone-950: #111111;
+  --color-stone-900: #181512;
   --color-stone-850: #221e1b;
   --color-stone-550: #706861;
   --color-stone-250: #e5ded7;
+  
+  --color-telegram: #229ed9;
+  --color-telegram-hover: #1e8dbf;
 }
 
 /* Global bespoke styles */

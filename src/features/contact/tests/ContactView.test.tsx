@@ -9,10 +9,8 @@ describe('ContactView', () => {
     expect(screen.getByText('Contact Us')).toBeInTheDocument();
   });
 
-  
-
-  it('renders FAQ section', () => {
+  it('renders Help page link banner', () => {
     render(<ContactView />);
-    expect(screen.getByText('Frequently Asked Questions')).toBeInTheDocument();
+    expect(screen.getByText('Have specific questions?')).toBeInTheDocument();
   });
 });

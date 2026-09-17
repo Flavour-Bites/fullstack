@@ -82,4 +82,9 @@ export const authController = {
     const user = await authService.getCurrentUser(req.user!.userId);
     res.json({ success: true, user });
   }),
+
+  updateProfile: asyncHandler(async (req: Request, res: Response) => {
+    const user = await authService.updateProfile(req.user!.userId, req.body);
+    res.json({ success: true, user });
+  }),
 };

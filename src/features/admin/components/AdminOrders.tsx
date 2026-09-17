@@ -58,7 +58,7 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
       {/* Left: order list */}
       <div className="lg:col-span-7 space-y-5">
         {/* Search & Filter */}
-        <div className="bg-stone-50 dark:bg-[#1d1916] p-4 border border-stone-200/60 dark:border-stone-800/60 rounded-sm space-y-4 font-sans">
+        <div className="bg-stone-50 dark:bg-stone-900 p-4 border border-stone-200/60 dark:border-stone-800/60 rounded-sm space-y-4 font-sans">
           <div className="flex flex-col sm:flex-row items-center gap-3">
             <div className="relative flex-grow w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-stone-400" />
@@ -68,7 +68,7 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
                 aria-label={t('admin.searchOrders')}
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-lux-gold pl-9 pr-3 py-3 text-xs rounded-xs"
+                className="w-full bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-lux-gold pl-9 pr-3 py-3 text-xs rounded-xs"
               />
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
@@ -76,7 +76,7 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
               <select
                 value={statusFilter}
                 onChange={e => setStatusFilter(e.target.value)}
-                className="bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300 focus:outline-none focus:ring-1 focus:ring-lux-gold py-3 px-3 text-xs rounded-xs font-mono font-bold flex-grow sm:flex-grow-0"
+                className="bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300 focus:outline-none focus:ring-1 focus:ring-lux-gold py-3 px-3 text-xs rounded-xs font-mono font-bold flex-grow sm:flex-grow-0"
               >
                 <option value="all">{t('admin.allStatuses')}</option>
                 <option value="pending">Pending</option>
@@ -106,7 +106,7 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
             <SkeletonCard />
           </div>
         ) : filteredRequests.length === 0 ? (
-          <div className="bg-stone-50 dark:bg-[#1d1916] text-center p-16 border border-stone-200/60 dark:border-stone-800/60 rounded-sm">
+          <div className="bg-stone-50 dark:bg-stone-900 text-center p-16 border border-stone-200/60 dark:border-stone-800/60 rounded-sm">
             <Shield className="w-10 h-10 text-stone-400 dark:text-stone-500 mx-auto mb-3" />
             <p className="text-sm font-serif text-stone-600 dark:text-stone-300 italic">{t('admin.noOrders')}</p>
             <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">Try changing your filters or seed some demo data.</p>
@@ -124,8 +124,8 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
                   onClick={() => { if (!isEditing) setSelectedRequest(req); }}
                   role="button"
                   tabIndex={0}
-                  className={`bg-white/95 dark:bg-[#1e1a17]/95 border text-left rounded-sm p-5 transition-all cursor-pointer relative ${
-                    isSelected ? 'border-lux-gold shadow-lg shadow-lux-gold/5 bg-stone-100 dark:bg-[#221d19]' : 'border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700'
+                  className={`bg-white/95 dark:bg-stone-900/95 border text-left rounded-sm p-5 transition-all cursor-pointer relative ${
+                    isSelected ? 'border-lux-gold shadow-lg shadow-lux-gold/5 bg-stone-100 dark:bg-stone-850' : 'border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700'
                   }`}
                 >
                   {isSelected && <div className="absolute top-0 bottom-0 left-0 w-1 bg-lux-gold rounded-l-sm" />}
@@ -181,13 +181,13 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                           <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.statusLabel')}</label>
-                          <select value={editStatus} onChange={e => setEditStatus(e.target.value)} className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs">
+                          <select value={editStatus} onChange={e => setEditStatus(e.target.value)} className="w-full bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs">
                             {WORKFLOW.map(s => <option key={s} value={s}>{s}</option>)}
                           </select>
                         </div>
                         <div>
                           <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.quotedPrice')}</label>
-                          <input type="number" value={editCost} onChange={e => setEditCost(Math.max(0, Number(e.target.value)))} className="w-full bg-stone-100 dark:bg-[#15110f] border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+                          <input type="number" value={editCost} onChange={e => setEditCost(Math.max(0, Number(e.target.value)))} className="w-full bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
                         </div>
                       </div>
                       <div className="flex justify-end gap-2">
@@ -212,7 +212,7 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
             <motion.div
               key={selectedRequest.id}
               initial={{ opacity: 0, x: 25 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -15 }}
-              className="bg-white/95 dark:bg-[#1e1a17]/95 border border-lux-gold/30 dark:border-[#c5a880]/30 rounded-sm shadow-2xl sticky top-6"
+              className="bg-white/95 dark:bg-stone-900/95 border border-lux-gold/30 dark:border-lux-gold/30 rounded-sm shadow-2xl sticky top-6"
             >
               <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-lux-gold via-white to-transparent" />
               <div className="p-6 space-y-5">
@@ -225,7 +225,7 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
                   <button onClick={() => setSelectedRequest(null)} aria-label="Close details" className="p-1.5 rounded-sm hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white"><X className="w-4 h-4" /></button>
                 </div>
 
-                <div className="space-y-2 bg-stone-100 dark:bg-[#15110f] p-3 border border-stone-200 dark:border-stone-800 rounded-xs text-xs">
+                <div className="space-y-2 bg-stone-100 dark:bg-stone-950 p-3 border border-stone-200 dark:border-stone-800 rounded-xs text-xs">
                   <div className="flex items-center gap-2 text-stone-600 dark:text-stone-300"><Mail className="w-4 h-4 text-lux-gold shrink-0" /> {selectedRequest.userId ? 'via Telegram' : 'No contact email'}</div>
                   <div className="flex items-center gap-2 text-stone-600 dark:text-stone-300"><Phone className="w-4 h-4 text-lux-gold shrink-0" /> {selectedRequest.contactPhone}</div>
                   <div className="flex items-center gap-2 text-stone-600 dark:text-stone-300">
@@ -235,15 +235,15 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div className="bg-stone-100 dark:bg-[#15110f] p-3 border border-stone-200 dark:border-stone-800 rounded-xs">
+                  <div className="bg-stone-100 dark:bg-stone-950 p-3 border border-stone-200 dark:border-stone-800 rounded-xs">
                     <span className="text-[9px] uppercase text-stone-400 dark:text-stone-400 font-mono block">Tiers</span>
                     <span className="text-stone-100 font-serif text-sm">{selectedRequest.tierCount} Tier</span>
                   </div>
-                  <div className="bg-stone-100 dark:bg-[#15110f] p-3 border border-stone-200 dark:border-stone-800 rounded-xs">
+                  <div className="bg-stone-100 dark:bg-stone-950 p-3 border border-stone-200 dark:border-stone-800 rounded-xs">
                     <span className="text-[9px] uppercase text-stone-400 dark:text-stone-400 font-mono block">Guests</span>
                     <span className="text-stone-100 font-serif text-sm">{selectedRequest.guestCount}</span>
                   </div>
-                  <div className="bg-stone-100 dark:bg-[#15110f] p-3 border border-stone-200 dark:border-stone-800 rounded-xs col-span-2">
+                  <div className="bg-stone-100 dark:bg-stone-950 p-3 border border-stone-200 dark:border-stone-800 rounded-xs col-span-2">
                     <span className="text-[9px] uppercase text-stone-400 dark:text-stone-400 font-mono block">Flavor</span>
                     <span className="text-lux-gold font-serif text-sm">{selectedRequest.flavor}</span>
                   </div>
@@ -252,7 +252,7 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
                 {selectedRequest.designStyle && (
                   <div>
                     <h4 className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 font-bold mb-2">Design Notes</h4>
-                    <div className="p-3 border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-[#15110f] rounded-xs text-stone-600 dark:text-stone-300 text-xs font-light leading-relaxed italic">
+                    <div className="p-3 border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-950 rounded-xs text-stone-600 dark:text-stone-300 text-xs font-light leading-relaxed italic">
                       &quot;{selectedRequest.designStyle}&quot;
                     </div>
                   </div>
@@ -261,7 +261,7 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
                 {selectedRequest.specialInstructions && (
                   <div>
                     <h4 className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 font-bold mb-2">Special Instructions</h4>
-                    <div className="p-3 border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-[#15110f] rounded-xs text-stone-600 dark:text-stone-300 text-xs font-light leading-relaxed">
+                    <div className="p-3 border border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-950 rounded-xs text-stone-600 dark:text-stone-300 text-xs font-light leading-relaxed">
                       {selectedRequest.specialInstructions}
                     </div>
                   </div>
@@ -285,7 +285,7 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
                     </div>
                   </div>
                   <div className="grid grid-cols-1 gap-3 text-left">
-                    <div className="bg-stone-100 dark:bg-[#15110f] p-2.5 border border-stone-200 dark:border-stone-800 rounded-xs">
+                    <div className="bg-stone-100 dark:bg-stone-950 p-2.5 border border-stone-200 dark:border-stone-800 rounded-xs">
                       <span className="text-[8px] uppercase font-mono text-stone-400 dark:text-stone-400 block">Quoted Price</span>
                       <span className="text-xs font-mono font-bold text-stone-700 dark:text-stone-200">{orderPrice(selectedRequest) ? `${orderPrice(selectedRequest).toLocaleString()} ETB` : 'Not quoted'}</span>
                     </div>
@@ -294,7 +294,7 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
               </div>
             </motion.div>
           ) : (
-            <div className="bg-white/95 dark:bg-[#1e1a17]/95 border border-dashed border-stone-300 dark:border-stone-800 rounded-sm py-24 text-center sticky top-6">
+            <div className="bg-white/95 dark:bg-stone-900/95 border border-dashed border-stone-300 dark:border-stone-800 rounded-sm py-24 text-center sticky top-6">
               <Shield className="w-10 h-10 text-stone-600 mx-auto mb-3" />
               <h3 className="font-serif text-stone-400 dark:text-stone-400 italic">{t('admin.selectOrder')}</h3>
               <p className="text-xs text-stone-400 dark:text-stone-500 max-w-xs mx-auto mt-1 font-light px-6">Click any order on the left to view full details and manage it.</p>

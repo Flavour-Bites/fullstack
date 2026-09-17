@@ -3,8 +3,10 @@ import { motion } from 'motion/react';
 import { Search, AlertCircle, ShoppingBag, ShieldCheck } from 'lucide-react';
 import { t } from '../../../i18n/index';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
+import { getStatusStyles } from '../../../shared/utils/statusStyles';
+import { useOrders } from '../hooks/useOrders';
 
-interface SimulatedOrder {
+interface FrontendOrder {
   id: string;
   clientName: string;
   email: string;
@@ -19,89 +21,6 @@ interface SimulatedOrder {
   timeline: { title: string; date: string; description: string; done: boolean }[];
 }
 
-const SIMULATED_ORDERS: SimulatedOrder[] = [
-  {
-    id: 'FB-9812A',
-    clientName: 'Saba Tekle',
-    email: 'saba.tekle@example.com',
-    cakeType: 'Anniversary Couture',
-    eventDate: 'August 04, 2026',
-    status: 'In Progress',
-    stepNum: 4,
-    tierCount: 3,
-    flavor: 'Madagascar Vanilla Bean',
-    amount: '11,500 ETB',
-    details: 'Three-tier custom cream cake with fresh golden-trimmed delicate cream roses.',
-    timeline: [
-      { title: 'Inquiry Received', date: 'June 18, 2026', description: 'Design specs and guest counts submitted to Yodit Ashenafi.', done: true },
-      { title: 'Aesthetic Concept Design', date: 'June 19, 2026', description: 'Interactive design sheet sketched by Yodit.', done: true },
-      { title: 'Quotation Accepted & Deposit Paid', date: 'June 20, 2026', description: '50% reservation deposit confirmed on Bole Studio accounts.', done: true },
-      { title: 'Baking & Handcrafting Artistry', date: 'Active Right Now', description: 'Yodit is currently baking vanilla sponge sponges and sculpting custom roses.', done: true },
-      { title: 'Pre-Scheduled Studio Collection', date: 'August 04, 2026', description: 'Pending client collection with custom heavy-duty travel boxes.', done: false }
-    ]
-  },
-  {
-    id: 'FB-9231B',
-    clientName: 'Kidus Solomon',
-    email: 'kidus@example.com',
-    cakeType: 'Modern Birthday Landmark',
-    eventDate: 'July 02, 2026',
-    status: 'In Review',
-    stepNum: 2,
-    tierCount: 1,
-    flavor: 'Rich Chocolate Ganache',
-    amount: '2,800 ETB',
-    details: 'Clean modern custom iced birthday layout with elegant golden painted margins.',
-    timeline: [
-      { title: 'Inquiry Received', date: 'June 19, 2026', description: 'Specs for 25 guests birthday cake received.', done: true },
-      { title: 'Aesthetic Concept Design', date: 'Active Right Now', description: 'Yodit is selecting fine dark Belgian chocolate pairings and drafting the color schema.', done: true },
-      { title: 'Quotation Accepted & Deposit Paid', date: 'Pending Deposit', description: 'Awaiting 50% reservation booking fee to begin custom sponge preparations.', done: false },
-      { title: 'Baking & Handcrafting Artistry', date: 'Scheduled', description: 'Preparation of dark ganache sponges in Bole kitchen.', done: false },
-      { title: 'Pre-Scheduled Studio Collection', date: 'July 02, 2026', description: 'Secure custom box pickup.', done: false }
-    ]
-  },
-  {
-    id: 'FB-8831C',
-    clientName: 'Almaz Belay',
-    email: 'almaz.belay@example.com',
-    cakeType: 'Traditional Couture Wedding',
-    eventDate: 'August 19, 2026',
-    status: 'Confirmed',
-    stepNum: 3,
-    tierCount: 4,
-    flavor: 'Red Velvet with Cream Cheese',
-    amount: '18,500 ETB',
-    details: 'Four-tier traditional wedding design with hand-painted gold detailing & organic sugar jasmine blossoms.',
-    timeline: [
-      { title: 'Inquiry Received', date: 'June 20, 2026', description: 'Wedding reservation proposal submitted.', done: true },
-      { title: 'Aesthetic Concept Design', date: 'June 21, 2026', description: 'Gold detailing and jasmine layout approved.', done: true },
-      { title: 'Quotation Accepted & Deposit Paid', date: 'June 21, 2026', description: '50% wedding booking deposit ledger verified.', done: true },
-      { title: 'Baking & Handcrafting Artistry', date: 'Late July', description: 'Assembly of red velvet foundations and sugar jasmine petals.', done: false },
-      { title: 'Refrigerated Venue Delivery', date: 'August 19, 2026', description: 'Zone 2 express delivery to Bole wedding salon venue.', done: false }
-    ]
-  },
-  {
-    id: 'FB-5100E',
-    clientName: 'Helena Tekalign',
-    email: 'helena.t@example.com',
-    cakeType: 'Milestone Jubilee Cake',
-    eventDate: 'June 24, 2026',
-    status: 'Pending',
-    stepNum: 1,
-    tierCount: 2,
-    flavor: 'Salted Caramel Pecan',
-    amount: '6,200 ETB',
-    details: 'Two-tier textured milestone cake dusted with 23K edible gold layers.',
-    timeline: [
-      { title: 'Inquiry Received', date: 'June 20, 2026', description: 'Initial order request registered in local sandbox logs.', done: true },
-      { title: 'Aesthetic Concept Design', date: 'Awaiting Feedback', description: 'Waiting for Yodit to review current schedule availability.', done: false },
-      { title: 'Quotation Accepted & Deposit Paid', date: 'Pending Quotation', description: 'Booking slot locked once terms have been finalized.', done: false },
-      { title: 'Baking & Handcrafting Artistry', date: 'Scheduled', description: 'Oven timelines assigned and ingredients sourced.', done: false },
-      { title: 'Pre-Scheduled Studio Collection', date: 'June 24, 2026', description: 'Scheduled collection.', done: false }
-    ]
-  }
-];
-
 interface MyOrdersViewProps {
   currentUser: {
     id: string;
@@ -114,92 +33,51 @@ interface MyOrdersViewProps {
 export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
   usePageTitle("My Orders");
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedOrder, setSelectedOrder] = useState<SimulatedOrder | null>(null);
-  const [liveOrders, setLiveOrders] = useState<SimulatedOrder[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<FrontendOrder | null>(null);
   const [searchError, setSearchError] = useState(false);
-  const [, setLoading] = useState(true);
+  
+  const { requests, fetchRequests } = useOrders();
 
-  // Load user submitted requests from the Postgres DB and merge with SIMULATED records
   useEffect(() => {
-    async function loadOrders() {
-      setLoading(true);
-      try {
-        // Fetch real requests from Neon Postgres
-        const res = await fetch('/api/requests');
-        const dbData = await res.json();
-        let dbRequests: any[] = [];
-        if (dbData.success && Array.isArray(dbData.requests)) {
-          dbRequests = dbData.requests;
-        }
-
-        // Map database requests into simulated trackers
-        const mappedDbOrders: SimulatedOrder[] = dbRequests.map((item: any) => {
-          const numTiers = Number(item.tierCount) || 1;
-          const price = item.finalPrice ?? item.quotedPrice ?? 0;
-          const amountEtb = price ? `${price.toLocaleString()} ETB` : 'Pending Price';
-          
-          let stepNumber = 1;
-          if (item.status === 'Quoted') stepNumber = 2;
-          if (item.status === 'Confirmed') stepNumber = 3;
-          if (item.status === 'Designing' || item.status === 'InProgress') stepNumber = 4;
-          if (item.status === 'Ready' || item.status === 'Completed') stepNumber = 5;
-
-          return {
-            id: item.id || `FB-${Math.floor(1000 + Math.random() * 9000)}Y`,
-            clientName: item.contactName || 'Valued Client',
-            email: item.contactEmail || '',
-            cakeType: `${item.eventType || 'Bespoke Celebration'} Cake`,
-            eventDate: item.deliveryDate || 'TBD',
-            status: item.status || 'Pending',
-            stepNum: stepNumber,
-            tierCount: numTiers,
-            flavor: item.flavor || 'Bespoke Assortment',
-            amount: amountEtb,
-            details: item.designStyle || 'Custom cake studio creation requested.',
-            timeline: [
-              { title: 'Inquiry Received', date: item.requestDate || 'Just Now', description: 'Your request has been filed in Yodit\'s review queue!', done: true },
-              { title: 'Aesthetic Concept Design', date: 'Studio Stage', description: 'Yodit reviews your specs to draft a visual layout.', done: stepNumber >= 2 },
-              { title: 'Quotation Accepted & Deposit Paid', date: 'Booking Confirmed', description: 'After quote discussion, a 50% reservation fee secures your slot.', done: stepNumber >= 3 },
-              { title: 'Baking & Handcrafting Artistry', date: 'Active Phase', description: 'Oven baking and intricate hand-sculpted marzipan artwork.', done: stepNumber >= 4 },
-              { title: 'Secure Event Pickup', date: item.deliveryDate || 'TBD', description: 'Safe hand-off at Bole studio coordinates.', done: stepNumber >= 5 }
-            ]
-          };
-        });
-
-        // 1. Filter database requests by logged-in user's email
-        const userDbOrders = mappedDbOrders.filter(
-          (ord) => ord.email.toLowerCase() === (currentUser.email || '').toLowerCase()
-        );
-
-        // 2. Identify any relevant predefined simulated orders matching current email
-        const matchingSimulated = SIMULATED_ORDERS.filter(
-          (ord) => ord.email.toLowerCase() === (currentUser.email || '').toLowerCase()
-        );
-
-        // Determine final lists: we show users their specific orders.
-        // If there are none yet, we can also display a couple of curated samples so the UI isn't completely empty and cold, but marked as baseline samples!
-        const finalOrders = [...userDbOrders, ...matchingSimulated];
-        
-        if (finalOrders.length === 0) {
-          // If no custom order exists, present the simulated list as viewable reference models
-          setLiveOrders(SIMULATED_ORDERS);
-        } else {
-          setLiveOrders(finalOrders);
-        }
-      } catch (err) {
-        console.warn('Error syncing db requests inside orders view:', err);
-        setLiveOrders(SIMULATED_ORDERS);
-      } finally {
-        setLoading(false);
-      }
-    }
-    
     if (currentUser) {
-      loadOrders();
+      fetchRequests(true);
     }
-  }, [currentUser]);
+  }, [currentUser, fetchRequests]);
 
-  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+  const liveOrders: FrontendOrder[] = requests.map((item: any) => {
+    const numTiers = Number(item.tierCount) || 1;
+    const price = item.finalPrice ?? item.quotedPrice ?? 0;
+    const amountEtb = price ? `${price.toLocaleString()} ETB` : 'Pending Price';
+    
+    let stepNumber = 1;
+    if (item.status === 'Quoted') stepNumber = 2;
+    if (item.status === 'Confirmed') stepNumber = 3;
+    if (item.status === 'Designing' || item.status === 'InProgress') stepNumber = 4;
+    if (item.status === 'Ready' || item.status === 'Completed') stepNumber = 5;
+
+    return {
+      id: item.id || `FB-${Math.floor(1000 + Math.random() * 9000)}Y`,
+      clientName: item.contactName || 'Valued Client',
+      email: item.contactEmail || '',
+      cakeType: `${item.eventType || 'Bespoke Celebration'} Cake`,
+      eventDate: item.deliveryDate || 'TBD',
+      status: item.status || 'Pending',
+      stepNum: stepNumber,
+      tierCount: numTiers,
+      flavor: item.flavor || 'Bespoke Assortment',
+      amount: amountEtb,
+      details: item.designStyle || 'Custom cake studio creation requested.',
+      timeline: [
+        { title: 'Inquiry Received', date: item.requestDate || 'Just Now', description: 'Your request has been filed in Yodit\'s review queue!', done: true },
+        { title: 'Aesthetic Concept Design', date: 'Studio Stage', description: 'Yodit reviews your specs to draft a visual layout.', done: stepNumber >= 2 },
+        { title: 'Quotation Accepted & Deposit Paid', date: 'Booking Confirmed', description: 'After quote discussion, a 50% reservation fee secures your slot.', done: stepNumber >= 3 },
+        { title: 'Baking & Handcrafting Artistry', date: 'Active Phase', description: 'Oven baking and intricate hand-sculpted marzipan artwork.', done: stepNumber >= 4 },
+        { title: 'Secure Event Pickup', date: item.deliveryDate || 'TBD', description: 'Safe hand-off at Bole studio coordinates.', done: stepNumber >= 5 }
+      ]
+    };
+  });
+
+  const handleSearch = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSearchError(false);
     
@@ -224,30 +102,6 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
     }
   };
 
-  const getStatusBadgeStyles = (status: string) => {
-    switch (status) {
-      case 'Received':
-      case 'Pending':
-        return 'bg-amber-100 border-amber-300 text-amber-800';
-      case 'Designing':
-        return 'bg-blue-100 border-blue-300 text-blue-800';
-      case 'Quoted':
-        return 'bg-indigo-100 border-indigo-300 text-indigo-800';
-      case 'Confirmed':
-        return 'bg-emerald-100 border-emerald-300 text-emerald-800';
-      case 'InProgress':
-        return 'bg-purple-100 border-purple-300 text-purple-800';
-      case 'Ready':
-        return 'bg-teal-100 border-teal-300 text-teal-800';
-      case 'Completed':
-        return 'bg-green-100 border-green-300 text-green-800';
-      case 'Cancelled':
-        return 'bg-red-100 border-red-300 text-red-800';
-      default:
-        return 'bg-stone-100 border-stone-300 text-stone-800';
-    }
-  };
-
   return (
     <div className="bg-lux-cream/30 dark:bg-stone-900/10 min-h-screen py-16 px-4 sm:px-6">
       {/* Visual Title Header */}
@@ -263,7 +117,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Search & Overview List - left */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="bg-white dark:bg-[#111111] p-6 border border-stone-200/60 dark:border-stone-850 rounded-xs shadow-xs space-y-4 text-left">
+          <div className="bg-white dark:bg-stone-950 p-6 border border-stone-200/60 dark:border-stone-850 rounded-xs shadow-xs space-y-4 text-left">
             <h3 className="font-serif text-base text-stone-900 dark:text-stone-100 font-medium">{t('order.orderId')}</h3>
             <p className="text-[11px] text-stone-500 dark:text-stone-400 font-light font-sans">
               {t('order.enterOrderId')}
@@ -297,7 +151,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
             )}
           </div>
 
-          <div className="bg-white dark:bg-[#111111] p-6 border border-stone-200/60 dark:border-stone-850 rounded-xs shadow-xs space-y-4 text-left">
+          <div className="bg-white dark:bg-stone-950 p-6 border border-stone-200/60 dark:border-stone-850 rounded-xs shadow-xs space-y-4 text-left">
             <div className="flex justify-between items-center pb-2 border-b border-stone-100 dark:border-stone-850">
               <h3 className="font-serif text-sm text-stone-900 dark:text-stone-100 font-medium">{t('order.sampleOrdersList')}</h3>
               <span className="text-[9px] uppercase tracking-wider font-mono text-lux-gold bg-lux-gold/15 py-0.5 px-2 font-bold rounded-xs">
@@ -320,7 +174,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
                 >
                   <div className="flex justify-between items-center mb-1.5">
                     <span className="font-mono text-[11px] font-semibold text-stone-900 dark:text-stone-100">{ord.id}</span>
-                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-mono uppercase font-bold border ${getStatusBadgeStyles(ord.status)}`}>
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-mono uppercase font-bold border ${getStatusStyles(ord.status)}`}>
                       {ord.status}
                     </span>
                   </div>
@@ -341,7 +195,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="bg-white dark:bg-[#111111] border border-stone-200/70 dark:border-stone-850 shadow-sm rounded-xs overflow-hidden"
+              className="bg-white dark:bg-stone-950 border border-stone-200/70 dark:border-stone-850 shadow-sm rounded-xs overflow-hidden"
             >
               {/* Gold status bar */}
               <div className="h-1 bg-lux-gold w-full" />
@@ -358,7 +212,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
                   </div>
                   <div className="sm:text-right text-left">
                     <span className="text-[10px] uppercase tracking-wider text-stone-400 dark:text-stone-500 block font-mono">{t('order.orderProgressTracker')}</span>
-                    <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-mono uppercase font-bold border mt-1.5 ${getStatusBadgeStyles(selectedOrder.status)}`}>
+                    <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-mono uppercase font-bold border mt-1.5 ${getStatusStyles(selectedOrder.status)}`}>
                       {selectedOrder.status}
                     </span>
                   </div>
@@ -438,7 +292,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
               </div>
             </motion.div>
           ) : (
-            <div className="bg-white dark:bg-[#111111] border border-dashed border-stone-200/80 dark:border-stone-800 rounded-xs py-24 text-center font-sans">
+            <div className="bg-white dark:bg-stone-950 border border-dashed border-stone-200/80 dark:border-stone-800 rounded-xs py-24 text-center font-sans">
               <ShoppingBag className="w-12 h-12 text-stone-300 dark:text-stone-700 mx-auto mb-4" />
               <h3 className="font-serif text-lg text-stone-700 dark:text-stone-300 italic">{t('common.noSelection')}</h3>
               <p className="text-xs text-stone-400 dark:text-stone-500 font-light mt-1 max-w-sm mx-auto">

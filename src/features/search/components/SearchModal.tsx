@@ -76,7 +76,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.98 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="bg-white dark:bg-[#111111] border border-stone-200 dark:border-stone-800 rounded-sm shadow-2xl w-full max-w-lg overflow-hidden"
+            className="bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-sm shadow-2xl w-full max-w-lg overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Search Input */}

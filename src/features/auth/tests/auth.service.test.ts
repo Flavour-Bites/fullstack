@@ -21,7 +21,7 @@ const mockExistingUser = {
   passwordHash: 'hashed:mypass',
 };
 
-vi.mock('@/shared/utils/auth.js', () => ({
+vi.mock('@/shared/utils/auth.ts', () => ({
   signToken: vi.fn((payload) => `token-${payload.userId}`),
   verifyPassword: vi.fn((plain, hash) => Promise.resolve(hash === `hashed:${plain}`)),
   hashPassword: vi.fn((plain) => Promise.resolve(`hashed:${plain}`)),
@@ -31,7 +31,7 @@ vi.mock('@/shared/utils/auth.js', () => ({
   authCookieOptions: { httpOnly: true, sameSite: 'lax', secure: false, maxAge: 999 },
 }));
 
-vi.mock('@/features/auth/api/auth.repository.js', () => ({
+vi.mock('@/features/auth/api/auth.repository.ts', () => ({
   authRepository: {
     upsertTelegramUser: vi.fn(() => Promise.resolve(mockUser)),
     findByTelegramId: vi.fn((id) => {
@@ -58,6 +58,17 @@ vi.mock('@/features/auth/api/auth.repository.js', () => ({
   },
 }));
 
+vi.mock('../../../integrations/redis/redisClient', () => ({
+  getRedisStore: vi.fn(() => ({
+    set: vi.fn().mockResolvedValue('OK'),
+    get: vi.fn((key) => {
+      if (key.includes('unknown_state')) return Promise.resolve(null);
+      return Promise.resolve(JSON.stringify({ codeVerifier: 'mock_verifier', redirectUri: 'https://example.com/callback' }));
+    }),
+    del: vi.fn().mockResolvedValue(1),
+  })),
+}));
+
 describe('authService.finalizeTelegramLogin', () => {
   it('throws when account not found', async () => {
     await expect(authService.finalizeTelegramLogin('nonexistent', 'pass'))
@@ -79,7 +90,7 @@ describe('authService.finalizeTelegramLogin', () => {
 describe('authService.setPassword', () => {
   it('updates the password hash', async () => {
     await authService.setPassword('usr_123', 'newpass');
-    const { authRepository } = await import('@/features/auth/api/auth.repository.js');
+    const { authRepository } = await import('@/features/auth/api/auth.repository.ts');
     expect(authRepository.updatePassword).toHaveBeenCalledWith('usr_123', 'hashed:newpass');
   });
 });
@@ -123,7 +134,7 @@ describe('authService.initiateOidcFlow', () => {
         issuer: 'https://oauth.telegram.org',
         authorization_endpoint: 'https://oauth.telegram.org/auth',
         token_endpoint: 'https://oauth.telegram.org/token',
-        jwks_uri: 'https://oauth.telegram.org/.well-known/jwks.json',
+        jwks_uri: 'https://oauth.telegram.org/.well-known/jwks.tson',
       }),
     }));
   });

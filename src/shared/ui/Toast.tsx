@@ -52,7 +52,7 @@ export function ToastProvider({ children }: ToastProviderProps) {
     switch (type) {
       case 'success':
         return {
-          bg: 'bg-[#191613]/98 text-white',
+          bg: 'bg-stone-900/98 text-white',
           border: 'border-l-4 border-l-emerald-500 border-stone-800',
           glow: 'shadow-[0_0_15px_rgba(16,185,129,0.15)]',
           icon: <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />,
@@ -60,7 +60,7 @@ export function ToastProvider({ children }: ToastProviderProps) {
         };
       case 'error':
         return {
-          bg: 'bg-[#1e1414]/98 text-white',
+          bg: 'bg-stone-900/98 text-white',
           border: 'border-l-4 border-l-rose-500 border-stone-800',
           glow: 'shadow-[0_0_15px_rgba(244,63,94,0.15)]',
           icon: <AlertOctagon className="w-5 h-5 text-rose-400 shrink-0" />,
@@ -68,7 +68,7 @@ export function ToastProvider({ children }: ToastProviderProps) {
         };
       case 'warning':
         return {
-          bg: 'bg-[#1a1712]/98 text-white',
+          bg: 'bg-stone-900/98 text-white',
           border: 'border-l-4 border-l-amber-500 border-stone-800',
           glow: 'shadow-[0_0_15px_rgba(245,158,11,0.15)]',
           icon: <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />,
@@ -76,7 +76,7 @@ export function ToastProvider({ children }: ToastProviderProps) {
         };
       case 'info':
         return {
-          bg: 'bg-[#12161b]/98 text-white',
+          bg: 'bg-stone-950/98 text-white',
           border: 'border-l-4 border-l-blue-400 border-stone-800',
           glow: 'shadow-[0_0_15px_rgba(96,165,250,0.15)]',
           icon: <Info className="w-5 h-5 text-blue-400 shrink-0" />,

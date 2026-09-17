@@ -46,6 +46,8 @@ model User {
   name              String  @default("Telegram Customer")
   role              Role    @default(customer)
   notifyViaTelegram Boolean  @default(true)
+  dietaryPreferences String[] @default([])
+  language          String   @default("en")
 
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt

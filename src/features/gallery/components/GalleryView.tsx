@@ -157,7 +157,7 @@ export default function GalleryView({
 
       {/* Advanced Filter Control Center Dashboard */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="bg-white dark:bg-[#111111] border border-stone-200/60 dark:border-stone-850 p-6 rounded-sm shadow-xs space-y-6">
+        <div className="bg-white dark:bg-stone-950 border border-stone-200/60 dark:border-stone-850 p-6 rounded-sm shadow-xs space-y-6">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             
             {/* Search Input Controls */}
@@ -206,7 +206,7 @@ export default function GalleryView({
                   className={`px-4 py-2.5 text-[10px] tracking-widest uppercase font-semibold whitespace-nowrap transition-all duration-300 rounded-full cursor-pointer ${
                     activeFilter === cat.value
                       ? 'bg-stone-900 dark:bg-stone-850 border-stone-900 dark:border-stone-800 text-white shadow-xs'
-                      : 'bg-white dark:bg-[#111111] border border-stone-200 dark:border-stone-800 text-stone-500 dark:text-stone-400 hover:border-stone-400 hover:text-stone-950 dark:hover:text-stone-200 font-sans'
+                      : 'bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-stone-500 dark:text-stone-400 hover:border-stone-400 hover:text-stone-950 dark:hover:text-stone-200 font-sans'
                   }`}
                 >
                   {cat.label}
@@ -246,7 +246,7 @@ export default function GalleryView({
       {/* Asymmetric Masonry List */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6">
         {filteredCakes.length === 0 ? (
-          <div className="text-center py-20 bg-white dark:bg-[#111111] border border-stone-150 dark:border-stone-850 rounded-sm font-sans">
+          <div className="text-center py-20 bg-white dark:bg-stone-950 border border-stone-150 dark:border-stone-850 rounded-sm font-sans">
             <Cake className="w-12 h-12 text-stone-300 dark:text-stone-600 mx-auto mb-4 stroke-1 animate-pulse" />
             <p className="text-lg font-serif italic text-stone-500 dark:text-stone-300">{t('gallery.noDesigns')}</p>
             <p className="text-xs text-stone-400 dark:text-stone-500 mt-1 font-light">{t('gallery.tryDifferent')}</p>
@@ -272,7 +272,7 @@ export default function GalleryView({
                   variants={cardVariants}
                   key={cake.id}
                   onClick={() => onSelectCake(cake)}
-                  className="break-inside-avoid bg-white dark:bg-[#111111] border border-stone-200/40 dark:border-stone-850 shadow-xs hover:shadow-xl transition-all duration-500 rounded-sm overflow-hidden cursor-pointer group font-sans"
+                  className="break-inside-avoid bg-white dark:bg-stone-950 border border-stone-200/40 dark:border-stone-850 shadow-xs hover:shadow-xl transition-all duration-500 rounded-sm overflow-hidden cursor-pointer group font-sans"
                 >
                   <div className="relative overflow-hidden bg-stone-100 aspect-auto">
                     {/* Unique height matching asymmetric feel */}
@@ -364,7 +364,7 @@ export default function GalleryView({
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 15 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="bg-white dark:bg-[#111111] max-w-4xl w-full rounded-sm overflow-hidden shadow-2xl flex flex-col md:flex-row text-stone-900 border dark:border-stone-850 font-sans relative max-h-[94vh] md:max-h-[85vh] md:h-[620px]"
+              className="bg-white dark:bg-stone-950 max-w-4xl w-full rounded-sm overflow-hidden shadow-2xl flex flex-col md:flex-row text-stone-900 border dark:border-stone-850 font-sans relative max-h-[94vh] md:max-h-[85vh] md:h-[620px]"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Product Close button - Absolutely positioned z-50 to float cleanly over content or image */}
@@ -438,7 +438,7 @@ export default function GalleryView({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 bg-white dark:bg-[#111111] p-4 border border-stone-200/50 dark:border-stone-850 rounded-sm shadow-xs text-left">
+                  <div className="grid grid-cols-2 gap-4 bg-white dark:bg-stone-950 p-4 border border-stone-200/50 dark:border-stone-850 rounded-sm shadow-xs text-left">
                     <div>
                       <h5 className="text-[9px] uppercase tracking-widest text-stone-450 dark:text-stone-500 font-bold font-mono">{t('gallery.servingsCapacity')}</h5>
                       <p className="text-xs font-semibold text-stone-850 dark:text-stone-100 mt-0.5">{selectedCake.servingCount}</p>

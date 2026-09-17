@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 const JWT_EXPIRES = '30d';
 const BCRYPT_ROUNDS = 12;
@@ -117,9 +117,11 @@ export function getTokenFromRequest(req: { cookies?: Record<string, string>; hea
   return null;
 }
 
+import { THIRTY_DAYS_MS } from '../constants/index.js';
+
 export const authCookieOptions = {
   httpOnly: true,
   sameSite: 'lax' as const,
   secure: process.env.NODE_ENV === 'production',
-  maxAge: 30 * 24 * 60 * 60 * 1000,
+  maxAge: THIRTY_DAYS_MS,
 };

@@ -39,7 +39,7 @@ export default function AdminUsers({
 
   if (!isAdmin) {
     return (
-      <div className="max-w-md mx-auto py-20 bg-white dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm text-center relative z-10 font-sans shadow-xl">
+      <div className="max-w-md mx-auto py-20 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm text-center relative z-10 font-sans shadow-xl">
         <ShieldCheck className="w-12 h-12 text-lux-gold/30 mx-auto mb-4" />
         <h3 className="font-serif text-lg text-stone-900 dark:text-white font-medium mb-2">Admin Access Only</h3>
         <p className="text-xs text-stone-400 dark:text-stone-400 max-w-xs mx-auto leading-relaxed">
@@ -51,7 +51,7 @@ export default function AdminUsers({
 
   return (
     <div className="max-w-7xl mx-auto space-y-5 relative z-10 font-sans">
-      <div className="flex justify-between items-center bg-stone-50 dark:bg-[#1d1916] p-5 border border-stone-200 dark:border-stone-800 rounded-sm">
+      <div className="flex justify-between items-center bg-stone-50 dark:bg-stone-900 p-5 border border-stone-200 dark:border-stone-800 rounded-sm">
         <h2 className="font-serif text-xl text-stone-900 dark:text-white flex items-center gap-2">
           <Users className="w-5 h-5 text-lux-gold" /> {t('admin.totalUsers')} ({users.length})
         </h2>
@@ -63,10 +63,10 @@ export default function AdminUsers({
       {usersLoading ? (
         <SkeletonTable rows={5} cols={4} />
       ) : (
-        <div className="bg-[#1e1a17] border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden">
+        <div className="bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-stone-100 dark:bg-[#15110f] text-stone-400 dark:text-stone-400 uppercase font-mono tracking-wider font-semibold border-b border-stone-200 dark:border-stone-800">
+              <thead className="bg-stone-100 dark:bg-stone-950 text-stone-400 dark:text-stone-400 uppercase font-mono tracking-wider font-semibold border-b border-stone-200 dark:border-stone-800">
                 <tr>
                   <th className="px-5 py-4">Name</th>
                   <th className="px-5 py-4">Email</th>
@@ -84,7 +84,7 @@ export default function AdminUsers({
                         <select
                           value={editingRole}
                           onChange={e => setEditingRole(e.target.value)}
-                          className="bg-stone-100 dark:bg-[#15110f] border border-lux-gold text-stone-700 dark:text-stone-200 py-1 px-2 text-xs rounded-xs font-mono"
+                          className="bg-stone-100 dark:bg-stone-950 border border-lux-gold text-stone-700 dark:text-stone-200 py-1 px-2 text-xs rounded-xs font-mono"
                         >
                           <option value="customer">Customer</option>
                           <option value="staff">Bakery Staff</option>

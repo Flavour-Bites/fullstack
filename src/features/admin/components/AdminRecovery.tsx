@@ -32,7 +32,7 @@ export default function AdminRecovery({
 }: AdminRecoveryProps) {
   if (!isAdmin) {
     return (
-      <div className="max-w-md mx-auto py-20 bg-white dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm text-center relative z-10 font-sans shadow-xl">
+      <div className="max-w-md mx-auto py-20 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm text-center relative z-10 font-sans shadow-xl">
         <ShieldCheck className="w-12 h-12 text-lux-gold/30 mx-auto mb-4" />
         <h3 className="font-serif text-lg text-stone-900 dark:text-white font-medium mb-2">Admin Access Only</h3>
         <p className="text-xs text-stone-400 dark:text-stone-400 max-w-xs mx-auto leading-relaxed">
@@ -44,7 +44,7 @@ export default function AdminRecovery({
 
   return (
     <div className="max-w-7xl mx-auto space-y-5 relative z-10 font-sans">
-      <div className="flex justify-between items-center bg-stone-50 dark:bg-[#1d1916] p-5 border border-stone-200 dark:border-stone-800 rounded-sm">
+      <div className="flex justify-between items-center bg-stone-50 dark:bg-stone-900 p-5 border border-stone-200 dark:border-stone-800 rounded-sm">
         <h2 className="font-serif text-xl text-stone-900 dark:text-white flex items-center gap-2">
           <ShieldCheck className="w-5 h-5 text-lux-gold" /> {t('admin.recoveryRequests')} ({recoveryRequests.length})
         </h2>
@@ -71,20 +71,20 @@ export default function AdminRecovery({
       </div>
 
       {recoveryLoading ? (
-        <div className="text-center py-16 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
+        <div className="text-center py-16 bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm">
           <Loader2 className="w-7 h-7 animate-spin text-lux-gold mx-auto mb-2" />
           <p className="text-xs text-stone-400 dark:text-stone-400 font-mono">Loading recovery requests...</p>
         </div>
       ) : recoveryRequests.length === 0 ? (
-        <div className="text-center py-16 bg-stone-50 dark:bg-[#1d1916] border border-stone-200 dark:border-stone-800 rounded-sm">
+        <div className="text-center py-16 bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm">
           <ShieldCheck className="w-10 h-10 text-stone-400 dark:text-stone-500 mx-auto mb-3" />
           <p className="text-sm font-serif text-stone-600 dark:text-stone-300 italic">No recovery requests found.</p>
         </div>
       ) : (
-        <div className="bg-[#1e1a17] border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden">
+        <div className="bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-stone-100 dark:bg-[#15110f] text-stone-400 dark:text-stone-400 uppercase font-mono tracking-wider font-semibold border-b border-stone-200 dark:border-stone-800">
+              <thead className="bg-stone-100 dark:bg-stone-950 text-stone-400 dark:text-stone-400 uppercase font-mono tracking-wider font-semibold border-b border-stone-200 dark:border-stone-800">
                 <tr>
                   <th className="px-5 py-4">Old Telegram ID</th>
                   <th className="px-5 py-4">New Telegram ID</th>

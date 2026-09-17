@@ -42,7 +42,7 @@ export function AdminDashboard({
           { label: 'Pending Review', value: loading ? '…' : pendingCount, sub: 'Orders waiting for action', icon: <Clock className="w-4 h-4 text-amber-400" />, accent: 'from-amber-500/60' },
           { label: 'Currently Active', value: loading ? '…' : activeCount, sub: 'In design or baking', icon: <Activity className="w-4 h-4 text-blue-400" />, accent: 'from-blue-500/60' },
         ].map((card) => (
-          <div key={card.label} className="bg-white/90 dark:bg-[#1e1a17]/90 border border-stone-200 dark:border-stone-200/80 dark:border-stone-800/80 p-5 rounded-sm shadow-xl relative overflow-hidden text-left">
+          <div key={card.label} className="bg-white/90 dark:bg-stone-900/90 border border-stone-200 dark:border-stone-200/80 dark:border-stone-800/80 p-5 rounded-sm shadow-xl relative overflow-hidden text-left">
             <div className="flex justify-between items-start mb-3">
               <span className="text-[10px] uppercase tracking-wider text-stone-400 dark:text-stone-400 font-mono">{card.label}</span>
               {card.icon}
@@ -58,7 +58,7 @@ export function AdminDashboard({
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10 font-sans">
 
         {/* Order Pipeline — live status breakdown */}
-        <div className="bg-white dark:bg-[#1e1a17] border border-stone-200 dark:border-stone-800 p-6 rounded-sm space-y-4 text-left">
+        <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 rounded-sm space-y-4 text-left">
           <h3 className="font-sans text-sm font-semibold text-stone-700 dark:text-stone-200 flex items-center gap-2">
             <BarChart2 className="w-4 h-4 text-lux-gold" /> Order Pipeline
           </h3>
@@ -82,7 +82,7 @@ export function AdminDashboard({
         </div>
 
         {/* Bakery Info Panel */}
-        <div className="bg-white dark:bg-[#1e1a17] border border-stone-200 dark:border-stone-800 p-6 rounded-sm space-y-4 text-left">
+        <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 rounded-sm space-y-4 text-left">
           <h3 className="font-sans text-sm font-semibold text-stone-700 dark:text-stone-200 flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-lux-gold" /> Bakery Status
           </h3>
@@ -111,7 +111,7 @@ export function AdminDashboard({
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10 font-sans">
 
           {/* System Health */}
-          <div className="bg-white dark:bg-[#1e1a17] border border-stone-200 dark:border-stone-800 p-6 rounded-sm space-y-4 text-left">
+          <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 rounded-sm space-y-4 text-left">
             <h3 className="font-sans text-sm font-semibold text-stone-700 dark:text-stone-200 flex items-center gap-2">
               <Database className="w-4 h-4 text-lux-gold" /> System Health
             </h3>
@@ -145,7 +145,7 @@ export function AdminDashboard({
           </div>
 
           {/* User Breakdown */}
-          <div className="bg-white dark:bg-[#1e1a17] border border-stone-200 dark:border-stone-800 p-6 rounded-sm space-y-4 text-left">
+          <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 rounded-sm space-y-4 text-left">
             <h3 className="font-sans text-sm font-semibold text-stone-700 dark:text-stone-200 flex items-center gap-2">
               <Users className="w-4 h-4 text-lux-gold" /> {t('admin.totalUsers')}
               <span className="ml-auto text-[10px] font-mono text-stone-400 dark:text-stone-400">{stats?.totalUsers ?? '…'} total</span>
