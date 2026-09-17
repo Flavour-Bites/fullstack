@@ -4,7 +4,7 @@ import { Shield, Key, LogIn, Loader2, ArrowLeft } from 'lucide-react';
 import { useToast } from '../../../shared/ui/Toast';
 import { User as UserType } from '../../../types';
 import { t } from '../../../i18n/index';
-import { setToken } from '../../../shared/utils/apiClient';
+import { setToken, apiFetch } from '../../../shared/utils/apiClient';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
 
 interface AuthViewProps {
@@ -26,21 +26,22 @@ export const AuthView: React.FC<AuthViewProps> = ({
 
   usePageTitle(title ?? t('auth.signInTitle'));
 
-
   const handleTelegramOidcLogin = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/auth/telegram/login', {
+      const res = await apiFetch('/api/auth/telegram/login', {
         headers: { Accept: 'application/json' },
       });
       const data = await res.json();
       if (data.success && data.authorizationUrl) {
         window.location.href = data.authorizationUrl;
       } else {
-        window.location.href = '/api/auth/telegram/login';
+        const apiBase = (import.meta as any).env?.VITE_API_URL || '';
+        window.location.href = `${apiBase}/api/auth/telegram/login`;
       }
     } catch {
-      window.location.href = '/api/auth/telegram/login';
+      const apiBase = (import.meta as any).env?.VITE_API_URL || '';
+      window.location.href = `${apiBase}/api/auth/telegram/login`;
     }
   };
 
@@ -52,7 +53,7 @@ export const AuthView: React.FC<AuthViewProps> = ({
     }
     setLoading(true);
     try {
-      const res = await fetch('/api/auth/telegram/finalize', {
+      const res = await apiFetch('/api/auth/telegram/finalize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ telegramId, password }),

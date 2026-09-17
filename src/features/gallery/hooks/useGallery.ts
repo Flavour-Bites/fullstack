@@ -10,7 +10,7 @@ export function useGallery() {
   const fetchGallery = useCallback(async () => {
     setGalleryLoading(true);
     try {
-      const res = await fetch('/api/gallery');
+      const res = await apiFetch('/api/gallery');
       const data = await res.json();
       if (data.success) setGalleryItems(data.items || []);
     } catch (e) { /* ignore */ }

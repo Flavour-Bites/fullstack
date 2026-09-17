@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { oidcCallbackSchema } from '@/features/auth/api/auth.schemas.js';
+import { authController } from '@/features/auth/api/auth.controller.js';
+import { authService } from '@/features/auth/api/auth.service.js';
+import { env } from '@/app/config/env.js';
 
 vi.mock('@/features/auth/api/auth.service.js', () => ({
   authService: {
@@ -10,8 +13,6 @@ vi.mock('@/features/auth/api/auth.service.js', () => ({
   },
 }));
 
-import { authController } from '@/features/auth/api/auth.controller.js';
-import { authService } from '@/features/auth/api/auth.service.js';
 
 function mockReq(overrides: any = {}) {
   return {
@@ -118,7 +119,7 @@ describe('authController.handleTelegramCallback', () => {
     await authController.handleTelegramCallback(req, res, vi.fn());
 
     expect(res.cookie).toHaveBeenCalledWith('auth_token', 'jwt_app_token', expect.any(Object));
-    expect(res.redirect).toHaveBeenCalledWith('/');
+    expect(res.redirect).toHaveBeenCalledWith(`${env.FRONTEND_URL.replace(/\/+$/, '')}/`);
   });
 });
 

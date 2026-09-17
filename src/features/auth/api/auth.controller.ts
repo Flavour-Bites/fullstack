@@ -1,13 +1,11 @@
 import { Request, Response } from 'express';
-import { authService } from './auth.service';
-import { asyncHandler } from '../../../app/middleware/asyncHandler';
+import { authService } from './auth.service.js';
+import { asyncHandler } from '../../../app/middleware/asyncHandler.js';
+import { env } from '../../../app/config/env.js';
 
 export const authController = {
   initiateTelegramLogin: asyncHandler(async (req: Request, res: Response) => {
-    const protocol = req.protocol || 'http';
-    const host = req.get('host') || 'localhost:3000';
-    const baseUrl = process.env.APP_URL || `${protocol}://${host}`;
-    const redirectUri = `${baseUrl}/api/auth/telegram/callback`;
+    const redirectUri = `${env.APP_URL}/api/auth/telegram/callback`;
 
     const { authorizationUrl } = await authService.initiateOidcFlow(redirectUri);
 
@@ -21,11 +19,7 @@ export const authController = {
   handleTelegramCallback: asyncHandler(async (req: Request, res: Response) => {
     const code = (req.query.code || req.body?.code) as string;
     const state = (req.query.state || req.body?.state) as string;
-
-    const protocol = req.protocol || 'http';
-    const host = req.get('host') || 'localhost:3000';
-    const baseUrl = process.env.APP_URL || `${protocol}://${host}`;
-    const redirectUri = `${baseUrl}/api/auth/telegram/callback`;
+    const redirectUri = `${env.APP_URL}/api/auth/telegram/callback`;
 
     const result = await authService.handleOidcCallback({
       code,
@@ -38,7 +32,10 @@ export const authController = {
     }
 
     if (req.method === 'GET') {
-      const redirectTarget = result.needsPassword ? '/auth?needsPassword=true' : '/';
+      const frontendBase = env.FRONTEND_URL.replace(/\/+$/, '');
+      const redirectTarget = result.needsPassword
+        ? `${frontendBase}/auth?needsPassword=true`
+        : `${frontendBase}/`;
       res.redirect(redirectTarget);
     } else {
       res.json(result);

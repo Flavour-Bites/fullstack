@@ -11,7 +11,7 @@ export function useUsers() {
   const fetchUsers = useCallback(async () => {
     setUsersLoading(true);
     try {
-      const res = await fetch('/api/users');
+      const res = await apiFetch('/api/users');
       const data = await res.json();
       if (data.success) setUsers(data.users || []);
     } catch (e) { /* ignore */ }

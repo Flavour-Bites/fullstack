@@ -1,4 +1,5 @@
 import { getRedisStore, type KeyValueStore } from './redisClient.js';
+import { env } from '../../app/config/env.js';
 
 export interface OrderConversation {
   step: string;
@@ -24,8 +25,8 @@ export interface QuoteConversation {
   updatedAt: string;
 }
 
-const ORDER_TTL_SECONDS = Number(process.env.REDIS_CONVERSATION_TTL_SECONDS || 60 * 60 * 24);
-const QUOTE_TTL_SECONDS = Number(process.env.REDIS_QUOTE_TTL_SECONDS || 60 * 30);
+const ORDER_TTL_SECONDS = env.REDIS_CONVERSATION_TTL_SECONDS;
+const QUOTE_TTL_SECONDS = env.REDIS_QUOTE_TTL_SECONDS;
 
 const orderKey = (telegramId: string) => `fb:conversation:order:${telegramId}`;
 const quoteKey = (telegramId: string) => `fb:conversation:quote:${telegramId}`;

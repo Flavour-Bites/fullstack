@@ -1,4 +1,5 @@
 import { doubleCsrf } from 'csrf-csrf';
+import { env } from './env.js';
 
 export const {
   invalidCsrfTokenError,
@@ -6,17 +7,14 @@ export const {
   validateRequest,
   doubleCsrfProtection,
 } = doubleCsrf({
-  getSecret: () => process.env.CSRF_SECRET || 'flavour-bites-development-csrf-secret',
+  getSecret: () => env.CSRF_SECRET,
   getSessionIdentifier: () => 'stateless',
   cookieName: 'csrf-token',
   cookieOptions: {
-
-
-
     httpOnly: true,
     sameSite: 'strict',
     path: '/',
-    secure: process.env.NODE_ENV === 'production',
+    secure: env.isProd,
   },
   size: 64,
   ignoredMethods: ['GET', 'HEAD', 'OPTIONS'],

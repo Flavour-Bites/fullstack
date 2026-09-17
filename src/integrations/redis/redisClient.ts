@@ -1,5 +1,6 @@
 import net from 'net';
 import tls from 'tls';
+import { env } from '../../app/config/env.js';
 
 type RedisSocket = net.Socket | tls.TLSSocket;
 
@@ -82,7 +83,7 @@ export class RedisStore implements KeyValueStore {
   private socket: RedisSocket | null = null;
   private connectPromise: Promise<RedisSocket> | null = null;
 
-  constructor(redisUrl = process.env.REDIS_URL) {
+  constructor(redisUrl = env.REDIS_URL) {
     if (!redisUrl) {
       throw new Error('REDIS_URL is not configured.');
     }
@@ -176,7 +177,7 @@ let redisInstance: KeyValueStore | null = null;
 
 export function getRedisStore() {
   if (!redisInstance) {
-    if (process.env.REDIS_URL) {
+    if (env.REDIS_URL) {
       redisInstance = new RedisStore();
     } else {
       console.warn('[Redis] REDIS_URL not set. Using in-memory store. Conversation state will NOT persist across restarts or scale across replicas.');

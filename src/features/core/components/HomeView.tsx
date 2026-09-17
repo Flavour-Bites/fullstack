@@ -6,6 +6,7 @@ import { CakeGalleryItem } from '../../../types';
 import { GALLERY_ITEMS, TESTIMONIALS } from '../../../data';
 import { t } from '../../../i18n/index';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { apiFetch } from '../../../shared/utils/apiClient';
 
 interface HomeViewProps {
   onSelectCake: (cake: CakeGalleryItem) => void;
@@ -38,7 +39,7 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
   useEffect(() => {
     const fetchFeatured = async () => {
       try {
-        const res = await fetch('/api/gallery');
+        const res = await apiFetch('/api/gallery');
         if (res.ok) {
           const data = await res.json();
           if (data.success && data.items && data.items.length > 0) {

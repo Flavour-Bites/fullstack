@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { fetchWithTimeout } from '../../shared/utils/fetchWithTimeout.js';
+import { env } from '../../app/config/env.js';
 
 export const ALLOWED_IMAGE_TYPES = new Set([
   'image/jpeg',
@@ -47,14 +48,14 @@ function parseCloudinaryUrl(url: string): { cloudName: string; apiKey: string; a
 
 function requireCloudinaryEnv() {
   // Prefer individual vars, fall back to CLOUDINARY_URL
-  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-  const apiKey = process.env.CLOUDINARY_API_KEY;
-  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+  const cloudName = env.CLOUDINARY_CLOUD_NAME;
+  const apiKey = env.CLOUDINARY_API_KEY;
+  const apiSecret = env.CLOUDINARY_API_SECRET;
   if (cloudName && apiKey && apiSecret) {
     return { cloudName, apiKey, apiSecret };
   }
 
-  const url = process.env.CLOUDINARY_URL;
+  const url = env.CLOUDINARY_URL;
   if (url) {
     const parsed = parseCloudinaryUrl(url);
     if (parsed) return parsed;
@@ -76,7 +77,7 @@ export async function uploadImageToCloudinary(input: ImageUploadInput) {
   const { cloudName, apiKey, apiSecret } = requireCloudinaryEnv();
   const { base64, byteLength } = validateImageUpload(input);
   const timestamp = Math.floor(Date.now() / 1000);
-  const folder = process.env.CLOUDINARY_UPLOAD_FOLDER || 'flavour-bites';
+  const folder = env.CLOUDINARY_UPLOAD_FOLDER;
   const params = { folder, timestamp };
   const signature = signCloudinaryParams(params, apiSecret);
 
