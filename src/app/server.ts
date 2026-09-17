@@ -1,9 +1,9 @@
 import 'dotenv/config';
-import { validateEnv } from './config/env.js';
+import { validateEnv, env } from './config/env.js';
 import { createApp, registerWebhook } from './app.js';
 import { getPrisma } from './config/prisma.js';
 
-const PORT = Number(process.env.PORT || 3000);
+const PORT = env.PORT;
 const SHUTDOWN_TIMEOUT_MS = 10_000;
 const DB_MAX_RETRIES = 5;
 const DB_RETRY_DELAY_MS = 5_000;

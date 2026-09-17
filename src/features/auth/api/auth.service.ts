@@ -4,6 +4,7 @@ import { authRepository } from './auth.repository';
 import type { LoginResponse, TelegramTokenExchangeResponse } from './auth.types';
 import { AuthenticationError, NotFoundError } from '../../../shared/errors/index';
 import { getRedisStore } from '../../../integrations/redis/redisClient';
+import { env } from '../../../app/config/env';
 import type * as jose from 'jose';
 
 const TELEGRAM_DISCOVERY_URL = 'https://oauth.telegram.org/.well-known/openid-configuration';
@@ -47,7 +48,7 @@ const oidcStateKey = (state: string) => `fb:oidc:state:${state}`;
 export const authService = {
   async initiateOidcFlow(redirectUri: string) {
     const config = await getOidcConfig();
-    const clientId = process.env.TELEGRAM_OPENID_CONNECT_CLIENT_ID?.trim();
+    const clientId = env.TELEGRAM_OPENID_CONNECT_CLIENT_ID?.trim();
     if (!clientId) {
       throw new Error('TELEGRAM_OPENID_CONNECT_CLIENT_ID is not configured.');
     }
@@ -108,8 +109,8 @@ export const authService = {
       throw new AuthenticationError('Missing PKCE code verifier.');
     }
 
-    const clientId = process.env.TELEGRAM_OPENID_CONNECT_CLIENT_ID?.trim();
-    const clientSecret = process.env.TELEGRAM_OPENID_CONNECT_CLIENT_SECRET?.trim();
+    const clientId = env.TELEGRAM_OPENID_CONNECT_CLIENT_ID?.trim();
+    const clientSecret = env.TELEGRAM_OPENID_CONNECT_CLIENT_SECRET?.trim();
     if (!clientId || !clientSecret) {
       throw new Error('Telegram OIDC Client ID or Client Secret is not configured.');
     }

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
 import { CakeGalleryItem, User } from './types';
-import { clearToken, apiFetch } from './shared/utils/apiClient';
+import { setToken, clearToken, apiFetch } from './shared/utils/apiClient';
 import AnimatedPage from './shared/ui/AnimatedPage';
 
 import HomeView from './features/core/components/HomeView';
@@ -60,7 +60,21 @@ export default function App() {
   }, [darkMode]);
 
   useEffect(() => {
-    fetch('/api/auth/me')
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const tokenParam = urlParams.get('token');
+      if (tokenParam) {
+        setToken(tokenParam);
+        urlParams.delete('token');
+        const newSearch = urlParams.toString();
+        const newUrl = window.location.pathname + (newSearch ? `?${newSearch}` : '');
+        window.history.replaceState({}, '', newUrl);
+      }
+    } catch {
+      // Ignore if URLSearchParams is unavailable
+    }
+
+    apiFetch('/api/auth/me')
       .then(res => {
         if (!res.ok) throw new Error('Not authenticated');
         return res.json();

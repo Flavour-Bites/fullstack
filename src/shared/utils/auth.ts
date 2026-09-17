@@ -1,14 +1,13 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import crypto from 'node:crypto';
+import { env } from '../../app/config/env.js';
 
 const JWT_EXPIRES = '30d';
 const BCRYPT_ROUNDS = 12;
 
 function getJwtSecret(): string {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) throw new Error('JWT_SECRET is not configured.');
-  return secret;
+  return env.JWT_SECRET;
 }
 
 export const hashPassword = (plain: string) => bcrypt.hash(plain, BCRYPT_ROUNDS);
@@ -85,7 +84,7 @@ export async function verifyOidcIdToken(
   expectedNonce?: string,
   jwksOverride?: jose.JWTVerifyGetKey
 ): Promise<OidcIdTokenPayload> {
-  const clientId = process.env.TELEGRAM_OPENID_CONNECT_CLIENT_ID?.trim();
+  const clientId = env.TELEGRAM_OPENID_CONNECT_CLIENT_ID?.trim();
   if (!clientId) {
     throw new Error('TELEGRAM_OPENID_CONNECT_CLIENT_ID is not configured.');
   }
@@ -122,6 +121,6 @@ import { THIRTY_DAYS_MS } from '../constants/index.js';
 export const authCookieOptions = {
   httpOnly: true,
   sameSite: 'lax' as const,
-  secure: process.env.NODE_ENV === 'production',
+  secure: env.isProd,
   maxAge: THIRTY_DAYS_MS,
 };

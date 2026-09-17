@@ -11,7 +11,7 @@ export function useReviews() {
   const fetchReviews = useCallback(async () => {
     setReviewsLoading(true);
     try {
-      const res = await fetch('/api/reviews');
+      const res = await apiFetch('/api/reviews');
       const data = await res.json();
       if (data.success) setReviewItems(data.reviews || []);
     } catch (e) { /* ignore */ }

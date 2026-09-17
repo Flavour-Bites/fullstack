@@ -45,24 +45,32 @@ describe('validateEnv', () => {
   });
 
   it('throws when APP_URL is a placeholder', () => {
+    process.env.NODE_ENV = 'production';
     process.env.APP_URL = 'MY_APP_URL';
-    expect(() => validateEnv()).toThrow('APP_URL must be a real URL');
+    expect(() => validateEnv()).toThrow('In production, APP_URL must be a real URL');
     expect(() => validateEnv()).toThrow('MY_APP_URL');
   });
 
-  it('throws when APP_URL is localhost', () => {
+  it('accepts localhost when not in production', () => {
     process.env.APP_URL = 'http://localhost:3000';
-    expect(() => validateEnv()).toThrow('APP_URL must be a real URL');
+    expect(() => validateEnv()).not.toThrow();
+  });
+
+  it('throws when APP_URL is localhost in production', () => {
+    process.env.NODE_ENV = 'production';
+    process.env.APP_URL = 'http://localhost:3000';
+    expect(() => validateEnv()).toThrow('In production, APP_URL must be a real URL');
   });
 
   it('throws when APP_URL is not a URL', () => {
     process.env.APP_URL = 'not-a-url';
-    expect(() => validateEnv()).toThrow('APP_URL must be a real URL');
+    expect(() => validateEnv()).toThrow('APP_URL must start with http:// or https://');
   });
 
   it('throws when APP_URL is "changeme"', () => {
+    process.env.NODE_ENV = 'production';
     process.env.APP_URL = 'changeme';
-    expect(() => validateEnv()).toThrow('APP_URL must be a real URL');
+    expect(() => validateEnv()).toThrow('In production, APP_URL must be a real URL');
   });
 
   it('accepts a valid https APP_URL', () => {
@@ -140,5 +148,64 @@ describe('validateEnv', () => {
     );
     expect(geminiWarnings).toHaveLength(0);
     warnSpy.mockRestore();
+  });
+});
+
+describe('getEnv and env singleton', () => {
+  const originalEnv = { ...process.env };
+
+  beforeEach(() => {
+    process.env = {
+      ...originalEnv,
+      NODE_ENV: 'development',
+      DATABASE_URL: 'postgresql://user:pass@localhost:5432/db',
+      JWT_SECRET: 'test-jwt-secret-key-12345678901234567890',
+      TELEGRAM_BOT_TOKEN: '123456:ABC-DEF',
+      APP_URL: 'http://localhost:3000',
+      TELEGRAM_WEBHOOK_SECRET: 'super-secret-token-123',
+      TELEGRAM_OPENID_CONNECT_CLIENT_ID: 'test_client_id',
+      TELEGRAM_OPENID_CONNECT_CLIENT_SECRET: 'test_client_secret',
+    };
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  it('populates defaults for optional configurations without code fallbacks', async () => {
+    const { getEnv, env } = await import('@/app/config/env.js');
+    const parsed = getEnv();
+
+    expect(parsed.PORT).toBe(3000);
+    expect(parsed.CSRF_SECRET).toBe('test-jwt-secret-key-12345678901234567890');
+    expect(parsed.FRONTEND_URL).toBe('http://localhost:3000');
+    expect(parsed.CLOUDINARY_UPLOAD_FOLDER).toBe('flavour-bites');
+    expect(parsed.REDIS_CONVERSATION_TTL_SECONDS).toBe(86400);
+    expect(parsed.REDIS_QUOTE_TTL_SECONDS).toBe(1800);
+    expect(parsed.isDev).toBe(true);
+    expect(parsed.isProd).toBe(false);
+
+    expect(env.CSRF_SECRET).toBe('test-jwt-secret-key-12345678901234567890');
+    expect(env.PORT).toBe(3000);
+    expect(env.REDIS_CONVERSATION_TTL_SECONDS).toBe(86400);
+  });
+
+  it('uses explicit CSRF_SECRET and FRONTEND_URL when provided', async () => {
+    process.env.CSRF_SECRET = 'custom-csrf-secret';
+    process.env.FRONTEND_URL = 'https://flavour-bites.vercel.app';
+    process.env.PORT = '8080';
+    process.env.CLOUDINARY_UPLOAD_FOLDER = 'custom-folder';
+    process.env.REDIS_CONVERSATION_TTL_SECONDS = '3600';
+    process.env.REDIS_QUOTE_TTL_SECONDS = '600';
+
+    const { getEnv } = await import('@/app/config/env.js');
+    const parsed = getEnv();
+
+    expect(parsed.CSRF_SECRET).toBe('custom-csrf-secret');
+    expect(parsed.FRONTEND_URL).toBe('https://flavour-bites.vercel.app');
+    expect(parsed.PORT).toBe(8080);
+    expect(parsed.CLOUDINARY_UPLOAD_FOLDER).toBe('custom-folder');
+    expect(parsed.REDIS_CONVERSATION_TTL_SECONDS).toBe(3600);
+    expect(parsed.REDIS_QUOTE_TTL_SECONDS).toBe(600);
   });
 });

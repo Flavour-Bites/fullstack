@@ -5,6 +5,7 @@ import { CakeGalleryItem } from '../../../types';
 import { GALLERY_ITEMS } from '../../../data';
 import { t } from '../../../i18n/index';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
+import { apiFetch } from '../../../shared/utils/apiClient';
 
 interface GalleryViewProps {
   selectedCake: CakeGalleryItem | null;
@@ -70,7 +71,7 @@ export default function GalleryView({
   useEffect(() => {
     const fetchGallery = async () => {
       try {
-        const res = await fetch('/api/gallery');
+        const res = await apiFetch('/api/gallery');
         if (res.ok) {
           const data = await res.json();
           if (data.success && data.items && data.items.length > 0) {

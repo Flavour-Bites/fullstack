@@ -1,7 +1,8 @@
 import helmet from 'helmet';
+import { env } from './env.js';
 
 function createSecurityConfig() {
-  const isDev = process.env.NODE_ENV !== 'production';
+  const isDev = !env.isProd;
 
   return helmet({
     contentSecurityPolicy: {

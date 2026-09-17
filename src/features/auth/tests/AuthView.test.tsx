@@ -58,9 +58,12 @@ describe('AuthView', () => {
     await userEvent.click(screen.getByText('Continue with Telegram'));
 
     await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('/api/auth/telegram/login', {
-        headers: { Accept: 'application/json' },
-      });
+      expect(mockFetch).toHaveBeenCalledWith(
+        '/api/auth/telegram/login',
+        expect.objectContaining({
+          headers: expect.objectContaining({ Accept: 'application/json' }),
+        })
+      );
     });
   });
 
