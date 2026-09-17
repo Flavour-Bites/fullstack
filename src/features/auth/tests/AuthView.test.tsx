@@ -4,10 +4,11 @@ import { render, screen, cleanup, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ToastProvider } from '@/shared/ui/Toast';
 import { AuthView } from '@/features/auth/components/AuthView';
+import { http } from '@/shared/utils/http';
 
 beforeEach(() => {
-  vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response('{"success":true}', { headers: { 'Content-Type': 'application/json' } }))));
   localStorage.clear();
+  vi.restoreAllMocks();
 });
 
 afterEach(() => {
@@ -41,13 +42,16 @@ describe('AuthView', () => {
   });
 
   it('redirects to OIDC authorization URL when Telegram button is clicked', async () => {
-    const mockFetch = vi.fn().mockResolvedValueOnce(
-      new Response(JSON.stringify({
+    const getSpy = vi.spyOn(http, 'get').mockResolvedValueOnce({
+      data: {
         success: true,
         authorizationUrl: 'https://oauth.telegram.org/auth?client_id=123',
-      }), { headers: { 'Content-Type': 'application/json' } })
-    );
-    vi.stubGlobal('fetch', mockFetch);
+      },
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config: {} as any,
+    });
 
     renderAuthView();
 
@@ -58,7 +62,7 @@ describe('AuthView', () => {
     await userEvent.click(screen.getByText('Continue with Telegram'));
 
     await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith(
+      expect(getSpy).toHaveBeenCalledWith(
         '/api/auth/telegram/login',
         expect.objectContaining({
           headers: expect.objectContaining({ Accept: 'application/json' }),
@@ -68,10 +72,9 @@ describe('AuthView', () => {
   });
 
   it('shows loading state while redirecting', async () => {
-    const mockFetch = vi.fn().mockImplementation(() =>
+    vi.spyOn(http, 'get').mockImplementation(() =>
       new Promise(() => {})
     );
-    vi.stubGlobal('fetch', mockFetch);
 
     renderAuthView();
 

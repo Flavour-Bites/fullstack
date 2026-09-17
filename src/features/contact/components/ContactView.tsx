@@ -4,7 +4,7 @@ import { Send, Mail, MapPin, Phone, Check, CheckCircle2, Calculator, Map, Shield
 import { t } from '../../../i18n/index';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
 import { BUSINESS_INFO } from '../../../shared/constants';
-import { apiFetch } from '../../../shared/utils/apiClient';
+import { http, ApiResponse } from '../../../shared/utils/http';
 
 export default function ContactView() {
   usePageTitle("Contact");
@@ -63,12 +63,7 @@ export default function ContactView() {
     setValError(null);
     setSending(true);
     try {
-      const res = await apiFetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(contactForm),
-      });
-      const data = await res.json();
+      const { data } = await http.post<ApiResponse>('/api/contact', contactForm);
       if (!data.success) throw new Error(data.error || 'Failed to send message');
       setFormSubmitted(true);
       setTimeout(() => {

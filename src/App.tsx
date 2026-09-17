@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
 import { CakeGalleryItem, User } from './types';
-import { setToken, clearToken, apiFetch } from './shared/utils/apiClient';
+import { setToken, clearToken, http, ApiResponse } from './shared/utils/http';
 import AnimatedPage from './shared/ui/AnimatedPage';
 
 import HomeView from './features/core/components/HomeView';
@@ -74,12 +74,8 @@ export default function App() {
       // Ignore if URLSearchParams is unavailable
     }
 
-    apiFetch('/api/auth/me')
-      .then(res => {
-        if (!res.ok) throw new Error('Not authenticated');
-        return res.json();
-      })
-      .then(data => {
+    http.get<ApiResponse<{ user: User }>>('/api/auth/me')
+      .then(({ data }) => {
         if (data.success && data.user) {
           setCurrentUser(data.user);
           localStorage.setItem('flavourbites_user', JSON.stringify(data.user));
@@ -124,7 +120,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
-    apiFetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+    http.post('/api/auth/logout').catch(() => {});
     localStorage.removeItem('flavourbites_user');
     clearToken();
     setCurrentUser(null);

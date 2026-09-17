@@ -5,7 +5,7 @@ import { CakeGalleryItem } from '../../../types';
 import { GALLERY_ITEMS } from '../../../data';
 import { t } from '../../../i18n/index';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
-import { apiFetch } from '../../../shared/utils/apiClient';
+import { http, ApiResponse } from '../../../shared/utils/http';
 
 interface GalleryViewProps {
   selectedCake: CakeGalleryItem | null;
@@ -71,13 +71,10 @@ export default function GalleryView({
   useEffect(() => {
     const fetchGallery = async () => {
       try {
-        const res = await apiFetch('/api/gallery');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success && data.items && data.items.length > 0) {
-            setItems(data.items);
-            setFilteredCakes(data.items);
-          }
+        const { data } = await http.get<ApiResponse<{ items: CakeGalleryItem[] }>>('/api/gallery');
+        if (data.success && data.items && data.items.length > 0) {
+          setItems(data.items);
+          setFilteredCakes(data.items);
         }
       } catch (err) {
         console.warn('Postgres custom cake gallery items unavailable, serving local backup:', err);

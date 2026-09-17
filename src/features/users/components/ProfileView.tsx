@@ -18,7 +18,7 @@ import { Link } from 'react-router-dom';
 import { t } from '../../../i18n/index';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
 import { User as UserType } from '../../../types';
-import { apiFetch } from '../../../shared/utils/apiClient';
+import { http, ApiResponse } from '../../../shared/utils/http';
 
 interface ProfileViewProps {
   currentUser: UserType;
@@ -59,18 +59,14 @@ export default function ProfileView({ currentUser, onLogout, onUpdateUser }: Pro
     setSaveSuccess(false);
     
     try {
-      const res = await apiFetch('/api/auth/me', {
-        method: 'PUT',
-        body: JSON.stringify({
-          name,
-          telegramPhone: phone,
-          dietaryPreferences: dietary,
-          language,
-          notifyViaTelegram: notify,
-        }),
+      const { data } = await http.put<ApiResponse<{ user: UserType }>>('/api/auth/me', {
+        name,
+        telegramPhone: phone,
+        dietaryPreferences: dietary,
+        language,
+        notifyViaTelegram: notify,
       });
       
-      const data = await res.json();
       if (data.success && data.user) {
         if (onUpdateUser) onUpdateUser(data.user);
         setSaveSuccess(true);

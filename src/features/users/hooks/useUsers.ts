@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '../../../shared/ui/Toast';
-import { apiFetch } from '../../../shared/utils/apiClient';
+import { http, ApiResponse } from '../../../shared/utils/http';
 import type { SystemUser } from '../../admin/components/types';
 
 export function useUsers() {
@@ -11,8 +11,7 @@ export function useUsers() {
   const fetchUsers = useCallback(async () => {
     setUsersLoading(true);
     try {
-      const res = await apiFetch('/api/users');
-      const data = await res.json();
+      const { data } = await http.get<ApiResponse<{ users: SystemUser[] }>>('/api/users');
       if (data.success) setUsers(data.users || []);
     } catch (e) { /* ignore */ }
     finally { setUsersLoading(false); }
@@ -20,11 +19,7 @@ export function useUsers() {
 
   const saveUserRole = useCallback(async (userId: string, userName: string, newRole: string) => {
     try {
-      const res = await apiFetch(`/api/users/${userId}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ role: newRole })
-      });
-      const data = await res.json();
+      const { data } = await http.patch<ApiResponse>(`/api/users/${userId}`, { role: newRole });
       if (data.success) {
         showToast('Role Updated', `${userName} is now a ${newRole}.`, 'success');
         setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
@@ -37,8 +32,7 @@ export function useUsers() {
   const deleteUser = useCallback(async (userId: string, userName: string) => {
     if (!window.confirm(`Delete user "${userName}"? All their data will be removed.`)) return false;
     try {
-      const res = await apiFetch(`/api/users/${userId}`, { method: 'DELETE' });
-      const data = await res.json();
+      const { data } = await http.delete<ApiResponse>(`/api/users/${userId}`);
       if (data.success) {
         showToast('User Deleted', `${userName} has been removed from the system.`, 'warning');
         setUsers(prev => prev.filter(u => u.id !== userId));

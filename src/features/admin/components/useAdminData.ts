@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useState } from 'react';
 import type { Stats } from './types';
 import type { User } from '../../../types';
-import { apiFetch } from '../../../shared/utils/apiClient';
+import { http, ApiResponse } from '../../../shared/utils/http';
 
 export function useAdminData(currentUser: User | null) {
   const isAdmin = currentUser?.role === 'admin';
@@ -11,8 +11,7 @@ export function useAdminData(currentUser: User | null) {
 
   const fetchStats = useCallback(async () => {
     try {
-      const res = await apiFetch('/api/stats');
-      const data = await res.json();
+      const { data } = await http.get<ApiResponse<{ stats: Stats }>>('/api/stats');
       if (data.success) setStats(data.stats);
     } catch { /* ignore */ }
   }, []);

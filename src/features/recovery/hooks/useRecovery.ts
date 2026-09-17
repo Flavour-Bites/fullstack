@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '../../../shared/ui/Toast';
-import { apiFetch } from '../../../shared/utils/apiClient';
+import { http, ApiResponse } from '../../../shared/utils/http';
 
 export function useRecovery() {
   const { showToast } = useToast();
@@ -12,8 +12,7 @@ export function useRecovery() {
     setRecoveryLoading(true);
     try {
       const url = recoveryStatusFilter === 'all' ? '/api/recovery' : `/api/recovery?status=${recoveryStatusFilter}`;
-      const res = await fetch(url);
-      const data = await res.json();
+      const { data } = await http.get<ApiResponse<{ requests: any[] }>>(url);
       if (data.success) setRecoveryRequests(data.requests || []);
     } catch (e) { /* ignore */ }
     finally { setRecoveryLoading(false); }
@@ -21,11 +20,7 @@ export function useRecovery() {
 
   const handleRecoveryStatus = useCallback(async (id: string, status: string) => {
     try {
-      const res = await apiFetch(`/api/recovery/${id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ status }),
-      });
-      const data = await res.json();
+      const { data } = await http.patch<ApiResponse>(`/api/recovery/${id}`, { status });
       if (data.success) {
         showToast('Recovery Updated', `Request ${status}.`, 'success');
         fetchRecoveryRequests();

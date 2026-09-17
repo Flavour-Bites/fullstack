@@ -6,7 +6,7 @@ import { CakeGalleryItem } from '../../../types';
 import { GALLERY_ITEMS, TESTIMONIALS } from '../../../data';
 import { t } from '../../../i18n/index';
 import { usePageTitle } from '../hooks/usePageTitle';
-import { apiFetch } from '../../../shared/utils/apiClient';
+import { http, ApiResponse } from '../../../shared/utils/http';
 
 interface HomeViewProps {
   onSelectCake: (cake: CakeGalleryItem) => void;
@@ -39,12 +39,9 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
   useEffect(() => {
     const fetchFeatured = async () => {
       try {
-        const res = await apiFetch('/api/gallery');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success && data.items && data.items.length > 0) {
-            setFeaturedCakes(data.items.slice(0, 3));
-          }
+        const { data } = await http.get<ApiResponse<{ items: CakeGalleryItem[] }>>('/api/gallery');
+        if (data.success && data.items && data.items.length > 0) {
+          setFeaturedCakes(data.items.slice(0, 3));
         }
       } catch (err) {
         console.warn('Postgres featured query offline, using local backup:', err);
