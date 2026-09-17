@@ -4,7 +4,7 @@ import { Send, Mail, MapPin, Phone, Check, CheckCircle2, Calculator, Map, Shield
 import { t } from '../../../i18n/index';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
 import { BUSINESS_INFO } from '../../../shared/constants';
-import { http, ApiResponse } from '../../../shared/utils/http';
+import { http, type ApiResponse } from '@/shared/api';
 
 export default function ContactView() {
   usePageTitle("Contact");

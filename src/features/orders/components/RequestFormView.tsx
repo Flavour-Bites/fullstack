@@ -4,7 +4,7 @@ import { Send, Loader2 } from 'lucide-react';
 import { CustomCakeRequest, CakeGalleryItem, User } from '../../../types';
 import { useToast } from '../../../shared/ui/Toast';
 import { t } from '../../../i18n/index';
-import { http, ApiResponse } from '../../../shared/utils/http';
+import { http, type ApiResponse } from '@/shared/api';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
 import OrderTrackingView from './OrderTrackingView';
 import RequestSuccessView from './RequestSuccessView';

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
 import { CakeGalleryItem, User } from './types';
-import { setToken, clearToken, http, ApiResponse } from './shared/utils/http';
+import { http, type ApiResponse } from '@/shared/api';
+import { setToken, clearToken } from '@/shared/auth';
 import AnimatedPage from './shared/ui/AnimatedPage';
 
 import HomeView from './features/core/components/HomeView';

@@ -5,7 +5,7 @@ import { CakeGalleryItem } from '../../../types';
 import { GALLERY_ITEMS } from '../../../data';
 import { t } from '../../../i18n/index';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
-import { http, ApiResponse } from '../../../shared/utils/http';
+import { http, type ApiResponse } from '@/shared/api';
 
 interface GalleryViewProps {
   selectedCake: CakeGalleryItem | null;

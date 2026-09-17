@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '../../../shared/ui/Toast';
-import { http, ApiResponse } from '../../../shared/utils/http';
+import { http, type ApiResponse } from '@/shared/api';
 import type { CakeRequest } from '../../admin/components/types';
 import { orderPrice } from '../../admin/components/types';
 

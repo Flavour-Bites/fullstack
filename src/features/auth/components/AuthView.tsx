@@ -4,7 +4,8 @@ import { Shield, Key, LogIn, Loader2, ArrowLeft } from 'lucide-react';
 import { useToast } from '../../../shared/ui/Toast';
 import { User as UserType } from '../../../types';
 import { t } from '../../../i18n/index';
-import { setToken, http, ApiResponse } from '../../../shared/utils/http';
+import { http, type ApiResponse } from '@/shared/api';
+import { setToken } from '@/shared/auth';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
 
 interface AuthViewProps {

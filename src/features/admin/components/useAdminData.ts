@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useState } from 'react';
 import type { Stats } from './types';
 import type { User } from '../../../types';
-import { http, ApiResponse } from '../../../shared/utils/http';
+import { http, type ApiResponse } from '@/shared/api';
 
 export function useAdminData(currentUser: User | null) {
   const isAdmin = currentUser?.role === 'admin';

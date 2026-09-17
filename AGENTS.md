@@ -1,186 +1,212 @@
 # Flavour Bites — Agent Instructions
 
-## Branch Discipline (STRICT)
+## Engineering Standard
 
-**Every piece of work gets its own branch. No exceptions.**
+Build **production-grade software**, not patches.
 
-### Rules
+Priorities:
 
-1. **Before any commit** — ask: "Is this related to the current branch's purpose?"
-   - Yes → commit to current branch
-   - No → create a new branch first
-2. **Never mix concerns** — lint fixes, test fixes, features, and docs all go on separate branches
-3. **Branch naming convention:**
-   - `feat/<short-description>` — new features
-   - `fix/<short-description>` — bug fixes
-   - `refactor/<short-description>` — code restructuring
-   - `test/<short-description>` — test additions/fixes
-   - `chore/<short-description>` — tooling, config, deps
-   - `docs/<short-description>` — documentation only
-4. **One branch = one PR** — each branch gets its own pull request
-5. **After merging** — delete the branch and start fresh for the next piece of work
-6. **Never commit to `main` or `dev` directly** — always go through a branch + PR
+1. Correctness
+2. Security
+3. Architecture
+4. Maintainability
+5. Simplicity
+6. Performance
 
-### Example Workflow
+Use established patterns and mature libraries when they reduce unnecessary custom infrastructure. **Do not optimize for fewer dependencies, files, or lines at the expense of good architecture.**
 
+---
+
+## Think Before You Code
+
+Before any non-trivial change:
+
+* Understand the existing architecture and data flow.
+* Identify which layer **owns the responsibility**.
+* Check for existing abstractions that already solve it.
+* Distinguish intentional architecture from legacy/historical code.
+* Look for duplication, leakage of responsibilities, and accumulated workarounds.
+* Prefer fixing the root design over adding another patch.
+
+**Existing code is evidence, not architectural authority.**
+
+If the current structure is wrong, refactor it.
+
+Do not ask the user to decide obvious architectural questions that can be resolved from established engineering practice and the codebase. Analyze, choose the conventional production-grade solution, and implement it.
+
+---
+
+## Architecture & Separation of Concerns
+
+Place code according to **responsibility**, not convenience or historical location.
+
+```text
+src/features/<domain>/  → domain UI, hooks, feature API, behavior
+src/shared/api/         → HTTP/API transport infrastructure
+src/shared/lib/         → reusable infrastructure/library abstractions
+src/shared/utils/       → small pure/stateless utilities
 ```
-Working on OIDC feature     → feat/telegram-oidc
-Lint breaks after merge     → fix/lint-errors-after-oidc  (new branch!)
-Adding test scripts         → chore/vitest-test-scripts   (new branch!)
+
+Backend:
+
+```text
+routes/controllers → HTTP boundary
+services           → business logic
+repositories/data  → persistence
 ```
 
-### What NOT to Do
+Keep modules cohesive and loosely coupled.
 
-- ❌ Dumping multiple unrelated fixes on one branch
-- ❌ Committing lint/test fixes on a feature branch after PR is merged
-- ❌ Pushing directly to `main` or `dev`
+Do not put network clients, interceptors, authentication infrastructure, stateful services, or transport logic in generic `utils/`.
 
-## Current Branches
+**A file's location must reflect what it does.**
 
-- `fix/critical-security-issues` — Security fixes + CI/CD setup
-- `fix/deployment-config` — (pre-existing) Deployment configuration fixes
+Avoid God files, duplicated abstractions, circular dependencies, and mixed responsibilities.
 
-## Engineering Principles
+---
 
-**All agents must follow these principles for every task.**
+## Use Libraries Intentionally
 
-### General Principles
+Do not reinvent infrastructure unnecessarily.
 
-* Always prefer well-designed, long-term solutions over quick fixes.
-* Never introduce hacks, band-aid fixes, or temporary workarounds just to make something pass.
-* Do not solve problems by scattering random `if` statements, special cases, or duplicated logic throughout the codebase.
-* Every solution should address the root cause, not merely the symptom.
-* If the current design makes a clean solution difficult, refactor the design instead of forcing a poor implementation.
+Use mature libraries for concerns they are designed to solve, while keeping application-specific behavior explicit.
 
-### Code Quality
+Examples:
 
-* Write clean, readable, and self-explanatory code.
-* Follow SOLID principles whenever appropriate.
-* Keep functions small and focused on a single responsibility.
-* Avoid deeply nested logic whenever possible.
-* Eliminate duplication by extracting shared logic into reusable components or utilities.
-* Use meaningful names for variables, functions, classes, and files.
-* Prefer composition over unnecessary inheritance or tightly coupled designs.
+* HTTP → Axios or a well-designed fetch abstraction
+* Validation → Zod
+* Database → Prisma
+* Redis → established Redis client
+* Authentication/crypto → established mechanisms
 
-### Architecture
+Understand the underlying technology, but do not hand-build infrastructure merely to avoid a dependency.
 
-* Maintain a clean, modular architecture.
-* Every module should have a clear and well-defined responsibility.
-* Avoid "God files" and "God classes." No single file should become responsible for multiple unrelated concerns.
-* Keep business logic, UI, data access, configuration, utilities, and infrastructure concerns properly separated.
-* New features should integrate naturally into the existing architecture instead of bypassing it.
-* Preserve loose coupling and high cohesion between modules.
+When adopting a library, migrate to **one coherent abstraction**. Remove obsolete competing implementations.
 
-### Maintainability
+---
 
-* Write code that another engineer can easily understand six months from now.
-* Optimize for maintainability over cleverness.
-* Keep dependencies between modules minimal and intentional.
-* Remove dead code, obsolete utilities, and unused abstractions whenever encountered.
-* Refactor opportunistically when it improves clarity without introducing unnecessary complexity.
+## No Duct Tape
 
-### Scalability
+Do not accumulate:
 
-* Design implementations that can accommodate future requirements without requiring significant rewrites.
-* Avoid hardcoded values, assumptions, and feature-specific logic where a general solution is more appropriate.
-* Build reusable abstractions only when they solve real recurring problems, not hypothetical ones.
+* arbitrary `if` statements
+* unexplained fallbacks
+* hardcoded environment assumptions
+* duplicate configuration
+* compatibility layers without real consumers
+* speculative abstractions
+* security checks without a concrete threat
+* patches compensating for another design mistake
 
-### Error Handling
+When exceptions start accumulating, **stop and reconsider the architecture**.
 
-* Handle failures gracefully.
-* Provide meaningful error messages.
-* Avoid swallowing exceptions silently.
-* Validate inputs at appropriate boundaries.
-* Prefer explicit handling over hidden behavior.
+Prefer one clean abstraction over many defensive exceptions.
 
-### Testing
+---
 
-* Ensure new code is testable.
-* Avoid designs that make unit testing unnecessarily difficult.
-* Update or add tests whenever behavior changes.
-* Preserve existing functionality unless a change is explicitly intended.
+## Security
 
-### Performance
+Security must match the actual architecture.
 
-* Consider performance, but never sacrifice maintainability for premature optimization.
-* Optimize only where there is measurable value or a clear bottleneck.
+Before changing authentication, authorization, CORS, CSRF, cookies, tokens, or sessions:
 
-### Decision Making
+1. Trace the complete request/auth flow.
+2. Identify the actual threat.
+3. Determine exactly which mechanism protects which request.
+4. Preserve the security property while simplifying implementation where possible.
+5. Never weaken production security for development convenience.
 
-Before implementing any solution:
+Do not add security mechanisms by cargo cult.
 
-1. Understand the root problem completely.
-2. Consider multiple approaches.
-3. Evaluate the trade-offs.
-4. Choose the cleanest and most maintainable design.
-5. Explain why that approach was selected if the decision is non-trivial.
+Do not remove them without understanding their purpose.
 
-Never choose an implementation simply because it is the fastest to write.
+---
 
-### Refactoring
+## Configuration
 
-If implementing a feature exposes architectural weaknesses:
+Keep development, test, and production behavior explicit.
 
-* Refactor the surrounding code where appropriate.
-* Improve the overall design rather than layering new logic onto a poor foundation.
-* Leave the codebase in a better state than you found it.
+Production configuration comes from environment/configuration sources.
 
-### Expected Standard
+Do not make production permissive to solve local-development inconvenience.
 
-Write code as if it will be maintained by a senior engineering team for years. Every implementation should be production-ready, modular, readable, extensible, and aligned with clean software engineering principles rather than short-term convenience.
+Avoid multiple configuration variables representing the same concept unless their responsibilities are genuinely different.
 
-## Context Discipline (STRICT)
+---
 
-**Every agent must manage context efficiently. Disk is your infinite context window.**
+## Refactoring
 
-### Session Start: MANDATORY
+If the correct architecture requires moving, renaming, splitting, or consolidating code:
 
-1. Read `AGENTS.md` (this file)
-2. Read `LEARNINGS.md` — project patterns, tooling, recurring issues
-3. Check the todo list for pending work
+**Do it completely.**
 
-This costs 30 seconds. Skipping it wastes 10+ minutes rediscovering patterns.
+Update imports, tests, exports, documentation, configuration, and references. Remove obsolete code.
 
-### During Work: Write-Back Rule
+Do not preserve bad structure merely because it already exists.
 
-After every meaningful decision, write it to persistent files immediately:
+---
 
-| Decision Type | Write To |
-|--------------|----------|
-| Library quirks, lint patterns, tooling gotchas | `LEARNINGS.md` |
-| Architecture decisions, new rules | `AGENTS.md` |
-| Task state, what's left to do | Todo list |
+## Verification
 
-Format: `- [YYYY-MM-DD] Category: What was learned`
+After meaningful changes:
 
-### Context Budget
+* Run relevant tests.
+* Run type checking.
+* Run linting.
+* Verify affected flows.
+* Inspect the final diff.
 
-**Keep in context:**
-- Current task and active files
-- Patterns from LEARNINGS.md relevant to this task
-- Test results (pass/fail count only, not full output)
+For security, authentication, persistence, or data-flow changes, verify both success and important failure paths.
 
-**Discard from context (don't re-read):**
-- File contents after editing is complete
-- Search results already acted on
-- Git status after committing
-- Error messages after fixing
+Do not declare work complete merely because it compiles.
 
-**Re-read from disk when needed:**
-- LEARNINGS.md before each new subtask
-- AGENTS.md when switching branches
-- Source files only if persistent files lack the answer
+---
 
-### Task Transition
+## Branch Discipline
 
-Before switching files or subtasks:
-1. Write new learnings to LEARNINGS.md
-2. Check LEARNINGS.md for patterns before reading source
-3. Update todo list
+Every piece of work gets its own branch.
 
-### Session End
+```text
+feat/<description>
+fix/<description>
+refactor/<description>
+test/<description>
+chore/<description>
+docs/<description>
+```
 
-Before session ends:
-1. Write ALL new learnings to LEARNINGS.md
-2. Update AGENTS.md if rules changed
-3. Note incomplete work in todo list
+Never mix unrelated concerns.
+
+Never commit directly to `main` or `dev`.
+
+One branch = one coherent change.
+
+---
+
+## Context Discipline
+
+At the start of work:
+
+1. Read `AGENTS.md`.
+2. Read relevant sections of `LEARNINGS.md`.
+3. Check the todo list.
+
+Record durable discoveries in `LEARNINGS.md`, architectural decisions in `AGENTS.md`, and task progress in the todo list.
+
+Do not repeatedly reread files or search results that have already been understood. Re-read source when the current evidence is insufficient.
+
+---
+
+## Final Decision Rule
+
+Before adding complexity, ask:
+
+> **What is the simplest production-grade design that correctly owns this responsibility?**
+
+Then implement that design.
+
+Do not invent project rules, philosophies, or constraints.
+
+If a constraint cannot be traced to `AGENTS.md`, an explicit user requirement, documented architecture, or a real technical limitation, **treat it as an assumption—not a requirement.**
+
+**Improve the architecture. Do not merely preserve what you found.**

@@ -1,15 +1,15 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import axios from 'axios';
 import type { InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 import {
   http,
-  setToken,
-  clearToken,
   ApiError,
   responseBody,
-} from '@/shared/utils/http';
+} from '@/shared/api';
+import { setToken, clearToken } from '@/shared/auth/tokenStorage';
 
-describe('http utility & token management', () => {
+describe('http transport layer & interceptors', () => {
   let originalAdapter: any;
 
   beforeEach(() => {
@@ -24,18 +24,8 @@ describe('http utility & token management', () => {
     vi.unstubAllGlobals();
   });
 
-  describe('setToken / clearToken', () => {
-    it('sets and clears authentication tokens in memory and localStorage', () => {
-      expect(() => setToken('test_token_123')).not.toThrow();
-      expect(localStorage.getItem('flavourbites_token')).toBe('test_token_123');
-
-      expect(() => clearToken()).not.toThrow();
-      expect(localStorage.getItem('flavourbites_token')).toBeNull();
-    });
-  });
-
   describe('request interceptor', () => {
-    it('attaches Authorization Bearer header when token is present', async () => {
+    it('attaches Authorization Bearer header when token is present in tokenStorage', async () => {
       setToken('jwt_test_token');
 
       let capturedConfig: InternalAxiosRequestConfig | undefined;
@@ -55,7 +45,7 @@ describe('http utility & token management', () => {
       expect(capturedConfig?.headers.get('Authorization')).toBe('Bearer jwt_test_token');
     });
 
-    it('omits Authorization header when token is not present', async () => {
+    it('omits Authorization header when token is not present in tokenStorage', async () => {
       clearToken();
 
       let capturedConfig: InternalAxiosRequestConfig | undefined;
@@ -74,12 +64,10 @@ describe('http utility & token management', () => {
       expect(capturedConfig?.headers.get('Authorization')).toBeUndefined();
     });
 
-    it('fetches and attaches CSRF token on mutating requests', async () => {
-      const mockFetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({ token: 'mock-csrf-token' }),
+    it('fetches and attaches CSRF token on mutating requests using axios', async () => {
+      const axiosGetSpy = vi.spyOn(axios, 'get').mockResolvedValueOnce({
+        data: { token: 'mock-csrf-token' },
       });
-      vi.stubGlobal('fetch', mockFetch);
 
       let capturedConfig: InternalAxiosRequestConfig | undefined;
       http.defaults.adapter = async (config: InternalAxiosRequestConfig): Promise<AxiosResponse> => {
@@ -94,9 +82,9 @@ describe('http utility & token management', () => {
       };
 
       await http.post('/api/orders', { cake: 'Velvet' });
-      expect(mockFetch).toHaveBeenCalledWith(
+      expect(axiosGetSpy).toHaveBeenCalledWith(
         expect.stringContaining('/api/csrf-token'),
-        expect.objectContaining({ credentials: 'include' })
+        expect.objectContaining({ withCredentials: true })
       );
       expect(capturedConfig?.headers.get('x-csrf-token')).toBe('mock-csrf-token');
     });
