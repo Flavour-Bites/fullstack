@@ -99,14 +99,13 @@ export function validateEnv(): void {
   const nodeEnv = process.env.NODE_ENV || 'development';
   const isDev = nodeEnv !== 'production';
 
-  // If deployed on Render and APP_URL is unset, placeholder, or loopback, auto-resolve with Render URL
+  // If deployed on Render or other platforms with automatic URL injection and APP_URL is unset or loopback
   if (!isDev && (isLocalhostUrl(appUrl) || !appUrl || PLACEHOLDER_URLS.has(appUrl))) {
-    const renderUrl = process.env.RENDER_EXTERNAL_URL ||
-      (process.env.RENDER_EXTERNAL_HOSTNAME ? `https://${process.env.RENDER_EXTERNAL_HOSTNAME}` : null) ||
-      (process.env.RENDER === 'true' ? 'https://flavour-bites-kq9n.onrender.com' : null);
-    if (renderUrl) {
-      appUrl = renderUrl;
-      process.env.APP_URL = renderUrl;
+    const platformUrl = process.env.RENDER_EXTERNAL_URL ||
+      (process.env.RENDER_EXTERNAL_HOSTNAME ? `https://${process.env.RENDER_EXTERNAL_HOSTNAME}` : null);
+    if (platformUrl) {
+      appUrl = platformUrl;
+      process.env.APP_URL = platformUrl;
     }
   }
 
@@ -160,20 +159,17 @@ export function getEnv(): AppEnv {
 
   let appUrl = (process.env.APP_URL || '').replace(/^["']|["']$/g, '').trim();
   if (isProd && (isLocalhostUrl(appUrl) || !appUrl || PLACEHOLDER_URLS.has(appUrl))) {
-    const renderUrl = process.env.RENDER_EXTERNAL_URL ||
-      (process.env.RENDER_EXTERNAL_HOSTNAME ? `https://${process.env.RENDER_EXTERNAL_HOSTNAME}` : null) ||
-      (process.env.RENDER === 'true' ? 'https://flavour-bites-kq9n.onrender.com' : null);
-    if (renderUrl) {
-      appUrl = renderUrl;
-      process.env.APP_URL = renderUrl;
+    const platformUrl = process.env.RENDER_EXTERNAL_URL ||
+      (process.env.RENDER_EXTERNAL_HOSTNAME ? `https://${process.env.RENDER_EXTERNAL_HOSTNAME}` : null);
+    if (platformUrl) {
+      appUrl = platformUrl;
+      process.env.APP_URL = platformUrl;
     }
   }
   appUrl = appUrl || 'http://localhost:3000';
 
   let frontendUrl = (process.env.FRONTEND_URL || '').replace(/^["']|["']$/g, '').trim();
-  if (!frontendUrl && isProd) {
-    frontendUrl = 'https://flavour-bites.vercel.app';
-  } else if (!frontendUrl) {
+  if (!frontendUrl) {
     frontendUrl = appUrl;
   }
   const jwtSecret = process.env.JWT_SECRET || '';

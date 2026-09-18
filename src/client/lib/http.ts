@@ -48,7 +48,16 @@ http.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
 });
 
 http.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const contentType = response.headers?.['content-type'] || '';
+    if (typeof response.data === 'string' && contentType.includes('text/html')) {
+      throw new ApiError(
+        'Backend unreachable: received HTML instead of JSON. Check that VITE_API_URL is configured.',
+        response.status
+      );
+    }
+    return response;
+  },
   (error: AxiosError<{ error?: string; message?: string }>) => {
     const status = error.response?.status;
     if (status === 401) {
