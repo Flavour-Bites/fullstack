@@ -1,1 +1,1 @@
-export * from './tokenStorage.js';
+export * from '../../client/lib/tokenStorage';
