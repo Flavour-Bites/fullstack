@@ -173,12 +173,58 @@ export class RedisStore implements KeyValueStore {
   }
 }
 
+export class ResilientRedisStore implements KeyValueStore {
+  private primary: RedisStore;
+  private fallback = new MemoryStore();
+  private failed = false;
+
+  constructor(redisUrl = env.REDIS_URL) {
+    this.primary = new RedisStore(redisUrl);
+  }
+
+  async get(key: string) {
+    if (!this.failed) {
+      try {
+        return await this.primary.get(key);
+      } catch (err: any) {
+        console.warn(`[Redis] Failed (${err.message}). Falling back to in-memory store.`);
+        this.failed = true;
+      }
+    }
+    return this.fallback.get(key);
+  }
+
+  async set(key: string, value: string, ttlSeconds?: number) {
+    if (!this.failed) {
+      try {
+        return await this.primary.set(key, value, ttlSeconds);
+      } catch (err: any) {
+        console.warn(`[Redis] Failed (${err.message}). Falling back to in-memory store.`);
+        this.failed = true;
+      }
+    }
+    return this.fallback.set(key, value, ttlSeconds);
+  }
+
+  async del(key: string) {
+    if (!this.failed) {
+      try {
+        return await this.primary.del(key);
+      } catch (err: any) {
+        console.warn(`[Redis] Failed (${err.message}). Falling back to in-memory store.`);
+        this.failed = true;
+      }
+    }
+    return this.fallback.del(key);
+  }
+}
+
 let redisInstance: KeyValueStore | null = null;
 
 export function getRedisStore() {
   if (!redisInstance) {
     if (env.REDIS_URL) {
-      redisInstance = new RedisStore();
+      redisInstance = new ResilientRedisStore();
     } else {
       console.warn('[Redis] REDIS_URL not set. Using in-memory store. Conversation state will NOT persist across restarts or scale across replicas.');
       redisInstance = new MemoryStore();

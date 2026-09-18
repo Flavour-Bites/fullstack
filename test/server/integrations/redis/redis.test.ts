@@ -189,3 +189,20 @@ describe('MemoryStore eviction boundary', () => {
   });
 });
 
+describe('ResilientRedisStore fallback', () => {
+  it('falls back to memory store when Redis throws', async () => {
+    process.env.REDIS_URL = 'redis://invalid-host-that-does-not-exist:6379';
+    setRedisStoreForTests(null);
+    const store = getRedisStore();
+
+    // Setting a key with dead Redis should not throw, it should fall back to memory
+    await store.set('resilientKey', 'resilientVal');
+    expect(await store.get('resilientKey')).toBe('resilientVal');
+    await store.del('resilientKey');
+    expect(await store.get('resilientKey')).toBeNull();
+
+    delete process.env.REDIS_URL;
+    setRedisStoreForTests(null);
+  });
+});
+
