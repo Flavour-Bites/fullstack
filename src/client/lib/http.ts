@@ -1,8 +1,9 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig, type AxiosResponse } from 'axios';
 import { clearToken, getToken } from './tokenStorage';
+import { env } from '../platform/config/env';
 import { ApiError, type ApiResponse } from '../../shared/api/types';
 
-const API_BASE = (import.meta as any).env?.VITE_API_URL || '';
+const API_BASE = env.VITE_API_URL;
 
 let csrfToken: string | null = null;
 
@@ -49,8 +50,12 @@ http.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
 
 http.interceptors.response.use(
   (response) => {
-    const contentType = response.headers?.['content-type'] || '';
-    if (typeof response.data === 'string' && contentType.includes('text/html')) {
+    const contentType = response.headers?.['content-type'];
+    if (
+      typeof response.data === 'string' &&
+      typeof contentType === 'string' &&
+      contentType.includes('text/html')
+    ) {
       throw new ApiError(
         'Backend unreachable: received HTML instead of JSON. Check that VITE_API_URL is configured.',
         response.status

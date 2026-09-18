@@ -13,6 +13,7 @@ env:
   NODE_VERSION: "22"
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  VITE_API_URL: ${{ vars.VITE_API_URL }}
 
 jobs:
   release:

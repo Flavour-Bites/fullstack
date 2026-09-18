@@ -5,6 +5,11 @@ COPY package.json package-lock.json ./
 COPY prisma ./prisma
 RUN npm ci
 
+# VITE_API_URL is baked into the client bundle at build time and is required.
+# Pass it as a Docker build arg (e.g. --build-arg VITE_API_URL=https://...) or the build fails.
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 COPY . .
 RUN npx prisma generate
 RUN npm run build
