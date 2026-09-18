@@ -36,12 +36,14 @@ export const AuthView: React.FC<AuthViewProps> = ({
       if (data.success && data.authorizationUrl) {
         window.location.href = data.authorizationUrl;
       } else {
-        const apiBase = (import.meta as any).env?.VITE_API_URL || '';
-        window.location.href = `${apiBase}/api/auth/telegram/login`;
+        const errorMsg = data.error || 'Failed to initialize Telegram login';
+        showToast(t('common.error'), errorMsg, 'error');
+        setLoading(false);
       }
-    } catch {
-      const apiBase = (import.meta as any).env?.VITE_API_URL || '';
-      window.location.href = `${apiBase}/api/auth/telegram/login`;
+    } catch (err: any) {
+      const errorMsg = err.message || 'Failed to connect to authentication server';
+      showToast(t('common.error'), errorMsg, 'error');
+      setLoading(false);
     }
   };
 
