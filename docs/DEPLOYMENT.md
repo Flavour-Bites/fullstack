@@ -37,8 +37,8 @@ TELEGRAM_WEBHOOK_SECRET=webhook_secret
 # Gemini AI
 GEMINI_API_KEY=your_gemini_key
 
-# Frontend
-VITE_TELEGRAM_BOT_USERNAME=flavour_bites_bot
+# Frontend (required — baked into the client bundle at build time)
+VITE_API_URL=https://flavour-bites-kq9n.onrender.com
 ```
 
 ## Installation
