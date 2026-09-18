@@ -208,4 +208,18 @@ describe('getEnv and env singleton', () => {
     expect(parsed.REDIS_CONVERSATION_TTL_SECONDS).toBe(3600);
     expect(parsed.REDIS_QUOTE_TTL_SECONDS).toBe(600);
   });
+
+  it('auto-recovers APP_URL from Render environment when set to localhost in production', async () => {
+    process.env.NODE_ENV = 'production';
+    process.env.APP_URL = 'http://127.0.0.1:3000';
+    process.env.RENDER_EXTERNAL_URL = 'https://flavour-bites-kq9n.onrender.com';
+
+    expect(() => validateEnv()).not.toThrow();
+
+    const { getEnv } = await import('@server/platform/config/env.js');
+    const parsed = getEnv();
+    expect(parsed.APP_URL).toBe('https://flavour-bites-kq9n.onrender.com');
+
+    delete process.env.RENDER_EXTERNAL_URL;
+  });
 });

@@ -95,9 +95,21 @@ export function validateEnv(): void {
   }
 
   // Validate APP_URL is a real URL
-  const appUrl = process.env.APP_URL || '';
+  let appUrl = (process.env.APP_URL || '').replace(/^["']|["']$/g, '').trim();
   const nodeEnv = process.env.NODE_ENV || 'development';
   const isDev = nodeEnv !== 'production';
+
+  // If deployed on Render and APP_URL is unset, placeholder, or loopback, auto-resolve with Render URL
+  if (!isDev && (isLocalhostUrl(appUrl) || !appUrl || PLACEHOLDER_URLS.has(appUrl))) {
+    const renderUrl = process.env.RENDER_EXTERNAL_URL ||
+      (process.env.RENDER_EXTERNAL_HOSTNAME ? `https://${process.env.RENDER_EXTERNAL_HOSTNAME}` : null) ||
+      (process.env.RENDER === 'true' ? 'https://flavour-bites-kq9n.onrender.com' : null);
+    if (renderUrl) {
+      appUrl = renderUrl;
+      process.env.APP_URL = renderUrl;
+    }
+  }
+
   const isLocal = isLocalhostUrl(appUrl);
 
   if (PLACEHOLDER_URLS.has(appUrl) || (!isDev && isLocal)) {
@@ -111,7 +123,7 @@ export function validateEnv(): void {
   }
 
   // Validate FRONTEND_URL if explicitly provided
-  const frontendUrl = process.env.FRONTEND_URL;
+  const frontendUrl = (process.env.FRONTEND_URL || '').replace(/^["']|["']$/g, '').trim();
   if (frontendUrl && !isValidHttpUrl(frontendUrl)) {
     throw new Error(`FRONTEND_URL must start with http:// or https://, got: "${frontendUrl}"`);
   }
@@ -146,8 +158,24 @@ export function getEnv(): AppEnv {
   const isProd = nodeEnv === 'production';
   const isTest = nodeEnv === 'test';
 
-  const appUrl = process.env.APP_URL || 'http://localhost:3000';
-  const frontendUrl = process.env.FRONTEND_URL || appUrl;
+  let appUrl = (process.env.APP_URL || '').replace(/^["']|["']$/g, '').trim();
+  if (isProd && (isLocalhostUrl(appUrl) || !appUrl || PLACEHOLDER_URLS.has(appUrl))) {
+    const renderUrl = process.env.RENDER_EXTERNAL_URL ||
+      (process.env.RENDER_EXTERNAL_HOSTNAME ? `https://${process.env.RENDER_EXTERNAL_HOSTNAME}` : null) ||
+      (process.env.RENDER === 'true' ? 'https://flavour-bites-kq9n.onrender.com' : null);
+    if (renderUrl) {
+      appUrl = renderUrl;
+      process.env.APP_URL = renderUrl;
+    }
+  }
+  appUrl = appUrl || 'http://localhost:3000';
+
+  let frontendUrl = (process.env.FRONTEND_URL || '').replace(/^["']|["']$/g, '').trim();
+  if (!frontendUrl && isProd) {
+    frontendUrl = 'https://flavour-bites.vercel.app';
+  } else if (!frontendUrl) {
+    frontendUrl = appUrl;
+  }
   const jwtSecret = process.env.JWT_SECRET || '';
   const csrfSecret = process.env.CSRF_SECRET || jwtSecret;
 
