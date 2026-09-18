@@ -5,8 +5,8 @@
   "type": "module",
   "packageManager": "npm@10.9.0",
   "scripts": {
-    "dev": "tsx src/app/server.ts",
-    "build": "vite build && esbuild src/app/server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
+    "dev": "tsx src/server/core/server.ts",
+    "build": "vite build && esbuild src/server/core/server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
     "start": "node dist/server.cjs",
     "postinstall": "npx prisma generate; true",
     "db:seed": "tsx prisma/seed/index.ts",
@@ -15,18 +15,8 @@
     "lint": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:auth": "vitest run src/features/auth/tests",
-    "test:orders": "vitest run src/features/orders/tests",
-    "test:reviews": "vitest run src/features/reviews/tests",
-    "test:stats": "vitest run src/features/stats/tests",
-    "test:users": "vitest run src/features/users/tests",
-    "test:contact": "vitest run src/features/contact/tests",
-    "test:components": "vitest run src/test/components",
-    "test:admin": "vitest run src/test/components/admin",
-    "test:telegram": "vitest run src/test/integrations/telegram",
-    "test:redis": "vitest run src/test/integrations/redis",
-    "test:utils": "vitest run src/test/shared/utils",
-    "test:app": "vitest run src/test/app"
+    "test:client": "vitest run test/client",
+    "test:server": "vitest run test/server"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import crypto from 'node:crypto';
-import { env } from '../../app/config/env.js';
+import { env } from '../../server/platform/config/env';
 
 const JWT_EXPIRES = '30d';
 const BCRYPT_ROUNDS = 12;

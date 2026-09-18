@@ -5,16 +5,19 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
+      '@client': path.resolve(__dirname, './src/client'),
+      '@server': path.resolve(__dirname, './src/server'),
+      '@shared': path.resolve(__dirname, './src/shared'),
     },
   },
   test: {
     globals: true,
     environment: 'node',
-    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+    include: ['src/**/*.test.ts', 'src/**/*.test.tsx', 'test/**/*.test.ts', 'test/**/*.test.tsx'],
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts', 'src/**/*.tsx'],
     },
-    setupFiles: ['src/test/setup.ts'],
+    setupFiles: ['test/setup.ts'],
   },
 });

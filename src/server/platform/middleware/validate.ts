@@ -1,0 +1,14 @@
+import { Request, Response, NextFunction } from 'express';
+import { ZodType } from 'zod';
+import { ValidationError } from '../errors/index';
+
+export function validate(schema: ZodType, source: 'body' | 'query' | 'params' = 'body') {
+  return (req: Request, _res: Response, next: NextFunction) => {
+    const result = schema.safeParse(req[source]);
+    if (!result.success) {
+      throw new ValidationError(result.error.issues[0].message);
+    }
+    req[source] = result.data;
+    next();
+  };
+}
