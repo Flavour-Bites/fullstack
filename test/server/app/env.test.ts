@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { validateEnv } from '@server/platform/config/env.js';
+import { validateEnv, isRenderDomain } from '@server/platform/config/env.js';
 
 describe('validateEnv', () => {
   const originalEnv = { ...process.env };
@@ -260,3 +260,24 @@ describe('getEnv and env singleton', () => {
     delete process.env.RENDER_EXTERNAL_URL;
   });
 });
+
+describe('isRenderDomain', () => {
+  it('returns true for onrender.com subdomains', () => {
+    expect(isRenderDomain('https://flavour-bites-8k5k.onrender.com')).toBe(true);
+    expect(isRenderDomain('https://my-app.onrender.com/path?foo=bar')).toBe(true);
+    expect(isRenderDomain('https://onrender.com')).toBe(true);
+  });
+
+  it('returns false for external domains even if substring matches', () => {
+    expect(isRenderDomain('https://evil-onrender.com')).toBe(false);
+    expect(isRenderDomain('https://attacker.com/onrender.com')).toBe(false);
+    expect(isRenderDomain('https://attacker.com/?redirect=.onrender.com')).toBe(false);
+    expect(isRenderDomain('https://onrender.com.attacker.com')).toBe(false);
+  });
+
+  it('returns false for invalid URLs', () => {
+    expect(isRenderDomain('not-a-url')).toBe(false);
+    expect(isRenderDomain('')).toBe(false);
+  });
+});
+
