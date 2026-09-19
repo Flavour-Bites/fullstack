@@ -173,6 +173,15 @@ describe('getEnv and env singleton', () => {
   });
 
   it('populates defaults for optional configurations without code fallbacks', async () => {
+    // Hermetic: clear optional vars so ambient env (e.g. a mock .env in CI)
+    // cannot leak into this defaults assertion.
+    delete process.env.FRONTEND_URL;
+    delete process.env.PORT;
+    delete process.env.CSRF_SECRET;
+    delete process.env.CLOUDINARY_UPLOAD_FOLDER;
+    delete process.env.REDIS_CONVERSATION_TTL_SECONDS;
+    delete process.env.REDIS_QUOTE_TTL_SECONDS;
+
     const { getEnv, env } = await import('@server/platform/config/env.js');
     const parsed = getEnv();
 

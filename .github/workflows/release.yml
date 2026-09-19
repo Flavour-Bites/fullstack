@@ -13,7 +13,6 @@ env:
   NODE_VERSION: "22"
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  VITE_API_URL: ${{ vars.VITE_API_URL }}
 
 jobs:
   release:
@@ -33,6 +32,7 @@ jobs:
         run: |
           npm ci
           npx prisma generate
+          cp .env.example .env
           npm run build
 
       - name: Generate Changelog
@@ -98,6 +98,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: VITE_API_URL=${{ vars.VITE_API_URL }}
+          build-args: VITE_API_URL=http://localhost:3000
           cache-from: type=gha
           cache-to: type=gha,mode=max
