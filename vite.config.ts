@@ -13,13 +13,15 @@ function assertFrontendEnv(mode: string): void {
       .join('\n');
     throw new Error(
       `Invalid frontend environment:\n${issues}\n` +
-        'Set the required VITE_* variables before building the client (see .env.example).'
+        'Fix the VITE_* variables before building the client (see .env.example).'
     );
   }
 }
 
 export default defineConfig(({ mode }) => {
-  // Fail the build (and the dev-server start) when required client env vars are missing.
+  // Fail the build (and the dev-server start) when a configured client env
+  // var is invalid. Missing optional vars (e.g. VITE_API_URL → same-origin)
+  // are fine; only set-but-invalid values are an error.
   assertFrontendEnv(mode);
 
   return {

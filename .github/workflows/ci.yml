@@ -10,7 +10,6 @@ concurrency:
 
 env:
   NODE_VERSION: "22"
-  VITE_API_URL: "https://flavour-bites-kq9n.onrender.com"
 
 jobs:
   lint:

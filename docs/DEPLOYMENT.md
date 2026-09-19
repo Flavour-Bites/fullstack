@@ -37,9 +37,32 @@ TELEGRAM_WEBHOOK_SECRET=webhook_secret
 # Gemini AI
 GEMINI_API_KEY=your_gemini_key
 
-# Frontend (required — baked into the client bundle at build time)
+# Frontend (optional — baked into the client bundle at build time)
+# Unset → client calls the API on the same origin (default; the server serves
+# both /api and the built SPA). Set an absolute URL only when the frontend is
+# hosted cross-origin (e.g. Vercel frontend → Render API).
 VITE_API_URL=https://flavour-bites-kq9n.onrender.com
 ```
+
+## Hosting Topology
+
+This repo is one monolith: a single Express server serves both the built SPA (`dist/`) and the `/api` routes. It can be hosted two ways.
+
+### Same-origin (zero frontend config — the default)
+
+Run the whole thing on one origin. The Docker image on Render builds `dist/`, and `createServer.ts` serves it next to `/api`, so the SPA and API share `https://flavour-bites-kq9n.onrender.com`. Leave `VITE_API_URL` unset — the client makes relative `/api` calls. Nothing to configure.
+
+### Cross-origin (Vercel frontend → Render backend)
+
+When the SPA is built and served by Vercel (Vite only) and the API runs on Render, the browser cannot guess the API origin, so the absolute URL must be baked into the bundle at Vercel's build time.
+
+| Variable | Where to set it | Value |
+| --- | --- | --- |
+| `VITE_API_URL` | **Vercel project env** → Settings → Environment Variables (scope: Production/Preview/Development) | `https://flavour-bites-kq9n.onrender.com` |
+| `FRONTEND_URL` | **Render service env** (backend) | `https://flavour-bites.vercel.app` |
+
+- Vite inlines `import.meta.env.VITE_API_URL` into the JS bundle during `vite build`. Vercel runs that build, so the value you set in Vercel's Environment Variables is what ships.
+- The backend needs `FRONTEND_URL` so its CORS allow-list (`src/server/platform/config/cors.ts`) and Telegram auth redirects (`auth.controller.ts`) target the real frontend origin.
 
 ## Installation
 

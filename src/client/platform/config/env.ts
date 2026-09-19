@@ -10,7 +10,7 @@ function loadClientEnv(): ClientEnv {
       .join('\n');
     throw new Error(
       `Invalid frontend environment:\n${issues}\n` +
-        'Set the required VITE_* variables before building the client (see .env.example).'
+        'VITE_API_URL must be set in the build environment (Vercel project env vars) before building the client.'
     );
   }
   return Object.freeze(result.data) as ClientEnv;
