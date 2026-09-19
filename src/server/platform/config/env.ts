@@ -99,8 +99,8 @@ export function validateEnv(): void {
   const nodeEnv = process.env.NODE_ENV || 'development';
   const isDev = nodeEnv !== 'production';
 
-  // If deployed on Render or other platforms with automatic URL injection and APP_URL is unset or loopback
-  if (!isDev && (isLocalhostUrl(appUrl) || !appUrl || PLACEHOLDER_URLS.has(appUrl))) {
+  // If deployed on Render or other platforms with automatic URL injection and APP_URL is unset, loopback, or an outdated render domain
+  if (!isDev && (isLocalhostUrl(appUrl) || !appUrl || PLACEHOLDER_URLS.has(appUrl) || (appUrl.includes('.onrender.com') && Boolean(process.env.RENDER_EXTERNAL_URL) && appUrl !== process.env.RENDER_EXTERNAL_URL))) {
     const platformUrl = process.env.RENDER_EXTERNAL_URL ||
       (process.env.RENDER_EXTERNAL_HOSTNAME ? `https://${process.env.RENDER_EXTERNAL_HOSTNAME}` : null);
     if (platformUrl) {
@@ -158,7 +158,7 @@ export function getEnv(): AppEnv {
   const isTest = nodeEnv === 'test';
 
   let appUrl = (process.env.APP_URL || '').replace(/^["']|["']$/g, '').trim();
-  if (isProd && (isLocalhostUrl(appUrl) || !appUrl || PLACEHOLDER_URLS.has(appUrl))) {
+  if (isProd && (isLocalhostUrl(appUrl) || !appUrl || PLACEHOLDER_URLS.has(appUrl) || (appUrl.includes('.onrender.com') && Boolean(process.env.RENDER_EXTERNAL_URL) && appUrl !== process.env.RENDER_EXTERNAL_URL))) {
     const platformUrl = process.env.RENDER_EXTERNAL_URL ||
       (process.env.RENDER_EXTERNAL_HOSTNAME ? `https://${process.env.RENDER_EXTERNAL_HOSTNAME}` : null);
     if (platformUrl) {

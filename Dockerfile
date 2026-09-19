@@ -5,14 +5,11 @@ COPY package.json package-lock.json ./
 COPY prisma ./prisma
 RUN npm ci
 
-# VITE_API_URL is baked into the client bundle at build time and is REQUIRED.
-# Pass it as a Docker build arg (e.g. --build-arg VITE_API_URL=https://api.example.com).
-ARG VITE_API_URL
-ENV VITE_API_URL=$VITE_API_URL
-
 COPY . .
 RUN npx prisma generate
-RUN npm run build
+# Backend-only image: builds just the Express server bundle. The frontend is a
+# separate service hosted on Vercel and is NOT built or served here.
+RUN npm run build:server
 
 FROM node:22-alpine AS runner
 WORKDIR /app

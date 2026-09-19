@@ -20,12 +20,18 @@ function assertFrontendEnv(mode: string): void {
 
 export default defineConfig(({ mode }) => {
   // Fail the build (and the dev-server start) when a configured client env
-  // var is invalid. Missing optional vars (e.g. VITE_API_URL → same-origin)
-  // are fine; only set-but-invalid values are an error.
+  // var is invalid. VITE_API_URL is REQUIRED and baked into the bundle; there
+  // is no same-origin fallback (frontend is a separate service hosted by Vercel).
   assertFrontendEnv(mode);
 
   return {
     plugins: [react(), tailwindcss()],
+    build: {
+      // Client build output is isolated so the server bundle (dist/server.cjs)
+      // stays independent: Vercel deploys dist/client, Render deploys the server.
+      outDir: 'dist/client',
+      emptyOutDir: true,
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),

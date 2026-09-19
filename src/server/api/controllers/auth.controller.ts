@@ -1,11 +1,23 @@
 import { Request, Response } from 'express';
 import { authService } from '../../modules/auth/auth.service';
 import { asyncHandler } from '../../platform/middleware/asyncHandler';
-import { env } from '../../platform/config/env';
+import { env, isLocalhostUrl } from '../../platform/config/env';
+
+export function getTelegramRedirectUri(req: Request): string {
+  const forwardedHost = req.get('x-forwarded-host');
+  const host = forwardedHost || req.get('host');
+  const proto = req.get('x-forwarded-proto') || (req.secure ? 'https' : (req.protocol || 'https'));
+
+  if (host && !isLocalhostUrl(`http://${host}`)) {
+    return `${proto}://${host}/api/auth/telegram/callback`;
+  }
+
+  return `${env.APP_URL}/api/auth/telegram/callback`;
+}
 
 export const authController = {
   initiateTelegramLogin: asyncHandler(async (req: Request, res: Response) => {
-    const redirectUri = `${env.APP_URL}/api/auth/telegram/callback`;
+    const redirectUri = getTelegramRedirectUri(req);
 
     const { authorizationUrl } = await authService.initiateOidcFlow(redirectUri);
 
@@ -19,7 +31,7 @@ export const authController = {
   handleTelegramCallback: asyncHandler(async (req: Request, res: Response) => {
     const code = (req.query.code || req.body?.code) as string;
     const state = (req.query.state || req.body?.state) as string;
-    const redirectUri = `${env.APP_URL}/api/auth/telegram/callback`;
+    const redirectUri = getTelegramRedirectUri(req);
 
     const result = await authService.handleOidcCallback({
       code,
