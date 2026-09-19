@@ -6,7 +6,9 @@
   "packageManager": "npm@10.9.0",
   "scripts": {
     "dev": "tsx src/server/core/server.ts",
-    "build": "vite build && esbuild src/server/core/server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "vite build",
+    "build:server": "esbuild src/server/core/server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
     "start": "node dist/server.cjs",
     "postinstall": "npx prisma generate; true",
     "db:seed": "tsx prisma/seed/index.ts",

@@ -45,17 +45,16 @@ VITE_API_URL=https://flavour-bites-8k5k.onrender.com
 
 ## Hosting Topology
 
-Although the frontend and backend code live in this one repo, they are deployed and served as **two separate services**:
+Although the frontend and backend code live in this one repo, they are deployed and served as **two separate services** with no build-time coupling:
 
-- **Vercel** → hosts the frontend only (Vite build). It never calls the Express code in this repo.
-- **Render** → hosts the backend API only (Docker). It serves `/api` and nothing else.
+- **Vercel** → hosts the frontend only. It runs `npm run build:client` (`vite build`) and deploys `dist/client/`. It never runs the Express code or the server build.
+- **Render** → hosts the backend API only. The Docker image runs `npm run build:server` and never touches the client build, so **no `VITE_API_URL` is needed on Render**.
 
-The frontend bundle must contain the backend's absolute URL, so `VITE_API_URL` is baked into the JS bundle at **Vercel's build time**:
+The frontend bundle must contain the backend's absolute URL, so `VITE_API_URL` is baked into the JS bundle at **Vercel's build time only**:
 
 | Variable | Where to set it | Value |
 | --- | --- | --- |
 | `VITE_API_URL` | **Vercel project env** → Settings → Environment Variables (scope: Production/Preview/Development) | `https://flavour-bites-8k5k.onrender.com` |
-| `VITE_API_URL` | **Render service env** (backend) — needed because the Docker build compiles the frontend too | `https://flavour-bites-8k5k.onrender.com` |
 | `FRONTEND_URL` | **Render service env** (backend) — CORS allow-list + Telegram auth redirect target | `https://flavour-bites.vercel.app` |
 
 - Vite inlines `import.meta.env.VITE_API_URL` into the JS bundle during `vite build`. Vercel runs that build, so the value you set in Vercel's Environment Variables is what ships to browsers.
@@ -81,13 +80,14 @@ Starts both the Express API (default port 3000) and Vite dev server with HMR.
 
 ## Production Build
 
+The client and server build independently, into separate output trees:
+
 ```bash
-npm run build
+npm run build:client   # dist/client/   → deployed by Vercel
+npm run build:server   # dist/server.cjs → run by Render (Docker)
 ```
 
-This produces:
-- `dist/` - Vite-built frontend assets
-- `dist/server.cjs` - Bundled Express server
+`npm run build` runs both for local convenience.
 
 ```bash
 npm start

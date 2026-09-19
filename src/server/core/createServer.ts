@@ -1,5 +1,4 @@
 import express from 'express';
-import path from 'path';
 import { webhookCallback } from 'grammy';
 import { bot } from '../bot/index';
 import cookieParser from 'cookie-parser';
@@ -106,9 +105,12 @@ export async function createApp() {
     const vite = await createViteServer({ server: { middlewareMode: true }, appType: 'spa' });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (_req, res) => res.sendFile(path.join(distPath, 'index.html')));
+    // Backend-only in production. The frontend is a separate service (Vercel),
+    // so this server never serves static assets. Unmatched non-API routes get
+    // a clean JSON 404 instead of an HTML page.
+    app.use((_req, res) => {
+      res.status(404).json({ success: false, error: 'Not found.' });
+    });
   }
 
   return app;
