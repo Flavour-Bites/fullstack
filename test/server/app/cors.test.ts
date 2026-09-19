@@ -44,6 +44,10 @@ describe('CORS configuration', () => {
       expect(isOriginAllowed('https://flavour-bites.vercel.app')).toBe(true);
     });
 
+    it('allows the server own origin (same-origin asset requests in CORS mode)', () => {
+      expect(isOriginAllowed('https://api.flavourbites.com')).toBe(true);
+    });
+
     it('allows loopback origins in development/test', () => {
       process.env.NODE_ENV = 'development';
       expect(isOriginAllowed('http://localhost:5173')).toBe(true);
@@ -58,7 +62,7 @@ describe('CORS configuration', () => {
       expect(isOriginAllowed('http://127.0.0.1:5173')).toBe(false);
     });
 
-    it('blocks unauthorized external origins in both dev and production', () => {
+    it('denies unauthorized external origins in both dev and production', () => {
       process.env.NODE_ENV = 'production';
       expect(isOriginAllowed('https://malicious-site.com')).toBe(false);
       expect(isOriginAllowed('https://evil-flavourbites.com')).toBe(false);
@@ -98,7 +102,7 @@ describe('CORS configuration', () => {
       expect(allowedResult).toBe(true);
     });
 
-    it('executes origin callback with error when origin is blocked', () => {
+    it('denies a blocked origin by omitting CORS headers (no error, no 500)', () => {
       process.env.NODE_ENV = 'production';
       const options = createCorsOptions();
       const originFn = options.origin as (
@@ -106,14 +110,16 @@ describe('CORS configuration', () => {
         cb: (err: Error | null, allow?: boolean) => void,
       ) => void;
 
+      let allowResult: boolean | undefined;
       let errorResult: Error | null = null;
 
-      originFn('https://unauthorized-domain.com', (err) => {
+      originFn('https://unauthorized-domain.com', (err, allow) => {
         errorResult = err;
+        allowResult = allow;
       });
 
-      expect(errorResult).not.toBeNull();
-      expect(errorResult?.message).toContain('CORS policy blocked access');
+      expect(errorResult).toBeNull();
+      expect(allowResult).toBe(false);
     });
   });
 });

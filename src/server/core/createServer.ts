@@ -61,6 +61,9 @@ export async function registerWebhook() {
 export async function createApp() {
   const app = express();
 
+  // Trust reverse proxy (e.g. Render, Cloudflare) for accurate headers (proto, host, ip)
+  app.set('trust proxy', 1);
+
   app.use(securityConfig);
   app.use(corsConfig);
   app.use(cookieParser());

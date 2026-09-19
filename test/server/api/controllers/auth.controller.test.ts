@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { oidcCallbackSchema } from '@server/api/schemas/auth.schemas.js';
-import { authController } from '@server/api/controllers/auth.controller.js';
+import { authController, getTelegramRedirectUri } from '@server/api/controllers/auth.controller.js';
 import { authService } from '@server/modules/auth/auth.service.js';
 import { env } from '@server/platform/config/env.js';
 
@@ -61,9 +61,59 @@ describe('oidcCallbackSchema validation', () => {
   });
 });
 
+describe('getTelegramRedirectUri', () => {
+  it('uses forwarded host and proto from reverse proxy when present', () => {
+    const req = mockReq({
+      headers: {
+        'x-forwarded-host': 'flavour-bites-8k5k.onrender.com',
+        'x-forwarded-proto': 'https',
+      },
+      get: (header: string) => {
+        if (header === 'x-forwarded-host') return 'flavour-bites-8k5k.onrender.com';
+        if (header === 'x-forwarded-proto') return 'https';
+        return undefined;
+      },
+    });
+
+    const uri = getTelegramRedirectUri(req);
+    expect(uri).toBe('https://flavour-bites-8k5k.onrender.com/api/auth/telegram/callback');
+  });
+
+  it('falls back to env.APP_URL when on localhost', () => {
+    const req = mockReq({
+      get: (header: string) => (header === 'host' ? 'localhost:3000' : undefined),
+    });
+
+    const uri = getTelegramRedirectUri(req);
+    expect(uri).toBe(`${env.APP_URL}/api/auth/telegram/callback`);
+  });
+});
+
 describe('authController.initiateTelegramLogin', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it('passes dynamic redirectUri from request host to initiateOidcFlow', async () => {
+    vi.mocked(authService.initiateOidcFlow).mockResolvedValueOnce({
+      authorizationUrl: 'https://oauth.telegram.org/auth?client_id=123',
+      state: 'state_jwt',
+    });
+
+    const req = mockReq({
+      get: (header: string) => {
+        if (header === 'x-forwarded-host') return 'flavour-bites-8k5k.onrender.com';
+        if (header === 'x-forwarded-proto') return 'https';
+        return undefined;
+      },
+    });
+    const res = mockRes();
+
+    await authController.initiateTelegramLogin(req, res, vi.fn());
+
+    expect(authService.initiateOidcFlow).toHaveBeenCalledWith(
+      'https://flavour-bites-8k5k.onrender.com/api/auth/telegram/callback'
+    );
   });
 
   it('redirects to Telegram authorizationUrl', async () => {
