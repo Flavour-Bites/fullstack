@@ -37,9 +37,30 @@ TELEGRAM_WEBHOOK_SECRET=webhook_secret
 # Gemini AI
 GEMINI_API_KEY=your_gemini_key
 
-# Frontend (required — baked into the client bundle at build time)
-VITE_API_URL=https://flavour-bites-kq9n.onrender.com
+# Frontend — REQUIRED, baked into the JS bundle at build time.
+# Absolute URL of the separately-deployed backend (Render). The client only
+# talks to this origin; there is no same-origin fallback.
+VITE_API_URL=https://flavour-bites-8k5k.onrender.com
 ```
+
+## Hosting Topology
+
+Although the frontend and backend code live in this one repo, they are deployed and served as **two separate services**:
+
+- **Vercel** → hosts the frontend only (Vite build). It never calls the Express code in this repo.
+- **Render** → hosts the backend API only (Docker). It serves `/api` and nothing else.
+
+The frontend bundle must contain the backend's absolute URL, so `VITE_API_URL` is baked into the JS bundle at **Vercel's build time**:
+
+| Variable | Where to set it | Value |
+| --- | --- | --- |
+| `VITE_API_URL` | **Vercel project env** → Settings → Environment Variables (scope: Production/Preview/Development) | `https://flavour-bites-8k5k.onrender.com` |
+| `VITE_API_URL` | **Render service env** (backend) — needed because the Docker build compiles the frontend too | `https://flavour-bites-8k5k.onrender.com` |
+| `FRONTEND_URL` | **Render service env** (backend) — CORS allow-list + Telegram auth redirect target | `https://flavour-bites.vercel.app` |
+
+- Vite inlines `import.meta.env.VITE_API_URL` into the JS bundle during `vite build`. Vercel runs that build, so the value you set in Vercel's Environment Variables is what ships to browsers.
+- If the Render backend is unreachable, the client surfaces a real API error (network/HTML responses are normalized to `ApiError`); it never silently falls back to same-origin or to the in-repo Express.
+- The backend needs `FRONTEND_URL` so its CORS allow-list (`src/server/platform/config/cors.ts`) and Telegram auth redirects (`auth.controller.ts`) target the real frontend origin.
 
 ## Installation
 

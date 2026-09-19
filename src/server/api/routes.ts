@@ -10,9 +10,11 @@ import reviewsRoutes from './routes/reviews.routes';
 import statsRoutes from './routes/stats.routes';
 import chatbotRoutes from './routes/chatbot.routes';
 import contactRoutes from './routes/contact.routes';
+import healthRoutes from './routes/health.routes';
 
 const router = Router();
 
+router.use('/health', healthRoutes);
 router.use('/auth', authRoutes);
 router.use('/requests', ordersRoutes);
 router.use('/users', usersRoutes);

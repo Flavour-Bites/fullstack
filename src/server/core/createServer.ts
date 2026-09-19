@@ -16,6 +16,7 @@ import { errorHandler } from '../platform/middleware/errorHandler';
 import { verifyTelegramWebhookSecret } from '../platform/integrations/telegram/telegramWebhook';
 import { fetchWithTimeout } from '../../shared/utils/fetchWithTimeout';
 import apiRoutes from '../api/routes';
+import { healthController } from '../api/controllers/health.controller';
 
 export async function registerWebhook() {
   const { TELEGRAM_BOT_TOKEN, APP_URL, TELEGRAM_WEBHOOK_SECRET } = env;
@@ -72,8 +73,9 @@ export async function createApp() {
     app.use(morgan('combined'));
   }
 
-  // Health check for platform monitoring
-  app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+  // Health check for platform monitoring and backend status
+  app.get('/health', healthController.getHealth);
+  app.get('/api/health', healthController.getHealth);
 
   app.post(
     '/bot/webhook',

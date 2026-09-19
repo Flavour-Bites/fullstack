@@ -31,7 +31,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://telegram.org https://oauth.telegram.org; img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com; connect-src 'self' https://*.onrender.com https://flavour-bites-kq9n.onrender.com https://oauth.telegram.org https://api.cloudinary.com; frame-src 'self' https://telegram.org https://oauth.telegram.org"
+          "value": "default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://telegram.org https://oauth.telegram.org; img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com; connect-src 'self' https://*.onrender.com https://flavour-bites-8k5k.onrender.com https://oauth.telegram.org https://api.cloudinary.com; frame-src 'self' https://telegram.org https://oauth.telegram.org"
         }
       ]
     }
