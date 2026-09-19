@@ -85,6 +85,14 @@ export function isValidHttpUrl(urlStr: string): boolean {
   }
 }
 
+export function isHttpsUrl(urlStr: string): boolean {
+  try {
+    return new URL(urlStr).protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 export function isRenderDomain(urlStr: string): boolean {
   try {
     const parsed = new URL(urlStr);
@@ -93,6 +101,15 @@ export function isRenderDomain(urlStr: string): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * Opt-in that lets the production server run against local (loopback)
+ * services — used by the docker-compose production mimic. Off by default so
+ * real deployments still fail loudly when APP_URL points at localhost.
+ */
+function isLoopbackAppUrlAllowed(): boolean {
+  return process.env.ALLOW_LOOPBACK_APP_URL === 'true';
 }
 
 export function validateEnv(): void {
@@ -110,7 +127,7 @@ export function validateEnv(): void {
   const isDev = nodeEnv !== 'production';
 
   // If deployed on Render or other platforms with automatic URL injection and APP_URL is unset, loopback, or an outdated render domain
-  if (!isDev && (isLocalhostUrl(appUrl) || !appUrl || PLACEHOLDER_URLS.has(appUrl) || (isRenderDomain(appUrl) && Boolean(process.env.RENDER_EXTERNAL_URL) && appUrl !== process.env.RENDER_EXTERNAL_URL))) {
+  if (!isDev && !isLoopbackAppUrlAllowed() && (isLocalhostUrl(appUrl) || !appUrl || PLACEHOLDER_URLS.has(appUrl) || (isRenderDomain(appUrl) && Boolean(process.env.RENDER_EXTERNAL_URL) && appUrl !== process.env.RENDER_EXTERNAL_URL))) {
     const platformUrl = process.env.RENDER_EXTERNAL_URL ||
       (process.env.RENDER_EXTERNAL_HOSTNAME ? `https://${process.env.RENDER_EXTERNAL_HOSTNAME}` : null);
     if (platformUrl) {
@@ -121,7 +138,7 @@ export function validateEnv(): void {
 
   const isLocal = isLocalhostUrl(appUrl);
 
-  if (PLACEHOLDER_URLS.has(appUrl) || (!isDev && isLocal)) {
+  if (PLACEHOLDER_URLS.has(appUrl) || (!isDev && isLocal && !isLoopbackAppUrlAllowed())) {
     throw new Error(
       `In production, APP_URL must be a real URL (e.g. https://flavourbites.com), got: "${appUrl}"`
     );
@@ -168,7 +185,7 @@ export function getEnv(): AppEnv {
   const isTest = nodeEnv === 'test';
 
   let appUrl = (process.env.APP_URL || '').replace(/^["']|["']$/g, '').trim();
-  if (isProd && (isLocalhostUrl(appUrl) || !appUrl || PLACEHOLDER_URLS.has(appUrl) || (isRenderDomain(appUrl) && Boolean(process.env.RENDER_EXTERNAL_URL) && appUrl !== process.env.RENDER_EXTERNAL_URL))) {
+  if (isProd && !isLoopbackAppUrlAllowed() && (isLocalhostUrl(appUrl) || !appUrl || PLACEHOLDER_URLS.has(appUrl) || (isRenderDomain(appUrl) && Boolean(process.env.RENDER_EXTERNAL_URL) && appUrl !== process.env.RENDER_EXTERNAL_URL))) {
     const platformUrl = process.env.RENDER_EXTERNAL_URL ||
       (process.env.RENDER_EXTERNAL_HOSTNAME ? `https://${process.env.RENDER_EXTERNAL_HOSTNAME}` : null);
     if (platformUrl) {

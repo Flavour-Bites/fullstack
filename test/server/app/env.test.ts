@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { validateEnv, isRenderDomain } from '@server/platform/config/env.js';
+import { validateEnv, isRenderDomain, isHttpsUrl } from '@server/platform/config/env.js';
 
 describe('validateEnv', () => {
   const originalEnv = { ...process.env };
@@ -60,6 +60,22 @@ describe('validateEnv', () => {
     process.env.NODE_ENV = 'production';
     process.env.APP_URL = 'http://localhost:3000';
     expect(() => validateEnv()).toThrow('In production, APP_URL must be a real URL');
+  });
+
+  it('allows loopback APP_URL in production when ALLOW_LOOPBACK_APP_URL is set', () => {
+    process.env.NODE_ENV = 'production';
+    process.env.APP_URL = 'http://localhost:3000';
+    process.env.ALLOW_LOOPBACK_APP_URL = 'true';
+    expect(() => validateEnv()).not.toThrow();
+    delete process.env.ALLOW_LOOPBACK_APP_URL;
+  });
+
+  it('still rejects a placeholder APP_URL when loopback is allowed', () => {
+    process.env.NODE_ENV = 'production';
+    process.env.APP_URL = 'MY_APP_URL';
+    process.env.ALLOW_LOOPBACK_APP_URL = 'true';
+    expect(() => validateEnv()).toThrow('In production, APP_URL must be a real URL');
+    delete process.env.ALLOW_LOOPBACK_APP_URL;
   });
 
   it('throws when APP_URL is not a URL', () => {
@@ -239,6 +255,19 @@ describe('getEnv and env singleton', () => {
     delete process.env.RENDER_EXTERNAL_URL;
   });
 
+  it('keeps loopback APP_URL in production when loopback is explicitly allowed', async () => {
+    process.env.NODE_ENV = 'production';
+    process.env.APP_URL = 'http://localhost:3000';
+    process.env.ALLOW_LOOPBACK_APP_URL = 'true';
+    process.env.RENDER_EXTERNAL_URL = 'https://flavour-bites-8k5k.onrender.com';
+
+    const { getEnv } = await import('@server/platform/config/env.js');
+    expect(getEnv().APP_URL).toBe('http://localhost:3000');
+
+    delete process.env.ALLOW_LOOPBACK_APP_URL;
+    delete process.env.RENDER_EXTERNAL_URL;
+  });
+
   it('auto-recovers APP_URL from Render environment when set to an outdated render URL in production', async () => {
     process.env.NODE_ENV = 'production';
     process.env.APP_URL = 'https://flavour-bites-kq9n.onrender.com';
@@ -258,6 +287,16 @@ describe('getEnv and env singleton', () => {
     expect(parsed.APP_URL).toBe('https://flavour-bites-8k5k.onrender.com');
 
     delete process.env.RENDER_EXTERNAL_URL;
+  });
+});
+
+describe('isHttpsUrl', () => {
+  it('returns true only for https URLs', () => {
+    expect(isHttpsUrl('https://flavourbites.com')).toBe(true);
+    expect(isHttpsUrl('https://flavour-bites-8k5k.onrender.com')).toBe(true);
+    expect(isHttpsUrl('http://localhost:3000')).toBe(false);
+    expect(isHttpsUrl('not-a-url')).toBe(false);
+    expect(isHttpsUrl('')).toBe(false);
   });
 });
 

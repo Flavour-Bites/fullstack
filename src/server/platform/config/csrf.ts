@@ -1,5 +1,5 @@
 import { doubleCsrf } from 'csrf-csrf';
-import { env } from './env';
+import { env, isHttpsUrl } from './env';
 
 export const {
   invalidCsrfTokenError,
@@ -12,9 +12,10 @@ export const {
   cookieName: 'csrf-token',
   cookieOptions: {
     httpOnly: true,
-    sameSite: 'strict',
+    sameSite: env.isProd && isHttpsUrl(env.APP_URL) ? 'none' : 'lax',
     path: '/',
-    secure: env.isProd,
+    // Secure follows the public origin's scheme (see authCookieOptions).
+    secure: isHttpsUrl(env.APP_URL),
   },
   size: 64,
   ignoredMethods: ['GET', 'HEAD', 'OPTIONS'],

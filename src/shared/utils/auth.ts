@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import crypto from 'node:crypto';
-import { env } from '../../server/platform/config/env';
+import { env, isHttpsUrl } from '../../server/platform/config/env';
 
 const JWT_EXPIRES = '30d';
 const BCRYPT_ROUNDS = 12;
@@ -120,7 +120,7 @@ import { THIRTY_DAYS_MS } from '../constants/index.js';
 
 export const authCookieOptions = {
   httpOnly: true,
-  sameSite: 'lax' as const,
-  secure: env.isProd,
+  sameSite: (env.isProd && isHttpsUrl(env.APP_URL) ? 'none' : 'lax') as 'none' | 'lax',
+  secure: isHttpsUrl(env.APP_URL),
   maxAge: THIRTY_DAYS_MS,
 };
