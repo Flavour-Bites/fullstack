@@ -5,11 +5,8 @@ COPY package.json package-lock.json ./
 COPY prisma ./prisma
 RUN npm ci
 
-# VITE_* values are baked into the client bundle at build time. They are
-# optional: an unset VITE_API_URL means the client talks to the API on the
-# same origin (the default for this server, which serves /api and the built
-# SPA together). To override the API origin, pass it as a build arg, e.g.
-# --build-arg VITE_API_URL=https://api.example.com
+# VITE_API_URL is baked into the client bundle at build time and is REQUIRED.
+# Pass it as a Docker build arg (e.g. --build-arg VITE_API_URL=https://api.example.com).
 ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
 

@@ -37,31 +37,29 @@ TELEGRAM_WEBHOOK_SECRET=webhook_secret
 # Gemini AI
 GEMINI_API_KEY=your_gemini_key
 
-# Frontend (optional — baked into the client bundle at build time)
-# Unset → client calls the API on the same origin (default; the server serves
-# both /api and the built SPA). Set an absolute URL only when the frontend is
-# hosted cross-origin (e.g. Vercel frontend → Render API).
-VITE_API_URL=https://flavour-bites-kq9n.onrender.com
+# Frontend — REQUIRED, baked into the JS bundle at build time.
+# Absolute URL of the separately-deployed backend (Render). The client only
+# talks to this origin; there is no same-origin fallback.
+VITE_API_URL=https://flavour-bites-8k5k.onrender.com
 ```
 
 ## Hosting Topology
 
-This repo is one monolith: a single Express server serves both the built SPA (`dist/`) and the `/api` routes. It can be hosted two ways.
+Although the frontend and backend code live in this one repo, they are deployed and served as **two separate services**:
 
-### Same-origin (zero frontend config — the default)
+- **Vercel** → hosts the frontend only (Vite build). It never calls the Express code in this repo.
+- **Render** → hosts the backend API only (Docker). It serves `/api` and nothing else.
 
-Run the whole thing on one origin. The Docker image on Render builds `dist/`, and `createServer.ts` serves it next to `/api`, so the SPA and API share `https://flavour-bites-kq9n.onrender.com`. Leave `VITE_API_URL` unset — the client makes relative `/api` calls. Nothing to configure.
-
-### Cross-origin (Vercel frontend → Render backend)
-
-When the SPA is built and served by Vercel (Vite only) and the API runs on Render, the browser cannot guess the API origin, so the absolute URL must be baked into the bundle at Vercel's build time.
+The frontend bundle must contain the backend's absolute URL, so `VITE_API_URL` is baked into the JS bundle at **Vercel's build time**:
 
 | Variable | Where to set it | Value |
 | --- | --- | --- |
-| `VITE_API_URL` | **Vercel project env** → Settings → Environment Variables (scope: Production/Preview/Development) | `https://flavour-bites-kq9n.onrender.com` |
-| `FRONTEND_URL` | **Render service env** (backend) | `https://flavour-bites.vercel.app` |
+| `VITE_API_URL` | **Vercel project env** → Settings → Environment Variables (scope: Production/Preview/Development) | `https://flavour-bites-8k5k.onrender.com` |
+| `VITE_API_URL` | **Render service env** (backend) — needed because the Docker build compiles the frontend too | `https://flavour-bites-8k5k.onrender.com` |
+| `FRONTEND_URL` | **Render service env** (backend) — CORS allow-list + Telegram auth redirect target | `https://flavour-bites.vercel.app` |
 
-- Vite inlines `import.meta.env.VITE_API_URL` into the JS bundle during `vite build`. Vercel runs that build, so the value you set in Vercel's Environment Variables is what ships.
+- Vite inlines `import.meta.env.VITE_API_URL` into the JS bundle during `vite build`. Vercel runs that build, so the value you set in Vercel's Environment Variables is what ships to browsers.
+- If the Render backend is unreachable, the client surfaces a real API error (network/HTML responses are normalized to `ApiError`); it never silently falls back to same-origin or to the in-repo Express.
 - The backend needs `FRONTEND_URL` so its CORS allow-list (`src/server/platform/config/cors.ts`) and Telegram auth redirects (`auth.controller.ts`) target the real frontend origin.
 
 ## Installation

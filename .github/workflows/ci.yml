@@ -10,6 +10,7 @@ concurrency:
 
 env:
   NODE_VERSION: "22"
+  VITE_API_URL: ${{ vars.VITE_API_URL }}
 
 jobs:
   lint:

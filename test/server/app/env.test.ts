@@ -212,7 +212,7 @@ describe('getEnv and env singleton', () => {
   it('auto-recovers APP_URL from Render environment when set to localhost in production', async () => {
     process.env.NODE_ENV = 'production';
     process.env.APP_URL = 'http://127.0.0.1:3000';
-    process.env.RENDER_EXTERNAL_URL = 'https://flavour-bites-kq9n.onrender.com';
+    process.env.RENDER_EXTERNAL_URL = 'https://flavour-bites-8k5k.onrender.com';
     process.env.DATABASE_URL = 'postgresql://user:pass@localhost:5432/db';
     process.env.JWT_SECRET = 'a'.repeat(64);
     process.env.TELEGRAM_BOT_TOKEN = '123456:ABC-DEF';
@@ -225,7 +225,7 @@ describe('getEnv and env singleton', () => {
 
     const { getEnv } = await import('@server/platform/config/env.js');
     const parsed = getEnv();
-    expect(parsed.APP_URL).toBe('https://flavour-bites-kq9n.onrender.com');
+    expect(parsed.APP_URL).toBe('https://flavour-bites-8k5k.onrender.com');
 
     delete process.env.RENDER_EXTERNAL_URL;
   });
