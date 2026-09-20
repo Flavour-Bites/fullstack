@@ -22,8 +22,22 @@ export const AuthView: React.FC<AuthViewProps> = ({
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState('');
-  const [telegramId] = useState<string>('');
-  const [step, setStep] = useState<'telegram' | 'password'>('telegram');
+  const [telegramId, setTelegramId] = useState<string>(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('telegramId') || '';
+    } catch {
+      return '';
+    }
+  });
+  const [step, setStep] = useState<'telegram' | 'password'>(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('needsPassword') === 'true' ? 'password' : 'telegram';
+    } catch {
+      return 'telegram';
+    }
+  });
 
   usePageTitle(title ?? t('auth.signInTitle'));
 

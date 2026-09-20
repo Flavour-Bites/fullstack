@@ -169,7 +169,27 @@ describe('authController.handleTelegramCallback', () => {
     await authController.handleTelegramCallback(req, res, vi.fn());
 
     expect(res.cookie).toHaveBeenCalledWith('auth_token', 'jwt_app_token', expect.any(Object));
-    expect(res.redirect).toHaveBeenCalledWith(`${env.FRONTEND_URL.replace(/\/+$/, '')}/`);
+    expect(res.redirect).toHaveBeenCalledWith(`${env.FRONTEND_URL.replace(/\/+$/, '')}/?token=jwt_app_token`);
+  });
+
+  it('redirects to auth view with needsPassword and telegramId when password required', async () => {
+    vi.mocked(authService.handleOidcCallback).mockResolvedValueOnce({
+      success: true,
+      needsPassword: true,
+      telegramId: 'tg_12345',
+    });
+
+    const req = mockReq({
+      method: 'GET',
+      query: { code: 'c_123', state: 's_123' },
+    });
+    const res = mockRes();
+
+    await authController.handleTelegramCallback(req, res, vi.fn());
+
+    expect(res.redirect).toHaveBeenCalledWith(
+      `${env.FRONTEND_URL.replace(/\/+$/, '')}/auth?needsPassword=true&telegramId=tg_12345`
+    );
   });
 });
 

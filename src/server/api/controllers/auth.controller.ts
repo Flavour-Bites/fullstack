@@ -46,8 +46,8 @@ export const authController = {
     if (req.method === 'GET') {
       const frontendBase = env.FRONTEND_URL.replace(/\/+$/, '');
       const redirectTarget = result.needsPassword
-        ? `${frontendBase}/auth?needsPassword=true`
-        : `${frontendBase}/`;
+        ? `${frontendBase}/auth?needsPassword=true${result.telegramId ? `&telegramId=${encodeURIComponent(result.telegramId)}` : ''}`
+        : `${frontendBase}/?token=${encodeURIComponent(result.token || '')}`;
       res.redirect(redirectTarget);
     } else {
       res.json(result);
@@ -83,7 +83,7 @@ export const authController = {
   }),
 
   logout: asyncHandler(async (_req: Request, res: Response) => {
-    res.clearCookie('auth_token');
+    res.clearCookie('auth_token', authService.authCookieOptions);
     res.json({ success: true });
   }),
 

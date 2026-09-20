@@ -214,4 +214,14 @@ describe('authCookieOptions', () => {
   it('secure is false in test environment', () => {
     expect(authCookieOptions.secure).toBe(false);
   });
+
+  it('secure is true when APP_URL is served over https', async () => {
+    const previous = process.env.APP_URL;
+    process.env.APP_URL = 'https://flavourbites.com';
+    vi.resetModules();
+    const { authCookieOptions: httpsCookieOptions } = await import('@/shared/utils/auth.js');
+    expect(httpsCookieOptions.secure).toBe(true);
+    process.env.APP_URL = previous;
+    vi.resetModules();
+  });
 });
