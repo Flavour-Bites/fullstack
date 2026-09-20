@@ -93,6 +93,35 @@ npm run build:server   # dist/server.cjs → run by Render (Docker)
 npm start
 ```
 
+## Local Production Mimic (docker compose)
+
+`docker-compose.yml` reproduces the deployed topology on one machine:
+
+| Service | Role | Host port |
+| --- | --- | --- |
+| `frontend` | nginx serving `dist/client/` (like Vercel) | 8080 |
+| `backend` | the production Docker image (like Render), API-only | 3000 |
+| `db` | PostgreSQL | 5433 |
+| `redis` | Redis | 6380 |
+| `db-init` | one-shot `prisma db push` for a fresh database | — |
+| `seed` | one-shot sample seeder (profile `tools`) | — |
+
+```bash
+cp .env.example .env      # then fill in the real secrets
+docker compose up --build
+docker compose --profile tools run --rm seed   # optional sample data
+```
+
+Open http://localhost:8080 — the frontend calls http://localhost:3000.
+
+Notes:
+
+- The backend runs the **production** code path (`NODE_ENV=production`, `node dist/server.cjs`) against the local Postgres/Redis. `ALLOW_LOOPBACK_APP_URL=true` lets the production `APP_URL` guard accept `http://localhost:3000`; it is off by default so real deployments still fail loudly on a loopback URL.
+- Cookies are marked `Secure` (and cross-site `SameSite=None`) only when `APP_URL` is HTTPS, so auth/CSRF work over the local plaintext stack.
+- Telegram webhook registration is skipped for a loopback `APP_URL`, so this stack never repoints the real bot at localhost.
+- `db-init` runs `prisma db push` because the migration history has no baseline (the initial migration only `ALTER`s legacy tables). `docker-entrypoint.sh` then baselines the tracked migrations (P3005), exactly as on Render. The `seed` service uses the `builder` image stage because the runtime image omits `tsx`.
+- The stack reads the repo `.env` directly. Values must be parseable by Docker Compose's dotenv parser: keep generated secrets to safe characters (e.g. a 64-char hex string — not a quoted value containing quotes, `{}`, or `#`).
+
 ## Telegram Webhook
 
 In production, the bot registers its webhook automatically on startup:
