@@ -1,22 +1,26 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, X, HelpCircle, ArrowRight, Command } from 'lucide-react';
+import { Search, X, HelpCircle, ArrowRight, Command, ChevronDown, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { GALLERY_ITEMS, FAQS } from '../../../../data';
+import type { CakeGalleryItem } from '../../../../types';
 
 interface SearchModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSelectCake?: (cake: CakeGalleryItem) => void;
 }
 
-export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
+export default function SearchModal({ isOpen, onClose, onSelectCake }: SearchModalProps) {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
+  const [expandedFaqId, setExpandedFaqId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen) {
       setQuery('');
+      setExpandedFaqId(null);
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [isOpen]);
@@ -25,8 +29,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        if (isOpen) onClose();
-        else onClose(); // parent toggles
+        onClose();
       }
       if (e.key === 'Escape' && isOpen) {
         onClose();
@@ -52,13 +55,30 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
       (faq) =>
         faq.question.toLowerCase().includes(q) ||
         faq.answer.toLowerCase().includes(q)
-    ).slice(0, 3);
+    ).slice(0, 4);
 
     return { cakes, faqs };
   }, [query]);
 
   const hasResults = results.cakes.length > 0 || results.faqs.length > 0;
   const hasQuery = query.trim().length > 0;
+
+  const handleCakeClick = (cake: CakeGalleryItem) => {
+    if (onSelectCake) {
+      onSelectCake(cake);
+    }
+    onClose();
+    navigate('/gallery');
+  };
+
+  const toggleFaq = (faqId: string) => {
+    setExpandedFaqId((prev) => (prev === faqId ? null : faqId));
+  };
+
+  const handleGoToHelp = () => {
+    onClose();
+    navigate('/help');
+  };
 
   return (
     <AnimatePresence>
@@ -102,7 +122,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             </div>
 
             {/* Results */}
-            <div className="max-h-[50vh] overflow-y-auto">
+            <div className="max-h-[55vh] overflow-y-auto">
               {!hasQuery && (
                 <div className="px-5 py-8 text-center">
                   <Command className="w-8 h-8 text-stone-300 dark:text-stone-600 mx-auto mb-3" />
@@ -135,22 +155,19 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   {results.cakes.map((cake) => (
                     <button
                       key={cake.id}
-                      onClick={() => {
-                        onClose();
-                        navigate('/gallery');
-                      }}
+                      onClick={() => handleCakeClick(cake)}
                       className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm hover:bg-stone-50 dark:hover:bg-stone-900/50 transition-colors text-left cursor-pointer group"
                     >
                       <div className="w-9 h-9 rounded-sm bg-stone-100 dark:bg-stone-800 overflow-hidden shrink-0">
                         <img src={cake.image} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-serif text-stone-900 dark:text-stone-100 truncate">{cake.name}</p>
+                        <p className="text-sm font-serif text-stone-900 dark:text-stone-100 truncate group-hover:text-lux-gold transition-colors">{cake.name}</p>
                         <p className="text-[10px] text-stone-400 dark:text-stone-500 truncate font-sans">
                           {cake.category?.name} · {cake.priceEstimate}
                         </p>
                       </div>
-                      <ArrowRight className="w-3.5 h-3.5 text-stone-300 dark:text-stone-600 group-hover:text-lux-gold transition-colors shrink-0" />
+                      <ArrowRight className="w-3.5 h-3.5 text-stone-300 dark:text-stone-600 group-hover:text-lux-gold group-hover:translate-x-0.5 transition-all shrink-0" />
                     </button>
                   ))}
                 </div>
@@ -158,24 +175,46 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
               {results.faqs.length > 0 && (
                 <div className="px-3 py-2 border-t border-stone-100 dark:border-stone-800">
-                  <p className="text-[9px] uppercase tracking-widest text-stone-400 dark:text-stone-500 font-mono font-semibold px-2 mb-1">FAQs</p>
-                  {results.faqs.map((faq) => (
+                  <div className="flex items-center justify-between px-2 mb-1">
+                    <p className="text-[9px] uppercase tracking-widest text-stone-400 dark:text-stone-500 font-mono font-semibold">FAQs</p>
                     <button
-                      key={faq.id}
-                      onClick={() => {
-                        onClose();
-                        navigate('/contact');
-                      }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm hover:bg-stone-50 dark:hover:bg-stone-900/50 transition-colors text-left cursor-pointer group"
+                      onClick={handleGoToHelp}
+                      className="text-[10px] font-mono text-lux-gold hover:underline flex items-center gap-1 cursor-pointer"
                     >
-                      <HelpCircle className="w-4 h-4 text-lux-gold shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-stone-900 dark:text-stone-100 truncate font-sans">{faq.question}</p>
-                        <p className="text-[10px] text-stone-400 dark:text-stone-500 font-sans">{faq.category}</p>
-                      </div>
-                      <ArrowRight className="w-3.5 h-3.5 text-stone-300 dark:text-stone-600 group-hover:text-lux-gold transition-colors shrink-0" />
+                      Help Center <ExternalLink className="w-2.5 h-2.5" />
                     </button>
-                  ))}
+                  </div>
+                  {results.faqs.map((faq) => {
+                    const isExpanded = expandedFaqId === faq.id;
+                    return (
+                      <div key={faq.id} className="rounded-sm overflow-hidden mb-1">
+                        <button
+                          onClick={() => toggleFaq(faq.id)}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm hover:bg-stone-50 dark:hover:bg-stone-900/50 transition-colors text-left cursor-pointer group"
+                        >
+                          <HelpCircle className="w-4 h-4 text-lux-gold shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-stone-900 dark:text-stone-100 font-sans">{faq.question}</p>
+                            <p className="text-[10px] text-stone-400 dark:text-stone-500 font-sans">{faq.category}</p>
+                          </div>
+                          <ChevronDown className={`w-3.5 h-3.5 text-stone-300 dark:text-stone-600 group-hover:text-lux-gold transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180 text-lux-gold' : ''}`} />
+                        </button>
+                        {isExpanded && (
+                          <div className="px-4 py-3 ml-7 mr-2 mb-2 bg-stone-50 dark:bg-stone-900/40 border-l-2 border-lux-gold rounded-r-sm text-xs text-stone-600 dark:text-stone-300 leading-relaxed font-sans">
+                            <p>{faq.answer}</p>
+                            <div className="mt-2.5 pt-2 border-t border-stone-200/50 dark:border-stone-800 flex justify-end">
+                              <button
+                                onClick={handleGoToHelp}
+                                className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-mono text-lux-gold hover:text-lux-gold/80 font-semibold cursor-pointer"
+                              >
+                                View full Help Guide <ArrowRight className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -185,3 +224,4 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     </AnimatePresence>
   );
 }
+

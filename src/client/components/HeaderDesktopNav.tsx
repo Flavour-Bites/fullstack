@@ -15,7 +15,6 @@ export default function HeaderDesktopNav({
         { label: 'Home', path: '/' },
         { label: 'Cake Gallery', path: '/gallery' },
         { label: 'Meet Yodit', path: '/about' },
-        { label: 'Reviews', path: '/testimonials' },
         { label: 'Contact', path: '/contact' },
       ].map((item) => {
         const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));

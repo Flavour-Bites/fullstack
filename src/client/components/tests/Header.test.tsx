@@ -31,7 +31,7 @@ describe('Header', () => {
     renderWithRouter(<Header {...baseProps} />);
     expect(screen.getByText('Home')).toBeInTheDocument();
     expect(screen.getByText('Cake Gallery')).toBeInTheDocument();
-    expect(screen.getByText('Reviews')).toBeInTheDocument();
+    expect(screen.getByText('Contact')).toBeInTheDocument();
   });
 
   it('shows sign in button when no user', () => {

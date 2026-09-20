@@ -1,8 +1,36 @@
+export type AppEnvKind = 'development' | 'preview' | 'production' | 'test';
+
+export interface CookiePolicy {
+  readonly secure: boolean;
+  readonly sameSite: 'none' | 'lax';
+}
+
+/**
+ * Normalize an arbitrary NODE_ENV value. Unknown or missing values fall back to
+ * 'development' so local tooling never accidentally behaves like a deployment.
+ */
+export function normalizeAppEnv(value?: string): AppEnvKind {
+  const normalized = (value || '').trim().toLowerCase();
+  return normalized === 'production' || normalized === 'preview' || normalized === 'test'
+    ? normalized
+    : 'development';
+}
+
 export interface AppEnv {
-  readonly NODE_ENV: 'development' | 'production' | 'test';
+  readonly NODE_ENV: AppEnvKind;
+  readonly APP_ENV: AppEnvKind;
   readonly isDev: boolean;
+  readonly isPreview: boolean;
   readonly isProd: boolean;
   readonly isTest: boolean;
+  /** Local, relaxed environments (development/test): loopback origins and Vite-style relaxations are allowed here. */
+  readonly isRelaxed: boolean;
+  /** APP_URL points at a loopback host (localhost/127.0.0.1). */
+  readonly isLocal: boolean;
+  /** Frontend and API are served from different origins (cross-site cookie rules apply). */
+  readonly isCrossSite: boolean;
+  /** Cookie attributes derived from topology (https + cross-site), not from NODE_ENV. */
+  readonly cookiePolicy: CookiePolicy;
   readonly PORT: number;
   readonly DATABASE_URL: string;
   readonly JWT_SECRET: string;
@@ -76,6 +104,14 @@ export function isLocalhostUrl(urlStr: string): boolean {
   }
 }
 
+export function originOfUrl(urlStr: string): string | null {
+  try {
+    return new URL(urlStr).origin.toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
 export function isValidHttpUrl(urlStr: string): boolean {
   try {
     const parsed = new URL(urlStr);
@@ -123,11 +159,14 @@ export function validateEnv(): void {
 
   // Validate APP_URL is a real URL
   let appUrl = (process.env.APP_URL || '').replace(/^["']|["']$/g, '').trim();
-  const nodeEnv = process.env.NODE_ENV || 'development';
-  const isDev = nodeEnv !== 'production';
+  const nodeEnv = normalizeAppEnv(process.env.NODE_ENV);
+  const isProd = nodeEnv === 'production';
+  const isPlatform = nodeEnv === 'production' || nodeEnv === 'preview';
 
-  // If deployed on Render or other platforms with automatic URL injection and APP_URL is unset, loopback, or an outdated render domain
-  if (!isDev && !isLoopbackAppUrlAllowed() && (isLocalhostUrl(appUrl) || !appUrl || PLACEHOLDER_URLS.has(appUrl) || (isRenderDomain(appUrl) && Boolean(process.env.RENDER_EXTERNAL_URL) && appUrl !== process.env.RENDER_EXTERNAL_URL))) {
+  // If deployed on Render and APP_URL is unset, loopback, or an outdated render
+  // domain, fall back to the platform-injected URL. Production-only: preview
+  // deployments must be explicit about where they live.
+  if (isProd && !isLoopbackAppUrlAllowed() && (isLocalhostUrl(appUrl) || !appUrl || PLACEHOLDER_URLS.has(appUrl) || (isRenderDomain(appUrl) && Boolean(process.env.RENDER_EXTERNAL_URL) && appUrl !== process.env.RENDER_EXTERNAL_URL))) {
     const platformUrl = process.env.RENDER_EXTERNAL_URL ||
       (process.env.RENDER_EXTERNAL_HOSTNAME ? `https://${process.env.RENDER_EXTERNAL_HOSTNAME}` : null);
     if (platformUrl) {
@@ -138,9 +177,14 @@ export function validateEnv(): void {
 
   const isLocal = isLocalhostUrl(appUrl);
 
-  if (PLACEHOLDER_URLS.has(appUrl) || (!isDev && isLocal && !isLoopbackAppUrlAllowed())) {
+  // Development and test may live on loopback; any deployment (preview,
+  // production) must point at a real, public URL unless explicitly overridden.
+  if (PLACEHOLDER_URLS.has(appUrl) || (isPlatform && isLocal && !isLoopbackAppUrlAllowed())) {
     throw new Error(
-      `In production, APP_URL must be a real URL (e.g. https://flavourbites.com), got: "${appUrl}"`
+      `In production, APP_URL must be a real URL (e.g. https://flavourbites.com), got: "${appUrl}"\n` +
+      (isPlatform && isLocal
+        ? 'Local preview stacks can set ALLOW_LOOPBACK_APP_URL=true (see .local/docker-compose.yml).\n'
+        : '')
     );
   }
 
@@ -179,10 +223,11 @@ export function validateEnv(): void {
 }
 
 export function getEnv(): AppEnv {
-  const nodeEnv = (process.env.NODE_ENV || 'development') as 'development' | 'production' | 'test';
+  const nodeEnv = normalizeAppEnv(process.env.NODE_ENV);
   const isDev = nodeEnv === 'development';
   const isProd = nodeEnv === 'production';
   const isTest = nodeEnv === 'test';
+  const isPreview = nodeEnv === 'preview';
 
   let appUrl = (process.env.APP_URL || '').replace(/^["']|["']$/g, '').trim();
   if (isProd && !isLoopbackAppUrlAllowed() && (isLocalhostUrl(appUrl) || !appUrl || PLACEHOLDER_URLS.has(appUrl) || (isRenderDomain(appUrl) && Boolean(process.env.RENDER_EXTERNAL_URL) && appUrl !== process.env.RENDER_EXTERNAL_URL))) {
@@ -202,11 +247,24 @@ export function getEnv(): AppEnv {
   const jwtSecret = process.env.JWT_SECRET || '';
   const csrfSecret = process.env.CSRF_SECRET || jwtSecret;
 
+  const isHttps = isHttpsUrl(appUrl);
+  const isCrossSite = originOfUrl(appUrl) !== originOfUrl(frontendUrl);
+
   return {
     NODE_ENV: nodeEnv,
+    APP_ENV: nodeEnv,
     isDev,
+    isPreview,
     isProd,
     isTest,
+    isRelaxed: isDev || isTest,
+    isLocal: isLocalhostUrl(appUrl),
+    isCrossSite,
+    cookiePolicy: {
+      // 'none' is only necessary (and only ever valid) cross-site over https.
+      sameSite: isCrossSite && isHttps ? 'none' : 'lax',
+      secure: isHttps,
+    },
     PORT: Number(process.env.PORT || 3000),
     DATABASE_URL: process.env.DATABASE_URL || '',
     JWT_SECRET: jwtSecret,

@@ -22,7 +22,7 @@ export const AuthView: React.FC<AuthViewProps> = ({
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState('');
-  const [telegramId, setTelegramId] = useState<string>(() => {
+  const [telegramId] = useState<string>(() => {
     try {
       const params = new URLSearchParams(window.location.search);
       return params.get('telegramId') || '';

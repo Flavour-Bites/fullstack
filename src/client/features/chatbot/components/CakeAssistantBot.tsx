@@ -16,7 +16,7 @@ const PRESET_QUESTIONS = [
   { text: "🍰 Recommend unique flavor pairings", label: t('bot.flavorPairings') },
   { text: "💰 What are your custom cake pricing estimates?", label: t('bot.pricingEstimates') },
   { text: "📅 How far in advance do I need to book?", label: t('bot.bookingLeadTimes') },
-  { text: "📍 What are the pickup address and delivery fees?", label: t('bot.deliveryRates') },
+  { text: "📍 Where is your studio located for pickup?", label: t('bot.pickupLocation') },
   { text: "🌱 Do you offer gluten-free or egg-free options?", label: t('bot.dietaryCustomization') }
 ];
 

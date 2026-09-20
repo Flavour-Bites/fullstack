@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Send, Mail, MapPin, Phone, Check, CheckCircle2, Calculator, Map, ShieldAlert, Loader2 } from 'lucide-react';
+import { Send, Mail, MapPin, Phone, Check, CheckCircle2, Map, ShieldAlert, Loader2 } from 'lucide-react';
 import { t } from '@client/i18n/index';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
 import { BUSINESS_INFO } from '../../../../shared/constants/index';
@@ -12,47 +12,6 @@ export default function ContactView() {
   const [sending, setSending] = useState(false);
   const [contactForm, setContactForm] = useState({ name: '', email: '', subject: 'Consultation', message: '' });
   const [valError, setValError] = useState<string | null>(null);
-
-  // Sub-City Delivery calculator state
-  const [subCityInput, setSubCityInput] = useState('');
-  const [calcResult, setCalcResult] = useState<{ zone: string; price: string; info: string; success: boolean } | null>(null);
-
-  const handleSubCityCheck = (e: React.SyntheticEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!subCityInput.trim()) return;
-
-    const query = subCityInput.trim().toLowerCase();
-
-    if (query.includes('arada') || query.includes('kirkos') || query.includes('lideta') || query.includes('arada')) {
-      setCalcResult({
-        zone: 'Core Sub-Cities (Zone 1)',
-        price: 'Included / Free Pickup',
-        info: 'Your location is close to our home studio. Pickup is fully complimentary, or hand-guarded transport can be proposed.',
-        success: true
-      });
-    } else if (query.includes('bole') || query.includes('yeka') || query.includes('nifas') || query.includes('lafto')) {
-      setCalcResult({
-        zone: 'East & South Hubs (Zone 2)',
-        price: '450 ETB',
-        info: 'Pickup slots are open Tuesday—Saturday. Optional delivery can be co-arranged upon request review.',
-        success: true
-      });
-    } else if (query.includes('gullele') || query.includes('kolfe') || query.includes('akaki') || query.includes('kality')) {
-      setCalcResult({
-        zone: 'Outer Perimeter Sub-Cities (Zone 3)',
-        price: '650 ETB',
-        info: 'Requires extra coordination to protect cake heights during transit. Studio pickup remains default.',
-        success: true
-      });
-    } else {
-      setCalcResult({
-        zone: 'Regional Custom Perimeter (Zone 4)',
-        price: 'By Custom Proposal',
-        info: 'Outside standard Addis Ababa sub-city zones. We organize custom pickup times or travel-boxing guidelines.',
-        success: false
-      });
-    }
-  };
 
   const handleContactSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -145,52 +104,25 @@ export default function ContactView() {
               </div>
             </div>
 
-            {/* Delivery Zone Sube-City LookUp */}
+            {/* Studio Hours & Pickup Info */}
             <div className="bg-stone-900 text-white p-8 rounded-sm shadow-xl space-y-4 border border-stone-800 font-sans">
               <div className="flex items-center gap-2">
-                <Calculator className="w-5 h-5 text-lux-gold" />
-                <h3 className="font-serif text-lg text-white">{t('contact.subCityLookup')}</h3>
+                <MapPin className="w-5 h-5 text-lux-gold" />
+                <h3 className="font-serif text-lg text-white">{t('contact.studioLocation')}</h3>
               </div>
               <p className="text-xs text-stone-400 font-light leading-relaxed font-sans">
-                {t('contact.typeSubCity')}
+                {t('contact.operatingInfo')}
               </p>
-
-              <form onSubmit={handleSubCityCheck} className="flex gap-2 font-sans">
-                <input
-                  type="text"
-                  placeholder={t('contact.subCityPlaceholder')}
-                  aria-label="Sub-city lookup"
-                  value={subCityInput}
-                  onChange={(e) => setSubCityInput(e.target.value)}
-                  className="bg-stone-850 border border-stone-750 text-white p-3 text-xs w-full focus:outline-none focus:border-lux-gold rounded-sm uppercase"
-                />
-                <button
-                  type="submit"
-                  className="px-4 bg-lux-gold text-warm-950 text-xs font-semibold uppercase tracking-widest rounded-sm hover:opacity-90 cursor-pointer"
-                >
-                  {t('common.verify')}
-                </button>
-              </form>
-
-              {calcResult && (
-                <motion.div
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="p-4 bg-stone-850 rounded-xs border border-stone-800 space-y-2 text-xs font-sans"
-                >
-                  <div className="flex justify-between items-center">
-                    <span className="font-mono text-stone-400 text-[10px] uppercase">{t('contact.jurisdictionArea')}</span>
-                    <span className="font-mono text-lux-gold font-semibold">{calcResult.zone}</span>
-                  </div>
-                  <div className="flex justify-between items-center border-t border-stone-800 pt-2">
-                    <span className="font-mono text-stone-400 text-[10px] uppercase">{t('contact.logisticRate')}</span>
-                    <span className="text-sm font-serif font-semibold text-white">{calcResult.price}</span>
-                  </div>
-                  <p className="text-[11px] text-stone-400 leading-relaxed pt-1 border-t border-stone-800">
-                    {calcResult.info}
-                  </p>
-                </motion.div>
-              )}
+              <div className="p-4 bg-stone-850 rounded-xs border border-stone-800 space-y-2 text-xs font-sans">
+                <div className="flex justify-between items-center">
+                  <span className="font-mono text-stone-400 text-[10px] uppercase">{t('contact.topic')}</span>
+                  <span className="font-mono text-lux-gold font-semibold">{t('contact.boleStudio')}</span>
+                </div>
+                <div className="flex justify-between items-center border-t border-stone-800 pt-2">
+                  <span className="font-mono text-stone-400 text-[10px] uppercase">Hours</span>
+                  <span className="text-xs font-mono text-stone-200">{t('contact.workingHours')}</span>
+                </div>
+              </div>
             </div>
           </div>
 

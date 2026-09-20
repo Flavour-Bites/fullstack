@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { AnimatePresence } from 'motion/react';
 import { Send, Loader2 } from 'lucide-react';
 import { CustomCakeRequest, CakeGalleryItem, User } from '../../../../types';
 import { useToast } from '../../../components/Toast';
@@ -358,7 +358,7 @@ export default function RequestFormView({
                   <div>
                     <div className="flex items-center justify-between mb-1">
                       <label className={`text-[10px] uppercase font-mono tracking-widest font-bold block ${dateError ? 'text-red-500' : 'text-stone-500 dark:text-stone-400'}`}>
-                        {t('order.deliveryDate')} *
+                        {t('order.targetDate')} *
                       </label>
                       {form.deliveryDate && !dateError && (
                         <span className="text-[9px] uppercase font-mono text-emerald-600 dark:text-emerald-400 font-bold tracking-wider flex items-center gap-1">
@@ -384,7 +384,7 @@ export default function RequestFormView({
                   </div>
 
                   <div>
-                    <label htmlFor="cakeDescription" className="text-[10px] uppercase font-mono tracking-widest text-stone-500 dark:text-stone-400 font-bold block mb-1">Tell us about your cake *</label>
+                    <label htmlFor="cakeDescription" className="text-[10px] uppercase font-mono tracking-widest text-stone-500 dark:text-stone-400 font-bold block mb-1">Cake Description & Vision *</label>
                     <textarea
                       id="cakeDescription"
                       name="cakeDescription"
@@ -396,53 +396,6 @@ export default function RequestFormView({
                       className="w-full border border-stone-200 dark:border-stone-800 p-3 text-sm focus:outline-none focus:border-lux-gold bg-stone-50/50 dark:bg-stone-900/40 text-stone-800 dark:text-stone-100 rounded-sm"
                     />
                   </div>
-
-                  <div>
-                    <legend className="text-[10px] uppercase font-mono tracking-widest text-stone-500 dark:text-stone-400 font-bold block mb-1">{t('order.fulfillmentMode')}</legend>
-                    <div className="flex gap-4 pt-1 font-sans">
-                      <label className="flex items-center gap-2 text-sm text-stone-700 dark:text-stone-300 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="deliveryOption"
-                          value="pickup"
-                          checked={form.deliveryOption === 'pickup'}
-                          onChange={() => setForm((prev) => ({ ...prev, deliveryOption: 'pickup', deliveryAddress: '' }))}
-                          className="text-stone-900 dark:text-stone-100 focus:ring-lux-gold focus:ring-1"
-                        />
-                        {t('order.pickup')}
-                      </label>
-                      <label className="flex items-center gap-2 text-sm text-stone-700 dark:text-stone-300 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="deliveryOption"
-                          value="delivery"
-                          checked={form.deliveryOption === 'delivery'}
-                          onChange={() => setForm((prev) => ({ ...prev, deliveryOption: 'delivery' }))}
-                          className="text-stone-900 dark:text-stone-100 focus:ring-lux-gold focus:ring-1"
-                        />
-                        {t('order.delivery')}
-                      </label>
-                    </div>
-                  </div>
-
-                  {form.deliveryOption === 'delivery' && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                    >
-                      <label htmlFor="deliveryAddress" className="text-[10px] uppercase font-mono tracking-widest text-stone-500 dark:text-stone-400 font-bold block mb-1">Delivery Address *</label>
-                      <input
-                        type="text"
-                        id="deliveryAddress"
-                        name="deliveryAddress"
-                        value={form.deliveryAddress}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="e.g. Bole Sub-City, Addis Ababa"
-                        className="w-full border border-stone-200 dark:border-stone-800 p-2.5 text-sm focus:outline-none focus:border-lux-gold bg-stone-50/50 dark:bg-stone-900/40 rounded-sm text-stone-800 dark:text-stone-100"
-                      />
-                    </motion.div>
-                  )}
                 </div>
 
                 <div className="space-y-4">

@@ -15,8 +15,9 @@ export function isOriginAllowed(origin: string | undefined): boolean {
     return true;
   }
 
-  // Development & Test: allow any loopback origin (e.g. localhost:5173, localhost:3000, 127.0.0.1)
-  if (env.isDev || env.isTest) {
+  // Development & Test: allow any loopback origin (e.g. localhost:5173, localhost:3000, 127.0.0.1).
+  // Real deployments (preview, production) fall through to the strict checks below.
+  if (env.isRelaxed) {
     if (isLocalhostUrl(origin)) return true;
   }
 

@@ -144,23 +144,23 @@ export default function GalleryView({
 
   return (
     <div className="space-y-12 pb-16">
-      {/* Intro Header */}
-      <section className="text-center max-w-2xl mx-auto pt-6 px-4">
-        <h1 className="text-4xl sm:text-5xl font-serif text-warm-950 dark:text-stone-100 mb-7">{t('gallery.customGallery')}</h1>
-        <p className="text-sm sm:text-base text-stone-600 dark:text-stone-300 font-light leading-relaxed max-w-lg mx-auto font-sans">
+      {/* Intro Header with generous top breathing room */}
+      <section className="text-center max-w-2xl mx-auto pt-16 sm:pt-20 md:pt-24 px-4">
+        <h1 className="text-4xl sm:text-5xl font-serif text-warm-950 dark:text-stone-100 mb-6">{t('gallery.customGallery')}</h1>
+        <p className="text-sm sm:text-base text-stone-700 dark:text-stone-300 font-light leading-relaxed max-w-lg mx-auto font-sans">
           {t('gallery.galleryDescription')}
         </p>
-        <div className="h-[1px] w-24 bg-stone-300 mx-auto mt-6" />
+        <div className="h-[1px] w-24 bg-stone-300 dark:bg-stone-700 mx-auto mt-6" />
       </section>
 
-      {/* Advanced Filter Control Center Dashboard */}
+      {/* Advanced Filter Floating Controls */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="bg-white dark:bg-stone-950 border border-stone-200/60 dark:border-stone-850 p-6 rounded-sm shadow-xs space-y-6">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="space-y-5">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             
             {/* Search Input Controls */}
-            <div className="relative w-full lg:w-96">
-              <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-stone-400">
+            <div className="relative w-full sm:w-80 lg:w-96 shrink-0">
+              <span className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-stone-500 dark:text-stone-400">
                 <Search className="w-4 h-4" />
               </span>
               <input
@@ -169,73 +169,78 @@ export default function GalleryView({
                 aria-label={t('gallery.searchFlavors')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-stone-50 dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 focus:border-lux-gold focus:outline-none pl-10 pr-10 py-3 text-xs uppercase tracking-wider font-mono rounded-sm transition-all text-stone-800 dark:text-stone-100 placeholder-stone-400"
+                className="w-full bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 focus:border-lux-gold focus:ring-1 focus:ring-lux-gold/30 focus:outline-none pl-10 pr-10 py-2.5 text-xs uppercase tracking-wider font-mono rounded-full transition-all text-stone-900 dark:text-stone-100 placeholder-stone-600 dark:placeholder-stone-400 shadow-xs"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
                   aria-label="Clear search"
-                  className="absolute inset-y-0 right-3 flex items-center text-stone-400 hover:text-stone-700"
+                  className="absolute inset-y-0 right-3.5 flex items-center text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"
                 >
                   <X className="w-4 h-4" />
                 </button>
               )}
             </div>
 
-            {/* Reset Filters Trigger */}
-            <div className="flex items-center gap-3">
+            {/* Categories and Clear Filters Row */}
+            <div className="flex items-center justify-between lg:justify-end gap-3 flex-1 overflow-x-auto scrollbar-none py-1">
+              <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
+                {categories.map((cat) => {
+                  const isActive = activeFilter === cat.value;
+                  return (
+                    <button
+                      key={cat.value}
+                      onClick={() => setActiveFilter(cat.value)}
+                      className={`px-4 py-2 text-[10px] tracking-widest uppercase font-semibold whitespace-nowrap transition-all duration-200 rounded-full cursor-pointer border ${
+                        isActive
+                          ? 'bg-stone-900 dark:bg-stone-100 border-stone-900 dark:border-stone-100 text-white dark:text-stone-950 shadow-xs'
+                          : 'bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 text-stone-750 dark:text-stone-200 hover:border-stone-900 dark:hover:border-stone-300 hover:text-stone-950 dark:hover:text-white font-sans'
+                      }`}
+                    >
+                      {cat.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Subtle text link "Clear filters" positioned cleanly to the far right */}
               {(activeFilter !== 'all' || searchQuery !== '' || selectedTags.length > 0) && (
                 <button
                   onClick={clearAllFilters}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 border border-dashed border-stone-300 dark:border-stone-800 hover:border-stone-400 text-[10px] uppercase tracking-widest text-stone-500 hover:text-stone-850 dark:hover:text-stone-200 rounded-sm font-mono cursor-pointer transition-all"
+                  className="inline-flex items-center gap-1.5 text-xs font-mono text-lux-gold hover:text-stone-900 dark:hover:text-stone-100 underline decoration-lux-gold/50 underline-offset-4 cursor-pointer transition-colors whitespace-nowrap shrink-0 pl-2"
                 >
-                  <RotateCcw className="w-3.5 h-3.5" />
+                  <RotateCcw className="w-3 h-3" />
                   <span>{t('gallery.resetFilters')}</span>
                 </button>
               )}
             </div>
-
-            {/* Categories Filter Tabs (Horizontal Scrollable for Mobile) */}
-            <div className="flex items-center overflow-x-auto gap-2 pb-2 lg:pb-0 scrollbar-none scroll-smooth">
-              {categories.map((cat) => (
-                <button
-                  key={cat.value}
-                  onClick={() => setActiveFilter(cat.value)}
-                  className={`px-4 py-2.5 text-[10px] tracking-widest uppercase font-semibold whitespace-nowrap transition-all duration-300 rounded-full cursor-pointer ${
-                    activeFilter === cat.value
-                      ? 'bg-stone-900 dark:bg-stone-850 border-stone-900 dark:border-stone-800 text-white shadow-xs'
-                      : 'bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-stone-500 dark:text-stone-400 hover:border-stone-400 hover:text-stone-950 dark:hover:text-stone-200 font-sans'
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              ))}
-            </div>
           </div>
 
-          {/* Sourcing/Tag Cloud filter ribbon */}
-          <div className="pt-4 border-t border-stone-100 dark:border-stone-850 flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-1 text-[10px] uppercase tracking-widest font-mono font-semibold text-stone-400 dark:text-stone-500">
-              <Tag className="w-3.5 h-3.5" />
-              <span>{t('gallery.inspirationTags')}</span>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {allUniqueTags.map((tag) => {
-                const isSelected = selectedTags.includes(tag);
-                return (
-                  <button
-                    key={tag}
-                    onClick={() => handleTagToggle(tag)}
-                    className={`px-3 py-1.5 text-[10px] uppercase font-mono tracking-wider rounded-full transition-all border cursor-pointer ${
-                      isSelected
-                        ? 'bg-lux-gold border-lux-gold text-stone-950 font-semibold shadow-xs'
-                        : 'bg-stone-50 dark:bg-stone-900/40 border-stone-200 dark:border-stone-800 text-stone-500 dark:text-stone-400 hover:border-lux-gold hover:text-stone-900 dark:hover:text-stone-200'
-                    }`}
-                  >
-                    #{tag}
-                  </button>
-                );
-              })}
+          {/* Sourcing/Tag Cloud filter row (Floating directly on background) */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-mono font-bold text-stone-600 dark:text-stone-400 mr-1">
+                <Tag className="w-3.5 h-3.5 text-lux-gold" />
+                <span>TAGS:</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {allUniqueTags.map((tag) => {
+                  const isSelected = selectedTags.includes(tag);
+                  return (
+                    <button
+                      key={tag}
+                      onClick={() => handleTagToggle(tag)}
+                      className={`px-3 py-1 text-[10px] uppercase font-mono tracking-wider rounded-full transition-all border cursor-pointer ${
+                        isSelected
+                          ? 'bg-lux-gold border-lux-gold text-stone-950 font-bold shadow-xs'
+                          : 'bg-white/90 dark:bg-stone-900/80 border-stone-300 dark:border-stone-700 text-stone-750 dark:text-stone-300 hover:border-lux-gold hover:text-stone-950 dark:hover:text-stone-100'
+                      }`}
+                    >
+                      {tag}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
@@ -325,10 +330,10 @@ export default function GalleryView({
                               className={`px-2 py-0.5 text-[9px] uppercase tracking-wider rounded-sm font-mono transition-all border ${
                                 isSelected
                                   ? 'bg-lux-gold border-lux-gold text-stone-950 font-semibold'
-                                  : 'bg-stone-50 dark:bg-stone-900/60 border-stone-200 dark:border-stone-800 text-stone-500 dark:text-stone-400 hover:border-lux-gold hover:text-stone-900 hover:scale-102 cursor-pointer'
+                                  : 'bg-white/80 dark:bg-stone-900/60 border-stone-300 dark:border-stone-750 text-stone-700 dark:text-stone-300 hover:border-lux-gold hover:text-stone-900 dark:hover:text-stone-100 hover:scale-102 cursor-pointer'
                               }`}
                             >
-                              #{tag}
+                              {tag}
                             </button>
                           );
                         })}
@@ -418,7 +423,7 @@ export default function GalleryView({
                              key={tag}
                              className="px-2.5 py-1 bg-stone-905 dark:bg-stone-900 text-lux-gold border border-stone-800 text-[10px] font-mono rounded-sm"
                           >
-                            #{tag}
+                            {tag}
                           </span>
                         ))}
                       </div>

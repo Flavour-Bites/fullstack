@@ -1,4 +1,6 @@
 import express from 'express';
+import { existsSync } from 'node:fs';
+import path from 'node:path';
 import { webhookCallback } from 'grammy';
 import { bot } from '../bot/index';
 import cookieParser from 'cookie-parser';
@@ -104,6 +106,35 @@ export async function createApp() {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({ server: { middlewareMode: true }, appType: 'spa' });
     app.use(vite.middlewares);
+  } else if (env.isPreview) {
+    // Preview serves the built SPA + API from one origin, so a single public
+    // https tunnel reproduces the deployed topology end to end (this is how the
+    // production auth path — OIDC redirects, cookies, CSRF — is exercised
+    // locally). Production stays API-only; Vercel serves the SPA there.
+    const distClient = path.resolve(process.cwd(), 'dist/client');
+    const indexHtml = path.join(distClient, 'index.html');
+    if (existsSync(indexHtml)) {
+      app.use(express.static(distClient));
+      // SPA fallback for navigation, JSON 404 for anything API/bot-ish or mutating.
+      app.use((req, res, next) => {
+        if (req.path.startsWith('/api/') || req.path.startsWith('/bot/')) {
+          res.status(404).json({ success: false, error: 'Not found.' });
+          return;
+        }
+        if (req.method === 'GET' || req.method === 'HEAD') {
+          res.sendFile(indexHtml);
+          return;
+        }
+        next();
+      });
+    } else {
+      console.warn(
+        '[Preview] dist/client/index.html not found — run `npm run build`, then start preview.'
+      );
+      app.use((_req, res) => {
+        res.status(404).json({ success: false, error: 'Not found.' });
+      });
+    }
   } else {
     // Backend-only in production. The frontend is a separate service (Vercel),
     // so this server never serves static assets. Unmatched non-API routes get

@@ -120,9 +120,7 @@ export async function notifyCustomerStatusChange(orderId: string): Promise<void>
         '',
         `Wonderful! Your <b>${order.eventType}</b> cake is officially booked.`,
         '',
-        `<b>Delivery date:</b> ${order.deliveryDate}`,
-        `<b>Option:</b> ${order.deliveryOption}`,
-        order.deliveryAddress ? `<b>Address:</b> ${order.deliveryAddress}` : '',
+        `<b>Event date:</b> ${order.deliveryDate}`,
         '',
         "We'll keep you updated as your cake progresses. Feel free to message this bot anytime to check your order.",
       ].join('\n');
@@ -146,9 +144,7 @@ export async function notifyCustomerStatusChange(orderId: string): Promise<void>
         '',
         `Your beautiful <b>${order.eventType}</b> cake is done and waiting for you!`,
         '',
-        order.deliveryOption === 'delivery'
-          ? `🚗 Our delivery team will contact you shortly to arrange delivery to:\n<b>${order.deliveryAddress}</b>`
-          : `🏠 You can pick it up from Yodit's Bole studio. Please bring your order number:\n<code>${order.id}</code>`,
+        `🏠 You can pick it up from Yodit's Bole studio. Please bring your order number:\n<code>${order.id}</code>`,
         '',
         'Thank you for choosing Flavour Bites! 🎂',
       ].join('\n');

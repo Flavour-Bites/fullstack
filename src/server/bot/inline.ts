@@ -63,7 +63,7 @@ export function handleInline(bot: Bot) {
                         `📞 <b>Phone:</b> ${order.contactPhone}\n` +
                         `🎉 <b>Event:</b> ${order.eventType}\n` +
                         `🍰 <b>Flavor:</b> ${order.flavor}\n` +
-                        `📅 <b>Delivery:</b> ${order.deliveryDate}\n` +
+                        `📅 <b>Date:</b> ${order.deliveryDate}\n` +
                         `👥 <b>Guests:</b> ${order.guestCount}\n` +
                         `🏗️ <b>Tiers:</b> ${order.tierCount}\n` +
                         (order.quotedPrice

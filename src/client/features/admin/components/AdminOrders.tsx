@@ -230,7 +230,7 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
                   <div className="flex items-center gap-2 text-stone-600 dark:text-stone-300"><Phone className="w-4 h-4 text-lux-gold shrink-0" /> {selectedRequest.contactPhone}</div>
                   <div className="flex items-center gap-2 text-stone-600 dark:text-stone-300">
                     <MapPin className="w-4 h-4 text-lux-gold shrink-0" />
-                    {selectedRequest.deliveryOption === 'pickup' ? 'Studio Pickup — Bole' : selectedRequest.deliveryAddress || 'Delivery'}
+                    Studio Pickup — Bole
                   </div>
                 </div>
 

@@ -213,7 +213,14 @@ export default function App() {
           </Routes>
         </AnimatePresence>
 
-        <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+        <SearchModal
+          isOpen={searchOpen}
+          onClose={() => setSearchOpen(false)}
+          onSelectCake={(cake) => {
+            setSelectedCake(cake);
+            navigateTo('/gallery');
+          }}
+        />
       </div>
     </>
   );

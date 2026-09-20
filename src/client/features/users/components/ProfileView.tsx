@@ -341,7 +341,7 @@ export default function ProfileView({ currentUser, onLogout, onUpdateUser }: Pro
                         <div>
                           <div className="text-sm font-semibold text-stone-900 dark:text-stone-100 group-hover:text-lux-gold transition-colors duration-300">Order Updates via Telegram</div>
                           <div className="text-xs text-stone-500 dark:text-stone-400 font-light mt-1.5 leading-relaxed">
-                            Receive immediate baking status changes, handcrafting milestones, and pick-up/delivery scheduling alerts straight to your Telegram. Highly recommended.
+                            Receive immediate baking status changes, handcrafting milestones, and pick-up scheduling alerts straight to your Telegram. Highly recommended.
                           </div>
                         </div>
                       </label>

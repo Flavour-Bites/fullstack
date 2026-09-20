@@ -57,15 +57,12 @@ export function handleCommands(bot: Bot) {
                 `📞 <b>Phone:</b> ${order.contactPhone}\n` +
                 `🎉 <b>Event:</b> ${order.eventType}\n` +
                 `🍰 <b>Flavor:</b> ${order.flavor}\n` +
-                `📅 <b>Delivery:</b> ${order.deliveryDate}\n` +
+                `📅 <b>Event Date:</b> ${order.deliveryDate}\n` +
                 `👥 <b>Guests:</b> ${order.guestCount}\n` +
                 `🏗️ <b>Tiers:</b> ${order.tierCount}\n`;
 
             if (order.quotedPrice) {
                 msg += `💰 <b>Price:</b> ${order.quotedPrice.toLocaleString()} ETB\n`;
-            }
-            if (order.deliveryOption === "delivery" && order.deliveryAddress) {
-                msg += `📍 <b>Address:</b> ${order.deliveryAddress}\n`;
             }
 
             return ctx.reply(msg, { parse_mode: "HTML" });
@@ -248,11 +245,12 @@ export function handleCommands(bot: Bot) {
         },
         designStyle: async (ctx, conv, text, telegramId) => {
             conv.designStyle = text;
-            conv.step = "deliveryOption";
+            conv.deliveryOption = "pickup";
+            conv.step = "contactPhone";
             await conversationStore.setOrder(telegramId, conv);
             await ctx.reply(
-                `🎨 Nice.\n\n<b>7.</b> Will this be <b>pickup</b> from our Bole studio or <b>delivery</b>?\n` +
-                    `Reply "pickup" or "delivery".`,
+                `🎨 Nice.\n\n<b>7.</b> What phone number should we use to reach you?\n` +
+                    `(e.g., +251 911 123 456)`,
                 { parse_mode: "HTML" },
             );
         },

@@ -214,15 +214,9 @@ export const FAQS: FaqItem[] = [
     category: 'ordering'
   },
   {
-    id: 'faq-03',
-    question: 'Do you offer delivery within Addis Ababa?',
-    answer: 'Yes, we offer refrigerated delivery within Addis Ababa for an additional fee of 850 ETB. We deliver to Bole, Kazanchis, Old Airport, CMC, Ayat, Summit, and most sub-cities. Contact us for areas outside our standard delivery zone.',
-    category: 'delivery'
-  },
-  {
     id: 'faq-04',
     question: 'Can I cancel or modify my order?',
-    answer: 'Orders can be modified up to 48 hours before the scheduled pickup/delivery date. Please contact us directly for any cancellation or modification requests, and we will accommodate where possible.',
+    answer: 'Orders can be modified up to 48 hours before the scheduled pickup date. Please contact us directly for any cancellation or modification requests, and we will accommodate where possible.',
     category: 'cancellation'
   },
   {

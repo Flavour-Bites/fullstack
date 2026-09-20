@@ -2,7 +2,10 @@ import helmet from 'helmet';
 import { env } from './env';
 
 function createSecurityConfig() {
-  const isDev = !env.isProd;
+  // Vite-integration relaxations (inline scripts/styles, localhost/ws) are only
+  // needed when this server also serves the dev client. Preview and production
+  // serve the build and therefore use the strict policy.
+  const isDev = env.isDev;
 
   return helmet({
     contentSecurityPolicy: {

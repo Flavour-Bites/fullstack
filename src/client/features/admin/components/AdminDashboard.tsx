@@ -91,7 +91,7 @@ export function AdminDashboard({
               { label: 'Head Baker', value: 'Yodit Ashenafi', color: 'text-stone-700 dark:text-stone-200' },
               { label: 'Oven Temperature', value: '175°C — Optimal', color: 'text-emerald-400', dot: true },
               { label: 'Ingredients Stock', value: '98% — Fully stocked', color: 'text-emerald-400', dot: true },
-              { label: 'Delivery Van', value: 'On standby — Bole depot', color: 'text-stone-600 dark:text-stone-300' },
+              { label: 'Studio Pickup', value: 'Bole Studio — Ready', color: 'text-stone-600 dark:text-stone-300' },
               { label: 'Active Promo', value: 'GOLDENBLOOM10 (10% off)', color: 'text-lux-gold' },
             ].map(row => (
               <div key={row.label} className="flex justify-between border-b border-stone-200/50 dark:border-stone-800/50 pb-2">

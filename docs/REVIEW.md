@@ -94,7 +94,6 @@ status: draft
 | Global search | 🔴 API missing | 🔴 | — | ⚪ |
 | Testimonials page | 🟢 API exists | 🔴 | — | ⚪ |
 | About / Help pages | — | 🔴 static | — | ⚪ |
-| Contact delivery calculator | — | 🔴 hardcoded | — | ⚪ |
 
 > [!warning] The Critical Pattern
 > **The backend is ~100% finished. The frontend is the weak spot.** Real APIs exist for gallery, reviews, orders, and search — but the public-facing pages mostly read hardcoded arrays from `src/data.ts` instead of calling them.
@@ -173,7 +172,7 @@ status: draft
 | **HomeView** | Hero dynamic; fetches `/api/gallery` | Testimonials + FAQs from `data.ts` |
 | **GalleryView** | Fetches `/api/gallery` | Falls back to static `GALLERY_ITEMS` |
 | **CakeAssistantBot** | Real `/api/chat` calls | Graceful offline/error banner |
-| **ContactView** | Form submits via API | Delivery calculator = hardcoded distance logic |
+| **ContactView** | Form submits via API | Studio location & contact info |
 | **ProfileView** | Has update API call | Some save behavior local-only |
 
 ---

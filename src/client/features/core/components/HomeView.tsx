@@ -463,7 +463,11 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
         </div>
 
         <div className="max-w-4xl mx-auto px-6 relative z-10 text-center font-sans">
-          <span className="text-[10px] uppercase tracking-[0.25em] text-lux-gold font-mono block mb-8 font-semibold">{t('home.sweetestCelebrations')}</span>
+          <div className="text-center max-w-xl mx-auto mb-10">
+            <span className="text-[10px] uppercase tracking-[0.25em] text-lux-gold font-mono block mb-2 font-semibold">{t('home.sweetestCelebrations')}</span>
+            <h2 className="text-3xl sm:text-4xl font-serif text-white">Client Reviews & Testimonials</h2>
+            <div className="h-[2px] w-12 bg-lux-gold mx-auto mt-4" />
+          </div>
 
           <div className="relative min-h-[290px] sm:min-h-[260px] flex items-center justify-center">
             <AnimatePresence mode="wait">
@@ -532,6 +536,16 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
             >
               <ChevronRight className="w-5 h-5" />
             </button>
+          </div>
+
+          <div className="mt-8 text-center">
+            <Link
+              to="/testimonials"
+              className="inline-flex items-center gap-2 text-xs font-mono tracking-widest uppercase text-stone-300 hover:text-lux-gold transition-colors group cursor-pointer"
+            >
+              <span>Read all client tributes & reviews</span>
+              <ChevronRight className="w-3.5 h-3.5 text-lux-gold group-hover:translate-x-1 transition-transform" />
+            </Link>
           </div>
         </div>
       </section>

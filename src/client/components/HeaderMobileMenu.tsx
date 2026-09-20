@@ -48,7 +48,6 @@ export default function HeaderMobileMenu({
               { label: 'Home', path: '/' },
               { label: 'Cake Gallery', path: '/gallery' },
               { label: 'Meet Yodit', path: '/about' },
-              { label: 'Reviews', path: '/testimonials' },
               { label: 'Contact', path: '/contact' },
             ].map((item) => (
               <Link
