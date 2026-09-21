@@ -26,8 +26,8 @@
     "lint": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:client": "vitest run test/client",
-    "test:server": "vitest run test/server"
+    "test:client": "vitest run src/client test/client",
+    "test:server": "vitest run src/server test/server"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

@@ -6,9 +6,10 @@ import { authLimiter, passwordVerifyLimiter } from '../../platform/config/rateLi
 import {
   finalizeSchema,
   passwordSchema,
+  passwordVerifySchema,
   telegramPasswordSchema,
   updateProfileSchema
-} from '../schemas/auth.schemas';
+} from '../../modules/auth/auth.schemas';
 
 const router = Router();
 
@@ -20,7 +21,7 @@ router.post('/telegram/callback', authController.handleTelegramCallback);
 
 router.post('/telegram/finalize', authLimiter, validate(finalizeSchema), authController.finalizeTelegram);
 router.post('/password', authLimiter, requireAuth, validate(passwordSchema), authController.setPassword);
-router.post('/password/verify', passwordVerifyLimiter, requireAuth, authController.verifyPassword);
+router.post('/password/verify', passwordVerifyLimiter, requireAuth, validate(passwordVerifySchema), authController.verifyPassword);
 router.post('/telegram-password', authLimiter, validate(telegramPasswordSchema), authController.telegramPasswordLogin);
 router.post('/logout', authController.logout);
 router.get('/me', requireAuth, authController.me);

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { oidcCallbackSchema } from '@server/api/schemas/auth.schemas.js';
+import { oidcCallbackSchema } from '@server/modules/auth/auth.schemas.js';
 import { authController, getTelegramRedirectUri } from '@server/api/controllers/auth.controller.js';
 import { authService } from '@server/modules/auth/auth.service.js';
 import { env } from '@server/platform/config/env.js';

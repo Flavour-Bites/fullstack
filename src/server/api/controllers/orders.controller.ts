@@ -1,8 +1,6 @@
 import { Request, Response } from 'express';
 import { ordersService } from '../../modules/orders/orders.service';
 import { asyncHandler } from '../../platform/middleware/asyncHandler';
-import { isValidTransition } from '../../modules/orders/orders.workflow';
-import type { OrderStatus } from '@prisma/client';
 
 export const ordersController = {
   findAll: asyncHandler(async (req: Request, res: Response) => {
@@ -21,44 +19,10 @@ export const ordersController = {
   }),
 
   update: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const current = await ordersService.findById(id);
-    if (!current || current.deletedAt) {
-      res.status(404).json({ success: false, error: 'Order not found.' });
-      return;
-    }
-
-    let updated = current;
-
-    const commercialResult = await ordersService.updateCommercials(id, req.body);
-    if (commercialResult) updated = commercialResult;
-
-    if (req.body.designStyle !== undefined || req.body.specialInstructions !== undefined || req.body.bakerNote !== undefined) {
-      updated = await ordersService.updateDesignAndNotes(id, req.body);
-    }
-
-    if (req.body.status !== undefined) {
-      const status = req.body.status as OrderStatus;
-      if (!isValidTransition(current.status, status)) {
-        res.status(400).json({
-          success: false,
-          error: `Cannot change status from ${current.status} to ${status}.`,
-        });
-        return;
-      }
-      updated = await ordersService.changeStatus(id, status, {
-        userId: req.user!.userId,
-        source: req.user!.role === 'admin' ? 'admin_api' : 'staff_api',
-        note: req.body.note ?? null,
-      });
-    } else if (req.body.quotedPrice !== undefined && current.status !== 'Quoted') {
-      updated = await ordersService.changeStatus(id, 'Quoted', {
-        userId: req.user!.userId,
-        source: req.user!.role === 'admin' ? 'admin_api' : 'staff_api',
-        note: 'Cake price was set.',
-      });
-    }
-
+    const updated = await ordersService.update(req.params.id, req.body, {
+      userId: req.user!.userId,
+      source: req.user!.role === 'admin' ? 'admin_api' : 'staff_api',
+    });
     res.json({ success: true, request: updated });
   }),
 

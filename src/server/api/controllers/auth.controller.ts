@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import { authService } from '../../modules/auth/auth.service';
 import { asyncHandler } from '../../platform/middleware/asyncHandler';
+import { ValidationError } from '../../platform/errors/index';
 import { env, isLocalhostUrl } from '../../platform/config/env';
+import { oidcCallbackSchema } from '../../modules/auth/auth.schemas';
 
 export function getTelegramRedirectUri(req: Request): string {
   const forwardedHost = req.get('x-forwarded-host');
@@ -29,8 +31,12 @@ export const authController = {
   }),
 
   handleTelegramCallback: asyncHandler(async (req: Request, res: Response) => {
-    const code = (req.query.code || req.body?.code) as string;
-    const state = (req.query.state || req.body?.state) as string;
+    const source = req.method === 'GET' ? req.query : req.body;
+    const parsed = oidcCallbackSchema.safeParse(source);
+    if (!parsed.success) {
+      throw new ValidationError('Missing or invalid Telegram authorization code.');
+    }
+    const { code, state } = parsed.data;
     const redirectUri = getTelegramRedirectUri(req);
 
     const result = await authService.handleOidcCallback({

@@ -6,6 +6,7 @@ vi.mock('@server/modules/orders/orders.service.js', () => ({
     restore: vi.fn(),
     findAll: vi.fn(),
     create: vi.fn(),
+    update: vi.fn(),
     updateCommercials: vi.fn(),
     updateDesignAndNotes: vi.fn(),
     changeStatus: vi.fn(),
@@ -91,6 +92,42 @@ describe('ordersController.restore', () => {
     expect(res.jsonBody.success).toBe(true);
     expect(res.jsonBody.request.deletedAt).toBeNull();
     expect(mockRestore).toHaveBeenCalledWith('FB-123');
+  });
+});
+
+describe('ordersController.update', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('delegates to ordersService.update with operator source and returns the updated order', async () => {
+    const mockUpdate = vi.mocked(ordersService.update);
+    mockUpdate.mockResolvedValue({ id: 'FB-123', status: 'Quoted' } as any);
+    const res = createRes();
+
+    await ordersController.update(
+      createReq({ id: 'FB-123' }),
+      res,
+      vi.fn(),
+    );
+
+    expect(mockUpdate).toHaveBeenCalledWith('FB-123', {}, {
+      userId: 'usr_admin',
+      source: 'admin_api',
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.jsonBody.success).toBe(true);
+    expect(res.jsonBody.request.status).toBe('Quoted');
+  });
+
+  it('propagates service errors (e.g. invalid transition) to the error handler', async () => {
+    const mockUpdate = vi.mocked(ordersService.update);
+    mockUpdate.mockRejectedValue(new Error('Cannot change status from Completed to Quoted.'));
+    const res = createRes();
+
+    await expect(
+      ordersController.update(createReq({ id: 'FB-123' }), res, vi.fn()),
+    ).rejects.toThrow('Cannot change status from Completed to Quoted.');
   });
 });
 

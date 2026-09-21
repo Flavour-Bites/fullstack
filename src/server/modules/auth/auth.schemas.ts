@@ -14,6 +14,10 @@ export const passwordSchema = z.object({
   password: z.string().min(8, 'Password must be at least 8 characters.'),
 });
 
+export const passwordVerifySchema = z.object({
+  password: z.string().min(1, 'Password is required.'),
+});
+
 export const telegramPasswordSchema = z.object({
   telegramId: z.string().min(1),
   password: z.string().min(1),
