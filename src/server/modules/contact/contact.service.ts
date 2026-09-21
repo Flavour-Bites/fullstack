@@ -1,5 +1,5 @@
 import { sendMessage } from '@server/platform/integrations/telegram/telegramClient.js';
-import { getPrisma } from '@server/platform/config/prisma.js';
+import { getStaffChatIds } from '@server/platform/integrations/telegram/telegramNotifications.js';
 
 function escapeHtml(text: string): string {
   return text
@@ -8,24 +8,6 @@ function escapeHtml(text: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
-}
-
-async function getStaffChatIds(): Promise<string[]> {
-  try {
-    const prisma = getPrisma();
-    const staff = await prisma.user.findMany({
-      where: {
-        role: { in: ['admin', 'staff'] },
-        notifyViaTelegram: true,
-        telegramId: { not: '' },
-        deletedAt: null,
-      },
-      select: { telegramId: true },
-    });
-    return staff.map((u) => u.telegramId);
-  } catch {
-    return [];
-  }
 }
 
 export const contactService = {

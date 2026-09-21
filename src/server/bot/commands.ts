@@ -1,6 +1,6 @@
 import { Bot, Context } from "grammy";
 import { getPrisma } from "../platform/config/prisma";
-import { createOrder } from "../modules/orders/orders.operations";
+import { ordersRepository } from "../modules/orders/orders.repository";
 import { notifyStaffNewOrder } from "../platform/integrations/telegram/telegramNotifications";
 import { getConversationStore } from "../platform/integrations/redis/conversationState";
 import { formatRequestDate } from "../../shared/utils/dateFormat";
@@ -299,15 +299,14 @@ export function handleCommands(bot: Bot) {
                 { parse_mode: "HTML" },
             );
         },
-        specialInstructions: async (ctx, conv, text, telegramId, prisma) => {
+        specialInstructions: async (ctx, conv, text, telegramId) => {
             conv.specialInstructions = text === "none" ? "" : text;
             conv.step = "done";
 
             const requestId = makeOrderId();
             const requestDate = formatRequestDate();
 
-            const order = await createOrder(
-                prisma,
+            const order = await ordersRepository.create(
                 {
                     id: requestId,
                     userId: conv.userId,

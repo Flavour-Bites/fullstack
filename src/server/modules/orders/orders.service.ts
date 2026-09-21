@@ -47,9 +47,7 @@ export const ordersService = {
       requestDate: data.requestDate || formatRequestDate(),
     };
 
-    const order = await ordersRepository.create(orderData);
-
-    await ordersRepository.updateStatus(order.id, 'Received', {
+    const order = await ordersRepository.create(orderData, {
       userId,
       source: 'customer_api',
     });
