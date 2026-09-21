@@ -69,18 +69,6 @@ export interface CustomCakeRequest {
   statusEvents?: OrderStatusEvent[];
 }
 
-export interface Testimonial {
-  id: string;
-  author: string;
-  eventType: string;
-  role: string;
-  content: string;
-  rating: number;
-  image: string;
-  date: string;
-  featured?: boolean;
-}
-
 export interface OrderStatusEvent {
   id: string;
   orderId: string;
