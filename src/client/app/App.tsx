@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
-import { CakeGalleryItem, User } from '@shared/types';
+import type { CakeGalleryItem, User } from '@shared/types';
 import { http } from '@client/lib/http';
-import { setToken, clearToken } from '@client/lib/tokenStorage';
-import type { ApiResponse } from '@/shared/api';
+import type { Locale } from '@client/i18n/index';
 import AnimatedPage from '../components/AnimatedPage';
+import AppLoader from '../components/AppLoader';
 
 import HomeView from '../features/core/components/HomeView';
 import GalleryView from '../features/gallery/components/GalleryView';
@@ -25,90 +25,26 @@ import HelpView from '../features/core/components/HelpView';
 import CustomerLayout from '../components/CustomerLayout';
 import AdminLayout from '../components/AdminLayout';
 
-import { setLocale as setI18nLocale, getLocale } from '@client/i18n/index';
-import type { Locale } from '@client/i18n/index';
+import { useAuth } from './providers/AuthProvider';
+import { useTheme } from './providers/ThemeProvider';
+import { useLocale } from './providers/LocaleProvider';
+import { useCakeSelection } from './providers/CakeSelectionProvider';
+import { useSearchModal } from '../features/search/hooks/useSearchModal';
 
 export default function App() {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [authChecked, setAuthChecked] = useState(false);
+  const { currentUser, authChecked, loginUser, updateUser, logout } = useAuth();
+  const { darkMode, toggleDarkMode } = useTheme();
+  const { locale, setLocale, toggleLocale } = useLocale();
+  const { selectedCake, prefilledCake, selectCake, clearSelectedCake, commissionCake, clearPrefilledCake } = useCakeSelection();
+  const { searchOpen, openSearch, closeSearch } = useSearchModal();
   const navigate = useNavigate();
   const location = useLocation();
-  const [adminTab, setAdminTab] = useState<'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users' | 'recovery'>('dashboard');
-  const [locale, setLocale] = useState<Locale>(() => getLocale());
-  const [darkMode, setDarkMode] = useState<boolean>(() => localStorage.getItem('theme') === 'dark');
-  const [selectedCake, setSelectedCake] = useState<CakeGalleryItem | null>(null);
-  const [prefilledCake, setPrefilledCake] = useState<CakeGalleryItem | null>(null);
-  const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setSearchOpen((prev) => !prev);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
+    if (currentUser?.language && currentUser.language !== locale) {
+      setLocale(currentUser.language as Locale);
     }
-  }, [darkMode]);
-
-  useEffect(() => {
-    try {
-      const urlParams = new URLSearchParams(window.location.search);
-      const tokenParam = urlParams.get('token');
-      if (tokenParam) {
-        setToken(tokenParam);
-        urlParams.delete('token');
-        const newSearch = urlParams.toString();
-        const newUrl = window.location.pathname + (newSearch ? `?${newSearch}` : '');
-        window.history.replaceState({}, '', newUrl);
-      }
-    } catch {
-      // Ignore if URLSearchParams is unavailable
-    }
-
-    http.get<ApiResponse<{ user: User }>>('/api/auth/me')
-      .then(({ data }) => {
-        if (data.success && data.user) {
-          setCurrentUser(data.user);
-          localStorage.setItem('flavourbites_user', JSON.stringify(data.user));
-          
-          if (data.user.language && data.user.language !== locale) {
-            const userLocale = data.user.language as Locale;
-            setLocale(userLocale);
-            setI18nLocale(userLocale);
-          }
-        } else {
-          setCurrentUser(null);
-          localStorage.removeItem('flavourbites_user');
-        }
-      })
-      .catch(() => {
-        setCurrentUser(null);
-        localStorage.removeItem('flavourbites_user');
-      })
-      .finally(() => setAuthChecked(true));
-  }, []);
-
-  const handleUpdateUser = (user: User) => {
-    setCurrentUser(user);
-    localStorage.setItem('flavourbites_user', JSON.stringify(user));
-    
-    if (user.language && user.language !== locale) {
-      const userLocale = user.language as Locale;
-      setLocale(userLocale);
-      setI18nLocale(userLocale);
-    }
-  };
+  }, [currentUser]);
 
   const navigateTo = (path: string) => {
     navigate(path);
@@ -116,43 +52,23 @@ export default function App() {
   };
 
   const handleCommissionCake = (cake: CakeGalleryItem) => {
-    setPrefilledCake(cake);
-    setSelectedCake(null);
+    commissionCake(cake);
     navigateTo('/request');
   };
 
   const handleLogout = () => {
     http.post('/api/auth/logout').catch(() => {});
-    localStorage.removeItem('flavourbites_user');
-    clearToken();
-    setCurrentUser(null);
+    logout();
     navigateTo('/');
   };
 
-  const handleToggleLocale = () => {
-    const next: Locale = locale === 'en' ? 'am' : 'en';
-    setLocale(next);
-    setI18nLocale(next);
+  const handleAuthSuccess = (user: User) => {
+    loginUser(user);
+    navigateTo(user.role === 'admin' || user.role === 'staff' ? '/admin' : '/');
   };
 
   if (!authChecked) {
-    return (
-      <div className={`min-h-screen flex flex-col justify-center items-center ${
-        darkMode ? 'bg-stone-950' : 'bg-lux-cream'
-      }`}>
-        <div className="h-1 w-full bg-gradient-to-r from-stone-900 via-lux-gold to-stone-900 fixed top-0 left-0 z-[1000]" />
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 rounded-sm bg-stone-900 flex items-center justify-center animate-pulse">
-            <span className="text-lux-gold font-serif text-lg">F</span>
-          </div>
-          <div className="flex gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-lux-gold animate-bounce" style={{ animationDelay: '0ms' }} />
-            <span className="w-1.5 h-1.5 rounded-full bg-lux-gold animate-bounce" style={{ animationDelay: '150ms' }} />
-            <span className="w-1.5 h-1.5 rounded-full bg-lux-gold animate-bounce" style={{ animationDelay: '300ms' }} />
-          </div>
-        </div>
-      </div>
-    );
+    return <AppLoader darkMode={darkMode} />;
   }
 
   return (
@@ -167,35 +83,35 @@ export default function App() {
 
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
-            
+
             {/* Customer Layout (Public & Protected Customer Routes) */}
             <Route element={
               <CustomerLayout
                 currentUser={currentUser}
                 darkMode={darkMode}
                 locale={locale}
-                onToggleDarkMode={() => setDarkMode(d => !d)}
-                onToggleLocale={handleToggleLocale}
+                onToggleDarkMode={toggleDarkMode}
+                onToggleLocale={toggleLocale}
                 onLogout={handleLogout}
-                onSearchOpen={() => setSearchOpen(true)}
+                onSearchOpen={openSearch}
               />
             }>
-              <Route path="/" element={<AnimatedPage><HomeView onSelectCake={(cake) => { setSelectedCake(cake); navigateTo('/gallery'); }} /></AnimatedPage>} />
-              <Route path="/gallery" element={<AnimatedPage><GalleryView selectedCake={selectedCake} onClearSelectedCake={() => setSelectedCake(null)} onSelectCake={setSelectedCake} onCommissionCake={handleCommissionCake} /></AnimatedPage>} />
-              <Route path="/request" element={<AnimatedPage><ProtectedRoute currentUser={currentUser}><RequestFormView prefilledCake={prefilledCake} onClearPrefilledCake={() => setPrefilledCake(null)} currentUser={currentUser!} /></ProtectedRoute></AnimatedPage>} />
+              <Route path="/" element={<AnimatedPage><HomeView onSelectCake={(cake) => { selectCake(cake); navigateTo('/gallery'); }} /></AnimatedPage>} />
+              <Route path="/gallery" element={<AnimatedPage><GalleryView selectedCake={selectedCake} onClearSelectedCake={clearSelectedCake} onSelectCake={selectCake} onCommissionCake={handleCommissionCake} /></AnimatedPage>} />
+              <Route path="/request" element={<AnimatedPage><ProtectedRoute currentUser={currentUser}><RequestFormView prefilledCake={prefilledCake} onClearPrefilledCake={clearPrefilledCake} currentUser={currentUser!} /></ProtectedRoute></AnimatedPage>} />
               <Route path="/about" element={<AnimatedPage><AboutView /></AnimatedPage>} />
               <Route path="/testimonials" element={<AnimatedPage><TestimonialsView /></AnimatedPage>} />
               <Route path="/help" element={<AnimatedPage><HelpView /></AnimatedPage>} />
               <Route path="/contact" element={<AnimatedPage><ContactView /></AnimatedPage>} />
-              <Route path="/profile" element={<AnimatedPage><ProtectedRoute currentUser={currentUser}><ProfileView currentUser={currentUser!} onLogout={handleLogout} onUpdateUser={handleUpdateUser} /></ProtectedRoute></AnimatedPage>} />
+              <Route path="/profile" element={<AnimatedPage><ProtectedRoute currentUser={currentUser}><ProfileView currentUser={currentUser!} onLogout={handleLogout} onUpdateUser={updateUser} /></ProtectedRoute></AnimatedPage>} />
               <Route path="/orders" element={<AnimatedPage><MyOrdersView currentUser={currentUser!} /></AnimatedPage>} />
-              
+
               <Route path="/auth" element={
                 <AnimatedPage>
                   {currentUser ? (
                     <Navigate to={currentUser.role === 'admin' || currentUser.role === 'staff' ? '/admin' : '/'} replace />
                   ) : (
-                    <AuthView onAuthSuccess={(user) => { setCurrentUser(user); navigateTo(user.role === 'admin' || user.role === 'staff' ? '/admin' : '/'); }} />
+                    <AuthView onAuthSuccess={handleAuthSuccess} />
                   )}
                 </AnimatedPage>
               } />
@@ -206,19 +122,19 @@ export default function App() {
             <Route element={<AdminLayout currentUser={currentUser} />}>
               <Route path="/admin" element={
                 <AnimatedPage>
-                  <AdminView activeTab={adminTab} onTabChange={setAdminTab} currentUser={currentUser!} />
+                  <AdminView currentUser={currentUser!} />
                 </AnimatedPage>
               } />
             </Route>
-            
+
           </Routes>
         </AnimatePresence>
 
         <SearchModal
           isOpen={searchOpen}
-          onClose={() => setSearchOpen(false)}
+          onClose={closeSearch}
           onSelectCake={(cake) => {
-            setSelectedCake(cake);
+            selectCake(cake);
             navigateTo('/gallery');
           }}
         />
