@@ -2,6 +2,7 @@ import { getPrisma } from '../../platform/config/prisma';
 import { makeId } from '../../../shared/utils/ids';
 import type { OrderStatus } from '@prisma/client';
 import type { OrderActor } from './orders.types';
+import { NotFoundError } from '../../platform/errors/index';
 
 export const ordersRepository = {
   async create(data: {
@@ -104,7 +105,7 @@ export const ordersRepository = {
       });
 
       if (!current || current.deletedAt) {
-        throw new Error('Order not found.');
+        throw new NotFoundError('Order not found.');
       }
 
       if (current.status === toStatus) {
@@ -152,7 +153,7 @@ export const ordersRepository = {
         where: { id: orderId },
         select: { finalPrice: true, depositAmount: true, deletedAt: true },
       });
-      if (!current || current.deletedAt) throw new Error('Order not found.');
+      if (!current || current.deletedAt) throw new NotFoundError('Order not found.');
 
       const nextFinalPrice =
         input.finalPrice !== undefined
@@ -199,7 +200,7 @@ export const ordersRepository = {
         where: { id: orderId },
         select: { id: true, deletedAt: true },
       });
-      if (!current || current.deletedAt) throw new Error('Order not found.');
+      if (!current || current.deletedAt) throw new NotFoundError('Order not found.');
       return tx.customCakeRequest.update({ where: { id: orderId }, data: fields });
     });
   },

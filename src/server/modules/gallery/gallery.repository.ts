@@ -1,6 +1,7 @@
 import { getPrisma } from '../../platform/config/prisma';
 import { makeId } from '../../../shared/utils/ids';
 import { slugifyCategoryName } from '../../../shared/utils/categories';
+import { ValidationError } from '../../platform/errors/index';
 
 export const galleryRepository = {
   async findAll(categorySlug?: string) {
@@ -23,7 +24,7 @@ export const galleryRepository = {
     const existing = await prisma.category.findUnique({ where: { slug } });
     if (existing) return existing.id;
 
-    throw new Error(`Category "${raw}" does not exist. Please create it first.`);
+    throw new ValidationError(`Category "${raw}" does not exist. Please create it first.`);
   },
 
   async create(data: {

@@ -3,7 +3,7 @@ import { makeOrderId } from '../../../shared/utils/ids';
 import { formatRequestDate } from '../../../shared/utils/dateFormat';
 import { normalizeMoney, isValidTransition } from './orders.workflow';
 import { notifyStaffNewOrder, notifyCustomerStatusChange, notifyStaffQuoteAccepted } from '../../platform/integrations/telegram/telegramNotifications';
-import { NotFoundError, ValidationError } from '../../platform/errors/index';
+import { NotFoundError, ValidationError, AuthorizationError } from '../../platform/errors/index';
 import type { OrderStatus } from '@prisma/client';
 import type { OrderActor, OrderUpdateInput } from './orders.types';
 
@@ -164,11 +164,11 @@ export const ordersService = {
 
   async acceptPrice(orderId: string, userId: string, role: string) {
     const order = await ordersRepository.findById(orderId);
-    if (!order || order.deletedAt) throw new Error('Order not found.');
+    if (!order || order.deletedAt) throw new NotFoundError('Order not found.');
     if (role === 'customer' && order.userId !== userId) {
-      throw new Error('You can only confirm your own cake order.');
+      throw new AuthorizationError('You can only confirm your own cake order.');
     }
-    if (!order.quotedPrice) throw new Error('Cake price is not ready yet.');
+    if (!order.quotedPrice) throw new ValidationError('Cake price is not ready yet.');
 
     await ordersRepository.updateCommercials(orderId, {
       finalPrice: order.finalPrice ?? order.quotedPrice,
