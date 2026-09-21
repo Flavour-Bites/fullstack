@@ -53,7 +53,7 @@ CHAPA_WEBHOOK_SECRET=your_webhook_secret
 
 ### Notes
 
-- The `payment` module exists in `src/modules/payment/` but is not routed in v1
+- The payment domain is not yet implemented; when built it belongs in `src/server/modules/payments/` with routes wired in `src/server/api/routes.ts`
 - Mock mode is available for development (auto-verifies payments)
 - Webhook signature verification is required for production
 
@@ -87,7 +87,7 @@ CHAPA_WEBHOOK_SECRET=your_webhook_secret
 ## How to Activate a Future Feature
 
 1. Read the feature spec above
-2. Uncomment/add the relevant route in `src/app/routes.ts`
+2. Implement the domain module (routes/controller/service/repository) and wire it in `src/server/api/routes.ts`
 3. Add required environment variables
 4. Run database migrations if new fields are needed
 5. Test thoroughly before deploying

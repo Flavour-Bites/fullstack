@@ -21,6 +21,34 @@ status: draft
 
 ---
 
+## ♻️ Post-Refactor Status (2026-09-21)
+
+> The audit below is accurate for **2026-09-16**. A subsequent clean-architecture refactor (branch `refactor/clean-architecture`) changed the layout and cleared several items. Read this section first; the numbered doc sections remain the dated snapshot.
+
+### What Changed Since the Audit
+
+- **Monorepo layout** replaces the old feature-monolith layout. The legacy paths cited throughout this document no longer exist:
+  - Server: `src/server/{core,api/routes,api/controllers,modules,platform,bot}`
+  - Client: `src/client/{app,app/providers,features,components,lib,platform,i18n,styles}`
+  - Shared: `src/shared/{api,constants,types,utils}` (imported by both sides via `@shared/*`)
+  - `src/data.ts`, `src/features/*/api`, `src/shared/utils/apiClient.ts`, `src/types.ts` were relocated/removed during the refactor.
+- **✅ Critical #4 (Order logic duplicated) is fixed.** The bot now uses the single `orders.repository.ts`; `orders.operations.ts` was deleted.
+- **✅ Duplicated utilities removed.** `getStaffChatIds` and other cross-module duplicates were consolidated; dead code (`analytics`, unused helpers) deleted.
+- **✅ Order-status keys reconciled.** The canonical key is `InProgress` (was `'In Progress'` in client code); admin badge colors/icons moved to `src/client/features/admin/components/statusPresentation.ts` and status transitions live in `orders.workflow.ts`. Emoji/labels, badges, and workflow remain separate presentation/domain maps over one `OrderStatus` type in `src/shared/types`.
+- **✅ God components decomposed** into feature hooks + presentational subcomponents: `ProfileView`, `RequestFormView`, `CakeAssistantBot` (view composition roots; logic in `users/hooks/useProfileForm.ts`, `orders/hooks/useRequestForm.ts`, `chatbot/hooks/useCakeChat.ts`).
+- **✅ Admin layer consolidated.** Types moved to `src/client/features/admin/types.ts`, the data hook to `admin/hooks/useAdminData.ts`, CSV export to `admin/utils/ordersCsv.ts`.
+- **✅ App composition root slimmed.** App-level state lives in `src/client/app/providers/` (Theme, Locale, Auth, CakeSelection) with `main.tsx` composing `AppProviders`.
+- **✅ Test tooling is real.** The broken per-module `test:*` scripts were dropped; run `npm test` (54 files / 356 tests), `npm run test:client` (27 files / 102 tests), or `npm run test:server` (22 files / 207 tests). `npm run lint` = `tsc --noEmit`.
+
+### Still Open (unchanged by the refactor)
+
+- **Critical #1 — CSRF contract**: verify every client mutation goes through the centralized Axios client at `src/client/lib/http.ts`, not raw `fetch`.
+- **Critical #2 — Mass assignment**: staff update endpoints still need explicit field whitelists in the service layer.
+- **Critical #5 — Generic errors → 500**: plain `Error`s and Prisma `P2025` still need mapping to typed errors/404s.
+- **Frontend public pages**: `MyOrdersView`, `SearchModal`, and testimonials still use static/hardcoded data instead of the real APIs.
+
+---
+
 ## 🗂️ Table of Contents
 
 - [Project Snapshot](#📋-project-snapshot)

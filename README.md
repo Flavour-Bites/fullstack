@@ -22,7 +22,7 @@
 | Frontend | React 19, TypeScript, TailwindCSS 4, Vite 6 |
 | Backend | Express 4, Node.js (ESM) |
 | Database | PostgreSQL (Neon), Prisma ORM |
-| Auth | JWT, bcrypt, Telegram Login Widget |
+| Auth | JWT, bcrypt, Telegram OIDC |
 | Bot | grammY (Telegram) |
 | AI | Google Gemini 2.0 Flash |
 | Media | Cloudinary |
@@ -90,14 +90,12 @@ policy are derived centrally from topology (https, same-site, loopback) in
 
 ```
 src/
-├── app/           Express app, middleware, config
-├── modules/       Domain modules (auth, orders, users, ...)
-├── integrations/  External services (Telegram, Redis, Cloudinary, Gemini)
-├── bot/           Telegram bot handlers
-├── components/    React UI components
-├── shared/        Error classes, utilities
-└── i18n/          Translations (en, am)
+├── server/       Express app, API routes/controllers, domain modules, integrations, bot
+├── client/       React SPA (app + feature-scoped UI, hooks, components)
+└── shared/       Cross-cutting types, constants, and utilities (client + server)
 ```
+
+See [Architecture](docs/ARCHITECTURE.md) for the full layout and module pattern.
 
 ## License
 
