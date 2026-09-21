@@ -2,11 +2,12 @@ import { PrismaClient } from '@prisma/client';
 import { CATEGORY_SEEDS } from './categories.js';
 import { SAMPLE_REQUESTS } from './requests.js';
 import { GALLERY_ITEMS } from './gallery.js';
+import { SAMPLE_REVIEWS } from './reviews.js';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Seeding baseline sample custom cake requests and gallery items into Neon database...');
+  console.log('Seeding baseline sample custom cake requests, gallery items, and reviews into Neon database...');
 
   if (!process.env.DATABASE_URL) {
     console.error('ERROR: DATABASE_URL environment variable is missing.');
@@ -47,7 +48,17 @@ async function main() {
     console.log(`Upserted gallery item: ${record.id} (${record.name})`);
   }
 
-  console.log('Database successfully seeded with requests and gallery items!');
+  // D. Seed Reviews (idempotent; leaves user-created reviews untouched)
+  for (const review of SAMPLE_REVIEWS) {
+    const record = await prisma.review.upsert({
+      where: { id: review.id },
+      update: review,
+      create: review
+    });
+    console.log(`Upserted review: ${record.id} (${record.author})`);
+  }
+
+  console.log('Database successfully seeded with requests, gallery items, and reviews!');
 }
 
 main()
