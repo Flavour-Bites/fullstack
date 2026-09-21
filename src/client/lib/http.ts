@@ -63,17 +63,16 @@ http.interceptors.response.use(
     }
     return response;
   },
-  (error: AxiosError<{ error?: string; message?: string }>) => {
+  (error: AxiosError<ApiResponse<never>>) => {
     const status = error.response?.status;
     if (status === 401) {
       clearToken();
     }
-
-    const serverMessage = error.response?.data?.error || error.response?.data?.message;
+    if (error.response?.data) {
+      return Promise.reject(ApiError.fromResponse(error.response.data, error.response.status));
+    }
     let message: string;
-    if (typeof serverMessage === 'string' && serverMessage) {
-      message = serverMessage;
-    } else if (error.code === 'ECONNABORTED') {
+    if (error.code === 'ECONNABORTED') {
       message = 'Request timed out';
     } else {
       message = error.message || 'Network request failed';
