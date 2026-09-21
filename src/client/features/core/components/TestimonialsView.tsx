@@ -1,18 +1,20 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Award, Quote } from 'lucide-react';
-import { TESTIMONIALS } from '@client/data';
 import { t } from '@client/i18n/index';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { useTestimonials } from '../hooks/useTestimonials';
+import InitialsAvatar from './InitialsAvatar';
 
 export default function TestimonialsView() {
   usePageTitle("Testimonials");
+  const { data: reviews = [], isLoading } = useTestimonials();
   const [filter, setFilter] = useState<'all' | 'celebration' | 'birthday'>('all');
 
-  const filteredReviews = TESTIMONIALS.filter((testimonial) => {
+  const filteredReviews = reviews.filter((review) => {
     if (filter === 'all') return true;
-    if (filter === 'celebration') return testimonial.eventType.toLowerCase().includes('celebration') || testimonial.eventType.toLowerCase().includes('anniversary') || testimonial.eventType.toLowerCase().includes('wedding');
-    if (filter === 'birthday') return testimonial.eventType.toLowerCase().includes('birthday') || testimonial.eventType.toLowerCase().includes('party');
+    if (filter === 'celebration') return review.eventType.toLowerCase().includes('celebration') || review.eventType.toLowerCase().includes('anniversary') || review.eventType.toLowerCase().includes('wedding');
+    if (filter === 'birthday') return review.eventType.toLowerCase().includes('birthday') || review.eventType.toLowerCase().includes('party');
     return true;
   });
 
@@ -78,8 +80,36 @@ export default function TestimonialsView() {
       {/* Masonry Waterfall Layout */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-32">
         <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+          {isLoading && (
+            <>
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="break-inside-avoid bg-white dark:bg-stone-800 p-8 rounded-2xl shadow-xs border border-stone-100 dark:border-stone-700/50 animate-pulse">
+                  <div className="h-4 w-24 bg-stone-200 dark:bg-stone-700 rounded mb-6" />
+                  <div className="h-3 bg-stone-100 dark:bg-stone-700/60 rounded mb-2" />
+                  <div className="h-3 bg-stone-100 dark:bg-stone-700/60 rounded mb-2" />
+                  <div className="h-3 w-2/3 bg-stone-100 dark:bg-stone-700/60 rounded mb-8" />
+                  <div className="flex items-center gap-4 pt-6 border-t border-stone-100 dark:border-stone-700/50">
+                    <div className="w-12 h-12 rounded-full bg-stone-200 dark:bg-stone-700" />
+                    <div className="h-3 w-28 bg-stone-100 dark:bg-stone-700/60 rounded" />
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+
+          {!isLoading && filteredReviews.length === 0 && (
+            <div className="col-span-1 md:col-span-2 lg:col-span-3 py-20 text-center">
+              <p className="text-stone-400 dark:text-stone-500 font-serif text-xl">
+                No client stories here yet.
+              </p>
+              <p className="text-sm text-stone-400 dark:text-stone-600 mt-2 font-sans">
+                Real reviews appear here after completed orders are published.
+              </p>
+            </div>
+          )}
+
           <AnimatePresence>
-            {filteredReviews.map((testimonial, idx) => (
+            {filteredReviews.map((review, idx) => (
               <motion.div
                 layout
                 initial={{ opacity: 0, y: 30 }}
@@ -87,35 +117,30 @@ export default function TestimonialsView() {
                 viewport={{ once: true, margin: "-50px" }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.6, delay: (idx % 3) * 0.1, ease: "easeOut" }}
-                key={testimonial.id}
+                key={review.id}
                 className="break-inside-avoid bg-white dark:bg-stone-800 p-8 rounded-2xl shadow-xs border border-stone-100 dark:border-stone-700/50 hover:shadow-lg transition-shadow duration-300 relative group"
               >
                 <Quote className="absolute top-6 right-6 w-8 h-8 text-lux-gold/20 dark:text-lux-gold/10 group-hover:text-lux-gold/40 transition-colors duration-300" />
-                
+
                 {/* Rating Stars */}
                 <div className="flex gap-1 mb-6">
-                  {Array.from({ length: testimonial.rating }).map((_, i) => (
+                  {Array.from({ length: review.rating }).map((_, i) => (
                     <span key={i} className="text-lux-gold text-sm leading-none">★</span>
                   ))}
                 </div>
 
                 <p className="text-stone-700 dark:text-stone-200 font-serif text-lg leading-relaxed mb-8">
-                  "{testimonial.content}"
+                  "{review.content}"
                 </p>
 
                 <div className="flex items-center gap-4 pt-6 border-t border-stone-100 dark:border-stone-700/50">
-                  <img
-                    src={testimonial.image}
-                    alt={testimonial.author}
-                    className="w-12 h-12 rounded-full object-cover border border-stone-200 dark:border-stone-700"
-                    referrerPolicy="no-referrer"
-                  />
+                  <InitialsAvatar name={review.author} className="w-12 h-12 text-sm" />
                   <div>
                     <h4 className="font-semibold text-stone-900 dark:text-stone-100 text-sm">
-                      {testimonial.author}
+                      {review.author}
                     </h4>
                     <span className="text-xs text-stone-500 dark:text-stone-400 block mt-0.5">
-                      {testimonial.eventType} • {testimonial.role}
+                      {review.eventType} • {review.role}
                     </span>
                   </div>
                 </div>

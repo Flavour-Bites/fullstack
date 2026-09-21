@@ -1,6 +1,7 @@
 import { CakeGalleryItem } from '@shared/types';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useFeaturedCakes } from '../hooks/useFeaturedCakes';
+import { useTestimonials } from '../hooks/useTestimonials';
 import { useTestimonialCarousel } from '../hooks/useTestimonialCarousel';
 import HomeHero from './home/HomeHero';
 import HomeTrustSeals from './home/HomeTrustSeals';
@@ -18,7 +19,8 @@ interface HomeViewProps {
 export default function HomeView({ onSelectCake }: HomeViewProps) {
   usePageTitle("Home");
   const featuredCakes = useFeaturedCakes();
-  const testimonials = useTestimonialCarousel();
+  const { data: reviews = [], isLoading: reviewsLoading } = useTestimonials();
+  const testimonials = useTestimonialCarousel(reviews.length);
 
   return (
     <div className="space-y-24 pb-16 overflow-hidden">
@@ -42,6 +44,8 @@ export default function HomeView({ onSelectCake }: HomeViewProps) {
 
       {/* 7. SWEETEST STORIES: Refined Quotation Carousel */}
       <HomeTestimonials
+        reviews={reviews}
+        isLoading={reviewsLoading}
         activeIndex={testimonials.activeTestimonial}
         onSelect={testimonials.setActiveTestimonial}
         onPrev={testimonials.handlePrevTestimonial}
