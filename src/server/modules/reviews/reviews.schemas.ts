@@ -16,3 +16,6 @@ export const updateReviewSchema = z.object({
   eventType: z.string().optional(),
   role: z.string().optional(),
 });
+
+export type CreateReviewInput = z.infer<typeof createReviewSchema>;
+export type UpdateReviewInput = z.infer<typeof updateReviewSchema>;

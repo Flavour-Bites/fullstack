@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Award, Quote } from 'lucide-react';
-import { TESTIMONIALS } from '../../../../data';
+import { TESTIMONIALS } from '@client/data';
 import { t } from '@client/i18n/index';
 import { usePageTitle } from '../hooks/usePageTitle';
 

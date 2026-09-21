@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Shield, Key, LogIn, Loader2, ArrowLeft } from 'lucide-react';
 import { useToast } from '../../../components/Toast';
-import { User as UserType } from '../../../../types';
+import { User as UserType } from '@shared/types';
 import { t } from '@client/i18n/index';
-import { http, type ApiResponse } from '@/shared/api';
-import { setToken } from '@/shared/auth';
+import { http } from '@client/lib/http';
+import { setToken } from '@client/lib/tokenStorage';
+import type { ApiResponse } from '@/shared/api';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
 
 interface AuthViewProps {

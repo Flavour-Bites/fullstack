@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ChevronRight, Cake, Info, Search, Tag, RotateCcw } from 'lucide-react';
-import { CakeGalleryItem } from '../../../../types';
-import { GALLERY_ITEMS } from '../../../../data';
+import { CakeGalleryItem } from '@shared/types';
+import { GALLERY_ITEMS } from '@client/data';
 import { t } from '@client/i18n/index';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
-import { http, type ApiResponse } from '@/shared/api';
+import { http } from '@client/lib/http';
+import type { ApiResponse } from '@/shared/api';
 
 interface GalleryViewProps {
   selectedCake: CakeGalleryItem | null;

@@ -16,3 +16,6 @@ export const gallerySchema = z.object({
 });
 
 export const galleryUpdateSchema = gallerySchema.partial();
+
+export type GalleryInput = z.infer<typeof gallerySchema>;
+export type GalleryUpdateInput = z.infer<typeof galleryUpdateSchema>;

@@ -3,7 +3,7 @@ import { galleryController } from '../controllers/gallery.controller';
 import { requireAuth } from '../../platform/middleware/requireAuth';
 import { requireRole } from '../../platform/middleware/requireRole';
 import { validate } from '../../platform/middleware/validate';
-import { gallerySchema, galleryUpdateSchema } from '../schemas/gallery.schemas';
+import { gallerySchema, galleryUpdateSchema } from '../../modules/gallery/gallery.schemas';
 
 const router = Router();
 

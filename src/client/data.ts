@@ -3,7 +3,7 @@ import {
     Testimonial,
     FaqItem,
     IngredientSpotlight,
-} from "./types";
+} from "@shared/types";
 
 export const GALLERY_ITEMS: CakeGalleryItem[] = [
   {

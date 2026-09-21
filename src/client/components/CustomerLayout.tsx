@@ -4,7 +4,7 @@ import Footer from './Footer';
 import CakeAssistantBot from '../features/chatbot/components/CakeAssistantBot';
 import ErrorBoundary from './ErrorBoundary';
 import type { Locale } from '@client/i18n/index';
-import type { User } from '../../types';
+import type { User } from '@shared/types';
 
 interface CustomerLayoutProps {
   currentUser: User | null;

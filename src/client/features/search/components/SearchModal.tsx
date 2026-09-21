@@ -2,8 +2,8 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, X, HelpCircle, ArrowRight, Command, ChevronDown, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { GALLERY_ITEMS, FAQS } from '../../../../data';
-import type { CakeGalleryItem } from '../../../../types';
+import { GALLERY_ITEMS, FAQS } from '@client/data';
+import type { CakeGalleryItem } from '@shared/types';
 
 interface SearchModalProps {
   isOpen: boolean;

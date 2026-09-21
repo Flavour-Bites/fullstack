@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { User as UserIcon, ShoppingBag, ShieldCheck, LogIn, HelpCircle, Sun, Moon, LogOut } from 'lucide-react';
-import type { User } from '../../types';
+import type { User } from '@shared/types';
 import { BUSINESS_INFO } from '../../shared/constants/index';
 
 interface HeaderProfileDropdownProps {

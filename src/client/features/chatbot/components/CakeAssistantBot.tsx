@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquare, X, Send, Sparkles, Trash2, ShieldAlert, Cake } from 'lucide-react';
 import { t } from '@client/i18n/index';
 import { useLocation } from 'react-router-dom';
-import { http, type ApiResponse } from '@/shared/api';
+import { http } from '@client/lib/http';
+import type { ApiResponse } from '@/shared/api';
 
 interface ChatMessage {
   id: string;

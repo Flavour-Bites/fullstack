@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence } from 'motion/react';
 import { Send, Loader2 } from 'lucide-react';
-import { CustomCakeRequest, CakeGalleryItem, User } from '../../../../types';
+import { CustomCakeRequest, CakeGalleryItem, User } from '@shared/types';
 import { useToast } from '../../../components/Toast';
 import { t } from '@client/i18n/index';
-import { http, type ApiResponse } from '@/shared/api';
+import { http } from '@client/lib/http';
+import type { ApiResponse } from '@/shared/api';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
 import OrderTrackingView from './OrderTrackingView';
 import RequestSuccessView from './RequestSuccessView';

@@ -19,7 +19,7 @@ import AdminCategories from './AdminCategories';
 import AdminReviews from './AdminReviews';
 import AdminUsers from './AdminUsers';
 import AdminRecovery from './AdminRecovery';
-import type { User } from '../../../../types';
+import type { User } from '@shared/types';
 import { exportOrdersCSV } from './types';
 
 interface AdminViewProps {

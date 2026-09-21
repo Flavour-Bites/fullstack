@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Calendar, ChevronRight, ChevronLeft, Star, Heart, Check, Award, ShieldCheck } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { CakeGalleryItem } from '../../../../types';
-import { GALLERY_ITEMS, TESTIMONIALS } from '../../../../data';
+import { CakeGalleryItem } from '@shared/types';
+import { GALLERY_ITEMS, TESTIMONIALS } from '@client/data';
 import { t } from '@client/i18n/index';
 import { usePageTitle } from '../hooks/usePageTitle';
-import { http, type ApiResponse } from '@/shared/api';
+import { http } from '@client/lib/http';
+import type { ApiResponse } from '@/shared/api';
 
 interface HomeViewProps {
   onSelectCake: (cake: CakeGalleryItem) => void;

@@ -4,7 +4,8 @@ import { Send, Mail, MapPin, Phone, Check, CheckCircle2, ShieldAlert, Loader2, E
 import { t } from '@client/i18n/index';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
 import { BUSINESS_INFO } from '../../../../shared/constants/index';
-import { http, type ApiResponse } from '@/shared/api';
+import { http } from '@client/lib/http';
+import type { ApiResponse } from '@/shared/api';
 
 export default function ContactView() {
   usePageTitle("Contact");

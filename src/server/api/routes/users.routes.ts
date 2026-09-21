@@ -3,7 +3,7 @@ import { usersController } from '../controllers/users.controller';
 import { requireAuth } from '../../platform/middleware/requireAuth';
 import { requireRole } from '../../platform/middleware/requireRole';
 import { validate } from '../../platform/middleware/validate';
-import { updateUserRoleSchema } from '../schemas/users.schemas';
+import { updateUserRoleSchema } from '../../modules/users/users.schemas';
 
 const router = Router();
 

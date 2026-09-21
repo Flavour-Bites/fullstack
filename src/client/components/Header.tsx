@@ -5,7 +5,7 @@ import HeaderDesktopNav from './HeaderDesktopNav';
 import HeaderProfileDropdown from './HeaderProfileDropdown';
 import HeaderMobileMenu from './HeaderMobileMenu';
 import type { Locale } from '@client/i18n/index';
-import type { User } from '../../types';
+import type { User } from '@shared/types';
 
 interface HeaderProps {
   currentUser: User | null;

@@ -17,8 +17,9 @@ import {
 import { Link } from 'react-router-dom';
 import { t } from '@client/i18n/index';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
-import { User as UserType } from '../../../../types';
-import { http, type ApiResponse } from '@/shared/api';
+import { User as UserType } from '@shared/types';
+import { http } from '@client/lib/http';
+import type { ApiResponse } from '@/shared/api';
 
 interface ProfileViewProps {
   currentUser: UserType;

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { HelpCircle, ChevronDown, Search, ArrowRight, ShieldCheck, UserCircle, MessageSquare, CheckCircle2 } from 'lucide-react';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { Link } from 'react-router-dom';
-import { FAQS } from '../../../../data';
+import { FAQS } from '@client/data';
 import { t } from '@client/i18n/index';
 
 export default function HelpView() {

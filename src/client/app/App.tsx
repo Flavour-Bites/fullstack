@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
-import { CakeGalleryItem, User } from '../../types';
-import { http, type ApiResponse } from '@/shared/api';
-import { setToken, clearToken } from '@/shared/auth';
+import { CakeGalleryItem, User } from '@shared/types';
+import { http } from '@client/lib/http';
+import { setToken, clearToken } from '@client/lib/tokenStorage';
+import type { ApiResponse } from '@/shared/api';
 import AnimatedPage from '../components/AnimatedPage';
 
 import HomeView from '../features/core/components/HomeView';

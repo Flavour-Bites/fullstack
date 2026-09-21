@@ -4,9 +4,9 @@ import axios from 'axios';
 import type { InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 import {
   http,
-  ApiError,
   responseBody,
-} from '@/shared/api';
+} from '@client/lib/http';
+import { ApiError } from '@/shared/api';
 import { setToken, clearToken } from '@client/lib/tokenStorage';
 
 describe('http transport layer & interceptors', () => {
