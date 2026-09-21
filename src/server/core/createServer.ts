@@ -2,7 +2,7 @@ import express from 'express';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { webhookCallback } from 'grammy';
-import { bot } from '../bot/index';
+import { getBot } from '../bot/index';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import {
@@ -90,7 +90,7 @@ export async function createApp() {
       }
       next();
     },
-    webhookCallback(bot, 'express'),
+    webhookCallback(getBot(), 'express'),
   );
 
   app.get('/api/csrf-token', cookieParser(), (req, res) => {

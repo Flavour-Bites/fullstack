@@ -15,6 +15,6 @@
 #
 # All other security queries (injection, XSS, SSRF, path traversal, rate
 # limiting, and friends) remain active.
-queries:
+query-filters:
   - exclude:
-      - id: js/missing-token-validation
+      id: js/missing-token-validation
