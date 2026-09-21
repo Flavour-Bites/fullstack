@@ -87,8 +87,6 @@ Create a new cake request.
   "contactPhone": "+251911223344",
   "eventType": "Birthday",
   "guestCount": 30,
-  "deliveryOption": "pickup",
-  "deliveryAddress": "Bole, Addis Ababa",
   "deliveryDate": "2026-07-15",
   "designStyle": "Elegant white with gold accents",
   "flavor": "Vanilla with strawberry filling",

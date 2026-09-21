@@ -7,7 +7,7 @@ import {
     notifyStaffQuoteAccepted,
 } from "../platform/integrations/telegram/telegramNotifications";
 import { getConversationStore } from "../platform/integrations/redis/conversationState";
-import { updateOrderCommercials, updateOrderStatus } from "../modules/orders/orders.operations";
+import { ordersRepository } from "../modules/orders/orders.repository";
 
 const conversationStore = getConversationStore();
 
@@ -22,8 +22,7 @@ export function handleCallbacks(bot: Bot) {
         if (data.startsWith("status:")) {
             const [, orderId, newStatus] = data.split(":");
 
-            const order = await updateOrderStatus(
-                prisma,
+            const order = await ordersRepository.updateStatus(
                 orderId,
                 newStatus as any,
                 {
@@ -83,7 +82,7 @@ export function handleCallbacks(bot: Bot) {
                 return;
             }
 
-            await updateOrderStatus(prisma, orderId, "Confirmed", {
+            await ordersRepository.updateStatus(orderId, "Confirmed", {
                 source: "telegram_bot",
                 userId: order.user?.id ?? null,
             });
@@ -145,10 +144,8 @@ export function handleCallbacks(bot: Bot) {
             return;
         }
 
-        const prisma = getPrisma();
-
-        await updateOrderCommercials(prisma, orderId, { quotedPrice: price });
-        await updateOrderStatus(prisma, orderId, "Quoted", {
+        await ordersRepository.updateCommercials(orderId, { quotedPrice: price });
+        await ordersRepository.updateStatus(orderId, "Quoted", {
             source: "telegram_bot",
             userId: String(ctx.from?.id),
         });

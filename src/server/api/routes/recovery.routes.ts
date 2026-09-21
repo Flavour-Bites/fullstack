@@ -3,7 +3,7 @@ import { recoveryController } from '../controllers/recovery.controller';
 import { requireAuth } from '../../platform/middleware/requireAuth';
 import { requireRole } from '../../platform/middleware/requireRole';
 import { validate } from '../../platform/middleware/validate';
-import { recoveryCreateSchema, recoveryUpdateSchema } from '../schemas/recovery.schemas';
+import { recoveryCreateSchema, recoveryUpdateSchema } from '../../modules/recovery/recovery.schemas';
 import { recoveryLimiter } from '../../platform/config/rateLimiter';
 
 const router = Router();

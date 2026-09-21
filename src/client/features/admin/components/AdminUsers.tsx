@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Users, Edit3, Trash2, Save, Loader2, RefreshCw, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { t } from '@client/i18n/index';
 import { SkeletonTable } from '../../../components/Skeleton';
-import type { SystemUser } from './types';
-import type { User } from '../../../../types';
+import type { SystemUser } from '../types';
+import type { User } from '@shared/types';
 
 interface AdminUsersProps {
   users: SystemUser[];

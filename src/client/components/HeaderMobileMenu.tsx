@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Link, useLocation } from 'react-router-dom';
 import { Search, Globe, Sun, Moon, LogOut, LogIn, CalendarDays } from 'lucide-react';
 import type { Locale } from '@client/i18n/index';
-import type { User } from '../../types';
+import type { User } from '@shared/types';
 
 interface HeaderMobileMenuProps {
   mobileMenuOpen: boolean;
@@ -48,7 +48,6 @@ export default function HeaderMobileMenu({
               { label: 'Home', path: '/' },
               { label: 'Cake Gallery', path: '/gallery' },
               { label: 'Meet Yodit', path: '/about' },
-              { label: 'Reviews', path: '/testimonials' },
               { label: 'Contact', path: '/contact' },
             ].map((item) => (
               <Link

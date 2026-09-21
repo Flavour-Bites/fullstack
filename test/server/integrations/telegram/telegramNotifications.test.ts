@@ -191,7 +191,7 @@ describe('notifyCustomerStatusChange', () => {
     const text = (sendMessage as any).mock.calls[0][1];
     expect(text).toContain('READY');
     expect(text).toContain('pick it up');
-    expect(text).toContain('Bole');
+    expect(text).toContain('Garment');
   });
 
   it('sends Cancelled notification', async () => {

@@ -41,21 +41,35 @@ const mockQuotedOrder = {
   quotedPrice: 5000,
 };
 
+const mockCompletedOrder = {
+  ...mockOrder,
+  id: 'FB-COMPLETED',
+  status: 'Completed',
+};
+
+const mockCancelledOrder = {
+  ...mockOrder,
+  id: 'FB-CANCELLED',
+  status: 'Cancelled',
+};
+
 vi.mock('@server/modules/orders/orders.repository.js', () => ({
   ordersRepository: {
     create: vi.fn((data) => Promise.resolve({ ...mockOrder, id: data.id })),
     findById: vi.fn((id) => {
       if (id === 'FB-ABC123') return Promise.resolve(mockOrder);
       if (id === 'FB-QUOTED') return Promise.resolve(mockQuotedOrder);
+      if (id === 'FB-COMPLETED') return Promise.resolve(mockCompletedOrder);
+      if (id === 'FB-CANCELLED') return Promise.resolve(mockCancelledOrder);
       if (id === 'FB-DELETED') return Promise.resolve({ ...mockOrder, id: 'FB-DELETED', deletedAt: new Date() });
       return Promise.resolve(null);
     }),
     findMany: vi.fn(() => Promise.resolve([mockOrder])),
     updateStatus: vi.fn((id, status) =>
-      Promise.resolve({ ...mockOrder, id, status }),
+      Promise.resolve({ ...(id === 'FB-QUOTED' ? mockQuotedOrder : id === 'FB-COMPLETED' ? mockCompletedOrder : id === 'FB-CANCELLED' ? mockCancelledOrder : mockOrder), id, status }),
     ),
     updateCommercials: vi.fn((id, data) =>
-      Promise.resolve({ ...mockOrder, id, ...data }),
+      Promise.resolve({ ...(id === 'FB-QUOTED' ? mockQuotedOrder : id === 'FB-COMPLETED' ? mockCompletedOrder : id === 'FB-CANCELLED' ? mockCancelledOrder : mockOrder), id, ...data }),
     ),
     softDelete: vi.fn((id) => Promise.resolve({ ...mockOrder, id, deletedAt: new Date() })),
     restore: vi.fn((id) => Promise.resolve({ ...mockOrder, id, deletedAt: null })),
@@ -68,14 +82,18 @@ vi.mock('@shared/utils/ids.js', () => ({
   makeOrderId: vi.fn(() => 'FB-TEST001'),
 }));
 
-vi.mock('@server/modules/orders/orders.workflow.js', () => ({
-  normalizeMoney: vi.fn((val) => {
-    if (val === undefined || val === null || val === '') return null;
-    const parsed = Number(val);
-    if (!Number.isFinite(parsed)) return null;
-    return Math.round(parsed);
-  }),
-}));
+vi.mock('@server/modules/orders/orders.workflow.js', async () => {
+  const actual = await vi.importActual<typeof import('@server/modules/orders/orders.workflow.js')>('@server/modules/orders/orders.workflow.js');
+  return {
+    isValidTransition: actual.isValidTransition,
+    normalizeMoney: vi.fn((val: unknown) => {
+      if (val === undefined || val === null || val === '') return null;
+      const parsed = Number(val);
+      if (!Number.isFinite(parsed)) return null;
+      return Math.round(parsed);
+    }),
+  };
+});
 
 vi.mock('@server/platform/integrations/telegram/telegramNotifications.js', () => ({
   notifyStaffNewOrder: vi.fn(() => Promise.resolve()),
@@ -124,6 +142,35 @@ describe('ordersService.findById', () => {
   it('returns null for missing order', async () => {
     const order = await ordersService.findById('FB-NOPE');
     expect(order).toBeNull();
+  });
+});
+
+describe('ordersService.update', () => {
+  const actor = { userId: 'usr_001', source: 'admin_api' as const };
+
+  it('throws NotFoundError when the order does not exist', async () => {
+    await expect(ordersService.update('FB-NOPE', { status: 'Designing' }, actor))
+      .rejects.toThrow('Order not found');
+  });
+
+  it('promotes only pre-quote orders to Quoted when quotedPrice is set', async () => {
+    const result = await ordersService.update('FB-ABC123', { quotedPrice: 5000 }, actor);
+    expect(result?.status).toBe('Quoted');
+  });
+
+  it('does not revert terminal orders to Quoted when quotedPrice is set', async () => {
+    const result = await ordersService.update('FB-COMPLETED', { quotedPrice: 5000 }, actor);
+    expect(result?.status).toBe('Completed');
+  });
+
+  it('does not revert cancelled orders to Quoted when quotedPrice is set', async () => {
+    const result = await ordersService.update('FB-CANCELLED', { quotedPrice: 5000 }, actor);
+    expect(result?.status).toBe('Cancelled');
+  });
+
+  it('throws ValidationError on an invalid explicit status transition', async () => {
+    await expect(ordersService.update('FB-COMPLETED', { status: 'Quoted' }, actor))
+      .rejects.toThrow('Cannot change status from Completed to Quoted');
   });
 });
 

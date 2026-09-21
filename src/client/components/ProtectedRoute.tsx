@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from 'react-router-dom';
-import { User } from '../../types';
+import { User } from '@shared/types';
 
 interface ProtectedRouteProps {
   currentUser: User | null;

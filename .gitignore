@@ -8,6 +8,8 @@ coverage/
 # Environment files — never commit secrets
 .env
 .env.*
+!.env.example
+!.env.preview.example
 
 # Hidden directories except .github
 .*/ 

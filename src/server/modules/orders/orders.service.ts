@@ -1,10 +1,11 @@
 import { ordersRepository } from './orders.repository';
 import { makeOrderId } from '../../../shared/utils/ids';
 import { formatRequestDate } from '../../../shared/utils/dateFormat';
-import { normalizeMoney } from './orders.workflow';
+import { normalizeMoney, isValidTransition } from './orders.workflow';
 import { notifyStaffNewOrder, notifyCustomerStatusChange, notifyStaffQuoteAccepted } from '../../platform/integrations/telegram/telegramNotifications';
+import { NotFoundError, ValidationError } from '../../platform/errors/index';
 import type { OrderStatus } from '@prisma/client';
-import type { OrderActor } from './orders.types';
+import type { OrderActor, OrderUpdateInput } from './orders.types';
 
 export const ordersService = {
   async create(data: {
@@ -46,9 +47,7 @@ export const ordersService = {
       requestDate: data.requestDate || formatRequestDate(),
     };
 
-    const order = await ordersRepository.create(orderData);
-
-    await ordersRepository.updateStatus(order.id, 'Received', {
+    const order = await ordersRepository.create(orderData, {
       userId,
       source: 'customer_api',
     });
@@ -72,6 +71,48 @@ export const ordersService = {
     return ordersRepository.findById(id);
   },
 
+  async update(orderId: string, input: OrderUpdateInput, actor: OrderActor) {
+    const current = await ordersRepository.findById(orderId);
+    if (!current || current.deletedAt) {
+      throw new NotFoundError('Order not found.');
+    }
+
+    let updated = current;
+
+    const commercialResult = await this.updateCommercials(orderId, input as Record<string, unknown>);
+    if (commercialResult) updated = commercialResult;
+
+    if (
+      input.designStyle !== undefined ||
+      input.specialInstructions !== undefined ||
+      input.bakerNote !== undefined
+    ) {
+      updated = await this.updateDesignAndNotes(orderId, input);
+    }
+
+    if (input.status !== undefined) {
+      if (!isValidTransition(current.status, input.status)) {
+        throw new ValidationError(`Cannot change status from ${current.status} to ${input.status}.`);
+      }
+      updated = await this.changeStatus(orderId, input.status, {
+        userId: actor.userId,
+        source: actor.source,
+        note: input.note ?? null,
+      });
+    } else if (
+      input.quotedPrice !== undefined &&
+      (current.status === 'Received' || current.status === 'Designing')
+    ) {
+      updated = await this.changeStatus(orderId, 'Quoted', {
+        userId: actor.userId,
+        source: actor.source,
+        note: 'Cake price was set.',
+      });
+    }
+
+    return updated;
+  },
+
   async updateCommercials(
     orderId: string,
     data: Record<string, unknown>,
@@ -84,7 +125,7 @@ export const ordersService = {
       for (const field of moneyFields) {
         if (field in data) {
           const value = normalizeMoney(data[field]);
-          if (value === null) throw new Error('Please enter a valid amount.');
+          if (value === null) throw new ValidationError('Please enter a valid amount.');
           commercialInput[field] = value;
         }
       }

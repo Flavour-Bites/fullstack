@@ -3,7 +3,7 @@ import { categoriesController } from '../controllers/categories.controller';
 import { requireAuth } from '../../platform/middleware/requireAuth';
 import { requireRole } from '../../platform/middleware/requireRole';
 import { validate } from '../../platform/middleware/validate';
-import { categorySchema, categoryUpdateSchema } from '../schemas/categories.schemas';
+import { categorySchema, categoryUpdateSchema } from '../../modules/categories/categories.schemas';
 
 const router = Router();
 

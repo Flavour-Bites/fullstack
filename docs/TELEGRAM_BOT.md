@@ -16,15 +16,13 @@ The Flavour Bites Telegram bot allows customers to place cake orders and track t
 The `/order` command starts a multi-step conversation:
 
 1. **Event Type** — What occasion? (Birthday, Wedding, etc.)
-2. **Delivery Date** — When is the event? (YYYY-MM-DD)
+2. **Event Date** — When is the event? (YYYY-MM-DD)
 3. **Guest Count** — How many guests? (numeric, validated)
 4. **Flavor** — Cake flavor preference
 5. **Tier Count** — How many tiers? (1-4)
 6. **Design Style** — Description of the desired design
-7. **Delivery Option** — Pickup or Delivery
-8. **Delivery Address** — (only if delivery selected)
-9. **Contact Phone** — Phone number for coordination
-10. **Special Instructions** — Any additional notes
+7. **Contact Phone** — Phone number for coordination
+8. **Special Instructions** — Any additional notes
 
 On completion, the order is saved and staff are notified via the staff group chat.
 
@@ -49,9 +47,9 @@ Staff and customers interact via inline keyboards:
 ### Customer Notifications (Direct Message)
 - **Designing**: "Your cake is being designed!"
 - **Quoted**: Price quote with Accept/Revise buttons
-- **Confirmed**: Confirmation with delivery details
+- **Confirmed**: Confirmation with order details
 - **InProgress**: Baking started
-- **Ready**: Cake ready for pickup/delivery
+- **Ready**: Cake ready for studio pickup
 - **Cancelled**: Order cancelled
 
 ## Architecture

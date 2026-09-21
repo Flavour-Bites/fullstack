@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Award, Utensils, Compass, ChevronRight } from 'lucide-react';
-import { IngredientSpotlight } from '../../../../types';
-import { INGREDIENT_SPOTLIGHTS } from '../../../../data';
+import { IngredientSpotlight } from '@shared/types';
+import { INGREDIENT_SPOTLIGHTS } from '@client/data';
 import { t } from '@client/i18n/index';
 import { usePageTitle } from '../hooks/usePageTitle';
 

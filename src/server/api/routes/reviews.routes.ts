@@ -3,7 +3,7 @@ import { reviewsController } from '../controllers/reviews.controller';
 import { requireAuth } from '../../platform/middleware/requireAuth';
 import { requireRole } from '../../platform/middleware/requireRole';
 import { validate } from '../../platform/middleware/validate';
-import { createReviewSchema, updateReviewSchema } from '../schemas/reviews.schemas';
+import { createReviewSchema, updateReviewSchema } from '../../modules/reviews/reviews.schemas';
 
 const router = Router();
 

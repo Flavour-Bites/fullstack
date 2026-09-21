@@ -4,7 +4,7 @@ import { render, screen, cleanup, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ToastProvider } from '@client/components/Toast';
 import { AuthView } from '@client/features/auth/components/AuthView';
-import { http } from '@/shared/api';
+import { http } from '@client/lib/http';
 
 beforeEach(() => {
   localStorage.clear();

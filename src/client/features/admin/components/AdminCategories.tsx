@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Layers, Plus, Save, Loader2, Edit3, Trash2, ToggleRight, ToggleLeft } from 'lucide-react';
 import { t } from '@client/i18n/index';
 import { SkeletonTable } from '../../../components/Skeleton';
-import type { Category } from './types';
+import type { Category } from '../types';
 
 interface AdminCategoriesProps {
   categories: Category[];

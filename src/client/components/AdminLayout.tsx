@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { ProtectedRoute } from './ProtectedRoute';
 import ErrorBoundary from './ErrorBoundary';
-import type { User } from '../../types';
+import type { User } from '@shared/types';
 
 interface AdminLayoutProps {
   currentUser: User | null;

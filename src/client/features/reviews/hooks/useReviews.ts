@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '../../../components/Toast';
-import { http, type ApiResponse } from '@/shared/api';
-import type { ReviewItem } from '../../admin/components/types';
+import { http } from '@client/lib/http';
+import type { ApiResponse } from '@/shared/api';
+import type { ReviewItem } from '../../admin/types';
 
 export function useReviews() {
   const { showToast } = useToast();

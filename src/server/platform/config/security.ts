@@ -2,7 +2,10 @@ import helmet from 'helmet';
 import { env } from './env';
 
 function createSecurityConfig() {
-  const isDev = !env.isProd;
+  // Vite-integration relaxations (inline scripts/styles, localhost/ws) are only
+  // needed when this server also serves the dev client. Preview and production
+  // serve the build and therefore use the strict policy.
+  const isDev = env.isDev;
 
   return helmet({
     contentSecurityPolicy: {
@@ -54,8 +57,8 @@ function createSecurityConfig() {
         ],
         objectSrc: ["'none'"],
         mediaSrc: ["'none'"],
-        // Telegram login widget renders an iframe from telegram.org and oauth.telegram.org.
-        frameSrc: ['https://telegram.org', 'https://oauth.telegram.org'],
+        // Telegram login widget and embedded Google Maps frame on contacts page
+        frameSrc: ["'self'", 'https://telegram.org', 'https://oauth.telegram.org', 'https://www.google.com', 'https://maps.google.com'],
         frameAncestors: [
           "'self'",
           'https://telegram.org',

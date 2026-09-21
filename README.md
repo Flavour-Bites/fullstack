@@ -22,7 +22,7 @@
 | Frontend | React 19, TypeScript, TailwindCSS 4, Vite 6 |
 | Backend | Express 4, Node.js (ESM) |
 | Database | PostgreSQL (Neon), Prisma ORM |
-| Auth | JWT, bcrypt, Telegram Login Widget |
+| Auth | JWT, bcrypt, Telegram OIDC |
 | Bot | grammY (Telegram) |
 | AI | Google Gemini 2.0 Flash |
 | Media | Cloudinary |
@@ -36,6 +36,32 @@ npx prisma generate && npx prisma db push
 npm run db:seed
 npm run dev
 ```
+
+## Preview Environment (`NODE_ENV=preview`)
+
+Preview runs the production-shaped code path (strict CSP/CORS, no Vite HMR,
+built SPA served by the API process) against a non-production database, so the
+real Telegram OIDC flow — redirects, cookies, CSRF — can be tested end to end
+behind a public https tunnel.
+
+```bash
+# 1. Public https tunnel to the local server
+cloudflared tunnel --url http://localhost:3000
+
+# 2. Configure from the committed template (paste the tunnel URL into all three)
+cp .env.preview.example .env.preview
+
+# 3. Build the client for the preview origin + bundle the server
+npm run preview:build
+
+# 4. Run
+npm run preview:start        # or preview:dev (tsx, no restart needed for server code)
+```
+
+Then register `https://<tunnel>/api/auth/telegram/callback` as an OIDC redirect
+URI in BotFather and visit `https://<tunnel>`. Cookie attributes and CORS/CSP
+policy are derived centrally from topology (https, same-site, loopback) in
+`src/server/platform/config/` — environment names never leak into feature code.
 
 ## Documentation
 
@@ -64,14 +90,12 @@ npm run dev
 
 ```
 src/
-├── app/           Express app, middleware, config
-├── modules/       Domain modules (auth, orders, users, ...)
-├── integrations/  External services (Telegram, Redis, Cloudinary, Gemini)
-├── bot/           Telegram bot handlers
-├── components/    React UI components
-├── shared/        Error classes, utilities
-└── i18n/          Translations (en, am)
+├── server/       Express app, API routes/controllers, domain modules, integrations, bot
+├── client/       React SPA (app + feature-scoped UI, hooks, components)
+└── shared/       Cross-cutting types, constants, and utilities (client + server)
 ```
+
+See [Architecture](docs/ARCHITECTURE.md) for the full layout and module pattern.
 
 ## License
 

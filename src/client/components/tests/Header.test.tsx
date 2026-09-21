@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import Header from '@client/components/Header';
-import type { User } from '@/types';
+import type { User } from '@shared/types';
 
 const baseProps = {
   currentUser: null as User | null,
@@ -31,7 +31,7 @@ describe('Header', () => {
     renderWithRouter(<Header {...baseProps} />);
     expect(screen.getByText('Home')).toBeInTheDocument();
     expect(screen.getByText('Cake Gallery')).toBeInTheDocument();
-    expect(screen.getByText('Reviews')).toBeInTheDocument();
+    expect(screen.getByText('Contact')).toBeInTheDocument();
   });
 
   it('shows sign in button when no user', () => {

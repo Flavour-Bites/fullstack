@@ -1,19 +1,17 @@
 import { categoriesRepository } from './categories.repository';
-import { categorySchema, categoryUpdateSchema } from '../../api/schemas/categories.schemas';
+import type { CategoryInput, CategoryUpdateInput } from './categories.schemas';
 
 export const categoriesService = {
   async findAll(includeInactive = false) {
     return categoriesRepository.findAll(includeInactive);
   },
 
-  async create(data: Record<string, unknown>) {
-    const validatedData = categorySchema.parse(data);
-    return categoriesRepository.create(validatedData as any);
+  async create(data: CategoryInput) {
+    return categoriesRepository.create(data);
   },
 
-  async update(id: string, data: Record<string, unknown>) {
-    const validatedData = categoryUpdateSchema.parse(data);
-    return categoriesRepository.update(id, validatedData);
+  async update(id: string, data: CategoryUpdateInput) {
+    return categoriesRepository.update(id, data);
   },
 
   async delete(id: string) {

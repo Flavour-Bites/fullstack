@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { HelpCircle, ChevronDown, Search, ArrowRight, ShieldCheck, UserCircle, MessageSquare, CheckCircle2 } from 'lucide-react';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { Link } from 'react-router-dom';
-import { FAQS } from '../../../../data';
+import { FAQS } from '@client/data';
 import { t } from '@client/i18n/index';
 
 export default function HelpView() {
@@ -56,7 +56,7 @@ export default function HelpView() {
                 <div className="w-8 h-8 rounded-full bg-stone-900 dark:bg-stone-800 text-white flex items-center justify-center font-mono font-bold text-xs shrink-0 border border-stone-800 dark:border-stone-700">2</div>
                 <div>
                   <h4 className="font-serif text-lg text-stone-900 dark:text-stone-200 mb-1">Fill out the Request Form</h4>
-                  <p className="text-sm text-stone-600 dark:text-stone-400 font-light">Navigate to the <Link to="/request" className="text-lux-gold hover:underline">Order Form</Link>. We need your exact event date, the estimated number of guests, and whether you want pickup or delivery.</p>
+                  <p className="text-sm text-stone-600 dark:text-stone-400 font-light">Navigate to the <Link to="/request" className="text-lux-gold hover:underline">Order Form</Link>. We need your exact event date, the estimated number of guests, and your preferred cake style.</p>
                 </div>
               </div>
 
@@ -147,7 +147,7 @@ export default function HelpView() {
               { id: 'all', label: t('contact.allPolicies'), match: ['all'] },
               { id: 'booking', label: t('contact.leadTimesBooking'), match: ['booking', 'ordering', 'cancellation'] },
               { id: 'pricing', label: t('contact.pricingCosts'), match: ['pricing'] },
-              { id: 'delivery', label: t('contact.deliveryLogistics'), match: ['delivery', 'studio'] },
+              { id: 'studio', label: t('contact.studioLocation'), match: ['studio'] },
               { id: 'dietary', label: t('contact.ingredientsDietary'), match: ['dietary', 'care'] }
             ].map((cat) => {
               const isActive = faqCategory === cat.id;
@@ -177,7 +177,7 @@ export default function HelpView() {
             { id: 'all', match: ['all'] },
             { id: 'booking', match: ['booking', 'ordering', 'cancellation'] },
             { id: 'pricing', match: ['pricing'] },
-            { id: 'delivery', match: ['delivery', 'studio'] },
+            { id: 'studio', match: ['studio'] },
             { id: 'dietary', match: ['dietary', 'care'] }
           ].find(c => c.id === faqCategory) || { match: ['all'] };
 

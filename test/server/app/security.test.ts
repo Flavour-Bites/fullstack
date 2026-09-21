@@ -27,8 +27,13 @@ describe('securityConfig CSP', () => {
     }
   });
 
-  it('allows unsafe-inline in styleSrc (needed for Tailwind)', () => {
-    const headers = runMiddleware(securityConfig);
+  it('allows unsafe-inline in styleSrc in dev mode (needed for Tailwind HMR)', () => {
+    const origEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'development';
+    const devConfig = createSecurityConfig();
+    process.env.NODE_ENV = origEnv;
+
+    const headers = runMiddleware(devConfig);
     const csp = headers['Content-Security-Policy'] || '';
     const styleMatch = csp.match(/style-src\s+([^;]+)/);
     if (styleMatch) {
@@ -42,7 +47,7 @@ describe('securityConfig CSP', () => {
     expect(csp).toContain("default-src 'self'");
   });
 
-  it('allows Telegram frames including oauth.telegram.org', () => {
+  it('allows Telegram frames and Google Maps in frame-src', () => {
     const headers = runMiddleware(securityConfig);
     const csp = headers['Content-Security-Policy'] || '';
     const frameMatch = csp.match(/frame-src\s+([^;]+)/);
@@ -50,6 +55,8 @@ describe('securityConfig CSP', () => {
     if (frameMatch) {
       expect(frameMatch[1]).toContain('https://telegram.org');
       expect(frameMatch[1]).toContain('https://oauth.telegram.org');
+      expect(frameMatch[1]).toContain('https://www.google.com');
+      expect(frameMatch[1]).toContain('https://maps.google.com');
     }
   });
 

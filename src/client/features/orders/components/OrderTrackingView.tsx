@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Activity, Clock, Filter, Trash2, AlertTriangle, X } from 'lucide-react';
 import { t } from '@client/i18n/index';
-import type { CustomCakeRequest } from '../../../../types';
+import type { CustomCakeRequest } from '@shared/types';
 import { getStatusStyles } from '../../../../shared/utils/statusStyles';
 
 interface OrderTrackingViewProps {

@@ -1,13 +1,13 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from 'vitest';
-import { nextStatus, orderPrice, WORKFLOW } from '@client/features/admin/components/types';
-import type { CakeRequest } from '@client/features/admin/components/types';
+import { nextStatus, orderPrice, WORKFLOW } from '@client/features/admin/types';
+import type { CakeRequest } from '@client/features/admin/types';
 
 describe('WORKFLOW', () => {
   it('defines the standard order workflow stages', () => {
     expect(WORKFLOW).toEqual([
       'Received', 'Designing', 'Quoted', 'Confirmed',
-      'In Progress', 'Ready', 'Completed',
+      'InProgress', 'Ready', 'Completed',
     ]);
   });
 });
@@ -17,8 +17,8 @@ describe('nextStatus', () => {
     expect(nextStatus('Received')).toBe('Designing');
     expect(nextStatus('Designing')).toBe('Quoted');
     expect(nextStatus('Quoted')).toBe('Confirmed');
-    expect(nextStatus('Confirmed')).toBe('In Progress');
-    expect(nextStatus('In Progress')).toBe('Ready');
+    expect(nextStatus('Confirmed')).toBe('InProgress');
+    expect(nextStatus('InProgress')).toBe('Ready');
     expect(nextStatus('Ready')).toBe('Completed');
   });
 

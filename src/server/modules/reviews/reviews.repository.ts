@@ -1,6 +1,7 @@
 import { getPrisma } from '../../platform/config/prisma';
 import { makeId } from '../../../shared/utils/ids';
 import { formatRequestDate } from '../../../shared/utils/dateFormat';
+import type { UpdateReviewInput } from './reviews.schemas';
 
 export const reviewsRepository = {
   async findAll() {
@@ -38,10 +39,8 @@ export const reviewsRepository = {
     return prisma.review.delete({ where: { id } });
   },
 
-  async update(id: string, data: Record<string, unknown>) {
+  async update(id: string, data: UpdateReviewInput) {
     const prisma = getPrisma();
-    const { updateReviewSchema } = await import('../../api/schemas/reviews.schemas');
-    const validatedData = updateReviewSchema.parse(data);
-    return prisma.review.update({ where: { id }, data: validatedData });
+    return prisma.review.update({ where: { id }, data });
   },
 };

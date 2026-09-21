@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useToast } from '../../../components/Toast';
-import { http, type ApiResponse } from '@/shared/api';
-import type { Category } from '../../admin/components/types';
+import { http } from '@client/lib/http';
+import type { ApiResponse } from '@/shared/api';
+import type { Category } from '../../admin/types';
 
 export function useCategories() {
   const { showToast } = useToast();

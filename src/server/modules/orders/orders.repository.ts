@@ -23,31 +23,47 @@ export const ordersRepository = {
     referenceImageFormat?: string | null;
     referenceImageBytes?: number | null;
     requestDate: string;
-  }) {
+  }, actor: OrderActor) {
     const prisma = getPrisma();
-    return prisma.customCakeRequest.create({
-      data: {
-        id: data.id,
-        userId: data.userId,
-        contactName: data.contactName,
-        contactPhone: data.contactPhone,
-        eventType: data.eventType,
-        guestCount: data.guestCount,
-        deliveryOption: data.deliveryOption,
-        deliveryAddress: data.deliveryAddress ?? null,
-        deliveryDate: data.deliveryDate,
-        designStyle: data.designStyle ?? '',
-        flavor: data.flavor,
-        tierCount: data.tierCount,
-        specialInstructions: data.specialInstructions ?? '',
-        referenceImage: data.referenceImage ?? null,
-        referenceImagePublicId: data.referenceImagePublicId ?? null,
-        referenceImageFormat: data.referenceImageFormat ?? null,
-        referenceImageBytes: data.referenceImageBytes ?? null,
-        requestDate: data.requestDate,
-        status: 'Received',
-      },
-      include: { user: true },
+    return prisma.$transaction(async (tx) => {
+      const order = await tx.customCakeRequest.create({
+        data: {
+          id: data.id,
+          userId: data.userId,
+          contactName: data.contactName,
+          contactPhone: data.contactPhone,
+          eventType: data.eventType,
+          guestCount: data.guestCount,
+          deliveryOption: data.deliveryOption,
+          deliveryAddress: data.deliveryAddress ?? null,
+          deliveryDate: data.deliveryDate,
+          designStyle: data.designStyle ?? '',
+          flavor: data.flavor,
+          tierCount: data.tierCount,
+          specialInstructions: data.specialInstructions ?? '',
+          referenceImage: data.referenceImage ?? null,
+          referenceImagePublicId: data.referenceImagePublicId ?? null,
+          referenceImageFormat: data.referenceImageFormat ?? null,
+          referenceImageBytes: data.referenceImageBytes ?? null,
+          requestDate: data.requestDate,
+          status: 'Received',
+        },
+        include: { user: true },
+      });
+
+      await tx.orderStatusEvent.create({
+        data: {
+          id: makeId('ose'),
+          orderId: order.id,
+          fromStatus: null,
+          toStatus: 'Received',
+          changedById: actor.userId ?? null,
+          source: actor.source,
+          note: actor.note ?? null,
+        },
+      });
+
+      return order;
     });
   },
 

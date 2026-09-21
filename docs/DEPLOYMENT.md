@@ -93,34 +93,42 @@ npm run build:server   # dist/server.cjs → run by Render (Docker)
 npm start
 ```
 
-## Local Production Mimic (docker compose)
+## Local Development (Docker Postgres + Redis)
 
-`docker-compose.yml` reproduces the deployed topology on one machine:
-
-| Service | Role | Host port |
-| --- | --- | --- |
-| `frontend` | nginx serving `dist/client/` (like Vercel) | 8080 |
-| `backend` | the production Docker image (like Render), API-only | 3000 |
-| `db` | PostgreSQL | 5433 |
-| `redis` | Redis | 6380 |
-| `db-init` | one-shot `prisma db push` for a fresh database | — |
-| `seed` | one-shot sample seeder (profile `tools`) | — |
+For everyday development the dev servers run against a local Postgres + Redis
+provided by `docker-compose.dev.yml` (tracked; not used by any deployment).
+The dev scripts override `DATABASE_URL`/`REDIS_URL` to point at those
+containers, so no `.env` changes are needed.
 
 ```bash
-cp .env.example .env      # then fill in the real secrets
-docker compose up --build
-docker compose --profile tools run --rm seed   # optional sample data
+npm run dev:db        # start Postgres (5432) + Redis (6379), wait for health
+npm run db:push       # first time / after schema changes (no migration baseline yet)
+npm run db:seed       # optional sample data
+npm run dev           # Vite (localhost:5173) + nodemon API (localhost:3000), both watch
+# or individually: npm run dev:web  /  npm run dev:server
 ```
-
-Open http://localhost:8080 — the frontend calls http://localhost:3000.
 
 Notes:
 
-- The backend runs the **production** code path (`NODE_ENV=production`, `node dist/server.cjs`) against the local Postgres/Redis. `ALLOW_LOOPBACK_APP_URL=true` lets the production `APP_URL` guard accept `http://localhost:3000`; it is off by default so real deployments still fail loudly on a loopback URL.
-- Cookies are marked `Secure` (and cross-site `SameSite=None`) only when `APP_URL` is HTTPS, so auth/CSRF work over the local plaintext stack.
-- Telegram webhook registration is skipped for a loopback `APP_URL`, so this stack never repoints the real bot at localhost.
-- `db-init` runs `prisma db push` because the migration history has no baseline (the initial migration only `ALTER`s legacy tables). `docker-entrypoint.sh` then baselines the tracked migrations (P3005), exactly as on Render. The `seed` service uses the `builder` image stage because the runtime image omits `tsx`.
-- The stack reads the repo `.env` directly. Values must be parseable by Docker Compose's dotenv parser: keep generated secrets to safe characters (e.g. a 64-char hex string — not a quoted value containing quotes, `{}`, or `#`).
+- Host ports are overridable: `DEV_POSTGRES_PORT=5430 DEV_REDIS_PORT=6380 npm run dev:db`
+  (e.g. if a system Postgres already owns 5432). Server and `db:push` scripts
+  pick up the same override.
+- Dev servers are http + loopback: cookies are `Lax`/non-`Secure` and the
+  Telegram webhook registration is skipped, so the real bot is never touched.
+- `dev:db:down` stops the containers but keeps the data (`down -v` wipes it).
+- To archive a deployed-like db check without changing `.env`, run the
+  production-mimic stack in `.local/` instead (see below).
+
+## Local Production Mimic
+
+A gitignored, local-only replica of the deployed topology (frontend/nginx like
+Vercel, backend like Render, local Postgres + Redis) lives in `.local/`. It is
+**not shipped** — `.local/` is excluded from git and every Docker build. It
+includes optional cloudflared quick-tunnel mode that reproduces the cross-origin
+HTTPS behavior of production (`Secure` + `SameSite=None` cookies, CORS, real
+Telegram OIDC + webhook).
+
+See `.local/README.md` for the full guide.
 
 ## Telegram Webhook
 
