@@ -1,0 +1,20 @@
+# CodeQL configuration for Flavour Bites.
+#
+# The `js/missing-token-validation` ("Missing CSRF middleware") query only
+# recognizes CSRF middleware from the `csurf`, `lusca`, and `tiny-csrf`
+# packages. This app protects every state-changing `/api` route with
+# `csrf-csrf`'s `doubleCsrfProtection`, which the query cannot model, so the
+# query reports the whole API as unprotected — a permanent false positive.
+#
+# The security property the query checks is instead enforced by
+# test/server/app/csrfCoverage.test.ts, which walks the real Express router
+# stacks and fails the build when any POST/PUT/PATCH/DELETE handler is not
+# guarded by `doubleCsrfProtection` (by function identity) or listed in an
+# explicit, two-way-checked exemption set. That test is strictly stronger than
+# the analyzer: it verifies the actual middleware, not a library-name match.
+#
+# All other security queries (injection, XSS, SSRF, path traversal, rate
+# limiting, and friends) remain active.
+queries:
+  - exclude:
+      - id: js/missing-token-validation

@@ -67,7 +67,6 @@ export async function createApp() {
 
   app.use(securityConfig);
   app.use(corsConfig);
-  app.use(cookieParser());
   app.use(express.json({ limit: '1mb' }));
 
   // Morgan request logging — skip Vite dev-server requests to avoid log spam
@@ -94,11 +93,18 @@ export async function createApp() {
     webhookCallback(bot, 'express'),
   );
 
-  app.get('/api/csrf-token', (req, res) => {
+  app.get('/api/csrf-token', cookieParser(), (req, res) => {
     res.json({ token: generateToken(req, res) });
   });
 
-  app.use('/api', doubleCsrfProtection, apiRoutes);
+  // The CSRF-protected API surface is the only place cookies are read (JWT in
+  // the auth cookie + the csrf-token double-submit cookie), so cookie parsing
+  // is scoped to /api rather than the whole app. Non-API handlers (health,
+  // the secret-token-verified Telegram webhook, static content) never touch
+  // cookies, which keeps request handlers not guarded by CSRF free of cookie
+  // middleware (least privilege). doubleCsrfProtection ignores GET/HEAD/OPTIONS
+  // and rejects unsafe requests that lack a valid x-csrf-token.
+  app.use('/api', cookieParser(), doubleCsrfProtection, apiRoutes);
 
   app.use(errorHandler);
 
