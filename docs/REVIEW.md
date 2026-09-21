@@ -47,6 +47,21 @@ status: draft
 - **Critical #5 — Generic errors → 500**: plain `Error`s and Prisma `P2025` still need mapping to typed errors/404s.
 - **Frontend public pages**: `MyOrdersView`, `SearchModal`, and testimonials still use static/hardcoded data instead of the real APIs.
 
+### ✅ Post-Security & Data Migration Status (2026-09-21)
+
+> Supersedes the "Still Open" list above. The audit snapshot above stays as the dated 2026-09-16 record.
+
+- **Critical #1 — CSRF contract: resolved.** Every client mutation flows through `src/client/lib/http.ts` (CSRF header + credentials + Bearer); the security branch scoped `doubleCsrfProtection`, added rate limits, a `csrfCoverage.test.ts`, and a CodeQL query for missing CSRF headers. CI hardened: lazy `getBot()` keeps prod fail-fast (`validateEnv()` before `createApp()`), hermetic token in `test/setup.ts`, CodeQL `v4`.
+- **Critical #2 — Mass assignment: mitigated at the boundary.** All mutation routes pass through `validate()` (Zod), which *replaces* `req.body` with parsed data; staff update endpoints only ever receive whitelisted, validated fields (`categories.repository.update` / `gallery.repository.update` take `Record<string, unknown>` but are called only with validated input).
+- **Frontend public pages: now API-backed.** Client reads migrated to **TanStack Query** (v5): app-wide `queryClient` at `src/client/lib/queryClient.ts`, `apiGet()` envelope-unwrap helper in `http.ts`, and a `renderWithQueryClient` test util.
+  - **Gallery catalog** — one cached `useGalleryItems` (`GET /api/gallery`) shared by the gallery page, home featured strip, and SearchModal. Static `GALLERY_ITEMS` seed and the silent fallback-to-fake removed.
+  - **Testimonials & home carousel** — `useTestimonials` (`GET /api/reviews`) with skeletons and honest empty states; initials avatars (Reviews store an author string, not a photo); seeded idempotent `SAMPLE_REVIEWS`.
+  - **MyOrdersView** — only real `CakeRequest` fields (sandbox badge, fabricated IDs/statuses/emails and the scripted 5-step timeline removed); real `OrderStatusEvent` history via `useOrderTimeline` (`GET /api/requests/:id/timeline`).
+  - **`data.ts`** — keeps only genuinely static editorial content (`FAQS`, `INGREDIENT_SPOTLIGHTS`); the `Testimonial` type is removed.
+  - **SearchModal** — searches the live catalog; FAQs remain static editorial content (no FAQ backend).
+- **Still open:** Critical #5 (map plain `Error`/Prisma `P2025` → typed 404/500); the app-shell client-state migration of the Theme/Locale/Auth/CakeSelection providers — **Zustand was deliberately deferred**: the migrated surfaces have no genuine client-state consumer, so adding it now would be a speculative dependency.
+- **Verification:** `npm run lint`, `npm test` (56 files / 363 tests), `npm run build`, and `npm run build:client` all green on `feat/public-pages-real-data`.
+
 ---
 
 ## 🗂️ Table of Contents

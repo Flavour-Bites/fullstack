@@ -1,4 +1,4 @@
-import axios, { type AxiosError, type InternalAxiosRequestConfig, type AxiosResponse } from 'axios';
+import axios, { type AxiosError, type AxiosRequestConfig, type InternalAxiosRequestConfig, type AxiosResponse } from 'axios';
 import { clearToken, getToken } from './tokenStorage';
 import { env } from '../platform/config/env';
 import { ApiError, type ApiResponse } from '../../shared/api/types';
@@ -84,4 +84,20 @@ http.interceptors.response.use(
 
 export function responseBody<T>(response: AxiosResponse): ApiResponse<T> {
   return response.data as ApiResponse<T>;
+}
+
+/**
+ * Type-safe GET that unwraps the `{ success, ... }` envelope: resolves with the
+ * success payload or throws an ApiError. The building block for TanStack Query
+ * queryFn's — callers never re-check `data.success`.
+ */
+export async function apiGet<T>(
+  path: string,
+  config?: AxiosRequestConfig,
+): Promise<Extract<ApiResponse<T>, { success: true }>> {
+  const { data } = await http.get<ApiResponse<T>>(path, config);
+  if (!data.success) {
+    throw new ApiError(data.error || 'Request failed');
+  }
+  return data;
 }

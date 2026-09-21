@@ -1,14 +1,20 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { screen, cleanup } from '@testing-library/react';
+import { renderWithQueryClient } from '@client/lib/tests/renderWithQueryClient';
 import GalleryView from '@client/features/gallery/components/GalleryView';
+import { apiGet } from '@client/lib/http';
+
+vi.mock('@client/lib/http', () => ({
+  apiGet: vi.fn(),
+}));
 
 beforeEach(() => {
-  vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response('{"success":true,"items":[]}'))));
+  vi.mocked(apiGet).mockResolvedValue({ success: true, items: [] } as never);
 });
 
 afterEach(() => {
-  vi.unstubAllGlobals();
+  vi.clearAllMocks();
   cleanup();
 });
 
@@ -16,7 +22,27 @@ const noop = () => {};
 
 describe('GalleryView', () => {
   it('renders header section', () => {
-    render(<GalleryView selectedCake={null} onClearSelectedCake={noop} onCommissionCake={noop} onSelectCake={noop} />);
+    renderWithQueryClient(
+      <GalleryView
+        selectedCake={null}
+        onClearSelectedCake={noop}
+        onCommissionCake={noop}
+        onSelectCake={noop}
+      />
+    );
+    expect(screen.getByText('Custom Cake Gallery')).toBeInTheDocument();
+  });
+
+  it('falls back to an honest empty grid while the catalog is empty', () => {
+    renderWithQueryClient(
+      <GalleryView
+        selectedCake={null}
+        onClearSelectedCake={noop}
+        onCommissionCake={noop}
+        onSelectCake={noop}
+      />
+    );
+    expect(apiGet).toHaveBeenCalledWith('/api/gallery');
     expect(screen.getByText('Custom Cake Gallery')).toBeInTheDocument();
   });
 });

@@ -2,8 +2,9 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, X, HelpCircle, ArrowRight, Command, ChevronDown, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { GALLERY_ITEMS, FAQS } from '@client/data';
+import { FAQS } from '@client/data';
 import type { CakeGalleryItem } from '@shared/types';
+import { useGalleryItems } from '../../gallery/hooks/useGalleryItems';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ export default function SearchModal({ isOpen, onClose, onSelectCake }: SearchMod
   const [query, setQuery] = useState('');
   const [expandedFaqId, setExpandedFaqId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { data: galleryItems = [], isLoading: galleryLoading } = useGalleryItems();
 
   useEffect(() => {
     if (isOpen) {
@@ -43,7 +45,7 @@ export default function SearchModal({ isOpen, onClose, onSelectCake }: SearchMod
     if (!query.trim()) return { cakes: [], faqs: [] };
     const q = query.toLowerCase();
 
-    const cakes = GALLERY_ITEMS.filter(
+    const cakes = galleryItems.filter(
       (item) =>
         item.name.toLowerCase().includes(q) ||
         item.description.toLowerCase().includes(q) ||
@@ -58,10 +60,11 @@ export default function SearchModal({ isOpen, onClose, onSelectCake }: SearchMod
     ).slice(0, 4);
 
     return { cakes, faqs };
-  }, [query]);
+  }, [query, galleryItems]);
 
   const hasResults = results.cakes.length > 0 || results.faqs.length > 0;
   const hasQuery = query.trim().length > 0;
+  const searching = hasQuery && galleryLoading && galleryItems.length === 0 && results.faqs.length === 0;
 
   const handleCakeClick = (cake: CakeGalleryItem) => {
     if (onSelectCake) {
@@ -142,7 +145,13 @@ export default function SearchModal({ isOpen, onClose, onSelectCake }: SearchMod
                 </div>
               )}
 
-              {hasQuery && !hasResults && (
+              {hasQuery && !hasResults && searching && (
+                <div className="px-5 py-8 text-center">
+                  <p className="text-sm text-stone-500 dark:text-stone-400 font-sans">Searching the catalog…</p>
+                </div>
+              )}
+
+              {hasQuery && !hasResults && !searching && (
                 <div className="px-5 py-8 text-center">
                   <p className="text-sm text-stone-500 dark:text-stone-400 font-sans">No results for "{query}"</p>
                   <p className="text-xs text-stone-400 dark:text-stone-500 mt-1 font-sans">Try a different search term.</p>
