@@ -50,7 +50,7 @@
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.546.0",
     "morgan": "^1.10.0",
-    "motion": "^12.23.24",
+    "motion": "^13.4.0",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
     "react-router-dom": "^7.18.1",
