@@ -1,42 +1,27 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { CakeGalleryItem } from '@shared/types';
-import { GALLERY_ITEMS } from '@client/data';
-import { http } from '@client/lib/http';
-import type { ApiResponse } from '@/shared/api';
+import { useGalleryItems } from './useGalleryItems';
 
 export type FilterType = 'all' | 'birthday' | 'kids' | 'treats' | 'celebration';
 
+// Gallery filtering over the real catalog. The catalog comes from the shared
+// useGalleryItems query — there is intentionally no static seed data: on an
+// empty or unreachable API the grid renders honestly empty instead of showing
+// fabricated items as if they were the shop's own work.
 export function useGalleryFilters() {
+  const { data: items = [], isLoading, error } = useGalleryItems();
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [items, setItems] = useState<CakeGalleryItem[]>(GALLERY_ITEMS);
-  const [filteredCakes, setFilteredCakes] = useState<CakeGalleryItem[]>(GALLERY_ITEMS);
 
-  // Load from Postgres backend if reachable, otherwise fall back gracefully
-  useEffect(() => {
-    const fetchGallery = async () => {
-      try {
-        const { data } = await http.get<ApiResponse<{ items: CakeGalleryItem[] }>>('/api/gallery');
-        if (data.success && data.items && data.items.length > 0) {
-          setItems(data.items);
-          setFilteredCakes(data.items);
-        }
-      } catch (err) {
-        console.warn('Postgres custom cake gallery items unavailable, serving local backup:', err);
-      }
-    };
-    fetchGallery();
-  }, []);
-
-  // Dynamic derivation of all unique tags from our catalog
+  // Dynamic derivation of all unique tags from the real catalog
   const allUniqueTags: string[] = useMemo(
     () => Array.from(new Set(items.flatMap((item) => item.tags || []))),
     [items],
   );
 
   // Combined logic to sync search feed, category selection, and multiple tag switches
-  useEffect(() => {
+  const filteredCakes: CakeGalleryItem[] = useMemo(() => {
     let result = items;
 
     // A. Filter by Category Tab
@@ -61,12 +46,10 @@ export function useGalleryFilters() {
 
     // C. Filter by Selected Tags cloud (item must contain all selected tag filters)
     if (selectedTags.length > 0) {
-      result = result.filter((item) =>
-        selectedTags.every((t) => item.tags?.includes(t)),
-      );
+      result = result.filter((item) => selectedTags.every((t) => item.tags?.includes(t)));
     }
 
-    setFilteredCakes(result);
+    return result;
   }, [activeFilter, searchQuery, selectedTags, items]);
 
   const handleTagToggle = (tag: string) => {
@@ -92,6 +75,8 @@ export function useGalleryFilters() {
     items,
     filteredCakes,
     allUniqueTags,
+    isLoading,
+    error,
     handleTagToggle,
     clearAllFilters,
     hasActiveFilters,
