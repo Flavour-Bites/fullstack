@@ -39,6 +39,8 @@ export interface CakeGalleryItem {
   tags: string[];
 }
 
+export type OrderStatus = 'Received' | 'Designing' | 'Quoted' | 'Confirmed' | 'InProgress' | 'Ready' | 'Completed' | 'Cancelled';
+
 export interface CustomCakeRequest {
   id: string;
   contactName: string;
@@ -54,7 +56,7 @@ export interface CustomCakeRequest {
   specialInstructions: string;
   requestDate: string;
   referenceImage?: string;
-  status: 'Received' | 'Designing' | 'Quoted' | 'Confirmed' | 'InProgress' | 'Ready' | 'Completed' | 'Cancelled';
+  status: OrderStatus;
   quotedPrice?: number;
   finalPrice?: number;
   priceConfirmedAt?: string;

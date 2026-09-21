@@ -13,7 +13,7 @@ interface FrontendOrder {
   email: string;
   cakeType: string;
   eventDate: string;
-  status: 'Pending' | 'In Review' | 'Confirmed' | 'Designing' | 'Quoted' | 'In Progress' | 'Ready' | 'Completed';
+  status: 'Pending' | 'In Review' | 'Confirmed' | 'Designing' | 'Quoted' | 'InProgress' | 'Ready' | 'Completed';
   stepNum: number; // 1 to 5 steps
   tierCount: number;
   flavor: string;

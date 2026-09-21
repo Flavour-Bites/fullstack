@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { useToast } from '../../../components/Toast';
 import { http } from '@client/lib/http';
 import type { ApiResponse } from '@/shared/api';
-import type { SystemUser } from '../../admin/components/types';
+import type { SystemUser } from '../../admin/types';
 
 export function useUsers() {
   const { showToast } = useToast();

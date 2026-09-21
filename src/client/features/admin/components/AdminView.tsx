@@ -11,7 +11,7 @@ import { useCategories } from '../../categories/hooks/useCategories';
 import { useGallery } from '../../gallery/hooks/useGallery';
 import { useUsers } from '../../users/hooks/useUsers';
 import { useOrders } from '../../orders/hooks/useOrders';
-import { useAdminData } from './useAdminData';
+import { useAdminData } from '../hooks/useAdminData';
 import { AdminDashboard } from './AdminDashboard';
 import AdminOrders from './AdminOrders';
 import AdminMenu from './AdminMenu';
@@ -20,11 +20,12 @@ import AdminReviews from './AdminReviews';
 import AdminUsers from './AdminUsers';
 import AdminRecovery from './AdminRecovery';
 import type { User } from '@shared/types';
-import { exportOrdersCSV } from './types';
+import type { AdminTab } from '../types';
+import { exportOrdersCSV } from '../utils/ordersCsv';
 
 interface AdminViewProps {
-  activeTab?: 'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users' | 'recovery';
-  onTabChange?: (tab: 'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users' | 'recovery') => void;
+  activeTab?: AdminTab;
+  onTabChange?: (tab: AdminTab) => void;
   currentUser?: User | null;
 }
 
@@ -42,7 +43,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
   usePageTitle("Admin");
 
 
-  const [internalTab, setInternalTab] = useState<'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users' | 'recovery'>('dashboard');
+  const [internalTab, setInternalTab] = useState<AdminTab>('dashboard');
   const currentTab = activeTab || internalTab;
   const setCurrentTab = onTabChange || setInternalTab;
 

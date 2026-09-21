@@ -4,8 +4,8 @@ import {
 } from 'lucide-react';
 import { t } from '@client/i18n/index';
 import { BUSINESS_INFO } from '@shared/constants';
-import { WORKFLOW } from './types';
-import type { CakeRequest, Stats } from './types';
+import { WORKFLOW } from '../types';
+import type { CakeRequest, Stats } from '../types';
 
 interface AdminDashboardProps {
   requests: CakeRequest[];

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { MessageSquare, Star, Edit3, Trash2, Save, Loader2 } from 'lucide-react';
 import { t } from '@client/i18n/index';
 import { SkeletonCard } from '../../../components/Skeleton';
-import type { ReviewItem } from './types';
+import type { ReviewItem } from '../types';
 
 interface AdminReviewsProps {
   reviewItems: ReviewItem[];

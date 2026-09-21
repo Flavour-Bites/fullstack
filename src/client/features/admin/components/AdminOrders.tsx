@@ -7,8 +7,9 @@ import {
 import { t } from '@client/i18n/index';
 import { BUSINESS_INFO } from '@shared/constants';
 import { SkeletonCard } from '../../../components/Skeleton';
-import { STATUS_COLORS, STATUS_ICONS, WORKFLOW, nextStatus, orderPrice } from './types';
-import type { CakeRequest } from './types';
+import { STATUS_COLORS, STATUS_ICONS } from './statusPresentation';
+import { WORKFLOW, nextStatus, orderPrice } from '../types';
+import type { CakeRequest } from '../types';
 
 interface AdminOrdersProps {
   requests: CakeRequest[];
@@ -33,7 +34,7 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
     const matchesSearch = r.contactName.toLowerCase().includes(q) || r.id.toLowerCase().includes(q) || r.flavor.toLowerCase().includes(q) || r.eventType.toLowerCase().includes(q);
     if (statusFilter === 'all') return matchesSearch;
     if (statusFilter === 'pending') return matchesSearch && (r.status === 'Received' || r.status === 'Pending');
-    if (statusFilter === 'active') return matchesSearch && ['Designing', 'Quoted', 'Confirmed', 'In Progress'].includes(r.status);
+    if (statusFilter === 'active') return matchesSearch && ['Designing', 'Quoted', 'Confirmed', 'InProgress'].includes(r.status);
     if (statusFilter === 'completed') return matchesSearch && (r.status === 'Ready' || r.status === 'Completed');
     return matchesSearch && r.status.toLowerCase() === statusFilter.toLowerCase();
   });

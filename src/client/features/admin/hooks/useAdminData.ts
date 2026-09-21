@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useState } from 'react';
-import type { Stats } from './types';
+import type { Stats } from '../types';
 import type { User } from '@shared/types';
 import { http } from '@client/lib/http';
 import type { ApiResponse } from '@/shared/api';
@@ -7,7 +7,6 @@ import type { ApiResponse } from '@/shared/api';
 export function useAdminData(currentUser: User | null) {
   const isAdmin = currentUser?.role === 'admin';
 
-  // Stats
   const [stats, setStats] = useState<Stats | null>(null);
 
   const fetchStats = useCallback(async () => {
