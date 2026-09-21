@@ -4,6 +4,7 @@ import { Search, AlertCircle, ShoppingBag, ShieldCheck } from 'lucide-react';
 import { t } from '@client/i18n/index';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
 import { getStatusStyles } from '../../../../shared/utils/statusStyles';
+import { BUSINESS_INFO } from '../../../../shared/constants/index';
 import { useOrders } from '../hooks/useOrders';
 
 interface FrontendOrder {
@@ -72,7 +73,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
         { title: 'Aesthetic Concept Design', date: 'Studio Stage', description: 'Yodit reviews your specs to draft a visual layout.', done: stepNumber >= 2 },
         { title: 'Quotation Accepted & Deposit Paid', date: 'Booking Confirmed', description: 'After quote discussion, a 50% reservation fee secures your slot.', done: stepNumber >= 3 },
         { title: 'Baking & Handcrafting Artistry', date: 'Active Phase', description: 'Oven baking and intricate hand-sculpted marzipan artwork.', done: stepNumber >= 4 },
-        { title: 'Secure Event Pickup', date: item.deliveryDate || 'TBD', description: 'Safe hand-off at Bole studio coordinates.', done: stepNumber >= 5 }
+        { title: 'Secure Event Pickup', date: item.deliveryDate || 'TBD', description: `Safe hand-off at ${BUSINESS_INFO.location.name} coordinates.`, done: stepNumber >= 5 }
       ]
     };
   });

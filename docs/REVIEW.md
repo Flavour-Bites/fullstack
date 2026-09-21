@@ -129,7 +129,7 @@ status: draft
 | Categories | 🟢 | Auto slug generation | `as any` cast + **mass-assignment risk** |
 | Gallery API | 🟢 | Cloudinary delete wired on item delete | fallback to hardcoded Unsplash URL |
 | Uploads | 🟢 | Direct Cloudinary proxy, SHA-1 signed, 10MB limit | `raw` body instead of multipart |
-| Reviews | 🟢 | Rating 1–5, defaults for event/role/date (Addis TZ) | delete missing → 500 (P2025); spread body |
+| Reviews | 🟢 | Rating 1-5, defaults for event/role/date (Addis TZ) | delete missing → 500 (P2025); spread body |
 | Stats | 🟢 | 5 real aggregate queries via `Promise.all` | — |
 | Recovery | 🟢 | Real Telegram send to old ID; dup-request guard | — |
 | Contact | 🟢 | `Promise.allSettled` fan-out, HTML-escaped | duplicated `getStaffChatIds` |

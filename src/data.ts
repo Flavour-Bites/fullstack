@@ -228,7 +228,7 @@ export const FAQS: FaqItem[] = [
   {
     id: 'faq-06',
     question: 'Where are you located?',
-    answer: 'Our home studio is located in Bole, Addis Ababa, near Bole International Airport. We operate by appointment only. Once your order is confirmed, we will share our exact location and pickup instructions.',
+    answer: 'Our home studio is located in Garment, Nifas Silk-Lafto, Addis Ababa. We operate by appointment only. Once your order is confirmed, we will share our exact location and pickup instructions.',
     category: 'studio'
   },
   {

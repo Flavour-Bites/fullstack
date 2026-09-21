@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Send, Mail, MapPin, Phone, Check, CheckCircle2, Map, ShieldAlert, Loader2 } from 'lucide-react';
+import { Send, Mail, MapPin, Phone, Check, CheckCircle2, ShieldAlert, Loader2, ExternalLink, Navigation } from 'lucide-react';
 import { t } from '@client/i18n/index';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
 import { BUSINESS_INFO } from '../../../../shared/constants/index';
@@ -61,10 +61,9 @@ export default function ContactView() {
                   <MapPin className="w-5 h-5 text-lux-gold shrink-0 mt-0.5" />
                   <div>
                     <label className="text-[10px] uppercase font-mono tracking-widest text-stone-400 dark:text-stone-500 font-semibold block mb-0.5">{t('contact.studioLocation')}</label>
-                    <p className="text-stone-850 dark:text-stone-150 font-medium">{t('contact.studioName')}</p>
-                    {/* [NEEDS INPUT: specific city / sub-city details - current Bole, Addis Ababa is placeholder] */}
-                    <p className="dark:text-stone-300">{t('contact.boleSubCity')}</p>
-                    <p className="dark:text-stone-300">{t('contact.addisAbabaEt')}</p>
+                    <p className="text-stone-850 dark:text-stone-150 font-medium">{BUSINESS_INFO.location.name}</p>
+                    <p className="dark:text-stone-300">{BUSINESS_INFO.location.area}, {BUSINESS_INFO.location.subCity}</p>
+                    <p className="dark:text-stone-300">{BUSINESS_INFO.location.city}, {BUSINESS_INFO.location.country}</p>
                   </div>
                 </div>
 
@@ -116,11 +115,11 @@ export default function ContactView() {
               <div className="p-4 bg-stone-850 rounded-xs border border-stone-800 space-y-2 text-xs font-sans">
                 <div className="flex justify-between items-center">
                   <span className="font-mono text-stone-400 text-[10px] uppercase">{t('contact.topic')}</span>
-                  <span className="font-mono text-lux-gold font-semibold">{t('contact.boleStudio')}</span>
+                  <span className="font-mono text-lux-gold font-semibold">{BUSINESS_INFO.location.name.toUpperCase()}</span>
                 </div>
                 <div className="flex justify-between items-center border-t border-stone-800 pt-2">
-                  <span className="font-mono text-stone-400 text-[10px] uppercase">Hours</span>
-                  <span className="text-xs font-mono text-stone-200">{t('contact.workingHours')}</span>
+                  <span className="font-mono text-stone-400 text-[10px] uppercase">Pickup Hours</span>
+                  <span className="text-xs font-mono text-stone-200">{BUSINESS_INFO.hours.pickup}</span>
                 </div>
               </div>
             </div>
@@ -229,67 +228,89 @@ export default function ContactView() {
         </div>
       </section>
 
-      {/* Stylized Vector Addis Ababa Service Area Map Section */}
+      {/* Google Maps Studio Location Embed Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="bg-stone-900 text-white p-8 sm:p-12 rounded-sm border border-stone-800 relative z-10 overflow-hidden font-sans">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/10 bg-white/5 font-sans">
-                <Map className="w-3.5 h-3.5 text-lux-gold" />
-                <span className="text-[9px] uppercase tracking-[0.25em] text-stone-300 font-mono font-semibold">{t('contact.serviceArea')}</span>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            {/* Left detail column */}
+            <div className="lg:col-span-5 space-y-6">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-lux-gold/20 bg-lux-gold/5 font-sans">
+                <MapPin className="w-3.5 h-3.5 text-lux-gold" />
+                <span className="text-[9px] uppercase tracking-[0.25em] text-lux-gold font-mono font-semibold">Studio Location & Atelier</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl font-serif text-white">{t('contact.addisAbabaIngress')}</h2>
-              <p className="text-sm text-stone-400 font-light leading-relaxed font-sans">
-                {t('contact.operatingInfo')}
+              <h2 className="text-3xl sm:text-4xl font-serif text-white">{BUSINESS_INFO.location.name}</h2>
+              <p className="text-sm text-stone-300 font-light leading-relaxed font-sans">
+                {BUSINESS_INFO.location.directionsNote}
               </p>
+              
               <div className="space-y-3 pt-2 text-xs font-light text-stone-300 font-sans">
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-lux-gold shrink-0" />
-                  <span>{t('contact.innerCoordinates')}</span>
+                <div className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-lux-gold shrink-0 mt-0.5" />
+                  <span>
+                    <strong className="text-white font-medium">Address:</strong> {BUSINESS_INFO.location.fullAddress}
+                  </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-lux-gold shrink-0" />
-                  <span>{t('contact.outerPerimeter')}</span>
+                <div className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-lux-gold shrink-0 mt-0.5" />
+                  <span>
+                    <strong className="text-white font-medium">Coordinates:</strong> {BUSINESS_INFO.location.coordinates.display}
+                  </span>
                 </div>
+                <div className="flex items-start gap-2.5">
+                  <Check className="w-4 h-4 text-lux-gold shrink-0 mt-0.5" />
+                  <span>
+                    <strong className="text-white font-medium">Pickup Hours:</strong> {BUSINESS_INFO.hours.pickup}
+                  </span>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <a
+                  href={BUSINESS_INFO.location.googleMapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-sm bg-lux-gold text-stone-950 font-semibold text-xs tracking-widest uppercase hover:bg-lux-gold-light transition-all shadow-md group cursor-pointer"
+                >
+                  <Navigation className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                  <span>Open in Google Maps</span>
+                  <ExternalLink className="w-3.5 h-3.5 opacity-70" />
+                </a>
               </div>
             </div>
 
-            {/* Stylized Vector Coordinate SVG map rendering Addis Ababa landmarks */}
-            <div className="relative aspect-square sm:aspect-[4/3] bg-stone-950 rounded-sm overflow-hidden border border-stone-800 p-4 flex items-center justify-center">
-              <svg className="w-full h-full max-h-[300px] text-stone-700/30" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Ring traces representing sub-city splits */}
-                <circle cx="200" cy="150" r="120" stroke="#ffffff" strokeOpacity="0.05" strokeWidth="1" strokeDasharray="3 3" />
-                <circle cx="200" cy="150" r="75" stroke="#ffffff" strokeOpacity="0.1" strokeWidth="1" />
-                <circle cx="200" cy="150" r="30" stroke="#c5a880" strokeOpacity="0.2" strokeWidth="1.5" />
+            {/* Embedded Google Maps Frame with Luxury Dark Styling */}
+            <div className="lg:col-span-7">
+              <div className="relative rounded-sm overflow-hidden border border-stone-800 bg-stone-950 shadow-2xl">
+                {/* Header bar */}
+                <div className="flex items-center justify-between px-4 py-2.5 bg-stone-950 border-b border-stone-800 text-[11px] font-mono text-stone-400">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-stone-200 font-medium">{BUSINESS_INFO.location.area}, {BUSINESS_INFO.location.city}</span>
+                  </div>
+                  <span className="text-stone-500 hidden sm:inline">{BUSINESS_INFO.location.coordinates.display}</span>
+                </div>
 
-                {/* Grid lines */}
-                <line x1="200" y1="10" x2="200" y2="290" stroke="#ffffff" strokeOpacity="0.03" strokeWidth="1" />
-                <line x1="10" y1="150" x2="390" y2="150" stroke="#ffffff" strokeOpacity="0.03" strokeWidth="1" />
-
-                {/* Coordinates */}
-                <circle cx="200" cy="150" r="5" fill="#c5a880" />
-                <text x="210" y="146" fill="#c5a880" fontSize="9" fontWeight="bold" fontFamily="monospace" letterSpacing="1">{t('contact.boleStudio')}</text>
-
-                <circle cx="150" cy="120" r="3" fill="#ffffff" fillOpacity="0.7" />
-                <text x="110" y="115" fill="#ffffff" fillOpacity="0.6" fontSize="8" fontFamily="sans-serif">{t('contact.aradaZone')}</text>
-
-                <circle cx="250" cy="180" r="3" fill="#ffffff" fillOpacity="0.7" />
-                <text x="258" y="184" fill="#ffffff" fillOpacity="0.6" fontSize="8" fontFamily="sans-serif">{t('contact.yekaZone')}</text>
-
-                <circle cx="100" cy="200" r="3" fill="#ffffff" fillOpacity="0.5" />
-                <text x="108" y="203" fill="#ffffff" fillOpacity="0.4" fontSize="7" fontFamily="sans-serif">{t('contact.nifasSilkArea')}</text>
-
-                <circle cx="290" cy="90" r="3" fill="#ffffff" fillOpacity="0.5" />
-                <text x="298" y="93" fill="#ffffff" fillOpacity="0.4" fontSize="7" fontFamily="sans-serif">{t('contact.lemiKuraRing')}</text>
-
-                {/* Pulse circle for Bole center */}
-                <circle cx="200" cy="150" r="10" stroke="#c5a880" strokeWidth="1">
-                  <animate attributeName="r" values="5;18;5" dur="4.2s" repeatCount="indefinite" />
-                  <animate attributeName="opacity" values="0.8;0;0.8" dur="4.2s" repeatCount="indefinite" />
-                </circle>
-              </svg>
-              <div className="absolute top-4 left-4 text-[9px] uppercase tracking-widest text-stone-400 font-mono bg-stone-900/90 py-1 px-2 border border-stone-800">
-                {t('contact.studioGrid')}
+                {/* Google Maps iFrame */}
+                <div className="relative w-full h-[380px] sm:h-[440px] bg-stone-950">
+                  <iframe
+                    title="Flavour Bites Studio Location — Garment, Addis Ababa"
+                    src={BUSINESS_INFO.location.googleMapsEmbedUrl}
+                    className="w-full h-full border-0"
+                    loading="lazy"
+                    allowFullScreen
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                  
+                  {/* Floating studio badge overlay */}
+                  <div className="absolute bottom-4 left-4 pointer-events-none">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xs bg-stone-950/90 backdrop-blur-md border border-stone-800 shadow-lg text-[11px] font-mono text-stone-200">
+                      <span className="w-1.5 h-1.5 rounded-full bg-lux-gold" />
+                      <span>{BUSINESS_INFO.name} Atelier</span>
+                      <span className="text-stone-500">•</span>
+                      <span className="text-lux-gold">{BUSINESS_INFO.location.area}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

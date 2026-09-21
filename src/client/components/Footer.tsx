@@ -47,7 +47,7 @@ export default function Footer() {
               </div>
               <div>
                 <p className="text-[10px] uppercase font-mono tracking-widest text-stone-500 font-semibold mb-1">Studio Location</p>
-                <p className="text-white text-sm font-light">Addis Ababa, Ethiopia</p>
+                <p className="text-white text-sm font-light">{BUSINESS_INFO.location.area}, {BUSINESS_INFO.location.city}</p>
                 <p className="text-stone-500 text-xs mt-1">Pre-scheduled pickups only</p>
               </div>
             </div>

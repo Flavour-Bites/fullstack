@@ -6,6 +6,7 @@ import { getConversationStore } from "../platform/integrations/redis/conversatio
 import { formatRequestDate } from "../../shared/utils/dateFormat";
 import { makeOrderId } from "../../shared/utils/ids";
 import { STATUS_EMOJI } from "../../shared/constants/orderStatus";
+import { BUSINESS_INFO } from "../../shared/constants/business";
 
 interface OrderConversation {
     step: string;
@@ -82,7 +83,7 @@ export function handleCommands(bot: Bot) {
             );
         } else {
             await ctx.reply(
-                `Hello! 👋 I'm <b>Yodit's Apprentice</b>, the bot for <b>Flavour Bites</b> — a bespoke cake boutique in Bole, Addis Ababa.\n\n` +
+                `Hello! 👋 I'm <b>Yodit's Apprentice</b>, the bot for <b>Flavour Bites</b> — a bespoke cake boutique in ${BUSINESS_INFO.location.area}, ${BUSINESS_INFO.location.city}.\n\n` +
                     `To use me fully, you'll need to link your account. Visit our website and sign in with Telegram:\n` +
                     `<b>👉 flavourbites.com</b>\n\n` +
                     `Once linked, you can check your order status and get updates right here.`,
@@ -272,7 +273,7 @@ export function handleCommands(bot: Bot) {
                 conv.step = "contactPhone";
                 await conversationStore.setOrder(telegramId, conv);
                 await ctx.reply(
-                    `🏠 Pickup from our Bole studio!\n\n<b>8.</b> What phone number should we use to reach you?\n` +
+                    `🏠 Pickup from our ${BUSINESS_INFO.location.area} studio!\n\n<b>8.</b> What phone number should we use to reach you?\n` +
                         `(e.g., +251 911 123 456)`,
                     { parse_mode: "HTML" },
                 );

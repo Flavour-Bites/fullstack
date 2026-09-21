@@ -5,6 +5,7 @@ import {
   Save, X, Loader2, Calendar, Mail, Phone, MapPin
 } from 'lucide-react';
 import { t } from '@client/i18n/index';
+import { BUSINESS_INFO } from '@shared/constants';
 import { SkeletonCard } from '../../../components/Skeleton';
 import { STATUS_COLORS, STATUS_ICONS, WORKFLOW, nextStatus, orderPrice } from './types';
 import type { CakeRequest } from './types';
@@ -230,7 +231,7 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
                   <div className="flex items-center gap-2 text-stone-600 dark:text-stone-300"><Phone className="w-4 h-4 text-lux-gold shrink-0" /> {selectedRequest.contactPhone}</div>
                   <div className="flex items-center gap-2 text-stone-600 dark:text-stone-300">
                     <MapPin className="w-4 h-4 text-lux-gold shrink-0" />
-                    Studio Pickup — Bole
+                    Studio Pickup — {BUSINESS_INFO.location.area}
                   </div>
                 </div>
 

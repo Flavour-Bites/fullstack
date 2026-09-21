@@ -6,3 +6,10 @@ dist
 *.local
 *.md
 src/assets/images
+
+# Local-only production-mimic stack (gitignored). Never shipped into a build.
+# The frontend Dockerfile and its nginx template are exceptions: the .local
+# compose stack shells out to them via dockerfile: .local/Dockerfile.frontend.
+.local/
+!.local/Dockerfile.frontend
+!.local/nginx.conf

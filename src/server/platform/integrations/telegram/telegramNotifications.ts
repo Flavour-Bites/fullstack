@@ -3,6 +3,7 @@ import { getPrisma } from '@server/platform/config/prisma.js';
 import type { CustomCakeRequest, User } from '@prisma/client';
 
 import { STATUS_EMOJI, STATUS_LABEL } from '../../../../shared/constants/orderStatus';
+import { BUSINESS_INFO } from '../../../../shared/constants/business';
 
 const etb = (n: number) => `${n.toLocaleString()} ETB`;
 
@@ -92,7 +93,7 @@ export async function notifyCustomerStatusChange(orderId: string): Promise<void>
 
   switch (order.status) {
     case 'Designing':
-      message = `${emoji} <b>Your cake is being designed!</b>\n\nHi ${order.contactName}! Yodit has started working on the design for your <b>${order.eventType}</b> cake.\n\nWe'll send you the quote once the design is ready. This usually takes 1–2 days.\n\n<b>Your order:</b> <code>${order.id}</code>`;
+      message = `${emoji} <b>Your cake is being designed!</b>\n\nHi ${order.contactName}! Yodit has started working on the design for your <b>${order.eventType}</b> cake.\n\nWe'll send you the quote once the design is ready. This usually takes 1-2 days.\n\n<b>Your order:</b> <code>${order.id}</code>`;
       break;
 
     case 'Quoted':
@@ -144,7 +145,7 @@ export async function notifyCustomerStatusChange(orderId: string): Promise<void>
         '',
         `Your beautiful <b>${order.eventType}</b> cake is done and waiting for you!`,
         '',
-        `🏠 You can pick it up from Yodit's Bole studio. Please bring your order number:\n<code>${order.id}</code>`,
+        `🏠 You can pick it up from Yodit's ${BUSINESS_INFO.location.area} studio. Please bring your order number:\n<code>${order.id}</code>`,
         '',
         'Thank you for choosing Flavour Bites! 🎂',
       ].join('\n');

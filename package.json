@@ -5,7 +5,12 @@
   "type": "module",
   "packageManager": "npm@10.9.0",
   "scripts": {
-    "dev": "tsx src/server/core/server.ts",
+    "dev": "concurrently -n api,web -c blue,green \"npm:dev:server\" \"npm:dev:web\"",
+    "dev:server": "DATABASE_URL=postgresql://flavour:flavour@localhost:${DEV_POSTGRES_PORT:-5432}/flavour_bites REDIS_URL=redis://localhost:${DEV_REDIS_PORT:-6379} nodemon",
+    "dev:web": "vite",
+    "dev:db": "docker compose -f docker-compose.dev.yml up -d --wait",
+    "dev:db:down": "docker compose -f docker-compose.dev.yml down",
+    "db:push": "DATABASE_URL=postgresql://flavour:flavour@localhost:${DEV_POSTGRES_PORT:-5432}/flavour_bites prisma db push",
     "build": "npm run build:client && npm run build:server",
     "build:client": "vite build",
     "build:server": "esbuild src/server/core/server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
@@ -15,7 +20,7 @@
     "preview:dev": "DOTENV_CONFIG_PATH=.env.preview NODE_ENV=preview tsx src/server/core/server.ts",
     "start": "node dist/server.cjs",
     "postinstall": "npx prisma generate; true",
-    "db:seed": "tsx prisma/seed/index.ts",
+    "db:seed": "DATABASE_URL=postgresql://flavour:flavour@localhost:${DEV_POSTGRES_PORT:-5432}/flavour_bites tsx prisma/seed/index.ts",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
@@ -65,8 +70,10 @@
     "@types/react": "^19.2.17",
     "@vitejs/plugin-react": "^5.2.0",
     "autoprefixer": "^10.4.21",
+    "concurrently": "^10.0.5",
     "esbuild": "^0.25.0",
     "jsdom": "^29.1.1",
+    "nodemon": "^3.1.14",
     "prisma": "^6.19.3",
     "tailwindcss": "^4.3.2",
     "ts-morph": "^28.0.0",
@@ -74,5 +81,13 @@
     "typescript": "~5.8.2",
     "vite": "^6.4.3",
     "vitest": "^4.1.10"
+  },
+  "nodemonConfig": {
+    "exec": "tsx src/server/core/server.ts",
+    "watch": [
+      "src/server",
+      "prisma"
+    ],
+    "ext": "ts,json"
   }
 }

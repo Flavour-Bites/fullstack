@@ -1,0 +1,52 @@
+# Local development infrastructure: Postgres + Redis in Docker.
+#
+# This is NOT a production artifact and NOT the production-mimic stack
+# (that one lives in .local/ and is gitignored). This compose file exists so
+# `npm run dev:server` can run against a real local database and Redis cache
+# instead of a remote Neon/Redis instance:
+#
+#   npm run dev:db        # start postgres (5432) + redis (6379), waits for health
+#   npm run db:push       # first time / after schema changes (no migration baseline yet)
+#   npm run db:seed       # optional sample data
+#   npm run dev           # dev servers (or dev:web / dev:server)
+#
+# Host ports are overridable if something else owns the defaults (e.g. a system
+# Postgres on 5432): DEV_POSTGRES_PORT=5430 DEV_REDIS_PORT=6380 npm run dev:db
+name: flavour-bites-dev
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: flavour-bites-dev-db
+    environment:
+      POSTGRES_USER: flavour
+      POSTGRES_PASSWORD: flavour
+      POSTGRES_DB: flavour_bites
+    ports:
+      - "${DEV_POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flavour -d flavour_bites"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: flavour-bites-dev-redis
+    ports:
+      - "${DEV_REDIS_PORT:-6379}:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+# Named volumes keep your dev data across restarts; `npm run dev:db:down`
+# stops the containers but preserves the data (down -v wipes it).
+volumes:
+  pgdata:
+  redisdata:
