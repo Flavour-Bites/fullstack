@@ -2,12 +2,13 @@ import crypto from 'node:crypto';
 import { signToken, verifyPassword, hashPassword, generateNonce, generatePkcePair, verifyOidcIdToken, authCookieOptions } from '../../../shared/utils/auth';
 import { authRepository } from './auth.repository';
 import type { LoginResponse, TelegramTokenExchangeResponse } from './auth.types';
-import { AuthenticationError, NotFoundError } from '../../platform/errors/index';
+import { AuthenticationError, NotFoundError, ValidationError } from '../../platform/errors/index';
 import { getRedisStore } from '../../platform/integrations/redis/redisClient';
 import { env } from '../../platform/config/env';
 import type * as jose from 'jose';
 
 const TELEGRAM_DISCOVERY_URL = 'https://oauth.telegram.org/.well-known/openid-configuration';
+const OIDC_CONFIG_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 interface OidcDiscoveryConfig {
   issuer: string;
@@ -17,14 +18,19 @@ interface OidcDiscoveryConfig {
 }
 
 let cachedOidcConfig: OidcDiscoveryConfig | null = null;
+let cachedOidcConfigAt = 0;
 
 async function getOidcConfig(): Promise<OidcDiscoveryConfig> {
-  if (cachedOidcConfig) return cachedOidcConfig;
+  const now = Date.now();
+  if (cachedOidcConfig && now - cachedOidcConfigAt < OIDC_CONFIG_TTL_MS) {
+    return cachedOidcConfig;
+  }
 
   try {
     const res = await fetch(TELEGRAM_DISCOVERY_URL);
     if (res.ok) {
       cachedOidcConfig = (await res.json()) as OidcDiscoveryConfig;
+      cachedOidcConfigAt = Date.now();
       return cachedOidcConfig;
     }
   } catch {
@@ -37,6 +43,7 @@ async function getOidcConfig(): Promise<OidcDiscoveryConfig> {
     token_endpoint: 'https://oauth.telegram.org/token',
     jwks_uri: 'https://oauth.telegram.org/.well-known/jwks.json',
   };
+  cachedOidcConfigAt = Date.now();
 
   return cachedOidcConfig;
 }
@@ -50,7 +57,7 @@ export const authService = {
     const config = await getOidcConfig();
     const clientId = env.TELEGRAM_OPENID_CONNECT_CLIENT_ID?.trim();
     if (!clientId) {
-      throw new Error('TELEGRAM_OPENID_CONNECT_CLIENT_ID is not configured.');
+      throw new ValidationError('TELEGRAM_OPENID_CONNECT_CLIENT_ID is not configured.');
     }
 
     const state = crypto.randomBytes(16).toString('hex');
@@ -112,7 +119,7 @@ export const authService = {
     const clientId = env.TELEGRAM_OPENID_CONNECT_CLIENT_ID?.trim();
     const clientSecret = env.TELEGRAM_OPENID_CONNECT_CLIENT_SECRET?.trim();
     if (!clientId || !clientSecret) {
-      throw new Error('Telegram OIDC Client ID or Client Secret is not configured.');
+      throw new ValidationError('Telegram OIDC Client ID or Client Secret is not configured.');
     }
 
     const config = await getOidcConfig();
