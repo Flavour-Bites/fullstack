@@ -1,0 +1,15 @@
+# Flavour Bites - robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://flavourbites.com/sitemap.xml
+
+# Disallow admin and private routes
+Disallow: /admin
+Disallow: /profile
+Disallow: /orders
+Disallow: /api/
+
+# Crawl-delay for polite bots
+Crawl-delay: 10

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <!-- Homepage -->
+  <url>
+    <loc>https://flavourbites.com</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <lastmod>2026-09-22</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flavourbites.com" />
+    <xhtml:link rel="alternate" hreflang="am" href="https://flavourbites.com?lang=am" />
+  </url>
+
+  <!-- Gallery -->
+  <url>
+    <loc>https://flavourbites.com/gallery</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <lastmod>2026-09-22</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flavourbites.com/gallery" />
+    <xhtml:link rel="alternate" hreflang="am" href="https://flavourbites.com/gallery?lang=am" />
+  </url>
+
+  <!-- Testimonials -->
+  <url>
+    <loc>https://flavourbites.com/testimonials</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-09-22</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flavourbites.com/testimonials" />
+    <xhtml:link rel="alternate" hreflang="am" href="https://flavourbites.com/testimonials?lang=am" />
+  </url>
+
+  <!-- About / Meet Yodit -->
+  <url>
+    <loc>https://flavourbites.com/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <lastmod>2026-09-22</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flavourbites.com/about" />
+    <xhtml:link rel="alternate" hreflang="am" href="https://flavourbites.com/about?lang=am" />
+  </url>
+
+  <!-- Contact -->
+  <url>
+    <loc>https://flavourbites.com/contact</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-09-22</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flavourbites.com/contact" />
+    <xhtml:link rel="alternate" hreflang="am" href="https://flavourbites.com/contact?lang=am" />
+  </url>
+
+  <!-- Order / Custom Cake Request -->
+  <url>
+    <loc>https://flavourbites.com/order</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <lastmod>2026-09-22</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flavourbites.com/order" />
+    <xhtml:link rel="alternate" hreflang="am" href="https://flavourbites.com/order?lang=am" />
+  </url>
+
+  <!-- FAQ / Help -->
+  <url>
+    <loc>https://flavourbites.com/help</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-09-22</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://flavourbites.com/help" />
+    <xhtml:link rel="alternate" hreflang="am" href="https://flavourbites.com/help?lang=am" />
+  </url>
+
+  <!-- Profile (authenticated) -->
+  <url>
+    <loc>https://flavourbites.com/profile</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+    <lastmod>2026-09-22</lastmod>
+  </url>
+
+  <!-- Login / Sign In -->
+  <url>
+    <loc>https://flavourbites.com/login</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+    <lastmod>2026-09-22</lastmod>
+  </url>
+</urlset>
