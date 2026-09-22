@@ -115,7 +115,7 @@ export default function RequestFormFields({
             <label className={`text-[10px] uppercase font-mono tracking-widest font-bold block ${dateError ? 'text-red-500' : 'text-stone-500 dark:text-stone-400'}`}>
               {t('order.targetDate')} *
             </label>
-            {form.deliveryDate && !dateError && (
+            {form.eventDate && !dateError && (
               <span className="text-[9px] uppercase font-mono text-emerald-600 dark:text-emerald-400 font-bold tracking-wider flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />{' '}
                 Notice Met
@@ -124,12 +124,12 @@ export default function RequestFormFields({
           </div>
           <input
             type="date"
-            name="deliveryDate"
-            value={form.deliveryDate}
+            name="eventDate"
+            value={form.eventDate}
             onChange={onInputChange}
             min={getMinDateString()}
             required
-            className={`w-full border p-3 text-sm focus:outline-none rounded-sm font-mono transition-colors text-stone-850 dark:text-stone-100 ${getDateInputStyles(dateError, form.deliveryDate)}`}
+            className={`w-full border p-3 text-sm focus:outline-none rounded-sm font-mono transition-colors text-stone-850 dark:text-stone-100 ${getDateInputStyles(dateError, form.eventDate)}`}
           />
           {dateError ? (
             <p className="text-[10px] text-red-500 dark:text-red-400 font-sans mt-1 leading-normal font-medium">{dateError}</p>

@@ -12,9 +12,7 @@ export const ordersRepository = {
     contactPhone: string;
     eventType: string;
     guestCount: number;
-    deliveryOption: string;
-    deliveryAddress?: string | null;
-    deliveryDate: string;
+    eventDate: string;
     designStyle?: string | null;
     flavor: string;
     tierCount: number;
@@ -35,9 +33,7 @@ export const ordersRepository = {
           contactPhone: data.contactPhone,
           eventType: data.eventType,
           guestCount: data.guestCount,
-          deliveryOption: data.deliveryOption,
-          deliveryAddress: data.deliveryAddress ?? null,
-          deliveryDate: data.deliveryDate,
+          eventDate: data.eventDate,
           designStyle: data.designStyle ?? '',
           flavor: data.flavor,
           tierCount: data.tierCount,

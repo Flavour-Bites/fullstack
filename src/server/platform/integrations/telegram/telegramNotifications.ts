@@ -32,10 +32,6 @@ function getOrderPrice(order: { quotedPrice?: number | null; finalPrice?: number
 export async function notifyStaffNewOrder(
   order: CustomCakeRequest & { user?: User | null },
 ): Promise<void> {
-  const emoji = order.deliveryOption === 'delivery' ? '🚗' : '🏠';
-  const deliveryTypeStr = order.deliveryOption === 'delivery' ? 'Delivery to:' : 'Pickup';
-  const addressStr = order.deliveryAddress ? ' ' + order.deliveryAddress : '';
-
   const text = [
     `<b>🎂 New Cake Request! ${order.id}</b>`,
     '',
@@ -46,13 +42,12 @@ export async function notifyStaffNewOrder(
       : '',
     '',
     `<b>Event:</b> ${order.eventType}`,
-    `<b>Date needed:</b> ${order.deliveryDate}`,
+    `<b>Date needed:</b> ${order.eventDate}`,
     `<b>Guests:</b> ${order.guestCount} people`,
     `<b>Tiers:</b> ${order.tierCount}`,
     `<b>Flavour:</b> ${order.flavor}`,
     `<b>Style:</b> ${order.designStyle}`,
     '',
-    `${emoji} <b>${deliveryTypeStr}</b>${addressStr}`,
     `<b>Price:</b> ${etb(getOrderPrice(order))}`,
     '',
     order.specialInstructions
@@ -105,7 +100,7 @@ export async function notifyCustomerStatusChange(orderId: string): Promise<void>
         `<b>Price: ${etb(getOrderPrice(order))}</b>`,
         order.bakerNote ? `\n<i>Note from Yodit: ${order.bakerNote}</i>` : '',
         '',
-        `Please confirm or request a revision below. Your date (${order.deliveryDate}) is held for 48 hours.`,
+        `Please confirm or request a revision below. Your date (${order.eventDate}) is held for 48 hours.`,
       ].join('\n');
       buttons = [
         [
@@ -121,7 +116,7 @@ export async function notifyCustomerStatusChange(orderId: string): Promise<void>
         '',
         `Wonderful! Your <b>${order.eventType}</b> cake is officially booked.`,
         '',
-        `<b>Event date:</b> ${order.deliveryDate}`,
+        `<b>Event date:</b> ${order.eventDate}`,
         '',
         "We'll keep you updated as your cake progresses. Feel free to message this bot anytime to check your order.",
       ].join('\n');
@@ -133,7 +128,7 @@ export async function notifyCustomerStatusChange(orderId: string): Promise<void>
         '',
         `Hi ${order.contactName}! Yodit has started baking your <b>${order.eventType}</b> cake. 🔥`,
         '',
-        `<b>Expected ready date:</b> ${order.deliveryDate}`,
+        `<b>Expected ready date:</b> ${order.eventDate}`,
         '',
         "We'll notify you as soon as it's ready.",
       ].join('\n');
@@ -181,7 +176,7 @@ export async function notifyStaffQuoteAccepted(
     '',
     `<b>${order.contactName}</b> accepted the quote for their <b>${order.eventType}</b> cake.`,
     `<b>Price:</b> ${etb(getOrderPrice(order))}`,
-    `<b>Date:</b> ${order.deliveryDate}`,
+    `<b>Date:</b> ${order.eventDate}`,
     `<b>Order ID:</b> <code>${order.id}</code>`,
     '',
     'You can now mark it as In Progress when baking begins.',

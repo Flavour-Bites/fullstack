@@ -116,7 +116,7 @@ describe('ordersService.create', () => {
       contactPhone: '+251911111111',
       eventType: 'Birthday',
       guestCount: 30,
-      deliveryDate: '2026-07-15',
+      eventDate: '2026-07-15',
       flavor: 'Vanilla',
       tierCount: 2,
     };

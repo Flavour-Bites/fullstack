@@ -58,7 +58,8 @@ http.interceptors.response.use(
     ) {
       throw new ApiError(
         'Backend unreachable: received HTML instead of JSON. Check that VITE_API_URL is configured.',
-        response.status
+        response.status,
+        'BAD_GATEWAY',
       );
     }
     return response;
@@ -69,15 +70,18 @@ http.interceptors.response.use(
       clearToken();
     }
     if (error.response?.data) {
-      return Promise.reject(ApiError.fromResponse(error.response.data, error.response.status));
+      return Promise.reject(ApiError.fromResponse(error.response.data));
     }
     let message: string;
+    let code: string;
     if (error.code === 'ECONNABORTED') {
       message = 'Request timed out';
+      code = 'TIMEOUT';
     } else {
       message = error.message || 'Network request failed';
+      code = 'NETWORK_ERROR';
     }
-    return Promise.reject(new ApiError(message, status));
+    return Promise.reject(new ApiError(message, status ?? 500, code));
   }
 );
 

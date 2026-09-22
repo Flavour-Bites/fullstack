@@ -14,13 +14,11 @@ interface OrderConversation {
     contactName: string;
     contactPhone: string;
     eventType?: string;
-    deliveryDate?: string;
+    eventDate?: string;
     guestCount?: number;
     flavor?: string;
     designStyle?: string;
     tierCount?: number;
-    deliveryOption?: string;
-    deliveryAddress?: string;
     specialInstructions?: string;
     createdAt: string;
     updatedAt: string;
@@ -34,7 +32,6 @@ export function handleCommands(bot: Bot) {
         const prisma = getPrisma();
         const payload = ctx.match?.toString().trim();
 
-        // ── Deep linking: order_<orderId> ──────────────────────────────────
         if (payload?.startsWith("order_")) {
             const orderId = payload.slice(6);
             const order = await prisma.customCakeRequest.findUnique({
@@ -58,7 +55,7 @@ export function handleCommands(bot: Bot) {
                 `📞 <b>Phone:</b> ${order.contactPhone}\n` +
                 `🎉 <b>Event:</b> ${order.eventType}\n` +
                 `🍰 <b>Flavor:</b> ${order.flavor}\n` +
-                `📅 <b>Event Date:</b> ${order.deliveryDate}\n` +
+                `📅 <b>Event Date:</b> ${order.eventDate}\n` +
                 `👥 <b>Guests:</b> ${order.guestCount}\n` +
                 `🏗️ <b>Tiers:</b> ${order.tierCount}\n`;
 
@@ -128,7 +125,7 @@ export function handleCommands(bot: Bot) {
             return (
                 `<b>${i + 1}. ${r.eventType} Cake</b>\n` +
                 `   ${emoji} ${r.status}\n` +
-                `   📅 ${r.deliveryDate}\n` +
+                `   📅 ${r.eventDate}\n` +
                 `   🆔 <code>${r.id}</code>`
             );
         });
@@ -151,7 +148,6 @@ export function handleCommands(bot: Bot) {
         );
     });
 
-    // ─── /order ────────────────────────────────────────────────────────────────
     bot.command("order", async (ctx) => {
         const telegramId = String(ctx.from?.id);
         const prisma = getPrisma();
@@ -188,7 +184,7 @@ export function handleCommands(bot: Bot) {
     const stepHandlers: Record<string, (ctx: Context, conv: OrderConversation, text: string, telegramId: string, prisma: any) => Promise<void>> = {
         eventType: async (ctx, conv, text, telegramId) => {
             conv.eventType = text;
-            conv.step = "deliveryDate";
+            conv.step = "eventDate";
             await conversationStore.setOrder(telegramId, conv);
             await ctx.reply(
                 `Great, a <b>${text}</b> cake! 🎉\n\n<b>2.</b> What date do you need it by?\n` +
@@ -196,8 +192,8 @@ export function handleCommands(bot: Bot) {
                 { parse_mode: "HTML" },
             );
         },
-        deliveryDate: async (ctx, conv, text, telegramId) => {
-            conv.deliveryDate = text;
+        eventDate: async (ctx, conv, text, telegramId) => {
+            conv.eventDate = text;
             conv.step = "guestCount";
             await conversationStore.setOrder(telegramId, conv);
             await ctx.reply(
@@ -246,45 +242,10 @@ export function handleCommands(bot: Bot) {
         },
         designStyle: async (ctx, conv, text, telegramId) => {
             conv.designStyle = text;
-            conv.deliveryOption = "pickup";
             conv.step = "contactPhone";
             await conversationStore.setOrder(telegramId, conv);
             await ctx.reply(
                 `🎨 Nice.\n\n<b>7.</b> What phone number should we use to reach you?\n` +
-                    `(e.g., +251 911 123 456)`,
-                { parse_mode: "HTML" },
-            );
-        },
-        deliveryOption: async (ctx, conv, text, telegramId) => {
-            const option = text.toLowerCase();
-            if (option !== "pickup" && option !== "delivery") {
-                await ctx.reply('⚠️ Please reply with "pickup" or "delivery".');
-                return;
-            }
-            conv.deliveryOption = option;
-            if (option === "delivery") {
-                conv.step = "deliveryAddress";
-                await conversationStore.setOrder(telegramId, conv);
-                await ctx.reply(
-                    `🚗 Delivery it is!\n\n<b>8.</b> What's the delivery address in Addis Ababa?`,
-                    { parse_mode: "HTML" },
-                );
-            } else {
-                conv.step = "contactPhone";
-                await conversationStore.setOrder(telegramId, conv);
-                await ctx.reply(
-                    `🏠 Pickup from our ${BUSINESS_INFO.location.area} studio!\n\n<b>8.</b> What phone number should we use to reach you?\n` +
-                        `(e.g., +251 911 123 456)`,
-                    { parse_mode: "HTML" },
-                );
-            }
-        },
-        deliveryAddress: async (ctx, conv, text, telegramId) => {
-            conv.deliveryAddress = text;
-            conv.step = "contactPhone";
-            await conversationStore.setOrder(telegramId, conv);
-            await ctx.reply(
-                `📍 Delivery to <b>${text}</b>!\n\n<b>9.</b> What phone number should we use to reach you?\n` +
                     `(e.g., +251 911 123 456)`,
                 { parse_mode: "HTML" },
             );
@@ -294,7 +255,7 @@ export function handleCommands(bot: Bot) {
             conv.step = "specialInstructions";
             await conversationStore.setOrder(telegramId, conv);
             await ctx.reply(
-                `📞 Got it!\n\n<b>10.</b> Any special instructions or dietary needs?\n` +
+                `📞 Got it!\n\n<b>8.</b> Any special instructions or dietary needs?\n` +
                     `(Reply "none" if not)`,
                 { parse_mode: "HTML" },
             );
@@ -314,9 +275,7 @@ export function handleCommands(bot: Bot) {
                     contactPhone: conv.contactPhone,
                     eventType: conv.eventType || "Custom Order",
                     guestCount: conv.guestCount || 1,
-                    deliveryOption: conv.deliveryOption || "pickup",
-                    deliveryAddress: conv.deliveryAddress || null,
-                    deliveryDate: conv.deliveryDate || "TBD",
+                    eventDate: conv.eventDate || "TBD",
                     designStyle: conv.designStyle || "Classic",
                     flavor: conv.flavor || "Vanilla",
                     tierCount: conv.tierCount || 1,
@@ -328,7 +287,6 @@ export function handleCommands(bot: Bot) {
 
             await conversationStore.clearOrder(telegramId);
 
-            // Notify staff
             notifyStaffNewOrder(order).catch((e) =>
                 console.error(
                     "[Notify] Failed to notify staff of new order:",
@@ -340,7 +298,7 @@ export function handleCommands(bot: Bot) {
                 `✅ <b>Your cake request has been sent!</b> 🎂\n\n` +
                     `Here's your summary:\n` +
                     `• <b>Event:</b> ${conv.eventType}\n` +
-                    `• <b>Date:</b> ${conv.deliveryDate}\n` +
+                    `• <b>Date:</b> ${conv.eventDate}\n` +
                     `• <b>Guests:</b> ${conv.guestCount}\n` +
                     `• <b>Flavor:</b> ${conv.flavor}\n` +
                     `• <b>Tiers:</b> ${conv.tierCount}\n` +
@@ -351,7 +309,6 @@ export function handleCommands(bot: Bot) {
         }
     };
 
-    // ─── Handle conversation replies for /order ──────────────────────────────
     bot.on("message:text", async (ctx) => {
         const telegramId = String(ctx.from?.id);
         const conv = await conversationStore.getOrder(telegramId);

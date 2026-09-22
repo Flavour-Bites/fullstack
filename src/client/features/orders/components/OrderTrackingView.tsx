@@ -77,7 +77,7 @@ export default function OrderTrackingView({ requests, dbConnected, onDelete }: O
                       {req.id}
                     </td>
                     <td className="py-4 px-4 font-light text-stone-600 dark:text-stone-300 border-stone-100 dark:border-stone-850 font-mono">
-                      {req.deliveryDate}
+                      {req.eventDate}
                     </td>
                     <td className="py-4 px-4 border-stone-100 dark:border-stone-850 text-left">
                       <div className="font-semibold text-stone-800 dark:text-stone-200">{req.eventType} Cake</div>
@@ -150,7 +150,7 @@ export default function OrderTrackingView({ requests, dbConnected, onDelete }: O
                 </button>
               </div>
               <p className="text-xs text-stone-600 dark:text-stone-300 mb-6 leading-relaxed">
-                This will permanently cancel your {pendingDelete.eventType} cake request for {pendingDelete.deliveryDate}. This action cannot be undone.
+                This will permanently cancel your {pendingDelete.eventType} cake request for {pendingDelete.eventDate}. This action cannot be undone.
               </p>
               <div className="flex gap-3">
                 <button

@@ -7,14 +7,12 @@ export interface OrderConversation {
   contactName: string;
   contactPhone: string;
   eventType?: string;
-  deliveryDate?: string;
+  eventDate?: string;
   guestCount?: number;
   flavor?: string;
   designStyle?: string;
   tierCount?: number;
   specialInstructions?: string;
-  deliveryOption?: string;
-  deliveryAddress?: string;
   createdAt: string;
   updatedAt: string;
 }

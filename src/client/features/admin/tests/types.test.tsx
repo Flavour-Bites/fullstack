@@ -34,8 +34,7 @@ describe('nextStatus', () => {
 describe('orderPrice', () => {
   const base: CakeRequest = {
     id: '1', contactName: '', contactPhone: '', eventType: '',
-    guestCount: 0, deliveryOption: '', deliveryAddress: null,
-    deliveryDate: '', designStyle: '', flavor: '', tierCount: 0,
+    guestCount: 0, eventDate: '', designStyle: '', flavor: '', tierCount: 0,
     specialInstructions: null, requestDate: '', status: '',
     referenceImage: null, depositAmount: 0, remainingBalance: 0,
     paymentStatus: '', createdAt: '',

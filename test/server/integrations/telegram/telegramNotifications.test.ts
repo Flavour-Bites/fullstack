@@ -35,13 +35,11 @@ describe('notifyStaffNewOrder', () => {
       contactName: 'Test User',
       contactPhone: '+251911111111',
       eventType: 'Birthday',
-      deliveryDate: '2026-07-15',
+      eventDate: '2026-07-15',
       guestCount: 30,
       tierCount: 2,
       flavor: 'Vanilla',
       designStyle: 'Elegant gold trim',
-      deliveryOption: 'pickup',
-      deliveryAddress: null,
       quotedPrice: null,
       finalPrice: null,
       specialInstructions: 'No nuts',
@@ -56,23 +54,23 @@ describe('notifyStaffNewOrder', () => {
     expect(text).toContain('FB-ABC123');
     expect(text).toContain('Test User');
     expect(text).toContain('@testuser');
-    expect(text).toContain('Pickup');
+    expect(text).toContain('Birthday');
+    expect(text).toContain('2026-07-15');
+    expect(text).toContain('Vanilla');
     expect(buttons).toHaveLength(3);
   });
 
-  it('includes delivery address for delivery orders', async () => {
+  it('uses eventDate in notification', async () => {
     const order = {
       id: 'FB-DELIVERY',
       contactName: 'Delivery Client',
       contactPhone: '+251922222222',
       eventType: 'Wedding',
-      deliveryDate: '2026-08-01',
+      eventDate: '2026-08-01',
       guestCount: 100,
       tierCount: 3,
       flavor: 'Chocolate',
       designStyle: 'Modern',
-      deliveryOption: 'delivery',
-      deliveryAddress: 'Bole, Addis Ababa',
       quotedPrice: null,
       finalPrice: null,
       specialInstructions: null,
@@ -81,8 +79,7 @@ describe('notifyStaffNewOrder', () => {
 
     await notifyStaffNewOrder(order as any);
     const text = (sendMessage as any).mock.calls[0][1];
-    expect(text).toContain('Delivery to');
-    expect(text).toContain('Bole, Addis Ababa');
+    expect(text).toContain('2026-08-01');
   });
 });
 
@@ -135,7 +132,7 @@ describe('notifyCustomerStatusChange', () => {
       id: 'FB-123',
       contactName: 'Test',
       eventType: 'Birthday',
-      deliveryDate: '2026-07-15',
+      eventDate: '2026-07-15',
       status: 'Designing',
       lastNotifiedStatus: 'Received',
       user: { telegramId: '12345', notifyViaTelegram: true },
@@ -158,7 +155,7 @@ describe('notifyCustomerStatusChange', () => {
       id: 'FB-123',
       contactName: 'Test',
       eventType: 'Wedding',
-      deliveryDate: '2026-08-15',
+      eventDate: '2026-08-15',
       status: 'Quoted',
       quotedPrice: 15000,
       finalPrice: null,
@@ -174,14 +171,13 @@ describe('notifyCustomerStatusChange', () => {
     expect(buttons[0][1].callback_data).toContain('revise:');
   });
 
-  it('sends Ready notification with delivery info', async () => {
+  it('sends Ready notification with pickup info', async () => {
     mockPrisma.customCakeRequest.findUnique.mockResolvedValue({
       id: 'FB-123',
       contactName: 'Test',
       eventType: 'Birthday',
-      deliveryDate: '2026-07-15',
+      eventDate: '2026-07-15',
       status: 'Ready',
-      deliveryOption: 'pickup',
       lastNotifiedStatus: 'InProgress',
       user: { telegramId: '12345', notifyViaTelegram: true },
     });
@@ -234,7 +230,7 @@ describe('notifyStaffQuoteAccepted', () => {
       id: 'FB-456',
       contactName: 'Happy Client',
       eventType: 'Anniversary',
-      deliveryDate: '2026-09-01',
+      eventDate: '2026-09-01',
       quotedPrice: 25000,
       finalPrice: null,
       user: null,

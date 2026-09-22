@@ -150,7 +150,7 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
 
                   <h3 className="font-serif text-base text-stone-900 dark:text-white font-medium mb-1">{req.contactName}</h3>
                   <div className="font-sans text-[11px] text-stone-400 dark:text-stone-400 font-light flex flex-wrap gap-x-4 gap-y-1 mb-3 pb-3 border-b border-stone-200/60 dark:border-stone-800/60">
-                    <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-lux-gold" /> {req.deliveryDate}</span>
+                    <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-lux-gold" /> {req.eventDate}</span>
                     <span>{req.tierCount} tier • {req.guestCount} guests</span>
                     <span className="text-lux-gold">{req.flavor}</span>
                   </div>
@@ -228,7 +228,7 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
                 </div>
 
                 <div className="space-y-2 bg-stone-100 dark:bg-stone-950 p-3 border border-stone-200 dark:border-stone-800 rounded-xs text-xs">
-                  <div className="flex items-center gap-2 text-stone-600 dark:text-stone-300"><Mail className="w-4 h-4 text-lux-gold shrink-0" /> {selectedRequest.userId ? 'via Telegram' : 'No contact email'}</div>
+                  <div className="flex items-center gap-2 text-stone-600 dark:text-stone-300"><Mail className="w-4 h-4 text-lux-gold shrink-0" /> {selectedRequest.userId ? 'via Telegram' : 'Walk-in customer'}</div>
                   <div className="flex items-center gap-2 text-stone-600 dark:text-stone-300"><Phone className="w-4 h-4 text-lux-gold shrink-0" /> {selectedRequest.contactPhone}</div>
                   <div className="flex items-center gap-2 text-stone-600 dark:text-stone-300">
                     <MapPin className="w-4 h-4 text-lux-gold shrink-0" />

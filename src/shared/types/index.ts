@@ -47,9 +47,7 @@ export interface CustomCakeRequest {
   contactPhone: string;
   eventType: string;
   guestCount: number;
-  deliveryOption: 'pickup' | 'delivery';
-  deliveryAddress?: string;
-  deliveryDate: string;
+  eventDate: string;
   designStyle: string;
   flavor: string;
   tierCount: number;

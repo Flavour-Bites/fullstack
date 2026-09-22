@@ -53,7 +53,7 @@ export function handleInline(bot: Bot) {
                 type: "article",
                 id: `order_${order.id}`,
                 title: `${order.id} — ${order.contactName}`,
-                description: `${emoji} ${order.eventType} · ${order.flavor} · ${order.deliveryDate}`,
+                description: `${emoji} ${order.eventType} · ${order.flavor} · ${order.eventDate}`,
                 thumbnail_url: undefined,
                 input_message_content: {
                     message_text:
@@ -63,7 +63,7 @@ export function handleInline(bot: Bot) {
                         `📞 <b>Phone:</b> ${order.contactPhone}\n` +
                         `🎉 <b>Event:</b> ${order.eventType}\n` +
                         `🍰 <b>Flavor:</b> ${order.flavor}\n` +
-                        `📅 <b>Date:</b> ${order.deliveryDate}\n` +
+                        `📅 <b>Date:</b> ${order.eventDate}\n` +
                         `👥 <b>Guests:</b> ${order.guestCount}\n` +
                         `🏗️ <b>Tiers:</b> ${order.tierCount}\n` +
                         (order.quotedPrice

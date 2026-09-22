@@ -6,9 +6,7 @@ export interface CakeRequest {
   contactPhone: string;
   eventType: string;
   guestCount: number;
-  deliveryOption: string;
-  deliveryAddress: string | null;
-  deliveryDate: string;
+  eventDate: string;
   designStyle: string;
   flavor: string;
   tierCount: number;
@@ -16,13 +14,13 @@ export interface CakeRequest {
   requestDate: string;
   status: string;
   referenceImage: string | null;
-  userId?: string;
   quotedPrice?: number;
   finalPrice?: number;
   depositAmount: number;
   remainingBalance: number;
   paymentStatus: string;
   bakerNote?: string | null;
+  userId?: string;
   createdAt: string;
 }
 

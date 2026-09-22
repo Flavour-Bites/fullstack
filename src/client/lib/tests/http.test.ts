@@ -115,7 +115,7 @@ describe('http transport layer & interceptors', () => {
         const error: any = new Error('Bad Request');
         error.response = {
           status: 400,
-          data: { success: false, error: 'Custom error from backend' },
+          data: { success: false, error: 'Custom error from backend', status: 400, code: 'VALIDATION_ERROR' },
           statusText: 'Bad Request',
           headers: {},
           config,

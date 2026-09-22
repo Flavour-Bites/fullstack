@@ -66,9 +66,7 @@ model CustomCakeRequest {
   contactPhone        String
   eventType           String
   guestCount          Int
-  deliveryOption      String
-  deliveryAddress     String?
-  deliveryDate        DateTime
+  eventDate           DateTime
   designStyle         String
   flavor              String
   tierCount           Int

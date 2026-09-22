@@ -37,7 +37,7 @@ export function handleCallbacks(bot: Bot) {
                 chatId!,
                 messageId!,
                 `✅ <b>Status updated to "${newStatus}"</b> for order <code>${orderId}</code>\n\n` +
-                    `Customer: ${order.contactName} | ${order.eventType} | ${order.deliveryDate}`,
+                    `Customer: ${order.contactName} | ${order.eventType} | ${order.eventDate}`,
                 newStatus === "InProgress"
                     ? [
                           [

@@ -8,10 +8,8 @@ import type { ApiResponse } from '@/shared/api';
 export const DEFAULT_FORM = {
   contactName: '',
   contactPhone: '',
-  deliveryDate: '',
+  eventDate: '',
   cakeDescription: '',
-  deliveryOption: 'pickup' as 'pickup' | 'delivery',
-  deliveryAddress: '',
 };
 
 export type RequestForm = typeof DEFAULT_FORM;
@@ -27,7 +25,6 @@ export function generateRequestId(): string {
     num = 1000 + (array[0] % 9000);
     charCode = 65 + (array[1] % 26);
   } else {
-    // Fallback to time-based value if crypto is unavailable (avoids PRNG security warnings)
     const now = Date.now();
     num = 1000 + (now % 9000);
     charCode = 65 + (now % 26);
@@ -36,11 +33,11 @@ export function generateRequestId(): string {
   return `FB-${num}${String.fromCodePoint(charCode)}`;
 }
 
-export function getDateInputStyles(dateError: string | null, deliveryDate: string): string {
+export function getDateInputStyles(dateError: string | null, eventDate: string): string {
   if (dateError) {
     return 'border-red-300 dark:border-red-900 bg-red-50/30 dark:bg-red-950/20 focus:border-red-500';
   }
-  if (deliveryDate) {
+  if (eventDate) {
     return 'border-emerald-300 dark:border-emerald-800 bg-emerald-50/10 dark:bg-emerald-950/10 focus:border-emerald-600';
   }
   return 'border-stone-200 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/40 focus:border-lux-gold';
@@ -113,7 +110,7 @@ export function useRequestForm(
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
 
-    if (name === 'deliveryDate') {
+    if (name === 'eventDate') {
       const minDateStr = getMinDateString();
       if (!value) {
         setDateError('Event date is required.');
@@ -201,12 +198,12 @@ export function useRequestForm(
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!form.contactName || !form.contactPhone || !form.deliveryDate) {
+    if (!form.contactName || !form.contactPhone || !form.eventDate) {
       setValError('Please fill in your name, phone, and event date.');
       return;
     }
     const minDateStr = getMinDateString();
-    if (form.deliveryDate < minDateStr) {
+    if (form.eventDate < minDateStr) {
       setValError(`Yodit needs at least 2 days to prepare. Please choose ${new Date(minDateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} or later.`);
       return;
     }
@@ -223,9 +220,7 @@ export function useRequestForm(
       contactPhone: form.contactPhone,
       eventType: 'Other',
       guestCount: 20,
-      deliveryOption: form.deliveryOption,
-      deliveryAddress: form.deliveryAddress,
-      deliveryDate: form.deliveryDate,
+      eventDate: form.eventDate,
       designStyle: form.cakeDescription,
       flavor: 'To be discussed',
       tierCount: 1,
