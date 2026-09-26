@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useMemo, ReactNode } from 'react';
 import { Product } from '@shared/types';
 
 interface CakeSelectionContextValue {
@@ -26,10 +26,13 @@ export function CakeSelectionProvider({ children }: { children: ReactNode }) {
 
   const clearPrefilledCake = () => setPrefilledCake(null);
 
+  const value = useMemo(
+    () => ({ selectedCake, prefilledCake, selectCake, clearSelectedCake, orderCake, clearPrefilledCake }),
+    [selectedCake, prefilledCake],
+  );
+
   return (
-    <CakeSelectionContext.Provider
-      value={{ selectedCake, prefilledCake, selectCake, clearSelectedCake, orderCake, clearPrefilledCake }}
-    >
+    <CakeSelectionContext.Provider value={value}>
       {children}
     </CakeSelectionContext.Provider>
   );

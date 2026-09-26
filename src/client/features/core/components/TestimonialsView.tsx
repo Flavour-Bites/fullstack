@@ -148,7 +148,7 @@ export default function TestimonialsView() {
                     {/* Rating Stars */}
                     <div className="flex gap-1 mb-6">
                       {Array.from({ length: testimonial.rating }).map((_, i) => (
-                        <span key={i} className="text-lux-gold text-sm leading-none">★</span>
+                        <span key={`${testimonial.id}-star-${i}`} className="text-lux-gold text-sm leading-none">★</span>
                       ))}
                     </div>
 

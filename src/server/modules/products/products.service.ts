@@ -2,6 +2,12 @@ import { productsRepository } from './products.repository';
 import { deleteImageFromCloudinary } from '../../platform/integrations/cloudinary/cloudinaryClient';
 import type { ProductInput, ProductUpdateInput } from './products.schemas';
 
+function normalizeStringArray(value?: string | string[]): string[] {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string' && value.trim().length > 0) return [value];
+  return [];
+}
+
 export const productsService = {
   async findAll(categorySlug?: string, includeInactive = false) {
     return productsRepository.findAll(categorySlug, includeInactive);
@@ -13,8 +19,8 @@ export const productsService = {
 
   async create(data: ProductInput) {
     const categoryId = await productsRepository.resolveCategoryId(data);
-    const flavors = Array.isArray(data.flavors) ? data.flavors : [data.flavors];
-    const tags = Array.isArray(data.tags) ? data.tags : data.tags ? [data.tags] : [];
+    const flavors = normalizeStringArray(data.flavors);
+    const tags = normalizeStringArray(data.tags);
 
     return productsRepository.create({
       id: data.id,
@@ -36,21 +42,20 @@ export const productsService = {
 
     if (data.name !== undefined) updateData.name = data.name;
     if (data.description !== undefined) updateData.description = data.description;
-    if (data.categoryId || data.categorySlug || data.category) {
-      updateData.categoryId = await productsRepository.resolveCategoryId(data);
-    }
-    if (data.flavors !== undefined) {
-      updateData.flavors = Array.isArray(data.flavors) ? data.flavors : [data.flavors];
-    }
     if (data.priceEstimate !== undefined) updateData.priceEstimate = data.priceEstimate;
     if (data.image !== undefined) updateData.image = data.image;
     if (data.imagePublicId !== undefined) updateData.imagePublicId = data.imagePublicId;
     if (data.servingCount !== undefined) updateData.servingCount = data.servingCount;
-    if (data.tags !== undefined) {
-      updateData.tags = Array.isArray(data.tags) ? data.tags : data.tags ? [data.tags] : [];
+    if (data.isActive !== undefined) updateData.isActive = data.isActive;
+
+    if (data.categoryId || data.categorySlug || data.category) {
+      updateData.categoryId = await productsRepository.resolveCategoryId(data);
     }
-    if (data.isActive !== undefined) {
-      updateData.isActive = data.isActive;
+    if (data.flavors !== undefined) {
+      updateData.flavors = normalizeStringArray(data.flavors);
+    }
+    if (data.tags !== undefined) {
+      updateData.tags = normalizeStringArray(data.tags);
     }
 
     return productsRepository.update(id, updateData);

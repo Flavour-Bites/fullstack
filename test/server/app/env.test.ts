@@ -130,6 +130,7 @@ describe('validateEnv', () => {
   });
 
   it('throws when Cloudinary is not configured', () => {
+    process.env.NODE_ENV = 'production';
     delete process.env.CLOUDINARY_URL;
     delete process.env.CLOUDINARY_CLOUD_NAME;
     delete process.env.CLOUDINARY_API_KEY;

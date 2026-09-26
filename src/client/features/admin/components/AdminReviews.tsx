@@ -11,8 +11,10 @@ interface AdminReviewsProps {
 }
 
 export default function AdminReviews({
-  reviewItems, reviewsLoading,
+  reviewItems,
+  reviewsLoading,
   handleDeleteReview,
+  fetchReviews,
 }: AdminReviewsProps) {
   return (
     <div className="max-w-7xl mx-auto space-y-5 relative z-10 font-sans">
@@ -20,6 +22,14 @@ export default function AdminReviews({
         <h2 className="font-serif text-xl text-stone-900 dark:text-white flex items-center gap-2">
           <MessageSquare className="w-5 h-5 text-lux-gold" /> {t('admin.reviews')} ({reviewItems.length})
         </h2>
+        <button
+          type="button"
+          onClick={() => void fetchReviews()}
+          disabled={reviewsLoading}
+          className="text-xs uppercase tracking-wider font-semibold text-lux-gold hover:text-lux-gold/80 transition-colors disabled:opacity-50 cursor-pointer"
+        >
+          Refresh
+        </button>
       </div>
 
       {reviewsLoading ? (

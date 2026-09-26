@@ -136,11 +136,11 @@ export default function SearchModal({ isOpen, onClose, onSelectCake }: SearchMod
                   <div className="flex items-center justify-center gap-4 mt-4 text-[10px] text-stone-400 font-mono">
                     <span className="flex items-center gap-1">
                       <span className="border border-stone-200 dark:border-stone-700 rounded px-1.5 py-0.5 text-[9px]">⌘K</span>
-                      to toggle
+                      {' '}to toggle
                     </span>
                     <span className="flex items-center gap-1">
                       <span className="border border-stone-200 dark:border-stone-700 rounded px-1.5 py-0.5 text-[9px]">ESC</span>
-                      to close
+                      {' '}to close
                     </span>
                   </div>
                 </div>

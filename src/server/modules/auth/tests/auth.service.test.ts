@@ -156,7 +156,7 @@ describe('authService.initiateOidcFlow', () => {
     expect(result.authorizationUrl).toContain('scope=openid');
     expect(decodeURIComponent(result.authorizationUrl)).toContain('telegram:bot_access');
     expect(result.state).toBeDefined();
-    expect(result.state.length).toBe(32);
+    expect(result.state).toHaveLength(32);
   });
 
   it('throws when CLIENT_ID is missing', async () => {

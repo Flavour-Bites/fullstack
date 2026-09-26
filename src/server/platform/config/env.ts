@@ -207,13 +207,16 @@ export function validateEnv(): void {
     );
   }
 
-  // Cloudinary: either CLOUDINARY_URL or all three individual vars required
-  const hasUrl = !!process.env.CLOUDINARY_URL;
-  const missingCloudinary = cloudinaryRequired.filter((key) => !process.env[key]);
-  if (!hasUrl && missingCloudinary.length > 0) {
-    throw new Error(
-      `Missing Cloudinary configuration: either set CLOUDINARY_URL or all of: ${missingCloudinary.join(', ')}`
-    );
+  // Cloudinary: either CLOUDINARY_URL or all three individual vars required (skip in dev/test)
+  const isDevOrTest = nodeEnv === 'development' || nodeEnv === 'test';
+  if (!isDevOrTest) {
+    const hasUrl = !!process.env.CLOUDINARY_URL;
+    const missingCloudinary = cloudinaryRequired.filter((key) => !process.env[key]);
+    if (!hasUrl && missingCloudinary.length > 0) {
+      throw new Error(
+        `Missing Cloudinary configuration: either set CLOUDINARY_URL or all of: ${missingCloudinary.join(', ')}`
+      );
+    }
   }
 
   const missingRecommended = recommended.filter((key) => !process.env[key]);

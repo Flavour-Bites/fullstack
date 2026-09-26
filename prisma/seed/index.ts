@@ -77,11 +77,11 @@ async function main() {
   console.log('Database successfully seeded with requests and gallery items!');
 }
 
-main()
-  .catch((e) => {
-    console.error('Seeding failed with error:', e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+try {
+  await main();
+} catch (e) {
+  console.error('Seeding failed with error:', e);
+  process.exit(1);
+} finally {
+  await prisma.$disconnect();
+}

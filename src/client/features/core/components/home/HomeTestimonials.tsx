@@ -84,7 +84,7 @@ export default function HomeTestimonials({
                   >
                     <div className="flex justify-center gap-0.5">
                       {Array.from({ length: review.rating }).map((_, i) => (
-                        <Star key={i} size={15} className="fill-lux-gold text-lux-gold" />
+                        <Star key={`${review.id}-star-${i}`} size={15} className="fill-lux-gold text-lux-gold" />
                       ))}
                     </div>
 
@@ -132,9 +132,9 @@ export default function HomeTestimonials({
               <ChevronLeft className="w-5 h-5" />
             </button>
             <div className="flex gap-1.5">
-              {reviews.map((_, idx) => (
+              {reviews.map((rev, idx) => (
                 <button
-                  key={idx}
+                  key={rev.id}
                   onClick={() => onSelect(idx)}
                   className={`h-1.5 rounded-full transition-all duration-300 ${
                     activeIndex === idx ? 'w-6 bg-lux-gold' : 'w-1.5 bg-white/20'
