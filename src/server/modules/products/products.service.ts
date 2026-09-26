@@ -30,23 +30,16 @@ export const productsService = {
   },
 
   async update(id: string, data: ProductUpdateInput) {
-    const updateData: Record<string, unknown> = {};
+    const { categoryId, categorySlug, category, id: _id, ...fields } = data;
 
-    if (data.name !== undefined) updateData.name = data.name;
-    if (data.description !== undefined) updateData.description = data.description;
-    if (data.priceEstimate !== undefined) updateData.priceEstimate = data.priceEstimate;
-    if (data.image !== undefined) updateData.image = data.image;
-    if (data.imagePublicId !== undefined) updateData.imagePublicId = data.imagePublicId;
-    if (data.servingCount !== undefined) updateData.servingCount = data.servingCount;
-    if (data.isActive !== undefined) updateData.isActive = data.isActive;
-    if (data.flavors !== undefined) updateData.flavors = data.flavors;
-    if (data.tags !== undefined) updateData.tags = data.tags;
+    const resolvedCategoryId = (categoryId || categorySlug || category)
+      ? await productsRepository.resolveCategoryId(data)
+      : undefined;
 
-    if (data.categoryId || data.categorySlug || data.category) {
-      updateData.categoryId = await productsRepository.resolveCategoryId(data);
-    }
-
-    return productsRepository.update(id, updateData);
+    return productsRepository.update(id, {
+      ...fields,
+      ...(resolvedCategoryId !== undefined && { categoryId: resolvedCategoryId }),
+    });
   },
 
   async delete(id: string) {
