@@ -136,8 +136,8 @@ export default function ProductDetailsPage() {
                   {t('gallery.flavorPairings')}
                 </h2>
                 <div className="flex flex-wrap gap-2">
-                  {cake.flavors.map((flv, idx) => (
-                    <span key={idx} className="px-4 py-2 bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-sm text-stone-700 dark:text-stone-300 font-light rounded-sm">
+                  {cake.flavors.map((flv) => (
+                    <span key={`${cake.id}-flavor-${flv}`} className="px-4 py-2 bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 text-sm text-stone-700 dark:text-stone-300 font-light rounded-sm">
                       {flv}
                     </span>
                   ))}

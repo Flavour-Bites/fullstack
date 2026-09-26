@@ -98,8 +98,8 @@ export default function GalleryLightbox({ cake, onClose, onCommission }: Gallery
                 <div className="space-y-3 text-left">
                   <h4 className="text-[10px] uppercase tracking-widest text-stone-500 dark:text-stone-450 font-bold font-mono">{t('gallery.flavorPairings')}</h4>
                   <div className="flex flex-wrap gap-2">
-                    {cake.flavors.map((flv, idx) => (
-                      <span key={idx} className="px-3 py-1.5 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-700 dark:text-stone-300 font-light rounded-sm">
+                    {cake.flavors.map((flv) => (
+                      <span key={`${cake.id}-flavor-${flv}`} className="px-3 py-1.5 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 text-xs text-stone-700 dark:text-stone-300 font-light rounded-sm">
                         {flv}
                       </span>
                     ))}
