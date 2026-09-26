@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const orderStatusEnum = z.enum([
   'Received',
   'Designing',
-  'Quoted',
+  'Priced',
   'Confirmed',
   'InProgress',
   'Ready',
@@ -31,7 +31,7 @@ export const createOrderSchema = z.object({
 
 export const updateOrderSchema = z.object({
   status: orderStatusEnum.optional(),
-  quotedPrice: z.union([z.number(), z.string()]).optional(),
+  price: z.union([z.number(), z.string()]).optional(),
   finalPrice: z.union([z.number(), z.string()]).optional(),
   depositAmount: z.union([z.number(), z.string()]).optional(),
   depositPaidAt: z.string().optional().nullable(),

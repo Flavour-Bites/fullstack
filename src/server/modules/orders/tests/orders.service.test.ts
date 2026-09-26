@@ -21,7 +21,7 @@ const mockOrder = {
   referenceImageBytes: null,
   requestDate: 'June 23, 2026',
   status: 'Received',
-  quotedPrice: null,
+  price: null,
   finalPrice: null,
   depositAmount: null,
   remainingBalance: 0,
@@ -34,11 +34,11 @@ const mockOrder = {
   user: { id: 'usr_123', name: 'Test User', role: 'customer' },
 };
 
-const mockQuotedOrder = {
+const mockPricedOrder = {
   ...mockOrder,
-  id: 'FB-QUOTED',
-  status: 'Quoted',
-  quotedPrice: 5000,
+  id: 'FB-PRICED',
+  status: 'Priced',
+  price: 5000,
 };
 
 const mockCompletedOrder = {
@@ -58,7 +58,7 @@ vi.mock('@server/modules/orders/orders.repository.js', () => ({
     create: vi.fn((data) => Promise.resolve({ ...mockOrder, id: data.id })),
     findById: vi.fn((id) => {
       if (id === 'FB-ABC123') return Promise.resolve(mockOrder);
-      if (id === 'FB-QUOTED') return Promise.resolve(mockQuotedOrder);
+      if (id === 'FB-PRICED') return Promise.resolve(mockPricedOrder);
       if (id === 'FB-COMPLETED') return Promise.resolve(mockCompletedOrder);
       if (id === 'FB-CANCELLED') return Promise.resolve(mockCancelledOrder);
       if (id === 'FB-DELETED') return Promise.resolve({ ...mockOrder, id: 'FB-DELETED', deletedAt: new Date() });
@@ -66,10 +66,10 @@ vi.mock('@server/modules/orders/orders.repository.js', () => ({
     }),
     findMany: vi.fn(() => Promise.resolve([mockOrder])),
     updateStatus: vi.fn((id, status) =>
-      Promise.resolve({ ...(id === 'FB-QUOTED' ? mockQuotedOrder : id === 'FB-COMPLETED' ? mockCompletedOrder : id === 'FB-CANCELLED' ? mockCancelledOrder : mockOrder), id, status }),
+      Promise.resolve({ ...(id === 'FB-PRICED' ? mockPricedOrder : id === 'FB-COMPLETED' ? mockCompletedOrder : id === 'FB-CANCELLED' ? mockCancelledOrder : mockOrder), id, status }),
     ),
     updateCommercials: vi.fn((id, data) =>
-      Promise.resolve({ ...(id === 'FB-QUOTED' ? mockQuotedOrder : id === 'FB-COMPLETED' ? mockCompletedOrder : id === 'FB-CANCELLED' ? mockCancelledOrder : mockOrder), id, ...data }),
+      Promise.resolve({ ...(id === 'FB-PRICED' ? mockPricedOrder : id === 'FB-COMPLETED' ? mockCompletedOrder : id === 'FB-CANCELLED' ? mockCancelledOrder : mockOrder), id, ...data }),
     ),
     softDelete: vi.fn((id) => Promise.resolve({ ...mockOrder, id, deletedAt: new Date() })),
     restore: vi.fn((id) => Promise.resolve({ ...mockOrder, id, deletedAt: null })),
@@ -98,7 +98,7 @@ vi.mock('@server/modules/orders/orders.workflow.js', async () => {
 vi.mock('@server/platform/integrations/telegram/telegramNotifications.js', () => ({
   notifyStaffNewOrder: vi.fn(() => Promise.resolve()),
   notifyCustomerStatusChange: vi.fn(() => Promise.resolve()),
-  notifyStaffQuoteAccepted: vi.fn(() => Promise.resolve()),
+  notifyStaffPriceConfirmed: vi.fn(() => Promise.resolve()),
 }));
 
 vi.mock('@server/platform/config/prisma.js', () => ({
@@ -153,30 +153,30 @@ describe('ordersService.update', () => {
       .rejects.toThrow('Order not found');
   });
 
-  it('promotes only pre-quote orders to Quoted when quotedPrice is set', async () => {
-    const result = await ordersService.update('FB-ABC123', { quotedPrice: 5000 }, actor);
-    expect(result?.status).toBe('Quoted');
+  it('promotes only pre-price orders to Priced when price is set', async () => {
+    const result = await ordersService.update('FB-ABC123', { price: 5000 }, actor);
+    expect(result?.status).toBe('Priced');
   });
 
-  it('does not revert terminal orders to Quoted when quotedPrice is set', async () => {
-    const result = await ordersService.update('FB-COMPLETED', { quotedPrice: 5000 }, actor);
+  it('does not revert terminal orders to Priced when price is set', async () => {
+    const result = await ordersService.update('FB-COMPLETED', { price: 5000 }, actor);
     expect(result?.status).toBe('Completed');
   });
 
-  it('does not revert cancelled orders to Quoted when quotedPrice is set', async () => {
-    const result = await ordersService.update('FB-CANCELLED', { quotedPrice: 5000 }, actor);
+  it('does not revert cancelled orders to Priced when price is set', async () => {
+    const result = await ordersService.update('FB-CANCELLED', { price: 5000 }, actor);
     expect(result?.status).toBe('Cancelled');
   });
 
   it('throws ValidationError on an invalid explicit status transition', async () => {
-    await expect(ordersService.update('FB-COMPLETED', { status: 'Quoted' }, actor))
-      .rejects.toThrow('Cannot change status from Completed to Quoted');
+    await expect(ordersService.update('FB-COMPLETED', { status: 'Priced' }, actor))
+      .rejects.toThrow('Cannot change status from Completed to Priced');
   });
 });
 
 describe('ordersService.updateCommercials', () => {
   it('throws on invalid money value', async () => {
-    await expect(ordersService.updateCommercials('FB-ABC123', { quotedPrice: 'abc' }))
+    await expect(ordersService.updateCommercials('FB-ABC123', { price: 'abc' }))
       .rejects.toThrow('Please enter a valid amount');
   });
 
@@ -186,7 +186,7 @@ describe('ordersService.updateCommercials', () => {
   });
 
   it('updates commercial fields', async () => {
-    const result = await ordersService.updateCommercials('FB-ABC123', { quotedPrice: 5000 });
+    const result = await ordersService.updateCommercials('FB-ABC123', { price: 5000 });
     expect(result?.id).toBe('FB-ABC123');
   });
 });
@@ -217,13 +217,13 @@ describe('ordersService.acceptPrice', () => {
       .rejects.toThrow('You can only confirm your own cake order');
   });
 
-  it('throws when no quoted price', async () => {
+  it('throws when no price is set', async () => {
     await expect(ordersService.acceptPrice('FB-ABC123', 'usr_123', 'customer'))
       .rejects.toThrow('Cake price is not ready yet');
   });
 
   it('accepts price and updates to Confirmed', async () => {
-    const result = await ordersService.acceptPrice('FB-QUOTED', 'usr_123', 'customer');
+    const result = await ordersService.acceptPrice('FB-PRICED', 'usr_123', 'customer');
     expect(result.status).toBe('Confirmed');
   });
 });
@@ -244,7 +244,7 @@ describe('ordersService.restore', () => {
 
 describe('ordersService.updateAll', () => {
   it('returns the updated order', async () => {
-    const result = await ordersService.updateAll('FB-ABC123', { quotedPrice: 5000 });
+    const result = await ordersService.updateAll('FB-ABC123', { price: 5000 });
     expect(result).toBeDefined();
     expect(result.id).toBe('FB-ABC123');
   });

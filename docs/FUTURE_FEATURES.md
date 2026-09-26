@@ -24,7 +24,7 @@ Online payment processing via [Chapa](https://chapa.co), an Ethiopian payment ga
 
 ### Planned Flow
 
-1. Staff sets `quotedPrice` on an order → status moves to `Quoted`
+1. Staff sets `price` on an order → status moves to `Priced`
 2. Customer accepts price → status moves to `Confirmed`
 3. Customer clicks "Pay Now" → `POST /api/payments/initiate` → redirected to Chapa checkout
 4. Payment completes → Chapa hits `/api/payments/webhook` → order `depositAmount` updated
@@ -36,7 +36,7 @@ These fields exist in `CustomCakeRequest` but are unused in v1:
 
 | Field | Type | Purpose |
 |-------|------|---------|
-| `quotedPrice` | Int? | Price quoted by staff |
+| `price` | Int? | Price set by staff |
 | `finalPrice` | Int? | Price confirmed by customer |
 | `priceConfirmedAt` | DateTime? | When customer accepted the price |
 | `depositAmount` | Int | Amount paid so far |

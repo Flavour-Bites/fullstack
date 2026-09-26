@@ -1,14 +1,14 @@
 import { motion } from 'motion/react';
 import { ChevronRight, Info } from 'lucide-react';
-import { CakeGalleryItem } from '@shared/types';
+import { Product } from '@shared/types';
 import { t } from '@client/i18n/index';
 import { cardVariants } from './galleryMotion';
 
 interface GalleryCardProps {
-  cake: CakeGalleryItem;
+  cake: Product;
   index: number;
   selectedTags: string[];
-  onSelect: (cake: CakeGalleryItem) => void;
+  onSelect: (cake: Product) => void;
   onTagToggle: (tag: string) => void;
 }
 
@@ -38,7 +38,7 @@ export default function GalleryCard({ cake, index, selectedTags, onSelect, onTag
           {cake.category?.name ?? cake.categoryId}
         </div>
 
-        {/* Hover commission prompt */}
+        {/* Hover order prompt */}
         <div className="absolute bottom-4 left-4 right-4 z-10 flex justify-between items-center bg-stone-900/90 text-white backdrop-blur-md py-3 px-4 rounded-sm translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
           <span className="text-xs tracking-wider uppercase font-light">{t('gallery.viewSecrets')}</span>
           <ChevronRight className="w-4 h-4 text-lux-gold" />

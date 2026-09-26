@@ -28,7 +28,12 @@ vi.mock('@shared/utils/auth.ts', () => ({
   generateState: vi.fn(() => 'mock_state_123'),
   generateNonce: vi.fn(() => 'mock_nonce_123'),
   generatePkcePair: vi.fn(() => ({ codeVerifier: 'mock_verifier_123', codeChallenge: 'mock_challenge_123' })),
+  verifyOidcIdToken: vi.fn(() => Promise.resolve({ id: '12345', sub: '12345', name: 'Test User' })),
   authCookieOptions: { httpOnly: true, sameSite: 'lax', secure: false, maxAge: 999 },
+}));
+
+vi.mock('@server/platform/integrations/telegram/telegramClient.js', () => ({
+  sendMessage: vi.fn(() => Promise.resolve(true)),
 }));
 
 vi.mock('@server/modules/auth/auth.repository.ts', () => ({
@@ -143,12 +148,13 @@ describe('authService.initiateOidcFlow', () => {
     vi.unstubAllGlobals();
   });
 
-  it('returns authorizationUrl with required OIDC params', async () => {
+  it('returns authorizationUrl with required OIDC params including telegram:bot_access', async () => {
     const result = await authService.initiateOidcFlow('https://example.com/callback');
     expect(result.authorizationUrl).toContain('client_id=test_client_id');
     expect(result.authorizationUrl).toContain('response_type=code');
     expect(result.authorizationUrl).toContain('code_challenge_method=S256');
     expect(result.authorizationUrl).toContain('scope=openid');
+    expect(decodeURIComponent(result.authorizationUrl)).toContain('telegram:bot_access');
     expect(result.state).toBeDefined();
     expect(result.state.length).toBe(32);
   });
@@ -168,5 +174,85 @@ describe('authService.handleOidcCallback', () => {
       state: 'unknown_state_not_in_map',
       redirectUri: 'https://example.com/callback',
     })).rejects.toThrow('Invalid OAuth state');
+  });
+
+  it('exchanges code for tokens, verifies id_token, and records bot write access', async () => {
+    process.env.TELEGRAM_OPENID_CONNECT_CLIENT_ID = 'test_client_id';
+    process.env.TELEGRAM_OPENID_CONNECT_CLIENT_SECRET = 'test_client_secret';
+
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({
+        access_token: 'mock_access_token',
+        token_type: 'Bearer',
+        expires_in: 3600,
+        id_token: 'mock_id_token',
+        scope: 'openid profile phone telegram:bot_access',
+      }),
+    });
+    vi.stubGlobal('fetch', mockFetch);
+
+    const { authRepository } = await import('@server/modules/auth/auth.repository.ts');
+
+    const result = await authService.handleOidcCallback({
+      code: 'valid_code',
+      state: 'valid_state',
+      redirectUri: 'https://example.com/callback',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.token).toBe('token-usr_123');
+    expect(authRepository.upsertTelegramUser).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: '12345',
+        notifyViaTelegram: true,
+      })
+    );
+  });
+
+  it('sends welcome notification to newly registered users when bot_access is granted', async () => {
+    process.env.TELEGRAM_OPENID_CONNECT_CLIENT_ID = 'test_client_id';
+    process.env.TELEGRAM_OPENID_CONNECT_CLIENT_SECRET = 'test_client_secret';
+
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({
+        access_token: 'mock_access_token',
+        token_type: 'Bearer',
+        expires_in: 3600,
+        id_token: 'mock_id_token',
+        scope: 'openid profile telegram:bot_access',
+      }),
+    });
+    vi.stubGlobal('fetch', mockFetch);
+
+    const { verifyOidcIdToken } = await import('@shared/utils/auth.ts');
+    vi.mocked(verifyOidcIdToken).mockResolvedValueOnce({
+      id: 99999,
+      sub: '99999',
+      name: 'New Customer',
+    } as any);
+
+    const { authRepository } = await import('@server/modules/auth/auth.repository.ts');
+    vi.mocked(authRepository.upsertTelegramUser).mockResolvedValueOnce({
+      ...mockUser,
+      id: 'usr_999',
+      telegramId: '99999',
+      name: 'New Customer',
+      notifyViaTelegram: true,
+    } as any);
+
+    const { sendMessage } = await import('@server/platform/integrations/telegram/telegramClient.js');
+
+    await authService.handleOidcCallback({
+      code: 'new_user_code',
+      state: 'valid_state',
+      redirectUri: 'https://example.com/callback',
+    });
+
+    expect(sendMessage).toHaveBeenCalledWith(
+      '99999',
+      expect.stringContaining('Welcome to Flavour Bites!')
+    );
   });
 });

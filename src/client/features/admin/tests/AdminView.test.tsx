@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup, waitFor } from '@testing-library/react';
+import { screen, cleanup, waitFor } from '@testing-library/react';
+import { renderWithQueryClient } from '@test/queryClientWrapper';
 import { ToastProvider } from '@client/components/Toast';
 import AdminView from '@client/features/admin/components/AdminView';
 
 beforeEach(() => {
-  vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response('{"success":true,"requests":[]}'))));
+  vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response('{"success":true,"requests":[],"items":[]}'))));
 });
 
 afterEach(() => {
@@ -16,7 +17,7 @@ afterEach(() => {
 const adminUser = { id: '1', telegramId: '1', name: 'Admin', role: 'admin' } as any;
 
 function renderView(props = {}) {
-  return render(
+  return renderWithQueryClient(
     <ToastProvider>
       <AdminView currentUser={adminUser} {...props} />
     </ToastProvider>

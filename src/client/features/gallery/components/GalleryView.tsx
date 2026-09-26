@@ -1,4 +1,4 @@
-import { CakeGalleryItem } from '@shared/types';
+import { Product } from '@shared/types';
 import { t } from '@client/i18n/index';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
 import { useGalleryFilters, FilterType } from '../hooks/useGalleryFilters';
@@ -8,10 +8,10 @@ import GalleryGrid from './gallery/GalleryGrid';
 import GalleryLightbox from './gallery/GalleryLightbox';
 
 interface GalleryViewProps {
-  selectedCake: CakeGalleryItem | null;
+  selectedCake: Product | null;
   onClearSelectedCake: () => void;
-  onSelectCake: (cake: CakeGalleryItem | null) => void;
-  onCommissionCake: (cake: CakeGalleryItem) => void;
+  onSelectCake: (cake: Product | null) => void;
+  onCommissionCake: (cake: Product) => void;
 }
 
 export default function GalleryView({
@@ -25,10 +25,10 @@ export default function GalleryView({
 
   const categories: { label: string; value: FilterType }[] = [
     { label: t('gallery.allCollections'), value: 'all' },
-    { label: t('gallery.bespokeCelebrations'), value: 'celebration' },
-    { label: t('gallery.eliteBirthdays'), value: 'birthday' },
-    { label: t('gallery.fairytaleKids'), value: 'kids' },
-    { label: t('gallery.gourmetTreats'), value: 'treats' },
+    { label: t('gallery.customCelebrations'), value: 'celebration' },
+    { label: t('gallery.birthdays'), value: 'birthday' },
+    { label: t('gallery.kidsCakes'), value: 'kids' },
+    { label: t('gallery.sweetTreats'), value: 'treats' },
   ];
 
   return (
@@ -55,6 +55,7 @@ export default function GalleryView({
         filteredCakes={gallery.filteredCakes}
         selectedTags={gallery.selectedTags}
         gridKey={`${gallery.activeFilter}-${gallery.selectedTags.join(',')}-${gallery.searchQuery}`}
+        isLoading={gallery.isLoading}
         onSelect={onSelectCake}
         onTagToggle={gallery.handleTagToggle}
         onClearAllFilters={gallery.clearAllFilters}

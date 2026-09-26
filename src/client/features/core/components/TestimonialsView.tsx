@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Award, Quote } from 'lucide-react';
-import { TESTIMONIALS } from '@client/data';
+import { Award, Quote, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { t } from '@client/i18n/index';
 import { usePageTitle } from '../hooks/usePageTitle';
+import { useReviews } from '../hooks/useReviews';
 
 export default function TestimonialsView() {
   usePageTitle("Testimonials");
+  const { reviews, isLoading } = useReviews();
   const [filter, setFilter] = useState<'all' | 'celebration' | 'birthday'>('all');
 
-  const filteredReviews = TESTIMONIALS.filter((testimonial) => {
+  const filteredReviews = reviews.filter((testimonial) => {
     if (filter === 'all') return true;
     if (filter === 'celebration') return testimonial.eventType.toLowerCase().includes('celebration') || testimonial.eventType.toLowerCase().includes('anniversary') || testimonial.eventType.toLowerCase().includes('wedding');
     if (filter === 'birthday') return testimonial.eventType.toLowerCase().includes('birthday') || testimonial.eventType.toLowerCase().includes('party');
@@ -44,7 +46,7 @@ export default function TestimonialsView() {
         <div className="flex flex-wrap justify-center gap-3">
           <button
             onClick={() => setFilter('all')}
-            className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 shadow-sm ${
+            className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 shadow-sm cursor-pointer ${
               filter === 'all'
                 ? 'bg-lux-gold text-white shadow-lux-gold/20'
                 : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700'
@@ -54,7 +56,7 @@ export default function TestimonialsView() {
           </button>
           <button
             onClick={() => setFilter('celebration')}
-            className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 shadow-sm ${
+            className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 shadow-sm cursor-pointer ${
               filter === 'celebration'
                 ? 'bg-lux-gold text-white shadow-lux-gold/20'
                 : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700'
@@ -64,7 +66,7 @@ export default function TestimonialsView() {
           </button>
           <button
             onClick={() => setFilter('birthday')}
-            className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 shadow-sm ${
+            className={`px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 shadow-sm cursor-pointer ${
               filter === 'birthday'
                 ? 'bg-lux-gold text-white shadow-lux-gold/20'
                 : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700'
@@ -75,54 +77,113 @@ export default function TestimonialsView() {
         </div>
       </section>
 
-      {/* Masonry Waterfall Layout */}
+      {/* Masonry Waterfall Layout / Empty State */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-32">
-        <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
-          <AnimatePresence>
-            {filteredReviews.map((testimonial, idx) => (
-              <motion.div
-                layout
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.6, delay: (idx % 3) * 0.1, ease: "easeOut" }}
-                key={testimonial.id}
-                className="break-inside-avoid bg-white dark:bg-stone-800 p-8 rounded-2xl shadow-xs border border-stone-100 dark:border-stone-700/50 hover:shadow-lg transition-shadow duration-300 relative group"
-              >
-                <Quote className="absolute top-6 right-6 w-8 h-8 text-lux-gold/20 dark:text-lux-gold/10 group-hover:text-lux-gold/40 transition-colors duration-300" />
-                
-                {/* Rating Stars */}
-                <div className="flex gap-1 mb-6">
-                  {Array.from({ length: testimonial.rating }).map((_, i) => (
-                    <span key={i} className="text-lux-gold text-sm leading-none">★</span>
-                  ))}
-                </div>
-
-                <p className="text-stone-700 dark:text-stone-200 font-serif text-lg leading-relaxed mb-8">
-                  "{testimonial.content}"
-                </p>
-
-                <div className="flex items-center gap-4 pt-6 border-t border-stone-100 dark:border-stone-700/50">
-                  <img
-                    src={testimonial.image}
-                    alt={testimonial.author}
-                    className="w-12 h-12 rounded-full object-cover border border-stone-200 dark:border-stone-700"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div>
-                    <h4 className="font-semibold text-stone-900 dark:text-stone-100 text-sm">
-                      {testimonial.author}
-                    </h4>
-                    <span className="text-xs text-stone-500 dark:text-stone-400 block mt-0.5">
-                      {testimonial.eventType} • {testimonial.role}
-                    </span>
+        {isLoading ? (
+          <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="break-inside-avoid bg-white dark:bg-stone-800 p-8 rounded-2xl border border-stone-100 dark:border-stone-700/50 animate-pulse space-y-4">
+                <div className="h-4 bg-stone-200 dark:bg-stone-700 rounded-sm w-1/4" />
+                <div className="h-5 bg-stone-200 dark:bg-stone-700 rounded-sm w-full" />
+                <div className="h-5 bg-stone-200 dark:bg-stone-700 rounded-sm w-3/4" />
+                <div className="pt-4 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-700" />
+                  <div className="space-y-1.5 flex-1">
+                    <div className="h-3 bg-stone-200 dark:bg-stone-700 rounded-sm w-1/2" />
+                    <div className="h-2 bg-stone-200 dark:bg-stone-700 rounded-sm w-1/3" />
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ))}
-          </AnimatePresence>
-        </div>
+          </div>
+        ) : filteredReviews.length === 0 ? (
+          <div className="max-w-2xl mx-auto py-16 px-6 text-center border-2 border-dashed border-stone-200/90 dark:border-stone-800/90 rounded-3xl bg-stone-50/50 dark:bg-stone-900/30">
+            <div className="w-16 h-16 rounded-full bg-lux-gold/10 border border-lux-gold/25 flex items-center justify-center mx-auto mb-4 text-lux-gold shadow-inner">
+              <Quote className="w-7 h-7 stroke-[1.5] rotate-180" />
+            </div>
+            <h3 className="text-2xl font-serif text-stone-800 dark:text-stone-100 mb-2">
+              No approved testimonials yet
+            </h3>
+            <p className="text-sm text-stone-500 dark:text-stone-400 font-light max-w-md mx-auto leading-relaxed mb-6">
+              {filter !== 'all'
+                ? 'No stories found in this celebration category. Try switching categories or check back soon.'
+                : 'Customer stories and reviews submitted after custom bakery orders will appear here.'}
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              {filter !== 'all' && (
+                <button
+                  onClick={() => setFilter('all')}
+                  className="px-5 py-2.5 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 text-xs font-semibold uppercase tracking-wider rounded-full hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors cursor-pointer font-mono"
+                >
+                  View All Stories
+                </button>
+              )}
+              <Link
+                to="/request"
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-lux-gold hover:bg-lux-gold-light text-stone-950 text-xs font-bold uppercase tracking-widest rounded-full transition-all duration-300 shadow-xs hover:shadow-md cursor-pointer font-mono"
+              >
+                <span>Order a Custom Cake</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+            <AnimatePresence>
+              {filteredReviews.map((testimonial, idx) => {
+                const userPhoto = testimonial.user?.telegramPhoto;
+                return (
+                  <motion.div
+                    layout
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-50px" }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.6, delay: (idx % 3) * 0.1, ease: "easeOut" }}
+                    key={testimonial.id}
+                    className="break-inside-avoid bg-white dark:bg-stone-800 p-8 rounded-2xl shadow-xs border border-stone-100 dark:border-stone-700/50 hover:shadow-lg transition-shadow duration-300 relative group"
+                  >
+                    <Quote className="absolute top-6 right-6 w-8 h-8 text-lux-gold/20 dark:text-lux-gold/10 group-hover:text-lux-gold/40 transition-colors duration-300" />
+                    
+                    {/* Rating Stars */}
+                    <div className="flex gap-1 mb-6">
+                      {Array.from({ length: testimonial.rating }).map((_, i) => (
+                        <span key={i} className="text-lux-gold text-sm leading-none">★</span>
+                      ))}
+                    </div>
+
+                    <p className="text-stone-700 dark:text-stone-200 font-serif text-lg leading-relaxed mb-8">
+                      "{testimonial.content}"
+                    </p>
+
+                    <div className="flex items-center gap-4 pt-6 border-t border-stone-100 dark:border-stone-700/50">
+                      {userPhoto ? (
+                        <img
+                          src={userPhoto}
+                          alt={testimonial.author}
+                          className="w-12 h-12 rounded-full object-cover border border-stone-200 dark:border-stone-700"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-lux-gold/20 border border-lux-gold/40 flex items-center justify-center text-lux-gold font-serif font-bold text-sm shrink-0">
+                          {testimonial.author ? testimonial.author.charAt(0).toUpperCase() : 'FB'}
+                        </div>
+                      )}
+                      <div>
+                        <h4 className="font-semibold text-stone-900 dark:text-stone-100 text-sm">
+                          {testimonial.author}
+                        </h4>
+                        <span className="text-xs text-stone-500 dark:text-stone-400 block mt-0.5">
+                          {testimonial.eventType} • {testimonial.role}
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
+        )}
       </section>
 
       {/* Press & Kudos Modern Footer Section */}

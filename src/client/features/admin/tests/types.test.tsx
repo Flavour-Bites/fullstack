@@ -6,7 +6,7 @@ import type { CakeRequest } from '@client/features/admin/types';
 describe('WORKFLOW', () => {
   it('defines the standard order workflow stages', () => {
     expect(WORKFLOW).toEqual([
-      'Received', 'Designing', 'Quoted', 'Confirmed',
+      'Received', 'Designing', 'Priced', 'Confirmed',
       'InProgress', 'Ready', 'Completed',
     ]);
   });
@@ -15,8 +15,8 @@ describe('WORKFLOW', () => {
 describe('nextStatus', () => {
   it('returns the next status in the workflow', () => {
     expect(nextStatus('Received')).toBe('Designing');
-    expect(nextStatus('Designing')).toBe('Quoted');
-    expect(nextStatus('Quoted')).toBe('Confirmed');
+    expect(nextStatus('Designing')).toBe('Priced');
+    expect(nextStatus('Priced')).toBe('Confirmed');
     expect(nextStatus('Confirmed')).toBe('InProgress');
     expect(nextStatus('InProgress')).toBe('Ready');
     expect(nextStatus('Ready')).toBe('Completed');
@@ -41,11 +41,11 @@ describe('orderPrice', () => {
   };
 
   it('returns finalPrice when available', () => {
-    expect(orderPrice({ ...base, finalPrice: 5000, quotedPrice: 3000 })).toBe(5000);
+    expect(orderPrice({ ...base, finalPrice: 5000, price: 3000 })).toBe(5000);
   });
 
-  it('falls back to quotedPrice when no finalPrice', () => {
-    expect(orderPrice({ ...base, quotedPrice: 3000 })).toBe(3000);
+  it('falls back to price when no finalPrice', () => {
+    expect(orderPrice({ ...base, price: 3000 })).toBe(3000);
   });
 
   it('returns 0 when neither price is set', () => {

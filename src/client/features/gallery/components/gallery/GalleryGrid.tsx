@@ -1,15 +1,17 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { Cake } from 'lucide-react';
-import { CakeGalleryItem } from '@shared/types';
+import { Product } from '@shared/types';
 import { t } from '@client/i18n/index';
+import { SkeletonGrid } from '@client/components/Skeleton';
 import { containerVariants } from './galleryMotion';
 import GalleryCard from './GalleryCard';
 
 interface GalleryGridProps {
-  filteredCakes: CakeGalleryItem[];
+  filteredCakes: Product[];
   selectedTags: string[];
   gridKey: string;
-  onSelect: (cake: CakeGalleryItem) => void;
+  isLoading?: boolean;
+  onSelect: (cake: Product) => void;
   onTagToggle: (tag: string) => void;
   onClearAllFilters: () => void;
 }
@@ -18,10 +20,19 @@ export default function GalleryGrid({
   filteredCakes,
   selectedTags,
   gridKey,
+  isLoading,
   onSelect,
   onTagToggle,
   onClearAllFilters,
 }: GalleryGridProps) {
+  if (isLoading) {
+    return (
+      <section className="max-w-7xl mx-auto px-4 sm:px-6">
+        <SkeletonGrid items={6} />
+      </section>
+    );
+  }
+
   if (filteredCakes.length === 0) {
     return (
       <section className="max-w-7xl mx-auto px-4 sm:px-6">

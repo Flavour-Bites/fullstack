@@ -1,4 +1,4 @@
-import { User, LogOut, Settings, Bell, Shield, ShoppingBag, ChevronRight, Sparkles } from 'lucide-react';
+import { User, LogOut, Settings, Bell, Shield, ShoppingBag, ChevronRight, Crown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { User as UserType } from '@shared/types';
 import { ProfileTab } from '../../hooks/useProfileForm';
@@ -29,7 +29,7 @@ export default function ProfileSidebar({ currentUser, activeTab, onTabChange, on
             {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
           </span>
           <div className="absolute -bottom-1 -right-1 w-5.5 h-5.5 bg-lux-gold rounded-full flex items-center justify-center text-[10px] text-stone-950 font-bold shadow-md border border-white dark:border-stone-900">
-            {currentUser.role === 'admin' ? <Sparkles className="w-3 h-3 text-stone-950 fill-stone-950" /> : '✓'}
+            {currentUser.role === 'admin' ? <Crown className="w-3 h-3 text-stone-950 fill-stone-950" /> : '✓'}
           </div>
         </div>
 

@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Package, Plus, Image, Save, Loader2, Trash2, Pencil } from 'lucide-react';
+import { Package, Plus, Image, Save, Loader2, Trash2, Pencil, X } from 'lucide-react';
 import { t } from '@client/i18n/index';
 import { SkeletonGrid } from '../../../components/Skeleton';
+import { http } from '@client/lib/http';
+import type { ApiResponse } from '@/shared/api';
 
 interface AdminMenuProps {
   galleryItems: any[];
@@ -14,8 +16,14 @@ interface AdminMenuProps {
 export default function AdminMenu({ galleryItems, galleryLoading, categories, handleSaveGalleryItem, handleDeleteGalleryItem }: AdminMenuProps) {
   const [showGalleryForm, setShowGalleryForm] = useState(false);
   const [editingGalleryId, setEditingGalleryId] = useState<string | null>(null);
-  const [galleryForm, setGalleryForm] = useState({ name: '', description: '', categoryId: '', flavors: '', priceEstimate: '', image: '', servingCount: '', tags: '' });
+  const [galleryForm, setGalleryForm] = useState({ name: '', description: '', categoryId: '', flavors: '', priceEstimate: '', image: '', imageFile: null as File | null, imagePreview: '', servingCount: '', tags: '' });
   const [savingGallery, setSavingGallery] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const resetForm = () => {
+    setGalleryForm({ name: '', description: '', categoryId: '', flavors: '', priceEstimate: '', image: '', imageFile: null, imagePreview: '', servingCount: '', tags: '' });
+    setEditingGalleryId(null);
+  };
 
   const startEditGalleryItem = (item: any) => {
     setEditingGalleryId(item.id);
@@ -26,18 +34,70 @@ export default function AdminMenu({ galleryItems, galleryLoading, categories, ha
       flavors: Array.isArray(item.flavors) ? item.flavors.join(', ') : '',
       priceEstimate: item.priceEstimate,
       image: item.image || '',
+      imageFile: null,
+      imagePreview: item.image || '',
       servingCount: item.servingCount || '',
       tags: Array.isArray(item.tags) ? item.tags.join(', ') : '',
     });
     setShowGalleryForm(true);
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) return;
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Image must be smaller than 10 MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setGalleryForm((f) => ({ ...f, imageFile: file, imagePreview: reader.result as string }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = () => {
+    setGalleryForm((f) => ({ ...f, imageFile: null, imagePreview: '', image: '' }));
+  };
+
+  const uploadImage = async (file: File): Promise<string> => {
+    setUploadingImage(true);
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const { data } = await http.post<ApiResponse<{ image: { url: string } }>>('/api/uploads/image', {
+        fileName: file.name,
+        mimeType: file.type,
+        size: file.size,
+        dataBase64: base64,
+      });
+      if (!data.success) throw new Error(data.error);
+      return data.image.url;
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   const onSave = async () => {
     setSavingGallery(true);
-    await handleSaveGalleryItem(galleryForm, editingGalleryId);
+    let imageUrl = galleryForm.image;
+    if (galleryForm.imageFile) {
+      try {
+        imageUrl = await uploadImage(galleryForm.imageFile);
+      } catch (err: any) {
+        alert(`Upload failed: ${err.message}`);
+        setSavingGallery(false);
+        return;
+      }
+    }
+    await handleSaveGalleryItem({ ...galleryForm, image: imageUrl }, editingGalleryId);
     setShowGalleryForm(false);
-    setEditingGalleryId(null);
-    setGalleryForm({ name: '', description: '', categoryId: '', flavors: '', priceEstimate: '', image: '', servingCount: '', tags: '' });
+    resetForm();
     setSavingGallery(false);
   };
 
@@ -48,7 +108,7 @@ export default function AdminMenu({ galleryItems, galleryLoading, categories, ha
           <Package className="w-5 h-5 text-lux-gold" /> Cake Menu ({galleryItems.length} items)
         </h2>
         <button
-          onClick={() => { setShowGalleryForm(true); setEditingGalleryId(null); setGalleryForm({ name: '', description: '', categoryId: '', flavors: '', priceEstimate: '', image: '', servingCount: '', tags: '' }); }}
+          onClick={() => { setShowGalleryForm(true); resetForm(); }}
           className="px-3 py-1.5 bg-lux-gold text-stone-950 font-mono text-[10px] uppercase font-bold tracking-wider rounded-sm flex items-center gap-1.5 hover:bg-white transition-all cursor-pointer"
         >
           <Plus className="w-3.5 h-3.5" /> {t('admin.addGalleryItem')}
@@ -87,7 +147,37 @@ export default function AdminMenu({ galleryItems, galleryLoading, categories, ha
             </div>
             <div>
               <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.itemImage')}</label>
-              <input value={galleryForm.image} onChange={e => setGalleryForm(f => ({ ...f, image: e.target.value }))} placeholder="https://..." className="w-full bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+              <div className="space-y-2">
+                {galleryForm.imagePreview ? (
+                  <div className="relative w-24 h-24 bg-stone-100 dark:bg-stone-900 rounded-sm overflow-hidden border border-stone-200 dark:border-stone-800">
+                    <img src={galleryForm.imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={removeImage}
+                      className="absolute top-1 right-1 p-1 bg-black/60 text-white rounded-full hover:bg-black/80 transition-colors"
+                      aria-label="Remove image"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ) : null}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={handleImageChange}
+                  className="w-full bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs cursor-pointer"
+                  disabled={uploadingImage}
+                />
+                {uploadingImage && (
+                  <div className="flex items-center gap-2 text-xs text-lux-gold">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    Uploading to Cloudinary...
+                  </div>
+                )}
+                <p className="text-[9px] text-stone-400 dark:text-stone-500 font-sans">
+                  Max 10 MB · JPG, PNG, WebP, GIF
+                </p>
+              </div>
             </div>
             <div>
               <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.itemServingCount')}</label>
@@ -99,7 +189,7 @@ export default function AdminMenu({ galleryItems, galleryLoading, categories, ha
             </div>
           </div>
           <div className="flex justify-end gap-2 pt-2">
-            <button onClick={() => { setShowGalleryForm(false); setEditingGalleryId(null); }} className="px-3 py-1.5 text-[10px] font-mono font-bold uppercase bg-stone-200 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:bg-stone-300 dark:hover:bg-stone-700 rounded-sm">{t('admin.cancelEdit')}</button>
+            <button onClick={() => { setShowGalleryForm(false); resetForm(); }} className="px-3 py-1.5 text-[10px] font-mono font-bold uppercase bg-stone-200 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:bg-stone-300 dark:hover:bg-stone-700 rounded-sm">{t('admin.cancelEdit')}</button>
             <button onClick={onSave} disabled={savingGallery} className="px-3.5 py-1.5 text-[10px] font-mono font-bold uppercase bg-lux-gold text-stone-950 hover:bg-white rounded-sm flex items-center gap-1">
               {savingGallery ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} {t('admin.saveChanges')}
             </button>

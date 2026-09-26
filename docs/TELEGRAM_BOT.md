@@ -33,20 +33,20 @@ Staff and customers interact via inline keyboards:
 | Callback | Action |
 |----------|--------|
 | `status:{orderId}:{newStatus}` | Advance order status |
-| `quote:{orderId}` | Prompt staff to enter a price |
-| `confirm:{orderId}` | Customer confirms quoted price |
+| `price:{orderId}` | Prompt staff to enter a price |
+| `confirm:{orderId}` | Customer confirms the price |
 | `revise:{orderId}` | Customer requests price revision |
 
 ## Notifications
 
 ### Staff Notifications (Group Chat)
 - New order created with details and action buttons
-- Customer accepted a quote
+- Customer accepted the price
 - Customer requested price revision
 
 ### Customer Notifications (Direct Message)
 - **Designing**: "Your cake is being designed!"
-- **Quoted**: Price quote with Accept/Revise buttons
+- **Priced**: Price with Accept/Revise buttons
 - **Confirmed**: Confirmation with order details
 - **InProgress**: Baking started
 - **Ready**: Cake ready for studio pickup

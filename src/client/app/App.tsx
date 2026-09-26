@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
-import type { CakeGalleryItem, User } from '@shared/types';
+import type { Product, User } from '@shared/types';
 import { http } from '@client/lib/http';
 import type { Locale } from '@client/i18n/index';
 import AnimatedPage from '../components/AnimatedPage';
@@ -9,6 +9,7 @@ import AppLoader from '../components/AppLoader';
 
 import HomeView from '../features/core/components/HomeView';
 import GalleryView from '../features/gallery/components/GalleryView';
+import ProductDetailsPage from '../features/gallery/components/ProductDetailsPage';
 import RequestFormView from '../features/orders/components/RequestFormView';
 import AboutView from '../features/core/components/AboutView';
 import TestimonialsView from '../features/core/components/TestimonialsView';
@@ -35,7 +36,7 @@ export default function App() {
   const { currentUser, authChecked, loginUser, updateUser, logout } = useAuth();
   const { darkMode, toggleDarkMode } = useTheme();
   const { locale, setLocale, toggleLocale } = useLocale();
-  const { selectedCake, prefilledCake, selectCake, clearSelectedCake, commissionCake, clearPrefilledCake } = useCakeSelection();
+  const { selectedCake, prefilledCake, selectCake, clearSelectedCake, orderCake, clearPrefilledCake } = useCakeSelection();
   const { searchOpen, openSearch, closeSearch } = useSearchModal();
   const navigate = useNavigate();
   const location = useLocation();
@@ -51,8 +52,8 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleCommissionCake = (cake: CakeGalleryItem) => {
-    commissionCake(cake);
+  const handleCommissionCake = (cake: Product) => {
+    orderCake(cake);
     navigateTo('/request');
   };
 
@@ -98,6 +99,7 @@ export default function App() {
             }>
               <Route path="/" element={<AnimatedPage><HomeView onSelectCake={(cake) => { selectCake(cake); navigateTo('/gallery'); }} /></AnimatedPage>} />
               <Route path="/gallery" element={<AnimatedPage><GalleryView selectedCake={selectedCake} onClearSelectedCake={clearSelectedCake} onSelectCake={selectCake} onCommissionCake={handleCommissionCake} /></AnimatedPage>} />
+              <Route path="/gallery/:id" element={<AnimatedPage><ProductDetailsPage /></AnimatedPage>} />
               <Route path="/request" element={<AnimatedPage><ProtectedRoute currentUser={currentUser}><RequestFormView prefilledCake={prefilledCake} onClearPrefilledCake={clearPrefilledCake} currentUser={currentUser!} /></ProtectedRoute></AnimatedPage>} />
               <Route path="/about" element={<AnimatedPage><AboutView /></AnimatedPage>} />
               <Route path="/testimonials" element={<AnimatedPage><TestimonialsView /></AnimatedPage>} />

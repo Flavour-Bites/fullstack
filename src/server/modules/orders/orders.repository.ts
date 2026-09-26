@@ -136,7 +136,7 @@ export const ordersRepository = {
   async updateCommercials(
     orderId: string,
     input: {
-      quotedPrice?: number | null;
+      price?: number | null;
       finalPrice?: number | null;
       depositAmount?: number | null;
       depositPaidAt?: Date | null;
@@ -163,7 +163,7 @@ export const ordersRepository = {
       return tx.customCakeRequest.update({
         where: { id: orderId },
         data: {
-          ...(input.quotedPrice !== undefined ? { quotedPrice: input.quotedPrice } : {}),
+          ...(input.price !== undefined ? { price: input.price } : {}),
           ...(input.finalPrice !== undefined ? { finalPrice: input.finalPrice } : {}),
           ...(input.priceConfirmedAt !== undefined ? { priceConfirmedAt: input.priceConfirmedAt } : {}),
           ...(input.depositPaidAt !== undefined ? { depositPaidAt: input.depositPaidAt } : {}),

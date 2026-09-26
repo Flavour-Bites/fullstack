@@ -13,7 +13,7 @@ interface FrontendOrder {
   email: string;
   cakeType: string;
   eventDate: string;
-  status: 'Pending' | 'In Review' | 'Confirmed' | 'Designing' | 'Quoted' | 'InProgress' | 'Ready' | 'Completed';
+  status: 'Pending' | 'In Review' | 'Confirmed' | 'Designing' | 'Priced' | 'InProgress' | 'Ready' | 'Completed';
   stepNum: number; // 1 to 5 steps
   tierCount: number;
   flavor: string;
@@ -47,11 +47,11 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
 
   const liveOrders: FrontendOrder[] = requests.map((item: any) => {
     const numTiers = Number(item.tierCount) || 1;
-    const price = item.finalPrice ?? item.quotedPrice ?? 0;
+    const price = item.finalPrice ?? item.price ?? 0;
     const amountEtb = price ? `${price.toLocaleString()} ETB` : 'Pending Price';
     
     let stepNumber = 1;
-    if (item.status === 'Quoted') stepNumber = 2;
+    if (item.status === 'Priced') stepNumber = 2;
     if (item.status === 'Confirmed') stepNumber = 3;
     if (item.status === 'Designing' || item.status === 'InProgress') stepNumber = 4;
     if (item.status === 'Ready' || item.status === 'Completed') stepNumber = 5;
@@ -60,18 +60,18 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
       id: item.id || `FB-${Math.floor(1000 + Math.random() * 9000)}Y`,
       clientName: item.contactName || 'Valued Client',
       email: item.contactEmail || '',
-      cakeType: `${item.eventType || 'Bespoke Celebration'} Cake`,
+      cakeType: `${item.eventType || 'Custom Celebration'} Cake`,
       eventDate: item.deliveryDate || 'TBD',
       status: item.status || 'Pending',
       stepNum: stepNumber,
       tierCount: numTiers,
-      flavor: item.flavor || 'Bespoke Assortment',
+      flavor: item.flavor || 'Custom Assortment',
       amount: amountEtb,
       details: item.designStyle || 'Custom cake studio creation requested.',
       timeline: [
         { title: 'Inquiry Received', date: item.requestDate || 'Just Now', description: 'Your request has been filed in Yodit\'s review queue!', done: true },
         { title: 'Aesthetic Concept Design', date: 'Studio Stage', description: 'Yodit reviews your specs to draft a visual layout.', done: stepNumber >= 2 },
-        { title: 'Quotation Accepted & Deposit Paid', date: 'Booking Confirmed', description: 'After quote discussion, a 50% reservation fee secures your slot.', done: stepNumber >= 3 },
+        { title: 'Price Confirmed & Deposit Paid', date: 'Booking Confirmed', description: 'After price confirmation, a 50% reservation fee secures your slot.', done: stepNumber >= 3 },
         { title: 'Baking & Handcrafting Artistry', date: 'Active Phase', description: 'Oven baking and intricate hand-sculpted marzipan artwork.', done: stepNumber >= 4 },
         { title: 'Secure Event Pickup', date: item.deliveryDate || 'TBD', description: `Safe hand-off at ${BUSINESS_INFO.location.name} coordinates.`, done: stepNumber >= 5 }
       ]
@@ -107,10 +107,10 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
     <div className="bg-lux-cream/30 dark:bg-stone-900/10 min-h-screen py-16 px-4 sm:px-6">
       {/* Visual Title Header */}
       <div className="max-w-6xl mx-auto mb-16 text-center">
-        <span className="text-[10px] uppercase tracking-[0.3em] text-lux-gold font-mono block mb-2 font-bold">{t('order.commissionMonitor')}</span>
+        <span className="text-[10px] uppercase tracking-[0.3em] text-lux-gold font-mono block mb-2 font-bold">{t('order.orderMonitor')}</span>
         <h1 className="text-4xl font-serif text-warm-950 dark:text-stone-100 font-medium italic">{t('order.orderUpdates')}</h1>
         <p className="text-xs text-stone-500 dark:text-stone-400 font-light mt-2 max-w-lg mx-auto font-sans">
-          {t('order.commissionMonitorDesc')}
+          {t('order.orderMonitorDesc')}
         </p>
         <div className="h-[2px] w-12 bg-lux-gold mx-auto mt-4" />
       </div>
@@ -247,7 +247,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
 
                 {/* Visual Blueprint Steps Map - Accordion timeline */}
                 <div className="space-y-4 pt-4 border-t border-stone-100 dark:border-stone-800 text-left">
-                  <span className="text-[9px] uppercase tracking-[0.15em] text-stone-400 dark:text-stone-400 font-mono font-semibold block">{t('order.artisanMilestones')}</span>
+                  <span className="text-[9px] uppercase tracking-[0.15em] text-stone-400 dark:text-stone-400 font-mono font-semibold block">{t('order.orderMilestones')}</span>
                   
                   <div className="relative pl-6 space-y-6 border-l-2 border-stone-200 dark:border-stone-800">
                     {selectedOrder.timeline.map((step, idx) => {

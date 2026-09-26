@@ -59,8 +59,8 @@ export function handleCommands(bot: Bot) {
                 `👥 <b>Guests:</b> ${order.guestCount}\n` +
                 `🏗️ <b>Tiers:</b> ${order.tierCount}\n`;
 
-            if (order.quotedPrice) {
-                msg += `💰 <b>Price:</b> ${order.quotedPrice.toLocaleString()} ETB\n`;
+            if (order.price) {
+                msg += `💰 <b>Price:</b> ${order.price.toLocaleString()} ETB\n`;
             }
 
             return ctx.reply(msg, { parse_mode: "HTML" });
@@ -80,7 +80,7 @@ export function handleCommands(bot: Bot) {
             );
         } else {
             await ctx.reply(
-                `Hello! 👋 I'm <b>Yodit's Apprentice</b>, the bot for <b>Flavour Bites</b> — a bespoke cake boutique in ${BUSINESS_INFO.location.area}, ${BUSINESS_INFO.location.city}.\n\n` +
+                `Hello! 👋 I'm <b>Yodit's Apprentice</b>, the bot for <b>Flavour Bites</b> — a custom cake boutique in ${BUSINESS_INFO.location.area}, ${BUSINESS_INFO.location.city}.\n\n` +
                     `To use me fully, you'll need to link your account. Visit our website and sign in with Telegram:\n` +
                     `<b>👉 flavourbites.com</b>\n\n` +
                     `Once linked, you can check your order status and get updates right here.`,

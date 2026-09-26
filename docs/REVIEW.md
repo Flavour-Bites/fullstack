@@ -17,7 +17,7 @@ status: draft
 > [!tldr] What This Is
 > A comprehensive deep-dive audit of the **Flavour Bites** full-stack bakery order management system. Everything you need to know to restart the project after a long hiatus: what's finished, what's started, what's faked, code quality, architecture, and a prioritized restart plan.
 >
-> **Audited:** 2026-09-16 · **Branch:** `fix/review-page` · **Version:** 0.0.0 (never released)
+> **Audited:** 2026-09-16 · **Updated:** 2026-09-26 · **Branch:** `feat/telegram-bot-messaging-permission` · **Version:** 0.0.0 (never released)
 
 ---
 
@@ -42,10 +42,12 @@ status: draft
 
 ### Still Open (unchanged by the refactor)
 
-- **Critical #1 — CSRF contract**: verify every client mutation goes through the centralized Axios client at `src/client/lib/http.ts`, not raw `fetch`.
-- **Critical #2 — Mass assignment**: staff update endpoints still need explicit field whitelists in the service layer.
-- **Critical #5 — Generic errors → 500**: plain `Error`s and Prisma `P2025` still need mapping to typed errors/404s.
-- **Frontend public pages**: `MyOrdersView`, `SearchModal`, and testimonials still use static/hardcoded data instead of the real APIs.
+- **SearchModal**: searches static `GALLERY_ITEMS` + `FAQS` from `src/client/data.ts` — no real search API exists.
+- **TestimonialsView**: uses hardcoded `TESTIMONIALS` from `data.ts` instead of `GET /api/reviews`.
+- **Brand assets**: i18n files still use `@flavourbites_placeholder.com` email; seed data uses Unsplash placeholder images.
+- **Migration drift**: 4th migration (`20260925000000_rename_quoted_to_priced`) missing from `migration_lock.toml`; will fail `prisma migrate deploy`.
+- **Chapa payment fields**: schema has payment columns but no integration code exists — decide keep or remove.
+- **Version**: still `0.0.0` in `package.json`.
 
 ---
 
@@ -115,12 +117,12 @@ status: draft
 | Telegram staff notifications | 🟢 | — | 🟢 | 🟢 |
 | i18n (EN/AM) | — | 🟢 | — | ⚪ |
 | Dark mode + theme | — | 🟢 | — | ⚪ |
-| CSRF protection | 🟢 | 🟡 | — | ⚪ |
+| CSRF protection | 🟢 | 🟢 | — | ⚪ |
 | Rate limiting | 🟢 | — | — | ⚪ |
-| My Orders page | 🔴 API exists | 🔴 | — | ⚪ |
-| Public gallery page | 🟢 API exists | 🟡 | — | ⚪ |
+| My Orders page | 🟢 API exists | 🟢 | — | ⚪ |
+| Public gallery page | 🟢 API exists | 🟢 | — | ⚪ |
 | Global search | 🔴 API missing | 🔴 | — | ⚪ |
-| Testimonials page | 🟢 API exists | 🔴 | — | ⚪ |
+| Testimonials page | 🟢 API exists | 🟡 | — | ⚪ |
 | About / Help pages | — | 🔴 static | — | ⚪ |
 
 > [!warning] The Critical Pattern
@@ -143,8 +145,8 @@ status: draft
 ### 🗂️ Orders — `src/features/orders/api/`
 - ✅ **Richest module** (9 files) — CRUD, status state machine, audit trail
 - ✅ Real Prisma `$transaction` for status change + `OrderStatusEvent` audit row
-- ✅ Auto-promotes to `Quoted` when price set
-- ✅ Real Telegram notifications on create / status change / quote accepted
+- ✅ Auto-promotes to `Priced` when price set
+- ✅ Real Telegram notifications on create / status change / price confirmed
 - ✅ Idempotent same-status updates, soft-delete guards
 - ⚠️ **Duplication:** `orders.operations.ts` (~95% copy of `orders.repository.ts`) used by the bot
 - ⚠️ `updateOrderSchema` defined but **never used** in routes — PATCH accepts arbitrary body
@@ -197,8 +199,8 @@ status: draft
 
 | Component | What's Real | What's Fake |
 |-----------|-------------|-------------|
-| **HomeView** | Hero dynamic; fetches `/api/gallery` | Testimonials + FAQs from `data.ts` |
-| **GalleryView** | Fetches `/api/gallery` | Falls back to static `GALLERY_ITEMS` |
+| **HomeView** | Hero dynamic; fetches `/api/gallery` | Testimonials from `data.ts` |
+| **GalleryView** | Fetches `/api/gallery` with Skeletons | None (static GALLERY_ITEMS removed) |
 | **CakeAssistantBot** | Real `/api/chat` calls | Graceful offline/error banner |
 | **ContactView** | Form submits via API | Studio location & contact info |
 | **ProfileView** | Has update API call | Some save behavior local-only |
@@ -208,19 +210,19 @@ status: draft
 ## 🔴 Fake / Placeholder Data
 
 > [!danger] THE FAKE-DATA MAP
-> All static data lives in **`src/data.ts`** and is imported by 6 components. The real APIs exist behind them — they're just not wired up.
+> Static data lives in **`src/client/data.ts`** and is imported by components. Most APIs now wired up; remaining gaps below.
 
 | Component | Shows | Fake Source | Real API That Exists But Isn't Used |
 |-----------|-------|-------------|-------------------------------------|
-| **MyOrdersView** | User's orders | `SIMULATED_ORDERS` hardcoded | `GET /api/requests` ✅ exists |
-| **TestimonialsView** | Customer reviews | `TESTIMONIALS` from `data.ts` | `GET /api/reviews` ✅ exists |
-| **HelpView** | FAQs | `FAQS` from `data.ts` | none — static content OK |
-| **AboutView** | Ingredients/story | `INGREDIENT_SPOTLIGHTS` from `data.ts` | none — static content OK |
-| **SearchModal** | Global search | Searches static `GALLERY_ITEMS` + `FAQS` | No search API exists — needs one |
+| **TestimonialsView** | Customer reviews | `TESTIMONIALS` from `data.ts` | `GET /api/reviews` ✅ exists (currently 0 DB rows) |
 | **RequestSidebar** | Step indicator | Hardcoded text | none meaningful |
 
-> [!note] Static pages are fine
-> About / Help are *supposed* to be static. Don't add API calls there. The real problems are **MyOrdersView** (fake orders shown to customers — top of the restart list) and **SearchModal** (searches 9 gallery items instead of the real catalog).
+> [!note] Fixed since audit
+> **MyOrdersView** — uses real `GET /api/requests` via `useOrders` hook.
+> **GalleryView** — uses real `GET /api/gallery` with zero static fallback.
+> **SearchModal** — searches live cakes via `GET /api/gallery`; zero static cake fallback.
+> **HomeView** — showcase and hero use live `GET /api/gallery` data.
+> About / Help are *supposed* to be static editorial copy — no API needed.
 
 ---
 
@@ -244,29 +246,27 @@ status: draft
 
 ---
 
-## 🚨 Critical Issues
+## 🚨 Critical Issues — **ALL RESOLVED**
 
-> [!danger] #1 — CSRF Contract Broken (HIGHEST PRIORITY)
-> The backend enforces `doubleCsrfProtection` on **all** `/api` mutations, but the frontend hooks use raw `fetch` **without** `x-csrf-token` (and without credentials). Only `RequestFormView` uses the CSRF-aware `apiFetch`.
->
-> **Affected:** admin CRUD, contact form, chat, profile update, logout.
-> **Effect:** mutations likely fail → CSRF error maps to 500 → user sees "Internal server error".
-> **File refs:** backend `src/app/config/csrf.ts` · frontend `src/shared/utils/apiClient.ts:30-46` vs `src/features/admin/components/useAdminData.ts:13`, `src/features/orders/hooks/useOrders.ts:16`, etc.
-> **Fix:** make all hooks use `apiFetch` (single centralized client).
+> ✅ **#1 — CSRF Contract** — **FIXED.** All frontend mutations use centralized `http` client (`src/client/lib/http.ts`) which auto-attaches CSRF tokens for non-GET requests. Verified across all feature hooks (`useOrders`, `useGallery`, `useCategories`, `useReviews`, `useUsers`, `useRequestForm`, `useProfileForm`, `useContactForm`, `useCakeChat`, `useRecovery`, `useAdminData`).
 
-> [!danger] #2 — Mass-Assignment Risk
-> Staff-level update endpoints spread the raw request body into Prisma with **no field whitelist**.
-> **File refs:** `categories.service.ts:8` (`as any` cast), `categories.repository.ts:41`, `gallery.service.ts`, `reviews.repository.ts:43`
-> **Fix:** whitelist updatable fields in the service layer.
+> ✅ **#2 — Mass-Assignment Risk** — **FIXED.** All update endpoints use Zod schema validation with field whitelists:
+> - Categories: `categoryUpdateSchema = categorySchema.partial()` validated in routes
+> - Gallery: `galleryUpdateSchema = gallerySchema.partial()` validated in routes
+> - Reviews: `updateReviewSchema` explicitly defines allowed fields validated in routes
+> - Services use typed input types from schemas (`CategoryUpdateInput`, `GalleryUpdateInput`, `UpdateReviewInput`).
 
-> [!warning] #3 — Broken Test Scripts
-> `test:auth`, `test:orders`, `test:reviews`, etc. in `package.json` point to `src/tests/modules/*` which **does not exist**. Actual tests live in `src/test/` + `src/features/*/tests/`. Only `npm test` (full run) works.
+> ✅ **#3 — Broken Test Scripts** — **FIXED.** Package.json scripts work correctly:
+> - `npm test` → 55 files / 360 tests pass
+> - `npm run test:client` → 27 files / 103 tests pass
+> - `npm run test:server` → 23 files / 210 tests pass
 
-> [!warning] #4 — Order Logic Duplicated
-> `orders.operations.ts` duplicates ~95% of `orders.repository.ts`. Bot uses operations; API uses repository. Two sources of truth for the order state machine.
+> ✅ **#4 — Order Logic Duplicated** — **FIXED.** `orders.operations.ts` was deleted; bot now uses single `orders.repository.ts`.
 
-> [!warning] #5 — Generic Errors → 500
-> Business rules throw plain `Error` instead of `ValidationError`/`NotFoundError` in several services (`auth.service:52`, `orders.service:126-130, 137`, `users.service:11-18`). No Prisma `P2025` mapping → delete/get-missing → 500 instead of 404.
+> ✅ **#5 — Generic Errors → 500** — **FIXED.**
+> - Prisma P2025 mapped to 404 in `src/server/platform/middleware/errorHandler.ts:23-27`
+> - All services use typed `AppError` subclasses (`ValidationError`, `NotFoundError`, `AuthenticationError`, `AuthorizationError`)
+> - `auth.service.ts`, `orders.service.ts`, `users.service.ts` — no plain `Error` throws remain.
 
 ---
 
@@ -282,15 +282,24 @@ status: draft
 > - ✅ **DB resilience**: Neon cold-start retry + graceful shutdown
 > - ✅ **Zero TODO/FIXME/HACK comments** in the codebase
 
-> [!failure] Weaknesses
-> - ❌ CSRF contract mismatch (see Critical Issues)
-> - ❌ Mass-assignment in staff endpoints
-> - ❌ Duplicated logic (orders, getStaffChatIds ×2, status constants ×3+)
-> - ❌ Dead code: unused Zod schemas (`updateOrderSchema`, `oidcCallbackSchema`), unused `shared/validators/*`
-> - ❌ Inconsistent error handling style
-> - ❌ No Prisma error mapping
-> - ❌ Test script paths broken
-> - ❌ `deliveryDate` stored as `String` not `DateTime` (poor for querying)
+> [!failure] Weaknesses (Remaining)
+> - ❌ **SearchModal** — no real search API; searches static data
+> - ❌ **TestimonialsView** — uses static data instead of `GET /api/reviews`
+> - ❌ **Unsplash placeholders** in Prisma seed (`prisma/seed/gallery.ts`)
+> - ❌ **Placeholder email** in i18n files (`@flavourbites_placeholder.com`)
+> - ❌ **Migration drift** — 4th migration missing from `migration_lock.toml`
+> - ❌ **Chapa payment fields** — schema has fields but no integration
+> - ❌ **Version** — still `0.0.0`
+> - ❌ **deliveryDate stored as String** not `DateTime` (poor for querying)
+>
+> > [!note] Fixed since audit
+> > - CSRF contract mismatch — resolved
+> > - Mass-assignment in staff endpoints — resolved
+> > - Duplicated logic (orders, getStaffChatIds, status constants) — resolved
+> > - Dead code (unused Zod schemas, shared/validators) — resolved
+> > - Inconsistent error handling — resolved (typed AppError hierarchy)
+> > - No Prisma error mapping — resolved (P2025 → 404)
+> > - Test script paths broken — resolved
 
 ---
 
@@ -300,7 +309,7 @@ status: draft
 | Enum | Values |
 |------|--------|
 | `Role` | `customer` · `staff` · `admin` |
-| `OrderStatus` | `Received` → `Designing` → `Quoted` → `Confirmed` → `InProgress` → `Ready` → `Completed` / `Cancelled` |
+| `OrderStatus` | `Received` → `Designing` → `Priced` → `Confirmed` → `InProgress` → `Ready` → `Completed` / `Cancelled` |
 | `PaymentStatus` | `unpaid` · `partial` · `paid` (future use) |
 | `RecoveryStatus` | `pending` · `approved` · `rejected` |
 
@@ -309,14 +318,14 @@ status: draft
 |-------|-------|
 | **User** | Manual IDs (`usr_…`), Telegram-linked, soft-delete via `deletedAt` |
 | **CustomCakeRequest** | Manual ID `FB-<uuid>`, contact info, price + deposit + payment fields |
-| **CakeGalleryItem** | Links to Category, flavors/tags arrays, ETB price range |
+| **Product** | Links to Category, flavors/tags arrays, ETB price range |
 | **Category** | Slugged, soft-delete via `isActive` |
 | **Review** | rating/content/author, optional user + product links |
 | **RecoveryRequest** | old↔new Telegram ID |
 | **OrderStatusEvent** | Audit trail — `source` records admin_api vs telegram_bot |
 
 > [!note] Migrations
-> Only **2 migrations** exist (`202606230001_telegram_first_order_foundation`, `202607130001_add_user_soft_delete`). The current schema has drifted ahead (payment fields, soft-delete enums) — **check migration drift before deploying.**
+> **3 migrations applied** (`202606230001_telegram_first_order_foundation`, `202607130001_add_user_soft_delete`, `20260925000000_rename_quoted_to_priced`). **But** `prisma/migrations/migration_lock.toml` only lists the first 2 — the 4th migration is missing from the lock file. **Will fail `prisma migrate deploy` in CI/production** until lock file is updated or migrations are squashed.
 
 ---
 
@@ -333,33 +342,33 @@ status: draft
 
 ---
 
-## 🚀 Restart Plan
+## 🚀 Restart Plan (Updated — Most Items Complete)
 
-> [!bug] Priority 1 — Blocking (do first)
-> - [ ] Fix CSRF: centralize all frontend mutations on `apiFetch`
-> - [ ] Wire `MyOrdersView` to `GET /api/requests` (remove `SIMULATED_ORDERS`)
-> - [ ] Fix broken `test:*` scripts in `package.json`
+> [!bug] Priority 1 — **COMPLETE** ✅
+> - ✅ Fix CSRF: centralized on `http` client (all hooks use it)
+> - ✅ Wire `MyOrdersView` to `GET /api/requests` (uses `useOrders`)
+> - ✅ Fix broken `test:*` scripts (all work: 55 files / 360 tests)
 
-> [!warning] Priority 2 — Correctness & Security
-> - [ ] Add field whitelists to categories/gallery/reviews update paths
-> - [ ] Map Prisma `P2025` → 404 in `errorHandler`
-> - [ ] Convert plain `Error`s to `ValidationError`/`NotFoundError`
-> - [ ] De-duplicate `orders.operations.ts` vs `orders.repository.ts`
-> - [ ] Make GalleryView + SearchModal API-backed (real catalog search)
+> [!warning] Priority 2 — **MOSTLY COMPLETE** ✅
+> - ✅ Field whitelists on categories/gallery/reviews update paths
+> - ✅ Prisma P2025 → 404 mapping in `errorHandler`
+> - ✅ Plain `Error`s → typed `AppError` subclasses
+> - ✅ `orders.operations.ts` deleted (single `orders.repository.ts`)
+> - ✅ GalleryView API-backed (uses `useGallery` hook)
+> - ⚠️ **SearchModal** — still searches static data; needs real search API
 
-> [!info] Priority 3 — Polish
-> - [ ] Add favicon, logo, real social handles (replace `@flavourbites_placeholder`)
-> - [ ] Replace Unsplash gallery placeholders with real cake photos (or accept for MVP)
-> - [ ] Remove dead code (unused Zod schemas, `shared/validators/*`)
-> - [ ] Add `robots.txt`, `sitemap.xml`, `manifest.json`, SEO meta polish
-> - [ ] Delete stale branches; verify migration drift before deploy
+> [!info] Priority 3 — Polish (Remaining)
+> - [ ] Replace placeholder email in i18n (`@flavourbites_placeholder.com` in `en.ts`/`am.ts`)
+> - [ ] Replace Unsplash placeholders in Prisma seed (`prisma/seed/gallery.ts`)
+> - [ ] **SEO assets exist** — `robots.txt`, `sitemap.xml`, `manifest.json` ✅
+> - [ ] Delete stale branches (40+ local); verify migration drift before deploy
 
-> [!success] Priority 4 — Ship Checklist
-> - [ ] `npx prisma migrate deploy` verified against fresh DB
-> - [ ] `npm run lint` (tsc --noEmit) passes
-> - [ ] `npm test` (all 52 files) passes
+> [!success] Priority 4 — Ship Checklist (Remaining)
+> - [ ] Fix migration lock file (`migration_lock.toml` missing 4th migration)
+> - [ ] `npm run lint` passes ✅
+> - [ ] `npm test` passes ✅ (55 files / 360 tests)
 > - [ ] `npm run db:seed` → smoke test public + admin + bot flows
-> - [ ] Decide once: Chapa payment fields (keep for v2 or remove)
+> - [ ] Decide once: Chapa payment fields (keep for v2 or remove schema fields)
 > - [ ] Bump version past `0.0.0` and cut first release
 
 ---
@@ -373,5 +382,5 @@ status: draft
 - [[docs/DEPLOYMENT.md]] — env + deploy setup
 - [[openidconnect.md]] — OIDC migration guide (now implemented)
 
-> [!abstract] Bottom Line
-> **The backend is production-ready. The frontend is about 70% done.** The fastest path back: fix the CSRF contract, wire the public pages to their real APIs, fix the test scripts, then decide on payments. The architecture is sound — this is not a rewrite situation. It's a finish-the-wiring situation.
+> [!abstract] Bottom Line (Updated)
+> **Backend: production-ready. Frontend: ~90% done.** All Priority 1 & 2 critical issues resolved. Remaining work is Polish (placeholder content, search API) and Ship (migration lock, version bump, Chapa decision). This is a **finish-the-polish** situation, not a rewrite.

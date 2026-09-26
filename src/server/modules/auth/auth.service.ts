@@ -5,6 +5,7 @@ import type { LoginResponse, TelegramTokenExchangeResponse } from './auth.types'
 import { AuthenticationError, NotFoundError, ValidationError } from '../../platform/errors/index';
 import { getRedisStore } from '../../platform/integrations/redis/redisClient';
 import { env } from '../../platform/config/env';
+import { sendMessage } from '../../platform/integrations/telegram/telegramClient';
 import type * as jose from 'jose';
 
 const TELEGRAM_DISCOVERY_URL = 'https://oauth.telegram.org/.well-known/openid-configuration';
@@ -154,7 +155,13 @@ export const authService = {
 
     const claims = await verifyOidcIdToken(tokenData.id_token, nonce, jwksOverride);
 
+    const grantedScope = tokenData.scope;
+    const hasBotAccess = !grantedScope || grantedScope.includes('telegram:bot_access') || grantedScope.includes('bot_access');
+
     const telegramUserId = String(claims.id ?? claims.sub);
+    const existingUser = await authRepository.findByTelegramId(telegramUserId);
+    const isNew = !existingUser;
+
     const user = await authRepository.upsertTelegramUser({
       id: telegramUserId,
       name: claims.name,
@@ -163,7 +170,20 @@ export const authService = {
       username: claims.preferred_username,
       photo_url: claims.picture,
       phone_number: claims.phone_number,
+      notifyViaTelegram: hasBotAccess,
     });
+
+    if (hasBotAccess && user.telegramId && isNew) {
+      sendMessage(
+        user.telegramId,
+        `🎂 <b>Welcome to Flavour Bites!</b>\n\n` +
+        `Hi ${user.name}! Your account is connected and instant order updates are active.\n\n` +
+        `When you request a custom cake, you'll receive your price, design notes, and baking progress right here in Telegram.\n\n` +
+        `You can also type /status anytime to track your orders.`
+      ).catch((err: Error) => {
+        console.warn('[Telegram] Welcome message failed:', err.message);
+      });
+    }
 
     if (user.passwordHash) {
       return { success: true, needsPassword: true, telegramId: user.telegramId };

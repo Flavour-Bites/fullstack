@@ -20,7 +20,7 @@ vi.mock('@server/platform/config/prisma.js', () => ({
   getPrisma: vi.fn(() => mockPrisma),
 }));
 
-import { notifyStaffNewOrder, notifyCustomerStatusChange, notifyStaffQuoteAccepted } from '@server/platform/integrations/telegram/telegramNotifications.js';
+import { notifyStaffNewOrder, notifyCustomerStatusChange, notifyStaffPriceConfirmed } from '@server/platform/integrations/telegram/telegramNotifications.js';
 import { sendMessage } from '@server/platform/integrations/telegram/telegramClient.js';
 
 describe('notifyStaffNewOrder', () => {
@@ -40,7 +40,7 @@ describe('notifyStaffNewOrder', () => {
       tierCount: 2,
       flavor: 'Vanilla',
       designStyle: 'Elegant gold trim',
-      quotedPrice: null,
+      price: null,
       finalPrice: null,
       specialInstructions: 'No nuts',
       user: { telegramUsername: 'testuser' },
@@ -71,7 +71,7 @@ describe('notifyStaffNewOrder', () => {
       tierCount: 3,
       flavor: 'Chocolate',
       designStyle: 'Modern',
-      quotedPrice: null,
+      price: null,
       finalPrice: null,
       specialInstructions: null,
       user: null,
@@ -108,7 +108,7 @@ describe('notifyCustomerStatusChange', () => {
   it('does nothing when user has no telegramId', async () => {
     mockPrisma.customCakeRequest.findUnique.mockResolvedValue({
       id: 'FB-123',
-      status: 'Quoted',
+      status: 'Priced',
       lastNotifiedStatus: 'Designing',
       user: { telegramId: null, notifyViaTelegram: true },
     });
@@ -119,7 +119,7 @@ describe('notifyCustomerStatusChange', () => {
   it('does nothing when notifyViaTelegram is false', async () => {
     mockPrisma.customCakeRequest.findUnique.mockResolvedValue({
       id: 'FB-123',
-      status: 'Quoted',
+      status: 'Priced',
       lastNotifiedStatus: 'Designing',
       user: { telegramId: '12345', notifyViaTelegram: false },
     });
@@ -150,14 +150,14 @@ describe('notifyCustomerStatusChange', () => {
     });
   });
 
-  it('sends Quoted notification with confirm/revision buttons', async () => {
+  it('sends Priced notification with confirm/revision buttons', async () => {
     mockPrisma.customCakeRequest.findUnique.mockResolvedValue({
       id: 'FB-123',
       contactName: 'Test',
       eventType: 'Wedding',
       eventDate: '2026-08-15',
-      status: 'Quoted',
-      quotedPrice: 15000,
+      status: 'Priced',
+      price: 15000,
       finalPrice: null,
       lastNotifiedStatus: 'Designing',
       user: { telegramId: '12345', notifyViaTelegram: true },
@@ -194,7 +194,7 @@ describe('notifyCustomerStatusChange', () => {
     mockPrisma.customCakeRequest.findUnique.mockResolvedValue({
       id: 'FB-123',
       status: 'Cancelled',
-      lastNotifiedStatus: 'Quoted',
+      lastNotifiedStatus: 'Priced',
       user: { telegramId: '12345', notifyViaTelegram: true },
     });
     mockPrisma.customCakeRequest.update.mockResolvedValue({});
@@ -219,27 +219,27 @@ describe('notifyCustomerStatusChange', () => {
   });
 });
 
-describe('notifyStaffQuoteAccepted', () => {
+describe('notifyStaffPriceConfirmed', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma.user.findMany.mockResolvedValue([{ telegramId: '-100_staff_chat' }]);
   });
 
-  it('notifies staff when a quote is accepted', async () => {
+  it('notifies staff when a price is confirmed', async () => {
     const order = {
       id: 'FB-456',
       contactName: 'Happy Client',
       eventType: 'Anniversary',
       eventDate: '2026-09-01',
-      quotedPrice: 25000,
+      price: 25000,
       finalPrice: null,
       user: null,
     };
 
-    await notifyStaffQuoteAccepted(order as any);
+    await notifyStaffPriceConfirmed(order as any);
     const [chatId, text, buttons] = (sendMessage as any).mock.calls[0];
     expect(chatId).toBe('-100_staff_chat');
-    expect(text).toContain('Quote Accepted');
+    expect(text).toContain('Price Confirmed');
     expect(text).toContain('Happy Client');
     expect(text).toContain('25,000 ETB');
     expect(buttons[0][0].callback_data).toContain('InProgress');

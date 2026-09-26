@@ -1,4 +1,4 @@
-import { Sparkles } from 'lucide-react';
+import { Bot } from 'lucide-react';
 import { ChatMessage } from '../../hooks/useCakeChat';
 
 function renderMessageTextPart(text: string) {
@@ -58,7 +58,7 @@ export default function ChatMessageRow({ message }: ChatMessageRowProps) {
           ? 'bg-stone-900 border-lux-gold/30 text-lux-gold'
           : 'bg-lux-gold border-stone-200/50 text-stone-950 font-serif font-bold text-[10px]'
       }`}>
-        {isBot ? <Sparkles className="w-3 h-3" /> : 'FB'}
+        {isBot ? <Bot className="w-3 h-3" /> : 'FB'}
       </div>
 
       <div className="space-y-1">

@@ -1,4 +1,6 @@
+import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
+import { makeId } from '../../src/shared/utils/ids.js';
 import { CATEGORY_SEEDS } from './categories.js';
 import { SAMPLE_REQUESTS } from './requests.js';
 import { GALLERY_ITEMS } from './gallery.js';
@@ -12,6 +14,31 @@ async function main() {
     console.error('ERROR: DATABASE_URL environment variable is missing.');
     process.exit(1);
   }
+
+  // Seed Admin User
+  const adminTelegramId = '1569314883';
+  const adminUser = await prisma.user.upsert({
+    where: { telegramId: adminTelegramId },
+    update: {
+      name: 'Abel Mekonen',
+      telegramUsername: 'boosted_bella2247',
+      telegramPhone: '+251911372523',
+      role: 'admin',
+      notifyViaTelegram: true,
+      language: 'en',
+    },
+    create: {
+      id: makeId('usr'),
+      name: 'Abel Mekonen',
+      telegramId: adminTelegramId,
+      telegramUsername: 'boosted_bella2247',
+      telegramPhone: '+251911372523',
+      role: 'admin',
+      notifyViaTelegram: true,
+      language: 'en',
+    },
+  });
+  console.log(`Upserted admin user: ${adminUser.id} (${adminUser.name})`);
 
   const categoryMap = new Map(CATEGORY_SEEDS.map((category) => [category.slug, category.id]));
 
@@ -39,12 +66,12 @@ async function main() {
   for (const item of GALLERY_ITEMS) {
     const categoryId = categoryMap.get(item.categorySlug) || CATEGORY_SEEDS[0].id;
     const { categorySlug, ...rest } = item;
-    const record = await prisma.cakeGalleryItem.upsert({
+    const record = await prisma.product.upsert({
       where: { id: item.id },
       update: { ...rest, categoryId },
       create: { ...rest, categoryId }
     });
-    console.log(`Upserted gallery item: ${record.id} (${record.name})`);
+    console.log(`Upserted product item: ${record.id} (${record.name})`);
   }
 
   console.log('Database successfully seeded with requests and gallery items!');

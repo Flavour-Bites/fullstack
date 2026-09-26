@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { HelpCircle, ChevronDown, Search, ArrowRight, ShieldCheck, UserCircle, MessageSquare, CheckCircle2 } from 'lucide-react';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { Link } from 'react-router-dom';
-import { FAQS } from '@client/data';
+import { FAQS } from '@client/content/faqs';
 import { t } from '@client/i18n/index';
 
 export default function HelpView() {
@@ -41,7 +41,7 @@ export default function HelpView() {
           <div className="bg-white dark:bg-stone-950 border border-stone-200/60 dark:border-stone-850 rounded-sm p-8 md:p-10 shadow-xs relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-stone-50 dark:bg-stone-900 rounded-full blur-3xl -z-10" />
             <h2 className="text-2xl md:text-3xl font-serif text-stone-900 dark:text-stone-100 mb-2">How to Request a Custom Cake</h2>
-            <p className="text-stone-500 dark:text-stone-400 font-light mb-8 text-sm">Follow these exact steps to commission your dream cake without the hassle.</p>
+            <p className="text-stone-500 dark:text-stone-400 font-light mb-8 text-sm">Follow these exact steps to create your dream cake without the hassle.</p>
             
             <div className="space-y-6">
               <div className="flex gap-4">
@@ -63,7 +63,7 @@ export default function HelpView() {
               <div className="flex gap-4">
                 <div className="w-8 h-8 rounded-full bg-stone-900 dark:bg-stone-800 text-white flex items-center justify-center font-mono font-bold text-xs shrink-0 border border-stone-800 dark:border-stone-700">3</div>
                 <div>
-                  <h4 className="font-serif text-lg text-stone-900 dark:text-stone-200 mb-1">Wait for Yodit's Review & Quote</h4>
+                  <h4 className="font-serif text-lg text-stone-900 dark:text-stone-200 mb-1">Wait for Yodit's Review & Price</h4>
                   <p className="text-sm text-stone-600 dark:text-stone-400 font-light">Once you submit, your order status becomes <span className="font-mono text-xs bg-stone-100 dark:bg-stone-800 px-1 rounded text-stone-600 dark:text-stone-300">Request Received</span>. Yodit will review your design and reply directly to your Phone or Telegram within 24 hours with an exact price.</p>
                 </div>
               </div>
@@ -72,7 +72,7 @@ export default function HelpView() {
                 <div className="w-8 h-8 rounded-full bg-stone-900 dark:bg-stone-800 text-white flex items-center justify-center font-mono font-bold text-xs shrink-0 border border-stone-800 dark:border-stone-700">4</div>
                 <div>
                   <h4 className="font-serif text-lg text-stone-900 dark:text-stone-200 mb-1">Confirm and Bake</h4>
-                  <p className="text-sm text-stone-600 dark:text-stone-400 font-light">After you confirm the quote and pay the deposit, your status updates to <span className="font-mono text-xs bg-stone-100 dark:bg-stone-800 px-1 rounded text-stone-600 dark:text-stone-300">Order Confirmed</span>. We will start baking your cake 48 hours before your event!</p>
+                  <p className="text-sm text-stone-600 dark:text-stone-400 font-light">After you confirm the price and pay the deposit, your status updates to <span className="font-mono text-xs bg-stone-100 dark:bg-stone-800 px-1 rounded text-stone-600 dark:text-stone-300">Order Confirmed</span>. We will start baking your cake 48 hours before your event!</p>
                 </div>
               </div>
             </div>

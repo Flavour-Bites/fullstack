@@ -1,12 +1,12 @@
 import { Send, Loader2 } from 'lucide-react';
-import { CakeGalleryItem } from '@shared/types';
+import { Product } from '@shared/types';
 import { t } from '@client/i18n/index';
 import ReferenceImageUploader from './ReferenceImageUploader';
 import { getDateInputStyles, RequestForm } from '../hooks/useRequestForm';
 
 interface RequestFormFieldsProps {
   form: RequestForm;
-  prefilledCake: CakeGalleryItem | null;
+  prefilledCake: Product | null;
   valError: string | null;
   dateError: string | null;
   uploading: boolean;

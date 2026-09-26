@@ -40,7 +40,6 @@ describe('AdminReviews', () => {
         reviewItems={[]}
         reviewsLoading={true}
         handleDeleteReview={noopBool}
-        handleSaveReview={noopBool as any}
         fetchReviews={noopVoid}
       />
     );
@@ -53,7 +52,6 @@ describe('AdminReviews', () => {
         reviewItems={[]}
         reviewsLoading={false}
         handleDeleteReview={noopBool}
-        handleSaveReview={noopBool as any}
         fetchReviews={noopVoid}
       />
     );
@@ -66,7 +64,6 @@ describe('AdminReviews', () => {
         reviewItems={sampleReviews}
         reviewsLoading={false}
         handleDeleteReview={noopBool}
-        handleSaveReview={noopBool as any}
         fetchReviews={noopVoid}
       />
     );

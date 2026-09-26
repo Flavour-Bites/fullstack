@@ -1,21 +1,17 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '../../../components/Toast';
 import { http } from '@client/lib/http';
+import { queryKeys } from '@client/lib/queryKeys';
 import type { ApiResponse } from '@/shared/api';
 
 export function useGallery() {
+  const queryClient = useQueryClient();
   const { showToast } = useToast();
-  const [galleryItems, setGalleryItems] = useState<any[]>([]);
-  const [galleryLoading, setGalleryLoading] = useState(false);
 
-  const fetchGallery = useCallback(async () => {
-    setGalleryLoading(true);
-    try {
-      const { data } = await http.get<ApiResponse<{ items: any[] }>>('/api/gallery');
-      if (data.success) setGalleryItems(data.items || []);
-    } catch (e) { /* ignore */ }
-    finally { setGalleryLoading(false); }
-  }, []);
+  const invalidateGallery = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.gallery.all });
+  }, [queryClient]);
 
   const handleSaveGalleryItem = useCallback(async (galleryForm: any, editingGalleryId: string | null) => {
     if (!galleryForm.name.trim() || !galleryForm.priceEstimate.trim()) {
@@ -43,11 +39,11 @@ export function useGallery() {
           showToast('Gallery Item Created', `"${galleryForm.name}" added.`, 'success');
         } else throw new Error(data.error);
       }
-      fetchGallery();
+      invalidateGallery();
       return true;
     } catch (e: any) { showToast('Failed', e.message, 'error'); }
     return false;
-  }, []);
+  }, [invalidateGallery]);
 
   const handleDeleteGalleryItem = useCallback(async (id: string, name: string) => {
     if (!window.confirm(`Delete gallery item "${name}"? This cannot be undone.`)) return false;
@@ -55,18 +51,16 @@ export function useGallery() {
       const { data } = await http.delete<ApiResponse>(`/api/gallery/${id}`);
       if (data.success) {
         showToast('Gallery Item Deleted', `"${name}" removed.`, 'warning');
-        fetchGallery();
+        invalidateGallery();
         return true;
       } else throw new Error(data.error);
     } catch (e: any) { showToast('Delete Failed', e.message, 'error'); }
     return false;
-  }, []);
+  }, [invalidateGallery]);
 
   return {
-    galleryItems,
-    galleryLoading,
-    fetchGallery,
     handleSaveGalleryItem,
     handleDeleteGalleryItem,
+    invalidateGallery,
   };
 }

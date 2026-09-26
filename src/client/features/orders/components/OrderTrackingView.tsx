@@ -7,11 +7,10 @@ import { getStatusStyles } from '../../../../shared/utils/statusStyles';
 
 interface OrderTrackingViewProps {
   requests: CustomCakeRequest[];
-  dbConnected: boolean | null;
   onDelete: (id: string) => void;
 }
 
-export default function OrderTrackingView({ requests, dbConnected, onDelete }: OrderTrackingViewProps) {
+export default function OrderTrackingView({ requests, onDelete }: OrderTrackingViewProps) {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const pendingDelete = confirmDeleteId ? (requests ?? []).find(r => r.id === confirmDeleteId) : null;
@@ -26,18 +25,6 @@ export default function OrderTrackingView({ requests, dbConnected, onDelete }: O
             </div>
             <h2 className="text-2xl font-serif text-warm-950 dark:text-stone-100">{t('order.trackRequests')}</h2>
             <p className="text-xs text-stone-500 dark:text-stone-400 font-light mt-1 mb-3 font-sans">See live progress updates, design status, and custom price bids.</p>
-
-            {dbConnected === false && (
-              <div className="inline-flex flex-col sm:flex-row sm:items-center gap-x-2.5 gap-y-1.5 px-3.5 py-2.5 rounded-sm border bg-amber-50/50 dark:bg-amber-950/15 border-amber-250 dark:border-amber-900/50 text-amber-900 dark:text-amber-300 text-[10.5px] font-mono tracking-wider max-w-xl">
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                  <span className="font-semibold text-left">{t('order.sandboxActive')}</span>
-                </div>
-                <span className="text-[9.5px] text-stone-500 dark:text-stone-400 font-light text-left">
-                  (To activate Postgres cloud persistence, add your <code className="bg-stone-200/60 dark:bg-stone-800 px-1 rounded font-bold">DATABASE_URL</code> to environment secrets)
-                </span>
-              </div>
-            )}
           </div>
           <div className="bg-white dark:bg-stone-900 px-4 py-2 border border-stone-200 dark:border-stone-800 rounded-sm text-xs text-stone-700 dark:text-stone-300 flex items-center gap-2 font-sans shrink-0">
             <Clock className="w-4 h-4 text-lux-gold animate-pulse" />
@@ -98,7 +85,7 @@ export default function OrderTrackingView({ requests, dbConnected, onDelete }: O
                       </span>
                     </td>
                     <td className="py-4 px-4 font-mono text-right text-stone-900 dark:text-stone-100 font-semibold border-stone-100 dark:border-stone-850">
-                      {((req as any).finalPrice ?? (req as any).quotedPrice ?? 0).toLocaleString()} ETB
+                      {((req as any).finalPrice ?? (req as any).price ?? 0).toLocaleString()} ETB
                     </td>
                     <td className="py-4 px-4 text-center border-stone-100 dark:border-stone-850">
                       <button

@@ -16,7 +16,7 @@ enum Role {
 enum OrderStatus {
   Received
   Designing
-  Quoted
+  Priced
   Confirmed
   InProgress
   Ready
@@ -78,7 +78,7 @@ model CustomCakeRequest {
   legacyContact      Json?
   requestDate         String
 
-  quotedPrice         Int?
+  price         Int?
   finalPrice          Int?
   priceConfirmedAt   DateTime?
   depositAmount      Int           @default(0)
@@ -99,7 +99,7 @@ model CustomCakeRequest {
   @@index([status, deletedAt])
 }
 
-model CakeGalleryItem {
+model Product {
   id            String   @id
   name          String
   description   String
@@ -111,8 +111,12 @@ model CakeGalleryItem {
   imagePublicId String?
   servingCount  String
   tags          String[]
+  isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  reviews       Review[]
+
+  @@index([isActive])
 }
 
 model Category {
@@ -126,7 +130,7 @@ model Category {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  items       CakeGalleryItem[]
+  products    Product[]
 
   @@index([isActive, sortOrder])
 }
@@ -138,11 +142,19 @@ model Review {
   author    String
   eventType String
   role      String   @default("Host")
+
   userId    String?
-  user      User?    @relation(fields: [userId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
   productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+
   date      String
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@index([userId])
 }
 
 model RecoveryRequest {

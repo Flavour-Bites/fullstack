@@ -50,7 +50,7 @@ export interface AppEnv {
   readonly GEMINI_API_KEY?: string;
   readonly REDIS_URL?: string;
   readonly REDIS_CONVERSATION_TTL_SECONDS: number;
-  readonly REDIS_QUOTE_TTL_SECONDS: number;
+  readonly REDIS_PRICE_TTL_SECONDS: number;
 }
 
 const required = [
@@ -284,7 +284,7 @@ export function getEnv(): AppEnv {
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
     REDIS_URL: process.env.REDIS_URL,
     REDIS_CONVERSATION_TTL_SECONDS: Number(process.env.REDIS_CONVERSATION_TTL_SECONDS || 60 * 60 * 24),
-    REDIS_QUOTE_TTL_SECONDS: Number(process.env.REDIS_QUOTE_TTL_SECONDS || 60 * 30),
+    REDIS_PRICE_TTL_SECONDS: Number(process.env.REDIS_PRICE_TTL_SECONDS || 60 * 30),
   };
 }
 

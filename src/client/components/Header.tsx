@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Cake, CalendarDays, Search, Menu, X, Globe } from 'lucide-react';
+import { CalendarDays, Search, Menu, X, Globe } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import HeaderDesktopNav from './HeaderDesktopNav';
 import HeaderProfileDropdown from './HeaderProfileDropdown';
@@ -42,7 +42,7 @@ export default function Header({
               ? 'bg-stone-900 border border-stone-800 text-lux-gold group-hover:bg-lux-gold group-hover:text-stone-950'
               : 'bg-stone-900 text-lux-gold group-hover:bg-lux-gold group-hover:text-stone-950'
           }`}>
-            <Cake className="w-5 h-5 stroke-[1.5]" />
+            <img src="/favicon_pink_f_1782078000588.jpg" alt="Flavour Bites" className="w-full h-full rounded-full object-cover" />
           </div>
           <div>
             <span className={`font-serif text-lg sm:text-xl font-bold tracking-wider block ${

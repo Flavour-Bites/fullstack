@@ -1,15 +1,22 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { X, Cake } from 'lucide-react';
-import { CakeGalleryItem } from '@shared/types';
+import { X, Cake, ArrowRight } from 'lucide-react';
+import { Product } from '@shared/types';
 import { t } from '@client/i18n/index';
+import { useNavigate } from 'react-router-dom';
 
 interface GalleryLightboxProps {
-  cake: CakeGalleryItem | null;
+  cake: Product | null;
   onClose: () => void;
-  onCommission: (cake: CakeGalleryItem) => void;
+  onCommission: (cake: Product) => void;
 }
 
 export default function GalleryLightbox({ cake, onClose, onCommission }: GalleryLightboxProps) {
+  const navigate = useNavigate();
+
+  const handleViewDetails = (cakeId: string) => {
+    onClose();
+    navigate(`/gallery/${cakeId}`);
+  };
   return (
     <AnimatePresence>
       {cake && (
@@ -119,7 +126,14 @@ export default function GalleryLightbox({ cake, onClose, onCommission }: Gallery
                   className="w-full py-4 bg-stone-900 dark:bg-stone-800 text-white font-medium text-xs tracking-[0.2em] uppercase rounded-sm transition-all shadow-md hover:bg-stone-800 dark:hover:bg-stone-700 cursor-pointer flex items-center justify-center gap-2 hover:translate-y-[-1px]"
                 >
                   <Cake className="w-4 h-4 text-lux-gold" />
-                  {t('gallery.commissionSimilar')}
+                  {t('gallery.orderSimilar')}
+                </button>
+                <button
+                  onClick={() => handleViewDetails(cake.id)}
+                  className="w-full py-4 bg-transparent border border-stone-300 dark:border-stone-700 text-stone-700 dark:text-stone-300 font-medium text-xs tracking-[0.2em] uppercase rounded-sm transition-all hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <ArrowRight className="w-4 h-4" />
+                  {t('gallery.viewDetails')}
                 </button>
                 <p className="text-center text-[10px] text-stone-400">
                   {t('gallery.everyCakeCustomizable')}

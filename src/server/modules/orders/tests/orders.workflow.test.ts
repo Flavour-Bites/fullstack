@@ -36,7 +36,7 @@ describe('ORDER_WORKFLOW', () => {
     expect(ORDER_WORKFLOW).toEqual([
       'Received',
       'Designing',
-      'Quoted',
+      'Priced',
       'Confirmed',
       'InProgress',
       'Ready',

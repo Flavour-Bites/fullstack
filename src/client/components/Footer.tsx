@@ -1,4 +1,4 @@
-import { Cake, Send, MapPin, Clock, ArrowRight, Quote, Instagram, Mail } from 'lucide-react';
+import { Send, MapPin, Clock, ArrowRight, Quote, Instagram, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BUSINESS_INFO } from '../../shared/constants/index';
 
@@ -16,14 +16,14 @@ export default function Footer() {
           <div className="lg:col-span-5 space-y-5">
             <div className="flex items-center gap-2.5">
               <div className="w-10 h-10 rounded-sm bg-stone-800/80 flex items-center justify-center text-lux-gold border border-stone-700/50">
-                <Cake className="w-5 h-5" />
+                <img src="/favicon_pink_f_1782078000588.jpg" alt="Flavour Bites" className="w-full h-full rounded-full object-cover" />
               </div>
               <span className="font-serif text-xl font-semibold tracking-tight text-white">
                 FLAVOUR <span className="italic font-light text-lux-gold font-sans font-normal text-sm tracking-widest ml-0.5">BITES</span>
               </span>
             </div>
             <p className="text-stone-400 font-light leading-relaxed max-w-sm text-[13px]">
-              Commission-only artisan bakery in Addis Ababa. Every cake is hand-crafted to order by Yodit Ashenafi — no shelves, no stock, just your vision brought to life.
+              A custom cake bakery in Addis Ababa. Every cake is hand-crafted to order by Yodit Ashenafi — no shelves, no stock, just your vision brought to life.
             </p>
             <div className="flex gap-3 pt-1">
               <a href={BUSINESS_INFO.social.telegram.link} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-sm bg-stone-800/60 flex items-center justify-center text-stone-400 hover:text-lux-gold hover:bg-stone-800 transition-all border border-stone-700/30" aria-label="Follow on Telegram">

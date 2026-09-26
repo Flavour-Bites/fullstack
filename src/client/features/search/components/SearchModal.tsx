@@ -2,26 +2,30 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, X, HelpCircle, ArrowRight, Command, ChevronDown, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { GALLERY_ITEMS, FAQS } from '@client/data';
-import type { CakeGalleryItem } from '@shared/types';
+import { FAQS } from '@client/content/faqs';
+import { useGalleryQuery } from '@client/features/gallery/hooks/useGalleryQuery';
+import type { Product } from '@shared/types';
+
+const INPUT_FOCUS_DELAY_MS = 100;
 
 interface SearchModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectCake?: (cake: CakeGalleryItem) => void;
+  onSelectCake?: (cake: Product) => void;
 }
 
 export default function SearchModal({ isOpen, onClose, onSelectCake }: SearchModalProps) {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [expandedFaqId, setExpandedFaqId] = useState<string | null>(null);
+  const { data: cakes = [] } = useGalleryQuery();
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen) {
       setQuery('');
       setExpandedFaqId(null);
-      setTimeout(() => inputRef.current?.focus(), 100);
+      setTimeout(() => inputRef.current?.focus(), INPUT_FOCUS_DELAY_MS);
     }
   }, [isOpen]);
 
@@ -43,7 +47,7 @@ export default function SearchModal({ isOpen, onClose, onSelectCake }: SearchMod
     if (!query.trim()) return { cakes: [], faqs: [] };
     const q = query.toLowerCase();
 
-    const cakes = GALLERY_ITEMS.filter(
+    const filteredCakes = cakes.filter(
       (item) =>
         item.name.toLowerCase().includes(q) ||
         item.description.toLowerCase().includes(q) ||
@@ -57,13 +61,13 @@ export default function SearchModal({ isOpen, onClose, onSelectCake }: SearchMod
         faq.answer.toLowerCase().includes(q)
     ).slice(0, 4);
 
-    return { cakes, faqs };
-  }, [query]);
+    return { cakes: filteredCakes, faqs };
+  }, [query, cakes]);
 
   const hasResults = results.cakes.length > 0 || results.faqs.length > 0;
   const hasQuery = query.trim().length > 0;
 
-  const handleCakeClick = (cake: CakeGalleryItem) => {
+  const handleCakeClick = (cake: Product) => {
     if (onSelectCake) {
       onSelectCake(cake);
     }

@@ -1,11 +1,11 @@
 import { ChevronRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { CakeGalleryItem } from '@shared/types';
+import { Product } from '@shared/types';
 import { t } from '@client/i18n/index';
 
 interface HomeShowcaseProps {
-  featuredCakes: CakeGalleryItem[];
-  onSelectCake: (cake: CakeGalleryItem) => void;
+  featuredCakes: Product[];
+  onSelectCake: (cake: Product) => void;
 }
 
 export default function HomeShowcase({ featuredCakes, onSelectCake }: HomeShowcaseProps) {

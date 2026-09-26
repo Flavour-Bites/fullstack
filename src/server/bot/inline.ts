@@ -26,7 +26,7 @@ export function handleInline(bot: Bot) {
                 orderBy: { createdAt: "desc" },
                 take: 30,
             }),
-            prisma.cakeGalleryItem.findMany({
+            prisma.product.findMany({
                 where: {
                     OR: [
                         { name: { contains: query, mode: "insensitive" } },
@@ -44,7 +44,7 @@ export function handleInline(bot: Bot) {
 
         for (const order of orders) {
             const statusEmoji: Record<string, string> = {
-                Received: "📬", Designing: "✏️", Quoted: "💰",
+                Received: "📬", Designing: "✏️", Priced: "💰",
                 Confirmed: "✅", InProgress: "🔥", Ready: "🎂", Completed: "✔️",
             };
             const emoji = statusEmoji[order.status] ?? "📦";
@@ -66,8 +66,8 @@ export function handleInline(bot: Bot) {
                         `📅 <b>Date:</b> ${order.eventDate}\n` +
                         `👥 <b>Guests:</b> ${order.guestCount}\n` +
                         `🏗️ <b>Tiers:</b> ${order.tierCount}\n` +
-                        (order.quotedPrice
-                            ? `💰 <b>Price:</b> ${order.quotedPrice.toLocaleString()} ETB\n`
+                        (order.price
+                            ? `💰 <b>Price:</b> ${order.price.toLocaleString()} ETB\n`
                             : ""),
                     parse_mode: "HTML",
                 } as InputTextMessageContent,

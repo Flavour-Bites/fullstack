@@ -14,6 +14,7 @@ export default function HeaderDesktopNav({
       {[
         { label: 'Home', path: '/' },
         { label: 'Cake Gallery', path: '/gallery' },
+        { label: 'Testimonials', path: '/testimonials' },
         { label: 'Meet Yodit', path: '/about' },
         { label: 'Contact', path: '/contact' },
       ].map((item) => {

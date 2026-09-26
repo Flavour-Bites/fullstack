@@ -28,7 +28,7 @@ describe('reviewsService.create', () => {
       'usr_003',
     );
     expect(review.author).toBe('Charlie');
-    expect(review.eventType).toBe('Cake Order');
+    expect(review.eventType).toBe('Bakery Order');
     expect(review.role).toBe('Customer');
   });
 

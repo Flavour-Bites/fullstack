@@ -8,13 +8,20 @@ export const reviewsController = {
     res.json({ success: true, reviews });
   }),
 
+  findByProduct: asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const reviews = await reviewsService.findByProductId(id);
+    res.json({ success: true, reviews });
+  }),
+
   create: asyncHandler(async (req: Request, res: Response) => {
     const review = await reviewsService.create(req.body, req.user!.userId);
     res.json({ success: true, review });
   }),
 
-  update: asyncHandler(async (req: Request, res: Response) => {
-    const review = await reviewsService.update(req.params.id, req.body);
+  createForProduct: asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const review = await reviewsService.create({ ...req.body, productId: id }, req.user!.userId);
     res.json({ success: true, review });
   }),
 

@@ -120,4 +120,14 @@ describe('AuthView', () => {
       expect(screen.getByText('Continue with Telegram')).toBeInTheDocument();
     });
   });
+
+  it('renders the Telegram messaging benefits and allow prompt tip', async () => {
+    renderAuthView();
+    await waitFor(() => {
+      expect(screen.getByText('Order updates & baking progress')).toBeInTheDocument();
+    });
+    expect(screen.getByText('Custom cake prices & pickup details')).toBeInTheDocument();
+    expect(screen.getByText(/When Telegram asks, tap "Allow"/i)).toBeInTheDocument();
+    expect(screen.getByText(/Used exclusively for your cake orders. Zero spam./i)).toBeInTheDocument();
+  });
 });

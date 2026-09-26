@@ -1,14 +1,18 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { screen, cleanup } from '@testing-library/react';
+import { renderWithQueryClient } from '@test/queryClientWrapper';
 import GalleryView from '@client/features/gallery/components/GalleryView';
+import { http } from '@client/lib/http';
 
 beforeEach(() => {
-  vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response('{"success":true,"items":[]}'))));
+  vi.spyOn(http, 'get').mockResolvedValue({
+    data: { success: true, items: [] },
+  } as any);
 });
 
 afterEach(() => {
-  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
   cleanup();
 });
 
@@ -16,7 +20,7 @@ const noop = () => {};
 
 describe('GalleryView', () => {
   it('renders header section', () => {
-    render(<GalleryView selectedCake={null} onClearSelectedCake={noop} onCommissionCake={noop} onSelectCake={noop} />);
+    renderWithQueryClient(<GalleryView selectedCake={null} onClearSelectedCake={noop} onCommissionCake={noop} onSelectCake={noop} />);
     expect(screen.getByText('Custom Cake Gallery')).toBeInTheDocument();
   });
 });

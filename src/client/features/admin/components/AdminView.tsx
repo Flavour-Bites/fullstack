@@ -9,6 +9,7 @@ import { useRecovery } from '../../recovery/hooks/useRecovery';
 import { useReviews } from '../../reviews/hooks/useReviews';
 import { useCategories } from '../../categories/hooks/useCategories';
 import { useGallery } from '../../gallery/hooks/useGallery';
+import { useGalleryQuery } from '../../gallery/hooks/useGalleryQuery';
 import { useUsers } from '../../users/hooks/useUsers';
 import { useOrders } from '../../orders/hooks/useOrders';
 import { useAdminData } from '../hooks/useAdminData';
@@ -51,7 +52,8 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
   const recovery = useRecovery();
   const reviews = useReviews();
   const categories = useCategories();
-  const gallery = useGallery();
+  const galleryMutations = useGallery();
+  const { data: galleryItems = [], isLoading: galleryLoading } = useGalleryQuery();
   const usersPage = useUsers();
   const orders = useOrders(() => admin.fetchStats());
   const { isAdmin, stats } = admin;
@@ -59,8 +61,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
 
   useEffect(() => {
     if (currentTab === 'users' && isAdmin) usersPage.fetchUsers();
-    if (currentTab === 'menu') gallery.fetchGallery();
-    if (currentTab === 'categories') { categories.fetchCategories(); gallery.fetchGallery(); }
+    if (currentTab === 'categories') categories.fetchCategories();
     if (currentTab === 'reviews') reviews.fetchReviews();
     if (currentTab === 'recovery' && isAdmin) recovery.fetchRecoveryRequests();
   }, [currentTab]);
@@ -161,11 +162,11 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
 
         {currentTab === 'menu' && (
           <AdminMenu
-            galleryItems={gallery.galleryItems}
-            galleryLoading={gallery.galleryLoading}
+            galleryItems={galleryItems}
+            galleryLoading={galleryLoading}
             categories={categories.categories}
-            handleSaveGalleryItem={gallery.handleSaveGalleryItem}
-            handleDeleteGalleryItem={gallery.handleDeleteGalleryItem}
+            handleSaveGalleryItem={galleryMutations.handleSaveGalleryItem}
+            handleDeleteGalleryItem={galleryMutations.handleDeleteGalleryItem}
           />
         )}
 
@@ -185,7 +186,6 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
             reviewItems={reviews.reviewItems}
             reviewsLoading={reviews.reviewsLoading}
             handleDeleteReview={reviews.handleDeleteReview}
-            handleSaveReview={reviews.handleSaveReview}
             fetchReviews={reviews.fetchReviews}
           />
         )}

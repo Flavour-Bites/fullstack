@@ -102,7 +102,7 @@ describe('ordersController.update', () => {
 
   it('delegates to ordersService.update with operator source and returns the updated order', async () => {
     const mockUpdate = vi.mocked(ordersService.update);
-    mockUpdate.mockResolvedValue({ id: 'FB-123', status: 'Quoted' } as any);
+    mockUpdate.mockResolvedValue({ id: 'FB-123', status: 'Priced' } as any);
     const res = createRes();
 
     await ordersController.update(
@@ -117,17 +117,17 @@ describe('ordersController.update', () => {
     });
     expect(res.statusCode).toBe(200);
     expect(res.jsonBody.success).toBe(true);
-    expect(res.jsonBody.request.status).toBe('Quoted');
+    expect(res.jsonBody.request.status).toBe('Priced');
   });
 
   it('propagates service errors (e.g. invalid transition) to the error handler', async () => {
     const mockUpdate = vi.mocked(ordersService.update);
-    mockUpdate.mockRejectedValue(new Error('Cannot change status from Completed to Quoted.'));
+    mockUpdate.mockRejectedValue(new Error('Cannot change status from Completed to Priced.'));
     const res = createRes();
 
     await expect(
       ordersController.update(createReq({ id: 'FB-123' }), res, vi.fn()),
-    ).rejects.toThrow('Cannot change status from Completed to Quoted.');
+    ).rejects.toThrow('Cannot change status from Completed to Priced.');
   });
 });
 

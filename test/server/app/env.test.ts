@@ -196,7 +196,7 @@ describe('getEnv and env singleton', () => {
     delete process.env.CSRF_SECRET;
     delete process.env.CLOUDINARY_UPLOAD_FOLDER;
     delete process.env.REDIS_CONVERSATION_TTL_SECONDS;
-    delete process.env.REDIS_QUOTE_TTL_SECONDS;
+    delete process.env.REDIS_PRICE_TTL_SECONDS;
 
     const { getEnv, env } = await import('@server/platform/config/env.js');
     const parsed = getEnv();
@@ -206,7 +206,7 @@ describe('getEnv and env singleton', () => {
     expect(parsed.FRONTEND_URL).toBe('http://localhost:3000');
     expect(parsed.CLOUDINARY_UPLOAD_FOLDER).toBe('flavour-bites');
     expect(parsed.REDIS_CONVERSATION_TTL_SECONDS).toBe(86400);
-    expect(parsed.REDIS_QUOTE_TTL_SECONDS).toBe(1800);
+    expect(parsed.REDIS_PRICE_TTL_SECONDS).toBe(1800);
     expect(parsed.isDev).toBe(true);
     expect(parsed.isProd).toBe(false);
 
@@ -221,7 +221,7 @@ describe('getEnv and env singleton', () => {
     process.env.PORT = '8080';
     process.env.CLOUDINARY_UPLOAD_FOLDER = 'custom-folder';
     process.env.REDIS_CONVERSATION_TTL_SECONDS = '3600';
-    process.env.REDIS_QUOTE_TTL_SECONDS = '600';
+    process.env.REDIS_PRICE_TTL_SECONDS = '600';
 
     const { getEnv } = await import('@server/platform/config/env.js');
     const parsed = getEnv();
@@ -231,7 +231,7 @@ describe('getEnv and env singleton', () => {
     expect(parsed.PORT).toBe(8080);
     expect(parsed.CLOUDINARY_UPLOAD_FOLDER).toBe('custom-folder');
     expect(parsed.REDIS_CONVERSATION_TTL_SECONDS).toBe(3600);
-    expect(parsed.REDIS_QUOTE_TTL_SECONDS).toBe(600);
+    expect(parsed.REDIS_PRICE_TTL_SECONDS).toBe(600);
   });
 
   it('auto-recovers APP_URL from Render environment when set to localhost in production', async () => {

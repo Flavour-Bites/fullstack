@@ -11,6 +11,7 @@ export type PublicUser = {
   telegramPhone: string | null;
   telegramPhoto: string | null;
   notifyViaTelegram: boolean;
+  telegramBotWriteAccess: boolean;
   dietaryPreferences: string[];
   language: string;
   createdAt: string;
@@ -26,6 +27,7 @@ function toPublic(user: User): PublicUser {
     telegramPhone: user.telegramPhone,
     telegramPhoto: user.telegramPhoto,
     notifyViaTelegram: user.notifyViaTelegram,
+    telegramBotWriteAccess: user.notifyViaTelegram,
     dietaryPreferences: user.dietaryPreferences ?? [],
     language: user.language ?? 'en',
     createdAt: user.createdAt?.toISOString() ?? '',
@@ -51,6 +53,7 @@ export const authRepository = {
     username?: string;
     photo_url?: string;
     phone_number?: string;
+    notifyViaTelegram?: boolean;
   }) {
     const prisma = getPrisma();
     const displayName = data.name || [data.first_name, data.last_name].filter(Boolean).join(' ');
@@ -62,6 +65,7 @@ export const authRepository = {
         telegramUsername: data.username ?? null,
         telegramPhoto: data.photo_url ?? null,
         ...(data.phone_number ? { telegramPhone: data.phone_number } : {}),
+        ...(data.notifyViaTelegram !== undefined ? { notifyViaTelegram: data.notifyViaTelegram } : {}),
       },
       create: {
         id: makeId('usr'),
@@ -71,6 +75,7 @@ export const authRepository = {
         telegramPhoto: data.photo_url ?? null,
         telegramPhone: data.phone_number ?? null,
         role: 'customer',
+        ...(data.notifyViaTelegram !== undefined ? { notifyViaTelegram: data.notifyViaTelegram } : {}),
       },
     });
     return user;

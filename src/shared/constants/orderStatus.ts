@@ -1,7 +1,7 @@
 export const STATUS_EMOJI: Record<string, string> = {
   Received: '📬',
   Designing: '✏️',
-  Quoted: '💰',
+  Priced: '💰',
   Confirmed: '✅',
   InProgress: '🔥',
   Ready: '🎂',
@@ -12,7 +12,7 @@ export const STATUS_EMOJI: Record<string, string> = {
 export const STATUS_LABEL: Record<string, string> = {
   Received: 'Request Received',
   Designing: 'Being Designed',
-  Quoted: 'Quote Ready for Review',
+  Priced: 'Price Ready',
   Confirmed: 'Order Confirmed',
   InProgress: 'Being Baked',
   Ready: 'Ready for Pickup / Delivery',

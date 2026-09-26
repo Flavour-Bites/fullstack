@@ -17,17 +17,17 @@ export interface OrderConversation {
   updatedAt: string;
 }
 
-export interface QuoteConversation {
+export interface PriceConversation {
   orderId: string;
   createdAt: string;
   updatedAt: string;
 }
 
 const ORDER_TTL_SECONDS = env.REDIS_CONVERSATION_TTL_SECONDS;
-const QUOTE_TTL_SECONDS = env.REDIS_QUOTE_TTL_SECONDS;
+const PRICE_TTL_SECONDS = env.REDIS_PRICE_TTL_SECONDS;
 
 const orderKey = (telegramId: string) => `fb:conversation:order:${telegramId}`;
-const quoteKey = (telegramId: string) => `fb:conversation:quote:${telegramId}`;
+const priceKey = (telegramId: string) => `fb:conversation:price:${telegramId}`;
 
 function stamp<T extends object>(value: T): T & { updatedAt: string } {
   return { ...value, updatedAt: new Date().toISOString() };
@@ -55,23 +55,23 @@ export class ConversationStateStore {
     await this.store.del(orderKey(telegramId));
   }
 
-  async getQuote(telegramId: string) {
-    const raw = await this.store.get(quoteKey(telegramId));
+  async getPrice(telegramId: string) {
+    const raw = await this.store.get(priceKey(telegramId));
     if (!raw) return null;
     try {
-      return JSON.parse(raw) as QuoteConversation;
+      return JSON.parse(raw) as PriceConversation;
     } catch {
-      await this.store.del(quoteKey(telegramId));
+      await this.store.del(priceKey(telegramId));
       return null;
     }
   }
 
-  async setQuote(telegramId: string, quote: QuoteConversation) {
-    await this.store.set(quoteKey(telegramId), JSON.stringify(stamp(quote)), QUOTE_TTL_SECONDS);
+  async setPrice(telegramId: string, price: PriceConversation) {
+    await this.store.set(priceKey(telegramId), JSON.stringify(stamp(price)), PRICE_TTL_SECONDS);
   }
 
-  async clearQuote(telegramId: string) {
-    await this.store.del(quoteKey(telegramId));
+  async clearPrice(telegramId: string) {
+    await this.store.del(priceKey(telegramId));
   }
 }
 

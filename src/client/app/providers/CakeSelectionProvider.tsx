@@ -1,25 +1,25 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
-import { CakeGalleryItem } from '@shared/types';
+import { Product } from '@shared/types';
 
 interface CakeSelectionContextValue {
-  selectedCake: CakeGalleryItem | null;
-  prefilledCake: CakeGalleryItem | null;
-  selectCake: (cake: CakeGalleryItem) => void;
+  selectedCake: Product | null;
+  prefilledCake: Product | null;
+  selectCake: (cake: Product) => void;
   clearSelectedCake: () => void;
-  commissionCake: (cake: CakeGalleryItem) => void;
+  orderCake: (cake: Product) => void;
   clearPrefilledCake: () => void;
 }
 
 const CakeSelectionContext = createContext<CakeSelectionContextValue | null>(null);
 
 export function CakeSelectionProvider({ children }: { children: ReactNode }) {
-  const [selectedCake, setSelectedCake] = useState<CakeGalleryItem | null>(null);
-  const [prefilledCake, setPrefilledCake] = useState<CakeGalleryItem | null>(null);
+  const [selectedCake, setSelectedCake] = useState<Product | null>(null);
+  const [prefilledCake, setPrefilledCake] = useState<Product | null>(null);
 
-  const selectCake = (cake: CakeGalleryItem) => setSelectedCake(cake);
+  const selectCake = (cake: Product) => setSelectedCake(cake);
   const clearSelectedCake = () => setSelectedCake(null);
 
-  const commissionCake = (cake: CakeGalleryItem) => {
+  const orderCake = (cake: Product) => {
     setPrefilledCake(cake);
     setSelectedCake(null);
   };
@@ -28,7 +28,7 @@ export function CakeSelectionProvider({ children }: { children: ReactNode }) {
 
   return (
     <CakeSelectionContext.Provider
-      value={{ selectedCake, prefilledCake, selectCake, clearSelectedCake, commissionCake, clearPrefilledCake }}
+      value={{ selectedCake, prefilledCake, selectCake, clearSelectedCake, orderCake, clearPrefilledCake }}
     >
       {children}
     </CakeSelectionContext.Provider>

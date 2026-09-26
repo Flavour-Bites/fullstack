@@ -25,8 +25,8 @@ export async function getStaffChatIds(): Promise<string[]> {
   }
 }
 
-function getOrderPrice(order: { quotedPrice?: number | null; finalPrice?: number | null }) {
-  return order.finalPrice ?? order.quotedPrice ?? 0;
+function getOrderPrice(order: { price?: number | null; finalPrice?: number | null }) {
+  return order.finalPrice ?? order.price ?? 0;
 }
 
 export async function notifyStaffNewOrder(
@@ -59,7 +59,7 @@ export async function notifyStaffNewOrder(
 
   const buttons = [
     [{ text: '✏️ Start Designing', callback_data: `status:${order.id}:Designing` }],
-    [{ text: '💰 Send Quote', callback_data: `quote:${order.id}` }],
+    [{ text: '💰 Send Price', callback_data: `price:${order.id}` }],
     [{ text: '❌ Cancel Order', callback_data: `status:${order.id}:Cancelled` }],
   ];
 
@@ -88,14 +88,14 @@ export async function notifyCustomerStatusChange(orderId: string): Promise<void>
 
   switch (order.status) {
     case 'Designing':
-      message = `${emoji} <b>Your cake is being designed!</b>\n\nHi ${order.contactName}! Yodit has started working on the design for your <b>${order.eventType}</b> cake.\n\nWe'll send you the quote once the design is ready. This usually takes 1-2 days.\n\n<b>Your order:</b> <code>${order.id}</code>`;
+      message = `${emoji} <b>Your cake is being designed!</b>\n\nHi ${order.contactName}! Yodit has started working on the design for your <b>${order.eventType}</b> cake.\n\nWe'll send you the price once the design is ready. This usually takes 1-2 days.\n\n<b>Your order:</b> <code>${order.id}</code>`;
       break;
 
-    case 'Quoted':
+    case 'Priced':
       message = [
-        `${emoji} <b>Your quote is ready!</b>`,
+        `${emoji} <b>Your price is ready!</b>`,
         '',
-        `Hi ${order.contactName}! Your custom <b>${order.eventType}</b> cake quote is ready:`,
+        `Hi ${order.contactName}! Your custom <b>${order.eventType}</b> cake price is ready:`,
         '',
         `<b>Price: ${etb(getOrderPrice(order))}</b>`,
         order.bakerNote ? `\n<i>Note from Yodit: ${order.bakerNote}</i>` : '',
@@ -104,7 +104,7 @@ export async function notifyCustomerStatusChange(orderId: string): Promise<void>
       ].join('\n');
       buttons = [
         [
-          { text: '✅ Accept Quote', callback_data: `confirm:${order.id}` },
+          { text: '✅ Accept Price', callback_data: `confirm:${order.id}` },
           { text: '💬 Request Revision', callback_data: `revise:${order.id}` },
         ],
       ];
@@ -168,13 +168,13 @@ export async function notifyCustomerStatusChange(orderId: string): Promise<void>
   });
 }
 
-export async function notifyStaffQuoteAccepted(
+export async function notifyStaffPriceConfirmed(
   order: CustomCakeRequest & { user?: User | null },
 ): Promise<void> {
   const text = [
-    `✅ <b>Quote Accepted!</b>`,
+    `✅ <b>Price Confirmed!</b>`,
     '',
-    `<b>${order.contactName}</b> accepted the quote for their <b>${order.eventType}</b> cake.`,
+    `<b>${order.contactName}</b> accepted the price for their <b>${order.eventType}</b> cake.`,
     `<b>Price:</b> ${etb(getOrderPrice(order))}`,
     `<b>Date:</b> ${order.eventDate}`,
     `<b>Order ID:</b> <code>${order.id}</code>`,

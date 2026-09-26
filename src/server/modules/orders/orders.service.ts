@@ -2,7 +2,7 @@ import { ordersRepository } from './orders.repository';
 import { makeOrderId } from '../../../shared/utils/ids';
 import { formatRequestDate } from '../../../shared/utils/dateFormat';
 import { normalizeMoney, isValidTransition } from './orders.workflow';
-import { notifyStaffNewOrder, notifyCustomerStatusChange, notifyStaffQuoteAccepted } from '../../platform/integrations/telegram/telegramNotifications';
+import { notifyStaffNewOrder, notifyCustomerStatusChange, notifyStaffPriceConfirmed } from '../../platform/integrations/telegram/telegramNotifications';
 import { NotFoundError, ValidationError, AuthorizationError } from '../../platform/errors/index';
 import type { OrderStatus } from '@prisma/client';
 import type { OrderActor, OrderUpdateInput } from './orders.types';
@@ -96,10 +96,10 @@ export const ordersService = {
         note: input.note ?? null,
       });
     } else if (
-      input.quotedPrice !== undefined &&
+      input.price !== undefined &&
       (current.status === 'Received' || current.status === 'Designing')
     ) {
-      updated = await this.changeStatus(orderId, 'Quoted', {
+      updated = await this.changeStatus(orderId, 'Priced', {
         userId: actor.userId,
         source: actor.source,
         note: 'Cake price was set.',
@@ -114,7 +114,7 @@ export const ordersService = {
     data: Record<string, unknown>,
     predefinedCommercials?: Record<string, number | Date | null>,
   ) {
-    const moneyFields = ['quotedPrice', 'finalPrice', 'depositAmount'] as const;
+    const moneyFields = ['price', 'finalPrice', 'depositAmount'] as const;
     const commercialInput: Record<string, number | Date | null> = { ...predefinedCommercials };
 
     if (!predefinedCommercials) {
@@ -164,10 +164,10 @@ export const ordersService = {
     if (role === 'customer' && order.userId !== userId) {
       throw new AuthorizationError('You can only confirm your own cake order.');
     }
-    if (!order.quotedPrice) throw new ValidationError('Cake price is not ready yet.');
+    if (!order.price) throw new ValidationError('Cake price is not ready yet.');
 
     await ordersRepository.updateCommercials(orderId, {
-      finalPrice: order.finalPrice ?? order.quotedPrice,
+      finalPrice: order.finalPrice ?? order.price,
       priceConfirmedAt: new Date(),
     });
 
@@ -180,8 +180,8 @@ export const ordersService = {
     notifyCustomerStatusChange(orderId).catch((err: Error) =>
       console.error('[Notify] Customer notice failed:', err.message),
     );
-    notifyStaffQuoteAccepted(updated as any).catch((err: Error) =>
-      console.error('[Notify] Staff quote-accepted notice failed:', err.message),
+    notifyStaffPriceConfirmed(updated as any).catch((err: Error) =>
+      console.error('[Notify] Staff price-confirmed notice failed:', err.message),
     );
 
     return updated;

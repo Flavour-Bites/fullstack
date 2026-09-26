@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { CustomCakeRequest, CakeGalleryItem, User } from '@shared/types';
+import { CustomCakeRequest, Product, User } from '@shared/types';
 import { useToast } from '../../../components/Toast';
 import { t } from '@client/i18n/index';
 import { http } from '@client/lib/http';
@@ -44,7 +44,7 @@ export function getDateInputStyles(dateError: string | null, eventDate: string):
 }
 
 export function useRequestForm(
-  prefilledCake: CakeGalleryItem | null,
+  prefilledCake: Product | null,
   onClearPrefilledCake: () => void,
   currentUser?: User | null,
 ) {
@@ -53,7 +53,6 @@ export function useRequestForm(
   const [activeRequests, setActiveRequests] = useState<CustomCakeRequest[]>([]);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [submittedId, setSubmittedId] = useState('');
-  const [dbConnected, setDbConnected] = useState<boolean | null>(null);
   const [valError, setValError] = useState<string | null>(null);
   const [dateError, setDateError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -73,6 +72,7 @@ export function useRequestForm(
       setForm((prev) => ({
         ...prev,
         contactName: currentUser.name || '',
+        contactPhone: currentUser.telegramPhone || '',
       }));
     }
   }, [currentUser]);
@@ -91,11 +91,9 @@ export function useRequestForm(
       const { data } = await http.get<ApiResponse<{ requests: CustomCakeRequest[] }>>('/api/requests');
       if (data.success) {
         setActiveRequests(data.requests);
-        setDbConnected(true);
       }
     } catch {
-      setDbConnected(false);
-      const list = localStorage.getItem('fb_request_commissions');
+      const list = localStorage.getItem('fb_request_orders');
       if (list) {
         try { setActiveRequests(JSON.parse(list)); } catch (parseErr) { console.error('Failed to parse cached requests from localStorage:', parseErr); }
       }
@@ -183,16 +181,14 @@ export function useRequestForm(
 
   const deleteRequest = async (id: string) => {
     let deletedOnBackend = false;
-    if (dbConnected) {
-      try {
-        const { data } = await http.delete<ApiResponse>(`/api/requests/${id}`);
-        if (data.success) { deletedOnBackend = true; fetchRequests(); }
-      } catch (deleteErr) { console.error(`Failed to delete request ${id} from backend:`, deleteErr); }
-    }
+    try {
+      const { data } = await http.delete<ApiResponse>(`/api/requests/${id}`);
+      if (data.success) { deletedOnBackend = true; fetchRequests(); }
+    } catch (deleteErr) { console.error(`Failed to delete request ${id} from backend:`, deleteErr); }
     if (!deletedOnBackend) {
       const updated = activeRequests.filter((item) => item.id !== id);
       setActiveRequests(updated);
-      localStorage.setItem('fb_request_commissions', JSON.stringify(updated));
+      localStorage.setItem('fb_request_orders', JSON.stringify(updated));
     }
   };
 
@@ -234,24 +230,22 @@ export function useRequestForm(
     };
 
     let savedOnBackend = false;
-    if (dbConnected) {
-      try {
-        const { data } = await http.post<ApiResponse>('/api/requests', newInquiry);
-        if (data.success) { savedOnBackend = true; fetchRequests(); }
-      } catch (saveErr) { console.error('Failed to save request to backend:', saveErr); }
-    }
+    try {
+      const { data } = await http.post<ApiResponse>('/api/requests', newInquiry);
+      if (data.success) { savedOnBackend = true; fetchRequests(); }
+    } catch (saveErr) { console.error('Failed to save request to backend:', saveErr); }
 
     if (!savedOnBackend) {
       const nextList = [newInquiry, ...activeRequests];
       setActiveRequests(nextList);
-      localStorage.setItem('fb_request_commissions', JSON.stringify(nextList));
+      localStorage.setItem('fb_request_orders', JSON.stringify(nextList));
     }
 
     setSubmittedId(uniqueId);
     setFormSubmitted(true);
     setSubmitting(false);
     onClearPrefilledCake();
-    showToast(t('order.artisanInquiryFiled'), t('order.submittedSuccess', { id: uniqueId }), 'majestic', 7000);
+    showToast(t('order.inquiryFiled'), t('order.submittedSuccess', { id: uniqueId }), 'majestic', 7000);
   };
 
   const resetForm = () => {
@@ -265,7 +259,6 @@ export function useRequestForm(
     activeRequests,
     formSubmitted,
     submittedId,
-    dbConnected,
     valError,
     dateError,
     uploading,

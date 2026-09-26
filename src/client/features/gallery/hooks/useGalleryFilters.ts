@@ -1,8 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
-import { CakeGalleryItem } from '@shared/types';
-import { GALLERY_ITEMS } from '@client/data';
-import { http } from '@client/lib/http';
-import type { ApiResponse } from '@/shared/api';
+import { useState, useMemo } from 'react';
+import { useGalleryQuery } from './useGalleryQuery';
+import type { Product } from '@shared/types';
 
 export type FilterType = 'all' | 'birthday' | 'kids' | 'treats' | 'celebration';
 
@@ -10,24 +8,8 @@ export function useGalleryFilters() {
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [items, setItems] = useState<CakeGalleryItem[]>(GALLERY_ITEMS);
-  const [filteredCakes, setFilteredCakes] = useState<CakeGalleryItem[]>(GALLERY_ITEMS);
 
-  // Load from Postgres backend if reachable, otherwise fall back gracefully
-  useEffect(() => {
-    const fetchGallery = async () => {
-      try {
-        const { data } = await http.get<ApiResponse<{ items: CakeGalleryItem[] }>>('/api/gallery');
-        if (data.success && data.items && data.items.length > 0) {
-          setItems(data.items);
-          setFilteredCakes(data.items);
-        }
-      } catch (err) {
-        console.warn('Postgres custom cake gallery items unavailable, serving local backup:', err);
-      }
-    };
-    fetchGallery();
-  }, []);
+  const { data: items = [], isLoading, isError } = useGalleryQuery();
 
   // Dynamic derivation of all unique tags from our catalog
   const allUniqueTags: string[] = useMemo(
@@ -36,7 +18,7 @@ export function useGalleryFilters() {
   );
 
   // Combined logic to sync search feed, category selection, and multiple tag switches
-  useEffect(() => {
+  const filteredCakes: Product[] = useMemo(() => {
     let result = items;
 
     // A. Filter by Category Tab
@@ -66,7 +48,7 @@ export function useGalleryFilters() {
       );
     }
 
-    setFilteredCakes(result);
+    return result;
   }, [activeFilter, searchQuery, selectedTags, items]);
 
   const handleTagToggle = (tag: string) => {
@@ -95,5 +77,7 @@ export function useGalleryFilters() {
     handleTagToggle,
     clearAllFilters,
     hasActiveFilters,
+    isLoading,
+    isError,
   };
 }

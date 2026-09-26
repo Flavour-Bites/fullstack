@@ -18,7 +18,7 @@ function getEnv(key: string): string | undefined {
 
 export const BUSINESS_INFO = {
   name: 'Flavour Bites',
-  tagline: 'Bespoke Artisanal Cake Boutique',
+  tagline: 'Custom Cake Boutique',
   chef: 'Chef Yodit Ashenafi',
   email: getEnv('VITE_FLAVOURBITES_EMAIL') || getEnv('FLAVOURBITES_EMAIL') || 'hello@flavourbites.et',
   phone: '+251 911 234567',
@@ -51,7 +51,7 @@ export const BUSINESS_INFO = {
     googleMapsEmbedUrl:
       'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15764.73!2d38.7219773!3d8.9399709!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x164b83007cbf9f7d%3A0x42393c8b940a4b89!2sGarment!5e0!3m2!1sen!2set!4v1710000000000!5m2!1sen!2set',
     directionsNote:
-      'Conveniently accessible along the Ring Road & Haile Garment corridor in Nifas Silk-Lafto. We operate by appointment only for scheduled pickups and bespoke cake consultations.',
+      'Conveniently accessible along the Ring Road & Haile Garment corridor in Nifas Silk-Lafto. We operate by appointment only for scheduled pickups and custom cake consultations.',
   },
   social: {
     telegram: {

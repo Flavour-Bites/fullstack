@@ -7,7 +7,7 @@ const COLLECTIONS = [
   {
     image: '/gallery_wedding.png',
     alt: 'Celebration Sculptures',
-    badgeKey: 'home.bespokeBadge',
+    badgeKey: 'home.customBadge',
     titleKey: 'home.celebrationSculptures',
     descKey: 'home.celebrationSculpturesDesc',
     linkKey: 'home.viewElegantTiers',

@@ -8,6 +8,7 @@ export default defineConfig({
       '@client': path.resolve(__dirname, './src/client'),
       '@server': path.resolve(__dirname, './src/server'),
       '@shared': path.resolve(__dirname, './src/shared'),
+      '@test': path.resolve(__dirname, './test'),
     },
   },
   test: {

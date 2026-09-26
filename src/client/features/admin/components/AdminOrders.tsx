@@ -34,7 +34,7 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
     const matchesSearch = r.contactName.toLowerCase().includes(q) || r.id.toLowerCase().includes(q) || r.flavor.toLowerCase().includes(q) || r.eventType.toLowerCase().includes(q);
     if (statusFilter === 'all') return matchesSearch;
     if (statusFilter === 'pending') return matchesSearch && (r.status === 'Received' || r.status === 'Pending');
-    if (statusFilter === 'active') return matchesSearch && ['Designing', 'Quoted', 'Confirmed', 'InProgress'].includes(r.status);
+    if (statusFilter === 'active') return matchesSearch && ['Designing', 'Priced', 'Confirmed', 'InProgress'].includes(r.status);
     if (statusFilter === 'completed') return matchesSearch && (r.status === 'Ready' || r.status === 'Completed');
     return matchesSearch && r.status.toLowerCase() === statusFilter.toLowerCase();
   });
@@ -42,14 +42,14 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
   const startEditing = (req: CakeRequest) => {
     setEditingId(req.id);
     setEditStatus(req.status);
-    setEditCost(req.finalPrice ?? req.quotedPrice ?? 0);
+    setEditCost(req.finalPrice ?? req.price ?? 0);
   };
 
   const handleSave = async (id: string, name: string) => {
     setUpdating(true);
     await saveRequestUpdates(id, name, editStatus, editCost);
     if (selectedRequest?.id === id) {
-      setSelectedRequest({ ...selectedRequest, status: editStatus, quotedPrice: editCost });
+      setSelectedRequest({ ...selectedRequest, status: editStatus, price: editCost });
     }
     setEditingId(null);
     setUpdating(false);
@@ -143,7 +143,7 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
                         {req.status}
                       </span>
                       <span className="text-[11px] font-mono font-bold text-stone-600 dark:text-stone-300">
-                        {orderPrice(req) ? `${orderPrice(req).toLocaleString()} ETB` : 'Unquoted'}
+                        {orderPrice(req) ? `${orderPrice(req).toLocaleString()} ETB` : 'Unpriced'}
                       </span>
                     </div>
                   </div>
@@ -188,7 +188,7 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
                           </select>
                         </div>
                         <div>
-                          <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.quotedPrice')}</label>
+                          <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.price')}</label>
                           <input type="number" value={editCost} onChange={e => setEditCost(Math.max(0, Number(e.target.value)))} className="w-full bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
                         </div>
                       </div>
@@ -272,9 +272,9 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
                 <div className="border-t border-stone-200 dark:border-stone-800 pt-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-[9px] uppercase font-mono text-stone-400 dark:text-stone-400 block">Quoted Price</span>
+                      <span className="text-[9px] uppercase font-mono text-stone-400 dark:text-stone-400 block">Price</span>
                       <span className="text-lg font-mono font-bold text-lux-gold">
-                        {orderPrice(selectedRequest) ? `${orderPrice(selectedRequest).toLocaleString()} ETB` : 'Not quoted yet'}
+                        {orderPrice(selectedRequest) ? `${orderPrice(selectedRequest).toLocaleString()} ETB` : 'No price yet'}
                       </span>
                     </div>
                     <div className="flex gap-2">
@@ -288,8 +288,8 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
                   </div>
                   <div className="grid grid-cols-1 gap-3 text-left">
                     <div className="bg-stone-100 dark:bg-stone-950 p-2.5 border border-stone-200 dark:border-stone-800 rounded-xs">
-                      <span className="text-[8px] uppercase font-mono text-stone-400 dark:text-stone-400 block">Quoted Price</span>
-                      <span className="text-xs font-mono font-bold text-stone-700 dark:text-stone-200">{orderPrice(selectedRequest) ? `${orderPrice(selectedRequest).toLocaleString()} ETB` : 'Not quoted'}</span>
+                      <span className="text-[8px] uppercase font-mono text-stone-400 dark:text-stone-400 block">Price</span>
+                      <span className="text-xs font-mono font-bold text-stone-700 dark:text-stone-200">{orderPrice(selectedRequest) ? `${orderPrice(selectedRequest).toLocaleString()} ETB` : 'No price'}</span>
                     </div>
                   </div>
                 </div>
