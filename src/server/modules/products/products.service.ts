@@ -2,12 +2,6 @@ import { productsRepository } from './products.repository';
 import { deleteImageFromCloudinary } from '../../platform/integrations/cloudinary/cloudinaryClient';
 import type { ProductInput, ProductUpdateInput } from './products.schemas';
 
-function normalizeStringArray(value?: string | string[]): string[] {
-  if (Array.isArray(value)) return value;
-  if (typeof value === 'string' && value.trim().length > 0) return [value];
-  return [];
-}
-
 export const productsService = {
   async findAll(categorySlug?: string, includeInactive = false) {
     return productsRepository.findAll(categorySlug, includeInactive);
@@ -19,20 +13,18 @@ export const productsService = {
 
   async create(data: ProductInput) {
     const categoryId = await productsRepository.resolveCategoryId(data);
-    const flavors = normalizeStringArray(data.flavors);
-    const tags = normalizeStringArray(data.tags);
 
     return productsRepository.create({
       id: data.id,
       name: data.name,
       description: data.description,
       categoryId,
-      flavors,
+      flavors: data.flavors,
       priceEstimate: data.priceEstimate,
       image: data.image,
       imagePublicId: data.imagePublicId,
       servingCount: data.servingCount,
-      tags,
+      tags: data.tags,
       isActive: data.isActive ?? true,
     });
   },
@@ -47,15 +39,11 @@ export const productsService = {
     if (data.imagePublicId !== undefined) updateData.imagePublicId = data.imagePublicId;
     if (data.servingCount !== undefined) updateData.servingCount = data.servingCount;
     if (data.isActive !== undefined) updateData.isActive = data.isActive;
+    if (data.flavors !== undefined) updateData.flavors = data.flavors;
+    if (data.tags !== undefined) updateData.tags = data.tags;
 
     if (data.categoryId || data.categorySlug || data.category) {
       updateData.categoryId = await productsRepository.resolveCategoryId(data);
-    }
-    if (data.flavors !== undefined) {
-      updateData.flavors = normalizeStringArray(data.flavors);
-    }
-    if (data.tags !== undefined) {
-      updateData.tags = normalizeStringArray(data.tags);
     }
 
     return productsRepository.update(id, updateData);

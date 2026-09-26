@@ -29,14 +29,14 @@ export function useGallery() {
         tags: galleryForm.tags.split(',').map((t: string) => t.trim()).filter(Boolean),
       };
       if (editingGalleryId) {
-        const { data } = await http.patch<ApiResponse>(`/api/gallery/${editingGalleryId}`, body);
+        const { data } = await http.patch<ApiResponse>(`/api/products/${editingGalleryId}`, body);
         if (data.success) {
-          showToast('Gallery Item Updated', `"${galleryForm.name}" updated.`, 'success');
+          showToast('Product Updated', `"${galleryForm.name}" updated.`, 'success');
         } else throw new Error(data.error);
       } else {
-        const { data } = await http.post<ApiResponse>('/api/gallery', body);
+        const { data } = await http.post<ApiResponse>('/api/products', body);
         if (data.success) {
-          showToast('Gallery Item Created', `"${galleryForm.name}" added.`, 'success');
+          showToast('Product Created', `"${galleryForm.name}" added.`, 'success');
         } else throw new Error(data.error);
       }
       invalidateGallery();
@@ -46,11 +46,11 @@ export function useGallery() {
   }, [invalidateGallery]);
 
   const handleDeleteGalleryItem = useCallback(async (id: string, name: string) => {
-    if (!window.confirm(`Delete gallery item "${name}"? This cannot be undone.`)) return false;
+    if (!window.confirm(`Delete product "${name}"? This cannot be undone.`)) return false;
     try {
-      const { data } = await http.delete<ApiResponse>(`/api/gallery/${id}`);
+      const { data } = await http.delete<ApiResponse>(`/api/products/${id}`);
       if (data.success) {
-        showToast('Gallery Item Deleted', `"${name}" removed.`, 'warning');
+        showToast('Product Deleted', `"${name}" removed.`, 'warning');
         invalidateGallery();
         return true;
       } else throw new Error(data.error);

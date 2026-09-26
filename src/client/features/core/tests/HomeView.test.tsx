@@ -7,7 +7,7 @@ import { http } from '@client/lib/http';
 
 beforeEach(() => {
   vi.spyOn(http, 'get').mockImplementation((url: string) => {
-    if (url.includes('/api/gallery')) {
+    if (url.includes('/api/products')) {
       return Promise.resolve({ data: { success: true, items: [] } } as any);
     }
     if (url.includes('/api/reviews')) {

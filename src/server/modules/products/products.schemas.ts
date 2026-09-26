@@ -7,12 +7,12 @@ export const productSchema = z.object({
   categoryId: z.string().optional(),
   categorySlug: z.string().optional(),
   category: z.string().optional(),
-  flavors: z.union([z.string(), z.array(z.string())]),
+  flavors: z.array(z.string().min(1)).min(1, 'At least one flavor is required'),
   priceEstimate: z.string().min(1),
   image: z.string().url(),
   imagePublicId: z.string().optional().nullable(),
   servingCount: z.string().optional(),
-  tags: z.union([z.string(), z.array(z.string())]).optional(),
+  tags: z.array(z.string().min(1)).default([]),
   isActive: z.boolean().optional(),
 });
 
