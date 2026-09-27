@@ -9,7 +9,7 @@ export const productSchema = z.object({
   category: z.string().optional(),
   flavors: z.array(z.string().min(1)).min(1, 'At least one flavor is required'),
   priceEstimate: z.string().min(1),
-  image: z.string().url(),
+  image: z.url(),
   imagePublicId: z.string().optional().nullable(),
   servingCount: z.string().optional(),
   tags: z.array(z.string().min(1)).default([]),

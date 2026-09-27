@@ -13,6 +13,93 @@ interface HomeTestimonialsProps {
   onNext: () => void;
 }
 
+function HomeTestimonialsSkeleton() {
+  return (
+    <div className="space-y-4 max-w-md mx-auto w-full animate-pulse">
+      <div className="flex justify-center gap-1">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="w-4 h-4 rounded-full bg-stone-800" />
+        ))}
+      </div>
+      <div className="h-6 bg-stone-800 rounded-sm w-3/4 mx-auto" />
+      <div className="h-4 bg-stone-800 rounded-sm w-1/2 mx-auto" />
+      <div className="w-10 h-10 rounded-full bg-stone-800 mx-auto mt-4" />
+    </div>
+  );
+}
+
+function HomeTestimonialsEmptyState() {
+  return (
+    <div className="py-10 text-center space-y-4 max-w-md mx-auto">
+      <div className="flex justify-center gap-1">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Star key={i} size={16} className="fill-lux-gold/30 text-lux-gold/30" />
+        ))}
+      </div>
+      <p className="text-xl font-serif font-light italic text-stone-300">
+        Be the first customer to leave a review after your cake tasting or celebration.
+      </p>
+      <div className="pt-2">
+        <Link
+          to="/request"
+          className="inline-block text-xs uppercase tracking-widest text-lux-gold border border-lux-gold/40 px-5 py-2.5 rounded-xs hover:bg-lux-gold hover:text-stone-950 transition-colors font-mono font-semibold"
+        >
+          Order a Custom Cake
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function HomeTestimonialSlide({ review }: Readonly<{ review: Review }>) {
+  const userPhoto = review.user?.telegramPhoto;
+  const authorInitial = review.author ? review.author.charAt(0).toUpperCase() : 'FB';
+
+  return (
+    <motion.div
+      key={review.id}
+      initial={{ opacity: 0, scale: 0.98, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 1.01, y: -10 }}
+      transition={{ duration: 0.4 }}
+      className="space-y-6"
+    >
+      <div className="flex justify-center gap-0.5">
+        {Array.from({ length: review.rating }).map((_, i) => (
+          <Star key={`${review.id}-star-${i}`} size={15} className="fill-lux-gold text-lux-gold" />
+        ))}
+      </div>
+
+      <blockquote className="text-lg sm:text-xl lg:text-2xl font-serif font-light leading-relaxed max-w-3xl mx-auto italic text-stone-100">
+        "{review.content}"
+      </blockquote>
+
+      <div className="flex items-center justify-center gap-4 pt-4 text-left">
+        {userPhoto ? (
+          <img
+            src={userPhoto}
+            alt={review.author}
+            className="w-11 h-11 rounded-full object-cover border-2 border-lux-gold/30 shrink-0"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          <div className="w-11 h-11 rounded-full bg-lux-gold/20 border-2 border-lux-gold/40 flex items-center justify-center text-lux-gold font-serif font-bold text-sm shrink-0">
+            {authorInitial}
+          </div>
+        )}
+        <div>
+          <cite className="not-italic font-semibold text-sm tracking-wide block text-white font-serif">
+            {review.author}
+          </cite>
+          <span className="text-xs text-stone-400 font-light block font-sans mt-0.5">
+            {review.eventType} — {review.role}
+          </span>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function HomeTestimonials({
   reviews,
   isLoading,
@@ -20,7 +107,23 @@ export default function HomeTestimonials({
   onSelect,
   onPrev,
   onNext,
-}: HomeTestimonialsProps) {
+}: Readonly<HomeTestimonialsProps>) {
+  let carouselContent: React.ReactNode;
+  if (isLoading) {
+    carouselContent = <HomeTestimonialsSkeleton />;
+  } else if (reviews.length === 0) {
+    carouselContent = <HomeTestimonialsEmptyState />;
+  } else {
+    carouselContent = (
+      <AnimatePresence mode="wait">
+        {reviews.map((review, idx) => {
+          if (idx !== activeIndex) return null;
+          return <HomeTestimonialSlide key={review.id} review={review} />;
+        })}
+      </AnimatePresence>
+    );
+  }
+
   return (
     <section className="relative bg-stone-900 py-24 text-white overflow-hidden">
       {/* Ambient background watermark label */}
@@ -38,87 +141,7 @@ export default function HomeTestimonials({
         </div>
 
         <div className="relative min-h-[290px] sm:min-h-[260px] flex items-center justify-center">
-          {isLoading ? (
-            <div className="space-y-4 max-w-md mx-auto w-full animate-pulse">
-              <div className="flex justify-center gap-1">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="w-4 h-4 rounded-full bg-stone-800" />
-                ))}
-              </div>
-              <div className="h-6 bg-stone-800 rounded-sm w-3/4 mx-auto" />
-              <div className="h-4 bg-stone-800 rounded-sm w-1/2 mx-auto" />
-              <div className="w-10 h-10 rounded-full bg-stone-800 mx-auto mt-4" />
-            </div>
-          ) : reviews.length === 0 ? (
-            <div className="py-10 text-center space-y-4 max-w-md mx-auto">
-              <div className="flex justify-center gap-1">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} size={16} className="fill-lux-gold/30 text-lux-gold/30" />
-                ))}
-              </div>
-              <p className="text-xl font-serif font-light italic text-stone-300">
-                Be the first customer to leave a review after your cake tasting or celebration.
-              </p>
-              <div className="pt-2">
-                <Link
-                  to="/request"
-                  className="inline-block text-xs uppercase tracking-widest text-lux-gold border border-lux-gold/40 px-5 py-2.5 rounded-xs hover:bg-lux-gold hover:text-stone-950 transition-colors font-mono font-semibold"
-                >
-                  Order a Custom Cake
-                </Link>
-              </div>
-            </div>
-          ) : (
-            <AnimatePresence mode="wait">
-              {reviews.map((review, idx) => {
-                if (idx !== activeIndex) return null;
-                const userPhoto = review.user?.telegramPhoto;
-                return (
-                  <motion.div
-                    key={review.id}
-                    initial={{ opacity: 0, scale: 0.98, y: 10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 1.01, y: -10 }}
-                    transition={{ duration: 0.4 }}
-                    className="space-y-6"
-                  >
-                    <div className="flex justify-center gap-0.5">
-                      {Array.from({ length: review.rating }).map((_, i) => (
-                        <Star key={`${review.id}-star-${i}`} size={15} className="fill-lux-gold text-lux-gold" />
-                      ))}
-                    </div>
-
-                    <blockquote className="text-lg sm:text-xl lg:text-2xl font-serif font-light leading-relaxed max-w-3xl mx-auto italic text-stone-100">
-                      "{review.content}"
-                    </blockquote>
-
-                    <div className="flex items-center justify-center gap-4 pt-4 text-left">
-                      {userPhoto ? (
-                        <img
-                          src={userPhoto}
-                          alt={review.author}
-                          className="w-11 h-11 rounded-full object-cover border-2 border-lux-gold/30 shrink-0"
-                          referrerPolicy="no-referrer"
-                        />
-                      ) : (
-                        <div className="w-11 h-11 rounded-full bg-lux-gold/20 border-2 border-lux-gold/40 flex items-center justify-center text-lux-gold font-serif font-bold text-sm shrink-0">
-                          {review.author ? review.author.charAt(0).toUpperCase() : 'FB'}
-                        </div>
-                      )}
-                      <div>
-                        <cite className="not-italic font-semibold text-sm tracking-wide block text-white font-serif">
-                          {review.author}
-                        </cite>
-                        <span className="text-xs text-stone-400 font-light block font-sans mt-0.5">
-                          {review.eventType} — {review.role}
-                        </span>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
-          )}
+          {carouselContent}
         </div>
 
         {/* Slider controls: only show if more than 1 review exists */}

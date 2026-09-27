@@ -14,7 +14,7 @@ interface SearchModalProps {
   onSelectCake?: (cake: Product) => void;
 }
 
-export default function SearchModal({ isOpen, onClose, onSelectCake }: SearchModalProps) {
+export default function SearchModal({ isOpen, onClose, onSelectCake }: Readonly<SearchModalProps>) {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [expandedFaqId, setExpandedFaqId] = useState<string | null>(null);

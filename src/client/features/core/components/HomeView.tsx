@@ -16,7 +16,7 @@ interface HomeViewProps {
   onSelectCake: (cake: Product) => void;
 }
 
-export default function HomeView({ onSelectCake }: HomeViewProps) {
+export default function HomeView({ onSelectCake }: Readonly<HomeViewProps>) {
   usePageTitle("Home");
   const featuredCakes = useFeaturedCakes();
   const { reviews, isLoading: reviewsLoading } = useReviews();

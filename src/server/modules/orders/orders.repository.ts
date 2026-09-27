@@ -75,11 +75,10 @@ export const ordersRepository = {
     role?: string,
   ) {
     const prisma = getPrisma();
-    const baseWhere = includeDeleted
-      ? role === 'customer'
-        ? { userId }
-        : {}
-      : { deletedAt: null, ...(role === 'customer' ? { userId } : {}) };
+    const baseWhere = {
+      ...(includeDeleted ? {} : { deletedAt: null }),
+      ...(role === 'customer' ? { userId } : {}),
+    };
 
     return prisma.customCakeRequest.findMany({
       where: baseWhere,

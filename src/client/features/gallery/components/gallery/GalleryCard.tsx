@@ -12,7 +12,13 @@ interface GalleryCardProps {
   onTagToggle: (tag: string) => void;
 }
 
-export default function GalleryCard({ cake, index, selectedTags, onSelect, onTagToggle }: GalleryCardProps) {
+function getCardMinHeight(index: number): string {
+  if (index % 3 === 0) return '420px';
+  if (index % 2 === 0) return '340px';
+  return '280px';
+}
+
+export default function GalleryCard({ cake, index, selectedTags, onSelect, onTagToggle }: Readonly<GalleryCardProps>) {
   return (
     <motion.div
       variants={cardVariants}
@@ -26,7 +32,7 @@ export default function GalleryCard({ cake, index, selectedTags, onSelect, onTag
           src={cake.image}
           alt={cake.name}
           style={{
-            minHeight: index % 3 === 0 ? '420px' : index % 2 === 0 ? '340px' : '280px',
+            minHeight: getCardMinHeight(index),
             maxHeight: '480px',
           }}
           className="w-full object-cover transition-transform duration-1000 group-hover:scale-[1.03]"

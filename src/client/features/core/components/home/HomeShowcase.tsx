@@ -8,7 +8,7 @@ interface HomeShowcaseProps {
   onSelectCake: (cake: Product) => void;
 }
 
-export default function HomeShowcase({ featuredCakes, onSelectCake }: HomeShowcaseProps) {
+export default function HomeShowcase({ featuredCakes, onSelectCake }: Readonly<HomeShowcaseProps>) {
   const navigate = useNavigate();
 
   return (
@@ -32,10 +32,19 @@ export default function HomeShowcase({ featuredCakes, onSelectCake }: HomeShowca
           {featuredCakes.map((cake) => (
             <div
               key={cake.id}
+              role="button"
+              tabIndex={0}
               className="group cursor-pointer text-left bg-white dark:bg-stone-950 border border-stone-200/60 dark:border-stone-850/70 p-4 rounded-sm shadow-xs transition-all duration-300 hover:shadow-xl"
               onClick={() => {
                 onSelectCake(cake);
                 navigate('/gallery');
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onSelectCake(cake);
+                  navigate('/gallery');
+                }
               }}
             >
               <div className="aspect-[3/4] overflow-hidden mb-4 relative bg-stone-100 dark:bg-stone-900 rounded-sm">

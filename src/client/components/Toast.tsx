@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Award, CheckCircle, AlertOctagon, Info, AlertTriangle, X } from 'lucide-react';
 import { t } from '@client/i18n/index';
@@ -28,17 +28,26 @@ export function useToast() {
   return context;
 }
 
+let toastSeq = 0;
+function generateToastId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  toastSeq += 1;
+  return `toast-${Date.now()}-${toastSeq}`;
+}
+
 const DEFAULT_TOAST_DURATION_MS = 4000;
 
 interface ToastProviderProps {
   children: ReactNode;
 }
 
-export function ToastProvider({ children }: ToastProviderProps) {
+export function ToastProvider({ children }: Readonly<ToastProviderProps>) {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   const showToast = useCallback((title: string, description: string, type: ToastType = 'success', duration = DEFAULT_TOAST_DURATION_MS) => {
-    const id = `toast-${Date.now()}-${Math.random()}`;
+    const id = generateToastId();
     setToasts((prev) => [...prev, { id, title, description, type, duration }]);
     
     setTimeout(() => {
@@ -97,8 +106,10 @@ export function ToastProvider({ children }: ToastProviderProps) {
     }
   };
 
+  const contextValue = useMemo(() => ({ showToast, dismissToast }), [showToast, dismissToast]);
+
   return (
-    <ToastContext.Provider value={{ showToast, dismissToast }}>
+    <ToastContext.Provider value={contextValue}>
       {children}
       
       {/* Toast Notification HUD Overlay */}

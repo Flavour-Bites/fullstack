@@ -1,11 +1,133 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Cake, Star, ChevronLeft } from 'lucide-react';
+import { Cake, Star, ChevronLeft, Quote, ArrowRight } from 'lucide-react';
 import { t } from '@client/i18n/index';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
 import { useGalleryQuery } from '../hooks/useGalleryQuery';
 import { useProductReviews } from '../../core/hooks/useReviews';
+import type { Review } from '@shared/types';
+
+interface ProductReviewsEmptyStateProps {
+  cakeName: string;
+}
+
+function ProductReviewsSkeleton() {
+  return (
+    <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div
+          key={i}
+          className="break-inside-avoid bg-white dark:bg-stone-800 p-8 rounded-2xl border border-stone-100 dark:border-stone-700/50 animate-pulse space-y-4"
+        >
+          <div className="h-4 bg-stone-200 dark:bg-stone-700 rounded-sm w-1/4" />
+          <div className="h-5 bg-stone-200 dark:bg-stone-700 rounded-sm w-full" />
+          <div className="h-5 bg-stone-200 dark:bg-stone-700 rounded-sm w-3/4" />
+          <div className="pt-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-700" />
+            <div className="space-y-1.5 flex-1">
+              <div className="h-3 bg-stone-200 dark:bg-stone-700 rounded-sm w-1/2" />
+              <div className="h-2 bg-stone-200 dark:bg-stone-700 rounded-sm w-1/3" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ProductReviewsEmptyState({ cakeName }: Readonly<ProductReviewsEmptyStateProps>) {
+  return (
+    <div className="max-w-2xl mx-auto py-16 px-6 text-center border-2 border-dashed border-stone-200/90 dark:border-stone-800/90 rounded-3xl bg-stone-50/50 dark:bg-stone-900/30">
+      <div className="w-16 h-16 rounded-full bg-lux-gold/10 border border-lux-gold/25 flex items-center justify-center mx-auto mb-4 text-lux-gold shadow-inner">
+        <Quote className="w-7 h-7 stroke-[1.5] rotate-180" />
+      </div>
+      <h3 className="text-2xl font-serif text-stone-800 dark:text-stone-100 mb-2">
+        No reviews for this cake yet
+      </h3>
+      <p className="text-sm text-stone-500 dark:text-stone-400 font-light max-w-md mx-auto leading-relaxed mb-6">
+        Be the first to share your experience with the <strong className="font-semibold text-stone-700 dark:text-stone-300">{cakeName}</strong>!
+      </p>
+      <Link
+        to="/request"
+        className="inline-flex items-center gap-2 px-6 py-2.5 bg-lux-gold hover:bg-lux-gold-light text-stone-950 text-xs font-bold uppercase tracking-widest rounded-full transition-all duration-300 shadow-xs hover:shadow-md cursor-pointer font-mono"
+      >
+        <span>Order This Cake</span>
+        <ArrowRight className="w-3.5 h-3.5" />
+      </Link>
+    </div>
+  );
+}
+
+function ProductReviewsList({ reviews }: Readonly<{ reviews: readonly Review[] }>) {
+  return (
+    <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+      <AnimatePresence>
+        {reviews.map((review, idx) => {
+          const userPhoto = review.user?.telegramPhoto;
+          const authorInitial = review.author ? review.author.charAt(0).toUpperCase() : 'FB';
+          return (
+            <motion.div
+              layout
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-50px' }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.6, delay: (idx % 3) * 0.1, ease: 'easeOut' }}
+              key={review.id}
+              className="break-inside-avoid bg-white dark:bg-stone-800 p-8 rounded-2xl shadow-xs border border-stone-100 dark:border-stone-700/50 hover:shadow-lg transition-shadow duration-300 relative group"
+            >
+              <Star className="absolute top-6 right-6 w-8 h-8 text-lux-gold/20 dark:text-lux-gold/10 group-hover:text-lux-gold/40 transition-colors duration-300" />
+
+              {/* Rating Stars */}
+              <div className="flex gap-1 mb-6">
+                {Array.from({ length: review.rating }).map((_, i) => (
+                  <span key={`${review.id}-star-${i + 1}`} className="text-lux-gold text-sm leading-none">
+                    ★
+                  </span>
+                ))}
+              </div>
+
+              <p className="text-stone-700 dark:text-stone-200 font-serif text-lg leading-relaxed mb-8">
+                "{review.content}"
+              </p>
+
+              <div className="flex items-center gap-4 pt-6 border-t border-stone-100 dark:border-stone-700/50">
+                {userPhoto ? (
+                  <img
+                    src={userPhoto}
+                    alt={review.author}
+                    className="w-12 h-12 rounded-full object-cover border border-stone-200 dark:border-stone-700"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-lux-gold/20 border border-lux-gold/40 flex items-center justify-center text-lux-gold font-serif font-bold text-sm shrink-0">
+                    {authorInitial}
+                  </div>
+                )}
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-semibold text-stone-900 dark:text-stone-100 text-sm">
+                      {review.author}
+                    </h4>
+                    {!review.userId && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 border border-stone-200 dark:border-stone-700 font-medium">
+                        Deleted Account
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs text-stone-500 dark:text-stone-400 block mt-0.5">
+                    {review.eventType} • {review.role}
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 export default function ProductDetailsPage() {
   usePageTitle("Product Details");
@@ -39,6 +161,15 @@ export default function ProductDetailsPage() {
         </div>
       </div>
     );
+  }
+
+  let reviewsContent: React.ReactNode;
+  if (reviewsLoading) {
+    reviewsContent = <ProductReviewsSkeleton />;
+  } else if (productReviews.length === 0) {
+    reviewsContent = <ProductReviewsEmptyState cakeName={cake.name} />;
+  } else {
+    reviewsContent = <ProductReviewsList reviews={productReviews} />;
   }
 
   return (
@@ -203,101 +334,7 @@ export default function ProductDetailsPage() {
             </span>
           </div>
 
-          {reviewsLoading ? (
-            <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="break-inside-avoid bg-white dark:bg-stone-800 p-8 rounded-2xl border border-stone-100 dark:border-stone-700/50 animate-pulse space-y-4">
-                  <div className="h-4 bg-stone-200 dark:bg-stone-700 rounded-sm w-1/4" />
-                  <div className="h-5 bg-stone-200 dark:bg-stone-700 rounded-sm w-full" />
-                  <div className="h-5 bg-stone-200 dark:bg-stone-700 rounded-sm w-3/4" />
-                  <div className="pt-4 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-stone-200 dark:bg-stone-700" />
-                    <div className="space-y-1.5 flex-1">
-                      <div className="h-3 bg-stone-200 dark:bg-stone-700 rounded-sm w-1/2" />
-                      <div className="h-2 bg-stone-200 dark:bg-stone-700 rounded-sm w-1/3" />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : productReviews.length === 0 ? (
-            <div className="text-center py-16 bg-white dark:bg-stone-800/80 border border-stone-150 dark:border-stone-700/50 rounded-2xl max-w-3xl mx-auto p-8 shadow-xs">
-              <Star className="w-12 h-12 text-stone-300 dark:text-stone-600 mx-auto mb-4 stroke-1" />
-              <h3 className="text-xl font-serif text-stone-900 dark:text-stone-100 mb-2">No reviews for this cake yet</h3>
-              <p className="text-xs text-stone-500 dark:text-stone-400 font-light leading-relaxed mb-6">
-                Be the first to share your experience with the <strong>{cake.name}</strong>!
-              </p>
-              <Link
-                to="/request"
-                className="inline-block px-6 py-2.5 bg-stone-900 dark:bg-stone-700 hover:bg-stone-800 dark:hover:bg-stone-600 text-white text-xs font-semibold uppercase tracking-widest rounded-sm transition-colors cursor-pointer font-mono"
-              >
-                Order This Cake
-              </Link>
-            </div>
-          ) : (
-            <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
-              <AnimatePresence>
-                {productReviews.map((review, idx) => {
-                  const userPhoto = review.user?.telegramPhoto;
-                  return (
-                    <motion.div
-                      layout
-                      initial={{ opacity: 0, y: 30 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, margin: "-50px" }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.6, delay: (idx % 3) * 0.1, ease: "easeOut" }}
-                      key={review.id}
-                      className="break-inside-avoid bg-white dark:bg-stone-800 p-8 rounded-2xl shadow-xs border border-stone-100 dark:border-stone-700/50 hover:shadow-lg transition-shadow duration-300 relative group"
-                    >
-                      <Star className="absolute top-6 right-6 w-8 h-8 text-lux-gold/20 dark:text-lux-gold/10 group-hover:text-lux-gold/40 transition-colors duration-300" />
-                      
-                      {/* Rating Stars */}
-                      <div className="flex gap-1 mb-6">
-                        {Array.from({ length: review.rating }).map((_, i) => (
-                          <span key={i} className="text-lux-gold text-sm leading-none">★</span>
-                        ))}
-                      </div>
-
-                      <p className="text-stone-700 dark:text-stone-200 font-serif text-lg leading-relaxed mb-8">
-                        "{review.content}"
-                      </p>
-
-                      <div className="flex items-center gap-4 pt-6 border-t border-stone-100 dark:border-stone-700/50">
-                        {userPhoto ? (
-                          <img
-                            src={userPhoto}
-                            alt={review.author}
-                            className="w-12 h-12 rounded-full object-cover border border-stone-200 dark:border-stone-700"
-                            referrerPolicy="no-referrer"
-                          />
-                        ) : (
-                          <div className="w-12 h-12 rounded-full bg-lux-gold/20 border border-lux-gold/40 flex items-center justify-center text-lux-gold font-serif font-bold text-sm shrink-0">
-                            {review.author ? review.author.charAt(0).toUpperCase() : 'FB'}
-                          </div>
-                        )}
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-semibold text-stone-900 dark:text-stone-100 text-sm">
-                              {review.author}
-                            </h4>
-                            {!review.userId && (
-                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 border border-stone-200 dark:border-stone-700 font-medium">
-                                Deleted Account
-                              </span>
-                            )}
-                          </div>
-                          <span className="text-xs text-stone-500 dark:text-stone-400 block mt-0.5">
-                            {review.eventType} • {review.role}
-                          </span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-            </div>
-          )}
+          {reviewsContent}
         </motion.section>
       </div>
     </div>

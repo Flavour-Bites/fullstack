@@ -10,7 +10,7 @@ interface GalleryLightboxProps {
   onCommission: (cake: Product) => void;
 }
 
-export default function GalleryLightbox({ cake, onClose, onCommission }: GalleryLightboxProps) {
+export default function GalleryLightbox({ cake, onClose, onCommission }: Readonly<GalleryLightboxProps>) {
   const navigate = useNavigate();
 
   const handleViewDetails = (cakeId: string) => {

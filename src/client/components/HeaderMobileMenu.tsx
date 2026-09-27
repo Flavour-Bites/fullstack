@@ -16,6 +16,16 @@ interface HeaderMobileMenuProps {
   onLogout: () => void;
 }
 
+function getMobileNavLinkClassName(isActive: boolean, darkMode: boolean): string {
+  if (isActive) {
+    return 'text-lux-gold pl-3 border-lux-gold/30 font-bold border-l-2 bg-lux-gold/5';
+  }
+  if (darkMode) {
+    return 'text-stone-400 border-stone-800/45 hover:text-stone-200';
+  }
+  return 'text-stone-600 border-stone-100 hover:text-stone-900';
+}
+
 export default function HeaderMobileMenu({
   mobileMenuOpen,
   setMobileMenuOpen,
@@ -50,22 +60,26 @@ export default function HeaderMobileMenu({
               { label: 'Testimonials', path: '/testimonials' },
               { label: 'Meet Yodit', path: '/about' },
               { label: 'Contact', path: '/contact' },
-            ].map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => { setMobileMenuOpen(false); }}
-                className={`text-left block text-xs uppercase tracking-widest font-semibold py-2 border-b cursor-pointer transition-all ${
-                  location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path))
-                    ? 'text-lux-gold pl-3 border-lux-gold/30 font-bold border-l-2 bg-lux-gold/5'
-                    : darkMode
-                      ? 'text-stone-400 border-stone-800/45 hover:text-stone-200'
-                      : 'text-stone-600 border-stone-100 hover:text-stone-900'
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
+            ].map((item) => {
+              const isActive =
+                location.pathname === item.path ||
+                (item.path !== '/' && location.pathname.startsWith(item.path));
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`text-left block text-xs uppercase tracking-widest font-semibold py-2 border-b cursor-pointer transition-all ${getMobileNavLinkClassName(
+                    isActive,
+                    darkMode,
+                  )}`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
 
             <button
               onClick={() => { onSearchOpen(); setMobileMenuOpen(false); }}

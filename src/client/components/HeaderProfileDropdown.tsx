@@ -12,6 +12,12 @@ interface HeaderProfileDropdownProps {
   onLogout: () => void;
 }
 
+const ROLE_LABELS: Record<string, string> = {
+  admin: 'System Admin',
+  staff: 'Bakery Staff',
+  customer: 'Customer',
+};
+
 export default function HeaderProfileDropdown({
   currentUser,
   darkMode,
@@ -82,7 +88,7 @@ export default function HeaderProfileDropdown({
                   {currentUser.name}
                 </div>
                 <div className="text-[8px] font-mono uppercase tracking-widest text-lux-gold font-bold">
-                  {currentUser.role === 'admin' ? 'System Admin' : currentUser.role === 'staff' ? 'Bakery Staff' : 'Customer'}
+                  {ROLE_LABELS[currentUser.role] ?? 'Customer'}
                 </div>
               </div>
             ) : (

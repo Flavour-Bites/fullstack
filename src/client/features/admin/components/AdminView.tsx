@@ -40,7 +40,7 @@ const TABS = [
   { key: 'recovery', label: 'Recovery', icon: ShieldCheck },
 ] as const;
 
-export default function AdminView({ activeTab, onTabChange, currentUser }: AdminViewProps) {
+export default function AdminView({ activeTab, onTabChange, currentUser }: Readonly<AdminViewProps>) {
   usePageTitle("Admin");
 
 

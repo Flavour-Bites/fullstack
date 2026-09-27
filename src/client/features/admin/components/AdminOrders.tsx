@@ -55,6 +55,118 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
     setUpdating(false);
   };
 
+  let orderListContent: React.ReactNode;
+  if (loading) {
+    orderListContent = (
+      <div className="space-y-4">
+        <SkeletonCard />
+        <SkeletonCard />
+        <SkeletonCard />
+      </div>
+    );
+  } else if (filteredRequests.length === 0) {
+    orderListContent = (
+      <div className="bg-stone-50 dark:bg-stone-900 text-center p-16 border border-stone-200/60 dark:border-stone-800/60 rounded-sm">
+        <Shield className="w-10 h-10 text-stone-400 dark:text-stone-500 mx-auto mb-3" />
+        <p className="text-sm font-serif text-stone-600 dark:text-stone-300 italic">{t('admin.noOrders')}</p>
+        <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">Try changing your filters or seed some demo data.</p>
+      </div>
+    );
+  } else {
+    orderListContent = (
+      <div className="space-y-3">
+        {filteredRequests.map(req => {
+          const isSelected = selectedRequest?.id === req.id;
+          const isEditing = editingId === req.id;
+          const next = nextStatus(req.status);
+          return (
+            <motion.div
+              key={req.id}
+              layoutId={`order-${req.id}`}
+              onClick={() => { if (!isEditing) setSelectedRequest(req); }}
+              role="button"
+              tabIndex={0}
+              className={`bg-white/95 dark:bg-stone-900/95 border text-left rounded-sm p-5 transition-all cursor-pointer relative ${
+                isSelected ? 'border-lux-gold shadow-lg shadow-lux-gold/5 bg-stone-100 dark:bg-stone-850' : 'border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700'
+              }`}
+            >
+              {isSelected && <div className="absolute top-0 bottom-0 left-0 w-1 bg-lux-gold rounded-l-sm" />}
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-mono text-xs font-semibold text-lux-gold">{req.id}</span>
+                  <span className="text-[9px] uppercase tracking-wider font-mono text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 px-2 py-0.5 rounded-sm">{req.eventType}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-mono uppercase font-bold border flex items-center gap-1 ${STATUS_COLORS[req.status] || 'bg-stone-100 dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300'}`}>
+                    {STATUS_ICONS[req.status]}
+                    {req.status}
+                  </span>
+                  <span className="text-[11px] font-mono font-bold text-stone-600 dark:text-stone-300">
+                    {orderPrice(req) ? `${orderPrice(req).toLocaleString()} ETB` : 'Unpriced'}
+                  </span>
+                </div>
+              </div>
+
+              <h3 className="font-serif text-base text-stone-900 dark:text-white font-medium mb-1">{req.contactName}</h3>
+              <div className="font-sans text-[11px] text-stone-400 dark:text-stone-400 font-light flex flex-wrap gap-x-4 gap-y-1 mb-3 pb-3 border-b border-stone-200/60 dark:border-stone-800/60">
+                <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-lux-gold" /> {req.eventDate}</span>
+                <span>{req.tierCount} tier • {req.guestCount} guests</span>
+                <span className="text-lux-gold">{req.flavor}</span>
+              </div>
+
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex gap-2 flex-wrap">
+                  {next && (
+                    <button
+                      onClick={e => { e.stopPropagation(); advanceStatus(req, next); }}
+                      className="bg-lux-gold/10 hover:bg-lux-gold text-lux-gold hover:text-stone-950 text-[9px] font-mono tracking-wider font-bold py-1 px-2.5 rounded-xs border border-lux-gold/20 flex items-center gap-1 transition-all"
+                    >
+                      <ArrowRight className="w-3 h-3" /> Mark as {next}
+                    </button>
+                  )}
+                </div>
+                <div className="flex gap-1">
+                  <button onClick={e => { e.stopPropagation(); startEditing(req); }} className="p-1 px-2 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-400 hover:text-lux-gold rounded-xs border border-stone-200 dark:border-stone-800 text-[10px] font-mono flex items-center gap-1">
+                    <Edit3 className="w-3 h-3" /> Edit
+                  </button>
+                  <button onClick={e => { e.stopPropagation(); handleDeleteRequest(req.id, req.contactName); }} aria-label={`Delete order ${req.id}`} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Inline edit form */}
+              {isEditing && (
+                <div onClick={e => e.stopPropagation()} className="mt-4 p-4 border-t border-stone-200/70 dark:border-stone-800/70 bg-stone-100/50 dark:bg-stone-900/50 space-y-4 rounded-xs">
+                  <h4 className="text-[10px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 font-bold">{t('admin.editOrder')}</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.statusLabel')}</label>
+                      <select value={editStatus} onChange={e => setEditStatus(e.target.value)} className="w-full bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs">
+                        {WORKFLOW.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.price')}</label>
+                      <input type="number" value={editCost} onChange={e => setEditCost(Math.max(0, Number(e.target.value)))} className="w-full bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <button onClick={() => setEditingId(null)} className="px-3 py-1.5 text-[10px] font-mono font-bold uppercase bg-stone-200 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:bg-stone-300 dark:hover:bg-stone-700 rounded-sm">{t('admin.cancelEdit')}</button>
+                    <button onClick={() => handleSave(req.id, req.contactName)} disabled={updating} className="px-3.5 py-1.5 text-[10px] font-mono font-bold uppercase bg-lux-gold text-stone-950 hover:bg-white rounded-sm flex items-center gap-1">
+                      {updating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} {t('admin.saveChanges')}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10 items-start">
       {/* Left: order list */}
@@ -101,110 +213,7 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
         </div>
 
         {/* Order List */}
-        {loading ? (
-          <div className="space-y-4">
-            <SkeletonCard />
-            <SkeletonCard />
-            <SkeletonCard />
-          </div>
-        ) : filteredRequests.length === 0 ? (
-          <div className="bg-stone-50 dark:bg-stone-900 text-center p-16 border border-stone-200/60 dark:border-stone-800/60 rounded-sm">
-            <Shield className="w-10 h-10 text-stone-400 dark:text-stone-500 mx-auto mb-3" />
-            <p className="text-sm font-serif text-stone-600 dark:text-stone-300 italic">{t('admin.noOrders')}</p>
-            <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">Try changing your filters or seed some demo data.</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {filteredRequests.map(req => {
-              const isSelected = selectedRequest?.id === req.id;
-              const isEditing = editingId === req.id;
-              const next = nextStatus(req.status);
-              return (
-                <motion.div
-                  key={req.id}
-                  layoutId={`order-${req.id}`}
-                  onClick={() => { if (!isEditing) setSelectedRequest(req); }}
-                  role="button"
-                  tabIndex={0}
-                  className={`bg-white/95 dark:bg-stone-900/95 border text-left rounded-sm p-5 transition-all cursor-pointer relative ${
-                    isSelected ? 'border-lux-gold shadow-lg shadow-lux-gold/5 bg-stone-100 dark:bg-stone-850' : 'border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700'
-                  }`}
-                >
-                  {isSelected && <div className="absolute top-0 bottom-0 left-0 w-1 bg-lux-gold rounded-l-sm" />}
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono text-xs font-semibold text-lux-gold">{req.id}</span>
-                      <span className="text-[9px] uppercase tracking-wider font-mono text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 px-2 py-0.5 rounded-sm">{req.eventType}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-mono uppercase font-bold border flex items-center gap-1 ${STATUS_COLORS[req.status] || 'bg-stone-100 dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300'}`}>
-                        {STATUS_ICONS[req.status]}
-                        {req.status}
-                      </span>
-                      <span className="text-[11px] font-mono font-bold text-stone-600 dark:text-stone-300">
-                        {orderPrice(req) ? `${orderPrice(req).toLocaleString()} ETB` : 'Unpriced'}
-                      </span>
-                    </div>
-                  </div>
-
-                  <h3 className="font-serif text-base text-stone-900 dark:text-white font-medium mb-1">{req.contactName}</h3>
-                  <div className="font-sans text-[11px] text-stone-400 dark:text-stone-400 font-light flex flex-wrap gap-x-4 gap-y-1 mb-3 pb-3 border-b border-stone-200/60 dark:border-stone-800/60">
-                    <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-lux-gold" /> {req.eventDate}</span>
-                    <span>{req.tierCount} tier • {req.guestCount} guests</span>
-                    <span className="text-lux-gold">{req.flavor}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex gap-2 flex-wrap">
-                      {next && (
-                        <button
-                          onClick={e => { e.stopPropagation(); advanceStatus(req, next); }}
-                          className="bg-lux-gold/10 hover:bg-lux-gold text-lux-gold hover:text-stone-950 text-[9px] font-mono tracking-wider font-bold py-1 px-2.5 rounded-xs border border-lux-gold/20 flex items-center gap-1 transition-all"
-                        >
-                          <ArrowRight className="w-3 h-3" /> Mark as {next}
-                        </button>
-                      )}
-                    </div>
-                    <div className="flex gap-1">
-                      <button onClick={e => { e.stopPropagation(); startEditing(req); }} className="p-1 px-2 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-400 hover:text-lux-gold rounded-xs border border-stone-200 dark:border-stone-800 text-[10px] font-mono flex items-center gap-1">
-                        <Edit3 className="w-3 h-3" /> Edit
-                      </button>
-                      <button onClick={e => { e.stopPropagation(); handleDeleteRequest(req.id, req.contactName); }} aria-label={`Delete order ${req.id}`} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Inline edit form */}
-                  {isEditing && (
-                    <div onClick={e => e.stopPropagation()} className="mt-4 p-4 border-t border-stone-200/70 dark:border-stone-800/70 bg-stone-100/50 dark:bg-stone-900/50 space-y-4 rounded-xs">
-                      <h4 className="text-[10px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 font-bold">{t('admin.editOrder')}</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                          <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.statusLabel')}</label>
-                          <select value={editStatus} onChange={e => setEditStatus(e.target.value)} className="w-full bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs">
-                            {WORKFLOW.map(s => <option key={s} value={s}>{s}</option>)}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.price')}</label>
-                          <input type="number" value={editCost} onChange={e => setEditCost(Math.max(0, Number(e.target.value)))} className="w-full bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
-                        </div>
-                      </div>
-                      <div className="flex justify-end gap-2">
-                        <button onClick={() => setEditingId(null)} className="px-3 py-1.5 text-[10px] font-mono font-bold uppercase bg-stone-200 dark:bg-stone-800 text-stone-500 dark:text-stone-400 hover:bg-stone-300 dark:hover:bg-stone-700 rounded-sm">{t('admin.cancelEdit')}</button>
-                        <button onClick={() => handleSave(req.id, req.contactName)} disabled={updating} className="px-3.5 py-1.5 text-[10px] font-mono font-bold uppercase bg-lux-gold text-stone-950 hover:bg-white rounded-sm flex items-center gap-1">
-                          {updating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} {t('admin.saveChanges')}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </motion.div>
-              );
-            })}
-          </div>
-        )}
+        {orderListContent}
       </div>
 
       {/* Right: order detail sidebar */}

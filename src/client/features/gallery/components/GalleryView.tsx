@@ -19,7 +19,7 @@ export default function GalleryView({
   onClearSelectedCake,
   onSelectCake,
   onCommissionCake,
-}: GalleryViewProps) {
+}: Readonly<GalleryViewProps>) {
   usePageTitle("Gallery");
   const gallery = useGalleryFilters();
 

@@ -53,6 +53,16 @@ const mockCancelledOrder = {
   status: 'Cancelled',
 };
 
+const mockOrdersById: Record<string, typeof mockOrder> = {
+  'FB-PRICED': mockPricedOrder,
+  'FB-COMPLETED': mockCompletedOrder,
+  'FB-CANCELLED': mockCancelledOrder,
+};
+
+function getMockOrder(id: string) {
+  return mockOrdersById[id] ?? mockOrder;
+}
+
 vi.mock('@server/modules/orders/orders.repository.js', () => ({
   ordersRepository: {
     create: vi.fn((data) => Promise.resolve({ ...mockOrder, id: data.id })),
@@ -66,10 +76,10 @@ vi.mock('@server/modules/orders/orders.repository.js', () => ({
     }),
     findMany: vi.fn(() => Promise.resolve([mockOrder])),
     updateStatus: vi.fn((id, status) =>
-      Promise.resolve({ ...(id === 'FB-PRICED' ? mockPricedOrder : id === 'FB-COMPLETED' ? mockCompletedOrder : id === 'FB-CANCELLED' ? mockCancelledOrder : mockOrder), id, status }),
+      Promise.resolve({ ...getMockOrder(id), id, status }),
     ),
     updateCommercials: vi.fn((id, data) =>
-      Promise.resolve({ ...(id === 'FB-PRICED' ? mockPricedOrder : id === 'FB-COMPLETED' ? mockCompletedOrder : id === 'FB-CANCELLED' ? mockCancelledOrder : mockOrder), id, ...data }),
+      Promise.resolve({ ...getMockOrder(id), id, ...data }),
     ),
     softDelete: vi.fn((id) => Promise.resolve({ ...mockOrder, id, deletedAt: new Date() })),
     restore: vi.fn((id) => Promise.resolve({ ...mockOrder, id, deletedAt: null })),

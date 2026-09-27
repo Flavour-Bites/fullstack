@@ -12,7 +12,7 @@ interface CakeSelectionContextValue {
 
 const CakeSelectionContext = createContext<CakeSelectionContextValue | null>(null);
 
-export function CakeSelectionProvider({ children }: { children: ReactNode }) {
+export function CakeSelectionProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [selectedCake, setSelectedCake] = useState<Product | null>(null);
   const [prefilledCake, setPrefilledCake] = useState<Product | null>(null);
 

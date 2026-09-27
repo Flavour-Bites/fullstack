@@ -44,7 +44,7 @@ export default function RequestFormFields({
   onDrop,
   onClearPrefilledCake,
   onSubmit,
-}: RequestFormFieldsProps) {
+}: Readonly<RequestFormFieldsProps>) {
   return (
     <form onSubmit={onSubmit} className="space-y-6" id="cake-custom-form">
       {valError && (

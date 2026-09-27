@@ -13,7 +13,7 @@ interface AdminMenuProps {
   handleDeleteGalleryItem: (id: string, name: string) => Promise<boolean | undefined>;
 }
 
-export default function AdminMenu({ galleryItems, galleryLoading, categories, handleSaveGalleryItem, handleDeleteGalleryItem }: AdminMenuProps) {
+export default function AdminMenu({ galleryItems, galleryLoading, categories, handleSaveGalleryItem, handleDeleteGalleryItem }: Readonly<AdminMenuProps>) {
   const [showGalleryForm, setShowGalleryForm] = useState(false);
   const [editingGalleryId, setEditingGalleryId] = useState<string | null>(null);
   const [galleryForm, setGalleryForm] = useState({ name: '', description: '', categoryId: '', flavors: '', priceEstimate: '', image: '', imageFile: null as File | null, imagePreview: '', servingCount: '', tags: '' });
@@ -100,6 +100,48 @@ export default function AdminMenu({ galleryItems, galleryLoading, categories, ha
     resetForm();
     setSavingGallery(false);
   };
+
+  let content: React.ReactNode;
+  if (galleryLoading) {
+    content = <SkeletonGrid items={6} />;
+  } else if (galleryItems.length === 0) {
+    content = (
+      <div className="text-center py-20 bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm">
+        <Image className="w-10 h-10 text-stone-400 dark:text-stone-500 mx-auto mb-3" />
+        <p className="text-sm font-serif text-stone-600 dark:text-stone-300 italic">No gallery items yet.</p>
+        <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">Add your first cake to the menu.</p>
+      </div>
+    );
+  } else {
+    content = (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {galleryItems.map((item: any) => (
+          <div key={item.id} className="bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden group">
+            <img src={item.image} alt={item.name} className="h-44 w-full object-cover grayscale brightness-75 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-300" referrerPolicy="no-referrer" />
+            <div className="p-5">
+              <div className="flex justify-between items-start mb-2">
+                <span className="text-[9px] uppercase tracking-widest font-mono text-lux-gold bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 px-2 py-0.5 rounded-sm">{item.category?.name ?? item.categoryId}</span>
+                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => startEditGalleryItem(item)} aria-label={t('admin.editGalleryItem')} className="p-1 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-400 hover:text-lux-gold rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.editGalleryItem')}>
+                    <Pencil className="w-3 h-3" />
+                  </button>
+                  <button onClick={() => handleDeleteGalleryItem(item.id, item.name)} aria-label={t('admin.deleteGalleryItem')} className="p-1 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.deleteGalleryItem')}>
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+              <h3 className="font-serif text-base text-stone-100 font-medium">{item.name}</h3>
+              <p className="text-xs text-stone-400 dark:text-stone-400 font-light mt-1 leading-relaxed line-clamp-2">{item.description}</p>
+              <div className="mt-4 pt-3 border-t border-stone-200/60 dark:border-stone-800/60 font-mono text-[11px] text-stone-600 dark:text-stone-300 flex justify-between">
+                <span>Serves: <strong className="text-stone-100 font-normal">{item.servingCount}</strong></span>
+                <span className="text-emerald-400 font-semibold">{item.priceEstimate}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 relative z-10 text-left font-sans">
@@ -197,42 +239,7 @@ export default function AdminMenu({ galleryItems, galleryLoading, categories, ha
         </div>
       )}
 
-      {galleryLoading ? (
-        <SkeletonGrid items={6} />
-      ) : galleryItems.length === 0 ? (
-        <div className="text-center py-20 bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm">
-          <Image className="w-10 h-10 text-stone-400 dark:text-stone-500 mx-auto mb-3" />
-          <p className="text-sm font-serif text-stone-600 dark:text-stone-300 italic">No gallery items yet.</p>
-          <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">Add your first cake to the menu.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {galleryItems.map((item: any) => (
-            <div key={item.id} className="bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden group">
-              <img src={item.image} alt={item.name} className="h-44 w-full object-cover grayscale brightness-75 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-300" referrerPolicy="no-referrer" />
-              <div className="p-5">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-[9px] uppercase tracking-widest font-mono text-lux-gold bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 px-2 py-0.5 rounded-sm">{item.category?.name ?? item.categoryId}</span>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => startEditGalleryItem(item)} aria-label={t('admin.editGalleryItem')} className="p-1 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-400 hover:text-lux-gold rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.editGalleryItem')}>
-                      <Pencil className="w-3 h-3" />
-                    </button>
-                    <button onClick={() => handleDeleteGalleryItem(item.id, item.name)} aria-label={t('admin.deleteGalleryItem')} className="p-1 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.deleteGalleryItem')}>
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </div>
-                </div>
-                <h3 className="font-serif text-base text-stone-100 font-medium">{item.name}</h3>
-                <p className="text-xs text-stone-400 dark:text-stone-400 font-light mt-1 leading-relaxed line-clamp-2">{item.description}</p>
-                <div className="mt-4 pt-3 border-t border-stone-200/60 dark:border-stone-800/60 font-mono text-[11px] text-stone-600 dark:text-stone-300 flex justify-between">
-                  <span>Serves: <strong className="text-stone-100 font-normal">{item.servingCount}</strong></span>
-                  <span className="text-emerald-400 font-semibold">{item.priceEstimate}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      {content}
     </div>
   );
 }

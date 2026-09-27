@@ -24,7 +24,7 @@ export default function GalleryGrid({
   onSelect,
   onTagToggle,
   onClearAllFilters,
-}: GalleryGridProps) {
+}: Readonly<GalleryGridProps>) {
   if (isLoading) {
     return (
       <section className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -35,14 +35,20 @@ export default function GalleryGrid({
 
   if (filteredCakes.length === 0) {
     return (
-      <section className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="text-center py-20 bg-white dark:bg-stone-950 border border-stone-150 dark:border-stone-850 rounded-sm font-sans">
-          <Cake className="w-12 h-12 text-stone-300 dark:text-stone-600 mx-auto mb-4 stroke-1 animate-pulse" />
-          <p className="text-lg font-serif italic text-stone-500 dark:text-stone-300">{t('gallery.noDesigns')}</p>
-          <p className="text-xs text-stone-400 dark:text-stone-500 mt-1 font-light">{t('gallery.tryDifferent')}</p>
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <div className="max-w-2xl mx-auto py-16 px-6 text-center border-2 border-dashed border-stone-200/90 dark:border-stone-800/90 rounded-3xl bg-stone-50/50 dark:bg-stone-900/30 font-sans">
+          <div className="w-16 h-16 rounded-full bg-lux-gold/10 border border-lux-gold/25 flex items-center justify-center mx-auto mb-4 text-lux-gold shadow-inner">
+            <Cake className="w-7 h-7 stroke-[1.5]" />
+          </div>
+          <h3 className="text-2xl font-serif text-stone-800 dark:text-stone-100 mb-2">
+            {t('gallery.noDesigns')}
+          </h3>
+          <p className="text-sm text-stone-500 dark:text-stone-400 font-light max-w-md mx-auto leading-relaxed mb-6">
+            {t('gallery.tryDifferent')}
+          </p>
           <button
             onClick={onClearAllFilters}
-            className="px-6 py-2.5 bg-stone-900 dark:bg-stone-800 hover:bg-stone-800 dark:hover:bg-stone-701 text-white text-xs font-semibold uppercase tracking-widest mt-6 rounded-sm shadow-xs cursor-pointer"
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-lux-gold hover:bg-lux-gold-light text-stone-950 text-xs font-bold uppercase tracking-widest rounded-full transition-all duration-300 shadow-xs hover:shadow-md cursor-pointer font-mono"
           >
             {t('gallery.clearAllFilters')}
           </button>
