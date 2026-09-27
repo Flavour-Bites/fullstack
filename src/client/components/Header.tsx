@@ -96,10 +96,10 @@ export default function Header({
             {locale === 'en' ? 'AM' : 'EN'}
           </button>
 
-          {/* Book Custom Cake CTA */}
+
           <Link
             to="/request"
-            className="px-4 py-2.5 bg-stone-900 hover:bg-lux-gold text-white hover:text-stone-950 font-bold tracking-wider text-[10px] uppercase transition-all duration-300 rounded-sm flex items-center gap-2 cursor-pointer border border-stone-800 hover:translate-y-[-1px] shadow-xs font-sans whitespace-nowrap shrink-0"
+            className="hidden min-[1300px]:inline-flex px-4 py-2.5 bg-stone-900 hover:bg-lux-gold text-white hover:text-stone-950 font-bold tracking-wider text-[10px] uppercase transition-all duration-300 rounded-sm items-center gap-2 cursor-pointer border border-stone-800 hover:translate-y-[-1px] shadow-xs font-sans whitespace-nowrap shrink-0"
             id="header-cta"
           >
             <CalendarDays className="w-4 h-4 text-lux-gold group-hover:text-stone-950" />
@@ -107,14 +107,38 @@ export default function Header({
           </Link>
         </div>
 
-        {/* Mobile hamburger */}
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className={`lg:hidden p-2 rounded-sm focus:outline-none cursor-pointer ${darkMode ? 'text-stone-300 hover:text-white' : 'text-stone-600'}`}
-          aria-label="Toggle menu"
-        >
-          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        {/* Mobile Action Cluster: Search + Hamburger Menu */}
+        <div className="flex lg:hidden items-center gap-1.5">
+          <button
+            onClick={onSearchOpen}
+            className={`p-2 rounded-full transition-all cursor-pointer flex items-center justify-center ${
+              darkMode
+                ? 'text-stone-300 hover:text-lux-gold hover:bg-stone-900/60 active:scale-95'
+                : 'text-stone-700 hover:text-lux-gold hover:bg-stone-200/50 active:scale-95'
+            }`}
+            aria-label="Search Cakes and FAQs"
+            title="Search"
+          >
+            <Search className="w-5 h-5 text-lux-gold" />
+          </button>
+
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className={`p-2 rounded-full focus:outline-none transition-all cursor-pointer flex items-center justify-center ${
+              mobileMenuOpen
+                ? darkMode
+                  ? 'bg-stone-900 text-lux-gold'
+                  : 'bg-stone-200/60 text-stone-900'
+                : darkMode
+                  ? 'text-stone-300 hover:text-white hover:bg-stone-900/60'
+                  : 'text-stone-700 hover:text-stone-950 hover:bg-stone-200/50'
+            }`}
+            aria-label="Toggle menu"
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Navigation Drawer */}

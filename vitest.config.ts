@@ -20,10 +20,11 @@ export default defineConfig({
     env: {
       VITE_API_URL: 'http://localhost:3000',
     },
-    include: ['src/**/*.test.ts', 'src/**/*.test.tsx', 'test/**/*.test.ts', 'test/**/*.test.tsx'],
+    include: ['test/**/*.test.ts', 'test/**/*.test.tsx'],
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts', 'src/**/*.tsx'],
+      reporter: ['text', 'json', 'html', 'lcov'],
     },
     setupFiles: ['test/setup.ts'],
   },

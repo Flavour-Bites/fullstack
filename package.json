@@ -27,8 +27,9 @@
     "lint": "npm run typecheck",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:client": "vitest run src/client test/client",
-    "test:server": "vitest run src/server test/server"
+    "test:client": "vitest run test/client",
+    "test:server": "vitest run test/server test/shared",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
@@ -58,10 +59,10 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@tanstack/react-query-devtools": "^5.103.2",
     "@emnapi/core": "^1.11.2",
     "@emnapi/runtime": "^1.11.2",
     "@tailwindcss/vite": "^4.3.2",
+    "@tanstack/react-query-devtools": "^5.103.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
@@ -71,6 +72,7 @@
     "@types/node": "^22.14.0",
     "@types/react": "^19.2.17",
     "@vitejs/plugin-react": "^5.2.0",
+    "@vitest/coverage-v8": "^4.1.10",
     "autoprefixer": "^10.4.21",
     "concurrently": "^10.0.5",
     "esbuild": "^0.25.0",
