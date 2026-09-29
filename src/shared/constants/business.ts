@@ -21,8 +21,8 @@ export const BUSINESS_INFO = {
   tagline: 'Custom Cake Boutique',
   chef: 'Chef Yodit Ashenafi',
   email: getEnv('VITE_FLAVOURBITES_EMAIL') || getEnv('FLAVOURBITES_EMAIL') || 'hello@flavourbites.et',
-  phone: '+251 911 234567',
-  phoneFormatted: '+251 911 234 567',
+  phone: '+251 952047442',
+  phoneFormatted: '+251 952 047 442',
   hours: {
     pickup: 'Tue - Sun: 9:00 AM - 6:00 PM',
     consultations: 'Mon - Sat: 10:00 AM - 5:00 PM',

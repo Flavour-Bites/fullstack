@@ -7,6 +7,7 @@ import { formatRequestDate } from "../../shared/utils/dateFormat";
 import { makeOrderId } from "../../shared/utils/ids";
 import { STATUS_EMOJI } from "../../shared/constants/orderStatus";
 import { BUSINESS_INFO } from "../../shared/constants/business";
+import { businessAvailabilityService } from "../modules/business/businessAvailability.service";
 
 interface OrderConversation {
     step: string;
@@ -161,6 +162,30 @@ export function handleCommands(bot: Bot) {
             );
         }
 
+        // Fetch availability policy
+        const availability = await businessAvailabilityService.getAvailabilityResponse();
+
+        if (!availability.isEnabled) {
+            return ctx.reply(
+                "⚠️ Ordering is currently disabled. Please check back later.",
+                { parse_mode: "HTML" },
+            );
+        }
+
+        const availableDays = Object.entries(availability.days)
+            .filter(([, enabled]) => enabled)
+            .map(([day]) => day.charAt(0).toUpperCase() + day.slice(1))
+            .join(", ");
+
+        if (availableDays.length === 0) {
+            return ctx.reply(
+                "⚠️ No days are currently available for orders. Please check back later.",
+                { parse_mode: "HTML" },
+            );
+        }
+
+        const hours = availability.minimumLeadTimeHours;
+
         const conv: OrderConversation = {
             step: "eventType",
             userId: user.id,
@@ -175,6 +200,8 @@ export function handleCommands(bot: Bot) {
         await ctx.reply(
             `🎂 <b>Let's make your cake!</b>\n\n` +
                 `I'll ask you a few simple questions.\n\n` +
+                `📅 <b>Available days:</b> ${availableDays}\n` +
+                `⏱️ <b>Minimum notice:</b> ${hours} hours\n\n` +
                 `<b>1.</b> What type of event is this?\n` +
                 `(e.g., Birthday, Wedding, Anniversary, etc.)`,
             { parse_mode: "HTML" },
@@ -193,6 +220,17 @@ export function handleCommands(bot: Bot) {
             );
         },
         eventDate: async (ctx, conv, text, telegramId) => {
+            // Validate date against availability policy
+            const validation = await businessAvailabilityService.validateOrderDate(text);
+            
+            if (!validation.valid) {
+                await ctx.reply(
+                    `⚠️ ${validation.error}\n\nPlease enter a valid date (e.g., July 15, 2026):`,
+                    { parse_mode: "HTML" },
+                );
+                return;
+            }
+
             conv.eventDate = text;
             conv.step = "guestCount";
             await conversationStore.setOrder(telegramId, conv);

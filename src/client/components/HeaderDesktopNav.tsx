@@ -20,7 +20,7 @@ export default function HeaderDesktopNav({
   const location = useLocation();
 
   return (
-    <nav className="hidden lg:flex items-center gap-1.5 ml-8 mr-auto font-sans">
+    <nav className="hidden lg:flex items-center gap-1.5 font-sans">
       {[
         { label: 'Home', path: '/' },
         { label: 'Cake Gallery', path: '/gallery' },

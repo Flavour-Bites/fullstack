@@ -121,7 +121,7 @@ describe('fetchWithTimeout', () => {
 
     // If timer wasn't cleared, advancing would cause issues
     vi.advanceTimersByTime(15000);
-    // No assertion needed - if timers weren't cleared, vitest would complain
+    expect(vi.getTimerCount()).toBe(0);
   });
 
   it('clears the timer on failure (no lingering timers)', async () => {
@@ -131,5 +131,6 @@ describe('fetchWithTimeout', () => {
 
     // Timer should be cleared in finally block
     vi.advanceTimersByTime(15000);
+    expect(vi.getTimerCount()).toBe(0);
   });
 });

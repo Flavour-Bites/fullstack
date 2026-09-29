@@ -114,3 +114,38 @@ export interface IngredientSpotlight {
   description: string;
   image: string;
 }
+
+export interface RequestForm {
+  contactName: string;
+  contactPhone: string;
+  eventDate: string;
+  cakeDescription: string;
+}
+
+export interface AvailabilityPolicy {
+  isEnabled: boolean;
+  timezone: string;
+  minimumLeadTimeHours: number;
+  mondayEnabled: boolean;
+  tuesdayEnabled: boolean;
+  wednesdayEnabled: boolean;
+  thursdayEnabled: boolean;
+  fridayEnabled: boolean;
+  saturdayEnabled: boolean;
+  sundayEnabled: boolean;
+}
+
+export interface AvailabilityResponse {
+  isEnabled: boolean;
+  timezone: string;
+  minimumLeadTimeHours: number;
+  days: {
+    monday: boolean;
+    tuesday: boolean;
+    wednesday: boolean;
+    thursday: boolean;
+    friday: boolean;
+    saturday: boolean;
+    sunday: boolean;
+  };
+}

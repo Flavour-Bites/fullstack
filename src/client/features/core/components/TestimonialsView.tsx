@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Award, Quote, ArrowRight } from 'lucide-react';
+import { Quote, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { t } from '@client/i18n/index';
 import { usePageTitle } from '../hooks/usePageTitle';
@@ -283,10 +283,7 @@ export default function TestimonialsView() {
             </div>
 
             <div className="space-y-4">
-              <div className="flex items-center justify-center md:justify-start gap-2">
-                <Award className="w-5 h-5 text-lux-gold" />
-                <span className="text-xl font-serif text-white block">Dietary</span>
-              </div>
+              <span className="text-xl font-serif text-white block">Dietary</span>
               <p className="text-stone-400 text-sm font-light leading-relaxed">
                 "Having safe, isolated preparation for our eggless custom request was a true blessing. Flavour Bites respects raw palates in a class of its own."
               </p>

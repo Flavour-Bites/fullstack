@@ -1,4 +1,4 @@
-export type AdminTab = 'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users' | 'recovery';
+export type AdminTab = 'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users' | 'recovery' | 'availability';
 
 export interface CakeRequest {
   id: string;

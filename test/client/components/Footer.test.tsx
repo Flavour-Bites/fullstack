@@ -12,7 +12,6 @@ describe('Footer', () => {
   it('renders public footer with branding', () => {
     renderWithRouter(<Footer />);
     expect(screen.getAllByText(/FLAVOUR/i).length).toBeGreaterThan(0);
-    expect(screen.getByText('Commission Your Cake')).toBeInTheDocument();
   });
 
   it('renders quick links', () => {

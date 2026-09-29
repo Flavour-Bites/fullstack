@@ -23,6 +23,7 @@ interface RequestFormFieldsProps {
   onDrop: (e: React.DragEvent) => void;
   onClearPrefilledCake: () => void;
   onSubmit: (e: React.SyntheticEvent<HTMLFormElement>) => void;
+  availability: { minimumLeadTimeHours: number; days: Record<string, boolean> } | undefined;
 }
 
 export default function RequestFormFields({
@@ -44,6 +45,7 @@ export default function RequestFormFields({
   onDrop,
   onClearPrefilledCake,
   onSubmit,
+  availability,
 }: Readonly<RequestFormFieldsProps>) {
   return (
     <form onSubmit={onSubmit} className="space-y-6" id="cake-custom-form">
@@ -129,12 +131,14 @@ export default function RequestFormFields({
             onChange={onInputChange}
             min={getMinDateString()}
             required
-            className={`w-full border p-3 text-sm focus:outline-none rounded-sm font-mono transition-colors text-stone-850 dark:text-stone-100 ${getDateInputStyles(dateError, form.eventDate)}`}
+            className={`w-full border p-3 text-sm focus:outline-none rounded-sm font-mono transition-colors text-stone-850 dark:text-stone-100 ${getDateInputStyles(dateError, form.eventDate, availability)}`}
           />
           {dateError ? (
             <p className="text-[10px] text-red-500 dark:text-red-400 font-sans mt-1 leading-normal font-medium">{dateError}</p>
-          ) : (
-            <span className="text-[10px] text-stone-400 mt-1 block">Minimum 48 hours notice required.</span>
+          ) : availability && (
+            <span className="text-[10px] text-stone-400 mt-1 block">
+              Minimum {availability.minimumLeadTimeHours} hours notice required. Orders accepted for {Object.entries(availability.days).filter(([, v]) => v).map(([k]) => k.charAt(0).toUpperCase() + k.slice(1)).join(', ')}.
+            </span>
           )}
         </div>
 

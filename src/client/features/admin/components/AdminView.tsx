@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Package, Image, Layers, Users, ShieldCheck, Star,
-  BarChart2, RefreshCw, Download, Loader2
+  BarChart2, RefreshCw, Download, Loader2, CalendarDays
 } from 'lucide-react';
 import { t } from '@client/i18n/index';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
@@ -20,6 +20,7 @@ import AdminCategories from './AdminCategories';
 import AdminReviews from './AdminReviews';
 import AdminUsers from './AdminUsers';
 import AdminRecovery from './AdminRecovery';
+import AdminAvailability from './AdminAvailability';
 import type { User } from '@shared/types';
 import type { AdminTab } from '../types';
 import { exportOrdersCSV } from '../utils/ordersCsv';
@@ -38,6 +39,7 @@ const TABS = [
   { key: 'reviews', label: 'Reviews', icon: Star },
   { key: 'users', label: t('admin.users'), icon: Users },
   { key: 'recovery', label: 'Recovery', icon: ShieldCheck },
+  { key: 'availability', label: 'Availability', icon: CalendarDays },
 ] as const;
 
 export default function AdminView({ activeTab, onTabChange, currentUser }: Readonly<AdminViewProps>) {
@@ -212,6 +214,10 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Reado
             fetchRecoveryRequests={recovery.fetchRecoveryRequests}
             handleRecoveryStatus={recovery.handleRecoveryStatus}
           />
+        )}
+
+        {currentTab === 'availability' && (
+          <AdminAvailability />
         )}
       </div>
     </div>

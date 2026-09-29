@@ -75,6 +75,28 @@ async function main() {
   }
 
   console.log('Database successfully seeded with requests and gallery items!');
+
+  // D. Seed Business Availability Policy
+  const existingPolicy = await prisma.businessAvailabilityPolicy.findFirst();
+  if (!existingPolicy) {
+    const policy = await prisma.businessAvailabilityPolicy.create({
+      data: {
+        isEnabled: true,
+        timezone: 'Africa/Addis_Ababa',
+        minimumLeadTimeHours: 24,
+        mondayEnabled: false,
+        tuesdayEnabled: false,
+        wednesdayEnabled: false,
+        thursdayEnabled: false,
+        fridayEnabled: false,
+        saturdayEnabled: true,
+        sundayEnabled: true,
+      },
+    });
+    console.log(`Created business availability policy: ${policy.id}`);
+  } else {
+    console.log(`Business availability policy already exists: ${existingPolicy.id}`);
+  }
 }
 
 try {

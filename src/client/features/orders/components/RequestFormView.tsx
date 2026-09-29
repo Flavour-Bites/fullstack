@@ -60,6 +60,7 @@ export default function RequestFormView({
                 onDrop={form.handleDrop}
                 onClearPrefilledCake={onClearPrefilledCake}
                 onSubmit={form.handleSubmit}
+                availability={form.availability}
               />
             )}
           </AnimatePresence>

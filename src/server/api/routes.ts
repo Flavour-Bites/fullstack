@@ -11,6 +11,7 @@ import statsRoutes from './routes/stats.routes';
 import chatbotRoutes from './routes/chatbot.routes';
 import contactRoutes from './routes/contact.routes';
 import healthRoutes from './routes/health.routes';
+import businessAvailabilityRoutes from './routes/businessAvailability.routes';
 
 const router = Router();
 
@@ -26,5 +27,6 @@ router.use('/reviews', reviewsRoutes);
 router.use('/stats', statsRoutes);
 router.use('/chat', chatbotRoutes);
 router.use('/contact', contactRoutes);
+router.use('/availability', businessAvailabilityRoutes);
 
 export default router;

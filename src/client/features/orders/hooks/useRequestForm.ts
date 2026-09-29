@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { CustomCakeRequest, Product, User } from '@shared/types';
+import { CustomCakeRequest, Product, User, AvailabilityResponse } from '@shared/types';
 import { useToast } from '../../../components/Toast';
 import { t } from '@client/i18n/index';
 import { http } from '@client/lib/http';
 import type { ApiResponse } from '@/shared/api';
+import { useAvailability } from '../../admin/hooks/useAvailability';
 
 export const DEFAULT_FORM = {
   contactName: '',
@@ -33,14 +34,52 @@ export function generateRequestId(): string {
   return `FB-${num}${String.fromCodePoint(charCode)}`;
 }
 
-export function getDateInputStyles(dateError: string | null, eventDate: string): string {
+export function getDateInputStyles(
+  dateError: string | null,
+  eventDate: string,
+  availability?: { minimumLeadTimeHours: number; days: Record<string, boolean> }
+): string {
   if (dateError) {
     return 'border-red-300 dark:border-red-900 bg-red-50/30 dark:bg-red-950/20 focus:border-red-500';
   }
   if (eventDate) {
+    if (availability?.days) {
+      const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const dayIndex = new Date(eventDate).getDay();
+      const dayKey = dayNames[dayIndex];
+      if (availability.days[dayKey] === false) {
+        return 'border-red-300 dark:border-red-900 bg-red-50/30 dark:bg-red-950/20 focus:border-red-500';
+      }
+    }
     return 'border-emerald-300 dark:border-emerald-800 bg-emerald-50/10 dark:bg-emerald-950/10 focus:border-emerald-600';
   }
   return 'border-stone-200 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/40 focus:border-lux-gold';
+}
+
+export interface UseRequestFormReturn {
+  form: RequestForm;
+  activeRequests: CustomCakeRequest[];
+  formSubmitted: boolean;
+  submittedId: string;
+  valError: string | null;
+  dateError: string | null;
+  uploading: boolean;
+  uploadedImageUrl: string | null;
+  uploadError: string | null;
+  submitting: boolean;
+  isDragging: boolean;
+  getMinDateString: () => string;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
+  handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleDragOver: (e: React.DragEvent) => void;
+  handleDragEnter: (e: React.DragEvent) => void;
+  handleDragLeave: (e: React.DragEvent) => void;
+  handleDrop: (e: React.DragEvent) => void;
+  deleteRequest: (id: string) => Promise<void>;
+  handleSubmit: (e: React.SyntheticEvent<HTMLFormElement>) => Promise<void>;
+  resetForm: () => void;
+  availability: AvailabilityResponse | undefined;
+  availabilityLoading: boolean;
 }
 
 export function useRequestForm(
@@ -49,6 +88,7 @@ export function useRequestForm(
   currentUser?: User | null,
 ) {
   const { showToast } = useToast();
+  const { data: availability, isLoading: availabilityLoading } = useAvailability();
   const [form, setForm] = useState<RequestForm>(DEFAULT_FORM);
   const [activeRequests, setActiveRequests] = useState<CustomCakeRequest[]>([]);
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -63,7 +103,8 @@ export function useRequestForm(
 
   const getMinDateString = () => {
     const minDate = new Date();
-    minDate.setDate(minDate.getDate() + 2);
+    const hours = availability?.minimumLeadTimeHours ?? 24;
+    minDate.setTime(minDate.getTime() + hours * 60 * 60 * 1000);
     return minDate.toISOString().split('T')[0];
   };
 
@@ -113,7 +154,12 @@ export function useRequestForm(
       if (!value) {
         setDateError('Event date is required.');
       } else if (value < minDateStr) {
-        setDateError(`Yodit needs at least 2 days. Choose ${new Date(minDateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} or later.`);
+        const hours = availability?.minimumLeadTimeHours ?? 24;
+        setDateError(`Minimum notice of ${hours} hours is required. Please choose ${new Date(minDateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} or later.`);
+      } else if (availability && !availability.days[new Date(value).getDay() === 0 ? 'sunday' : new Date(value).getDay() === 1 ? 'monday' : new Date(value).getDay() === 2 ? 'tuesday' : new Date(value).getDay() === 3 ? 'wednesday' : new Date(value).getDay() === 4 ? 'thursday' : new Date(value).getDay() === 5 ? 'friday' : 'saturday']) {
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const dayName = dayNames[new Date(value).getDay()];
+        setDateError(`Orders for ${dayName} are not currently accepted. Please choose an available day.`);
       } else {
         setDateError(null);
       }
@@ -200,7 +246,15 @@ export function useRequestForm(
     }
     const minDateStr = getMinDateString();
     if (form.eventDate < minDateStr) {
-      setValError(`Yodit needs at least 2 days to prepare. Please choose ${new Date(minDateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} or later.`);
+      const hours = availability?.minimumLeadTimeHours ?? 24;
+      setValError(`Minimum notice of ${hours} hours is required. Please choose ${new Date(minDateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} or later.`);
+      return;
+    }
+
+    if (availability && !availability.days[new Date(form.eventDate).getDay() === 0 ? 'sunday' : new Date(form.eventDate).getDay() === 1 ? 'monday' : new Date(form.eventDate).getDay() === 2 ? 'tuesday' : new Date(form.eventDate).getDay() === 3 ? 'wednesday' : new Date(form.eventDate).getDay() === 4 ? 'thursday' : new Date(form.eventDate).getDay() === 5 ? 'friday' : 'saturday']) {
+      const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const dayName = dayNames[new Date(form.eventDate).getDay()];
+      setValError(`Orders for ${dayName} are not currently accepted. Please choose an available day.`);
       return;
     }
 
@@ -276,5 +330,7 @@ export function useRequestForm(
     deleteRequest,
     handleSubmit,
     resetForm,
-  };
+    availability,
+    availabilityLoading,
+  } as UseRequestFormReturn;
 }

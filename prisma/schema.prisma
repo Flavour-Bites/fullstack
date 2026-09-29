@@ -183,3 +183,18 @@ model OrderStatusEvent {
   @@index([orderId, createdAt])
   @@index([changedById])
 }
+
+model BusinessAvailabilityPolicy {
+  id                     String   @id @default(cuid())
+  isEnabled              Boolean  @default(true)
+  timezone               String   @default("Africa/Addis_Ababa")
+  minimumLeadTimeHours   Int      @default(24)
+  mondayEnabled          Boolean  @default(false)
+  tuesdayEnabled         Boolean  @default(false)
+  wednesdayEnabled       Boolean  @default(false)
+  thursdayEnabled        Boolean  @default(false)
+  fridayEnabled          Boolean  @default(false)
+  saturdayEnabled        Boolean  @default(true)
+  sundayEnabled          Boolean  @default(true)
+  updatedAt              DateTime @updatedAt
+}

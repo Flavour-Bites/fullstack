@@ -7,6 +7,30 @@ import { NotFoundError, ValidationError, AuthorizationError } from '../../platfo
 import type { OrderStatus } from '@prisma/client';
 import type { OrderActor, OrderUpdateInput } from './orders.types';
 
+function parseMoneyCommercials(data: Record<string, unknown>): Record<string, number> {
+  const moneyFields = ['price', 'finalPrice', 'depositAmount'] as const;
+  const result: Record<string, number> = {};
+  for (const field of moneyFields) {
+    if (field in data) {
+      const value = normalizeMoney(data[field]);
+      if (value === null) throw new ValidationError('Please enter a valid amount.');
+      result[field] = value;
+    }
+  }
+  return result;
+}
+
+function parseDateCommercials(data: Record<string, unknown>): Record<string, Date | null> {
+  const result: Record<string, Date | null> = {};
+  if ('depositPaidAt' in data) {
+    result.depositPaidAt = data.depositPaidAt ? new Date(data.depositPaidAt as string) : null;
+  }
+  if ('priceConfirmedAt' in data) {
+    result.priceConfirmedAt = data.priceConfirmedAt ? new Date(data.priceConfirmedAt as string) : null;
+  }
+  return result;
+}
+
 export const ordersService = {
   async create(data: {
     contactName: string;
@@ -114,25 +138,10 @@ export const ordersService = {
     data: Record<string, unknown>,
     predefinedCommercials?: Record<string, number | Date | null>,
   ) {
-    const moneyFields = ['price', 'finalPrice', 'depositAmount'] as const;
-    const commercialInput: Record<string, number | Date | null> = { ...predefinedCommercials };
-
-    if (!predefinedCommercials) {
-      for (const field of moneyFields) {
-        if (field in data) {
-          const value = normalizeMoney(data[field]);
-          if (value === null) throw new ValidationError('Please enter a valid amount.');
-          commercialInput[field] = value;
-        }
-      }
-    }
-
-    if ('depositPaidAt' in data) {
-      commercialInput.depositPaidAt = data.depositPaidAt ? new Date(data.depositPaidAt as string) : null;
-    }
-    if ('priceConfirmedAt' in data) {
-      commercialInput.priceConfirmedAt = data.priceConfirmedAt ? new Date(data.priceConfirmedAt as string) : null;
-    }
+    const commercialInput: Record<string, number | Date | null> = {
+      ...(predefinedCommercials ?? parseMoneyCommercials(data)),
+      ...parseDateCommercials(data),
+    };
 
     if (Object.keys(commercialInput).length === 0) return null;
 

@@ -30,36 +30,44 @@ export default function Header({
         ? 'bg-stone-950/95 border-b border-stone-850 text-stone-100'
         : 'bg-lux-cream/95 border-b border-stone-200/40 text-stone-900'
     }`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between">
+      <div className="w-full px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 flex items-center justify-between">
 
-        {/* Branding */}
-        <button
-          onClick={() => navigate('/')}
-          className="flex items-center gap-2.5 text-left cursor-pointer group"
-        >
-          <div className={`w-9 h-9 rounded-md flex items-center justify-center transition-all duration-300 ${
-            darkMode
-              ? 'bg-stone-900 border border-stone-800 text-lux-gold group-hover:bg-lux-gold group-hover:text-stone-950'
-              : 'bg-stone-900 text-lux-gold group-hover:bg-lux-gold group-hover:text-stone-950'
-          }`}>
-            <img src="/favicon_pink_f_1782078000588.jpg" alt="Flavour Bites" className="w-full h-full rounded-full object-cover" />
-          </div>
-          <div>
-            <span className={`font-serif text-lg sm:text-xl font-bold tracking-wider block ${
-              darkMode ? 'text-white' : 'text-stone-900'
+        {/* Left: Branding */}
+        <div className="flex-1 flex items-center justify-start">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2.5 text-left cursor-pointer group"
+          >
+            <div className={`w-9 h-9 rounded-md flex items-center justify-center transition-all duration-300 border ${
+              darkMode
+                ? 'bg-stone-900 border-stone-800 text-lux-gold group-hover:border-lux-gold group-hover:shadow-[0_0_12px_rgba(202,168,110,0.4)] group-hover:scale-105'
+                : 'bg-stone-900 border-stone-800 text-lux-gold group-hover:border-lux-gold group-hover:shadow-[0_0_12px_rgba(202,168,110,0.35)] group-hover:scale-105'
             }`}>
-              FLAVOUR <span className="italic font-light text-lux-gold font-sans font-normal text-md tracking-widest ml-0.5">BITES</span>
-            </span>
-          </div>
-        </button>
+              <img
+                src="/favicon_pink_f_1782078000588.jpg"
+                alt="Flavour Bites"
+                className="w-full h-full rounded-full object-cover transition-transform duration-300 group-hover:rotate-3"
+              />
+            </div>
+            <div>
+              <span className={`font-serif text-lg sm:text-xl font-bold tracking-wider block transition-colors duration-300 ${
+                darkMode ? 'text-white group-hover:text-lux-gold' : 'text-stone-900 group-hover:text-lux-gold'
+              }`}>
+                FLAVOUR <span className="italic font-light text-lux-gold font-sans font-normal text-md tracking-widest ml-0.5">BITES</span>
+              </span>
+            </div>
+          </button>
+        </div>
 
-        {/* Desktop Navigation */}
-        <HeaderDesktopNav
-          darkMode={darkMode}
-        />
+        {/* Center: Desktop Navigation */}
+        <div className="hidden lg:flex flex-none items-center justify-center">
+          <HeaderDesktopNav
+            darkMode={darkMode}
+          />
+        </div>
 
-        {/* Far Right Action Cluster */}
-        <div className="hidden lg:flex items-center gap-3">
+        {/* Right: Desktop Action Cluster */}
+        <div className="hidden lg:flex flex-1 items-center justify-end gap-3">
           {/* Search */}
           <button
             onClick={onSearchOpen}
@@ -95,7 +103,6 @@ export default function Header({
             <Globe className="w-3.5 h-3.5 inline-block mr-1" />
             {locale === 'en' ? 'AM' : 'EN'}
           </button>
-
 
           <Link
             to="/request"
