@@ -4,11 +4,12 @@ import { makeId } from '../../src/shared/utils/ids.js';
 import { CATEGORY_SEEDS } from './categories.js';
 import { SAMPLE_REQUESTS } from './requests.js';
 import { GALLERY_ITEMS } from './gallery.js';
+import { SAMPLE_REVIEWS } from './reviews.js';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Seeding baseline sample custom cake requests and gallery items into Neon database...');
+  console.log('Seeding baseline sample custom cake requests, gallery items, and reviews into Neon database...');
 
   if (!process.env.DATABASE_URL) {
     console.error('ERROR: DATABASE_URL environment variable is missing.');
@@ -66,7 +67,7 @@ async function main() {
   for (const item of GALLERY_ITEMS) {
     const categoryId = categoryMap.get(item.categorySlug) || CATEGORY_SEEDS[0].id;
     const { categorySlug, ...rest } = item;
-    const record = await prisma.product.upsert({
+    const record = await prisma.cakeGalleryItem.upsert({
       where: { id: item.id },
       update: { ...rest, categoryId },
       create: { ...rest, categoryId }
@@ -74,9 +75,17 @@ async function main() {
     console.log(`Upserted product item: ${record.id} (${record.name})`);
   }
 
-  console.log('Database successfully seeded with requests and gallery items!');
+  // D. Seed Reviews (idempotent; leaves user-created reviews untouched)
+  for (const review of SAMPLE_REVIEWS) {
+    const record = await prisma.review.upsert({
+      where: { id: review.id },
+      update: review,
+      create: review
+    });
+    console.log(`Upserted review: ${record.id} (${review.author})`);
+  }
 
-  // D. Seed Business Availability Policy
+  // E. Seed Business Availability Policy
   const existingPolicy = await prisma.businessAvailabilityPolicy.findFirst();
   if (!existingPolicy) {
     const policy = await prisma.businessAvailabilityPolicy.create({
@@ -97,13 +106,15 @@ async function main() {
   } else {
     console.log(`Business availability policy already exists: ${existingPolicy.id}`);
   }
+
+  console.log('Database successfully seeded with requests, gallery items, and reviews!');
 }
 
-try {
-  await main();
-} catch (e) {
-  console.error('Seeding failed with error:', e);
-  process.exit(1);
-} finally {
-  await prisma.$disconnect();
-}
+main()
+  .catch((e) => {
+    console.error('Seeding failed with error:', e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
