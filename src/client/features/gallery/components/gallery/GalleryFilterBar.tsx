@@ -42,7 +42,7 @@ export default function GalleryFilterBar({
               aria-label={t('gallery.searchFlavors')}
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 focus:border-lux-gold focus:ring-1 focus:ring-lux-gold/30 focus:outline-none pl-10 pr-10 py-2.5 text-xs uppercase tracking-wider font-mono rounded-full transition-all text-stone-900 dark:text-stone-100 placeholder-stone-600 dark:placeholder-stone-400 shadow-xs"
+              className="w-full bg-stone-50/80 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-700 focus:border-lux-gold focus:ring-1 focus:ring-lux-gold/30 focus:outline-none pl-10 pr-10 py-3 text-sm uppercase tracking-wider font-mono rounded-full transition-all text-stone-900 dark:text-stone-100 placeholder-stone-500 dark:placeholder-stone-400 shadow-xs backdrop-blur-sm"
             />
             {searchQuery && (
               <button
@@ -64,10 +64,10 @@ export default function GalleryFilterBar({
                   <button
                     key={cat.value}
                     onClick={() => onFilterChange(cat.value)}
-                    className={`px-4 py-2 text-[10px] tracking-widest uppercase font-semibold whitespace-nowrap transition-all duration-200 rounded-full cursor-pointer border ${
+                    className={`px-4 py-2.5 text-xs tracking-widest uppercase font-semibold whitespace-nowrap transition-all duration-200 rounded-full cursor-pointer border ${
                       isActive
                         ? 'bg-stone-900 dark:bg-stone-100 border-stone-900 dark:border-stone-100 text-white dark:text-stone-950 shadow-xs'
-                        : 'bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 text-stone-750 dark:text-stone-200 hover:border-stone-900 dark:hover:border-stone-300 hover:text-stone-950 dark:hover:text-white font-sans'
+                        : 'bg-stone-50/80 dark:bg-stone-900/80 border border-stone-200 dark:border-stone-700 text-stone-750 dark:text-stone-200 hover:border-stone-900 dark:hover:border-stone-300 hover:text-stone-950 dark:hover:text-white font-sans backdrop-blur-sm'
                     }`}
                   >
                     {cat.label}
@@ -80,9 +80,9 @@ export default function GalleryFilterBar({
             {hasActiveFilters && (
               <button
                 onClick={onClearAllFilters}
-                className="inline-flex items-center gap-1.5 text-xs font-mono text-lux-gold hover:text-stone-900 dark:hover:text-stone-100 underline decoration-lux-gold/50 underline-offset-4 cursor-pointer transition-colors whitespace-nowrap shrink-0 pl-2"
+                className="inline-flex items-center gap-1.5 text-sm font-mono text-lux-gold hover:text-stone-900 dark:hover:text-stone-100 underline decoration-lux-gold/50 underline-offset-4 cursor-pointer transition-colors whitespace-nowrap shrink-0 pl-2"
               >
-                <RotateCcw className="w-3 h-3" />
+                <RotateCcw className="w-3.5 h-3.5" />
                 <span>{t('gallery.resetFilters')}</span>
               </button>
             )}
@@ -92,7 +92,7 @@ export default function GalleryFilterBar({
         {/* Sourcing/Tag Cloud filter row (Floating directly on background) */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-mono font-bold text-stone-600 dark:text-stone-400 mr-1">
+            <div className="flex items-center gap-1.5 text-xs uppercase tracking-widest font-mono font-bold text-stone-600 dark:text-stone-400 mr-1">
               <Tag className="w-3.5 h-3.5 text-lux-gold" />
               <span>TAGS:</span>
             </div>
@@ -103,10 +103,10 @@ export default function GalleryFilterBar({
                   <button
                     key={tag}
                     onClick={() => onTagToggle(tag)}
-                    className={`px-3 py-1 text-[10px] uppercase font-mono tracking-wider rounded-full transition-all border cursor-pointer ${
+                    className={`px-3.5 py-1.5 text-xs uppercase font-mono tracking-wider rounded-full transition-all border cursor-pointer ${
                       isSelected
                         ? 'bg-lux-gold border-lux-gold text-stone-950 font-bold shadow-xs'
-                        : 'bg-white/90 dark:bg-stone-900/80 border-stone-300 dark:border-stone-700 text-stone-750 dark:text-stone-300 hover:border-lux-gold hover:text-stone-950 dark:hover:text-stone-100'
+                        : 'bg-stone-50/80 dark:bg-stone-900/80 border-stone-200 dark:border-stone-700 text-stone-750 dark:text-stone-300 hover:border-lux-gold hover:text-stone-950 dark:hover:text-stone-100 backdrop-blur-sm'
                     }`}
                   >
                     {tag}

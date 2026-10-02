@@ -1,12 +1,14 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { screen, fireEvent, cleanup } from '@testing-library/react';
-import { renderWithQueryClient } from '@client/lib/tests/renderWithQueryClient';
+import { renderWithQueryClient } from '@test/queryClientWrapper';
 import SearchModal from '@client/features/search/components/SearchModal';
-import { apiGet } from '@client/lib/http';
+import { http } from '@client/lib/http';
 
 vi.mock('@client/lib/http', () => ({
-  apiGet: vi.fn(),
+  http: {
+    get: vi.fn(),
+  },
 }));
 
 const CAKES = [
@@ -37,7 +39,7 @@ const CAKES = [
 ];
 
 beforeEach(() => {
-  vi.mocked(apiGet).mockResolvedValue({ success: true, items: CAKES } as never);
+  vi.mocked(http.get).mockResolvedValue({ data: { success: true, items: CAKES } } as never);
 });
 
 afterEach(() => {
@@ -48,11 +50,11 @@ afterEach(() => {
 const noop = () => {};
 
 describe('SearchModal', () => {
-  it('searches the real catalog served by /api/gallery', async () => {
+  it('searches the real catalog served by /api/products', async () => {
     renderWithQueryClient(<SearchModal isOpen onClose={noop} />);
     const input = screen.getByPlaceholderText(/Search cakes/i);
     fireEvent.change(input, { target: { value: 'vanilla' } });
-    expect(apiGet).toHaveBeenCalledWith('/api/gallery');
+    expect(http.get).toHaveBeenCalledWith('/api/products');
     expect(await screen.findByText('The Victorian Dream')).toBeInTheDocument();
     expect(screen.queryByText('Chocolate and Fig')).not.toBeInTheDocument();
   });

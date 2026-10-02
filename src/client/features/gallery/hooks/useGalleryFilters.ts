@@ -1,27 +1,24 @@
 import { useState, useMemo } from 'react';
-import { CakeGalleryItem } from '@shared/types';
-import { useGalleryItems } from './useGalleryItems';
+import { useGalleryQuery } from './useGalleryQuery';
+import type { Product } from '@shared/types';
 
 export type FilterType = 'all' | 'birthday' | 'kids' | 'treats' | 'celebration';
 
-// Gallery filtering over the real catalog. The catalog comes from the shared
-// useGalleryItems query — there is intentionally no static seed data: on an
-// empty or unreachable API the grid renders honestly empty instead of showing
-// fabricated items as if they were the shop's own work.
 export function useGalleryFilters() {
-  const { data: items = [], isLoading, error } = useGalleryItems();
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  // Dynamic derivation of all unique tags from the real catalog
+  const { data: items = [], isLoading, isError } = useGalleryQuery();
+
+  // Dynamic derivation of all unique tags from our catalog
   const allUniqueTags: string[] = useMemo(
     () => Array.from(new Set(items.flatMap((item) => item.tags || []))),
     [items],
   );
 
   // Combined logic to sync search feed, category selection, and multiple tag switches
-  const filteredCakes: CakeGalleryItem[] = useMemo(() => {
+  const filteredCakes: Product[] = useMemo(() => {
     let result = items;
 
     // A. Filter by Category Tab
@@ -46,7 +43,9 @@ export function useGalleryFilters() {
 
     // C. Filter by Selected Tags cloud (item must contain all selected tag filters)
     if (selectedTags.length > 0) {
-      result = result.filter((item) => selectedTags.every((t) => item.tags?.includes(t)));
+      result = result.filter((item) =>
+        selectedTags.every((t) => item.tags?.includes(t)),
+      );
     }
 
     return result;
@@ -75,10 +74,10 @@ export function useGalleryFilters() {
     items,
     filteredCakes,
     allUniqueTags,
-    isLoading,
-    error,
     handleTagToggle,
     clearAllFilters,
     hasActiveFilters,
+    isLoading,
+    isError,
   };
 }

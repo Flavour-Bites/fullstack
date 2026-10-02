@@ -1,4 +1,6 @@
+import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
+import { makeId } from '../../src/shared/utils/ids.js';
 import { CATEGORY_SEEDS } from './categories.js';
 import { SAMPLE_REQUESTS } from './requests.js';
 import { GALLERY_ITEMS } from './gallery.js';
@@ -13,6 +15,31 @@ async function main() {
     console.error('ERROR: DATABASE_URL environment variable is missing.');
     process.exit(1);
   }
+
+  // Seed Admin User
+  const adminTelegramId = '1569314883';
+  const adminUser = await prisma.user.upsert({
+    where: { telegramId: adminTelegramId },
+    update: {
+      name: 'Abel Mekonen',
+      telegramUsername: 'boosted_bella2247',
+      telegramPhone: '+251911372523',
+      role: 'admin',
+      notifyViaTelegram: true,
+      language: 'en',
+    },
+    create: {
+      id: makeId('usr'),
+      name: 'Abel Mekonen',
+      telegramId: adminTelegramId,
+      telegramUsername: 'boosted_bella2247',
+      telegramPhone: '+251911372523',
+      role: 'admin',
+      notifyViaTelegram: true,
+      language: 'en',
+    },
+  });
+  console.log(`Upserted admin user: ${adminUser.id} (${adminUser.name})`);
 
   const categoryMap = new Map(CATEGORY_SEEDS.map((category) => [category.slug, category.id]));
 
@@ -40,12 +67,12 @@ async function main() {
   for (const item of GALLERY_ITEMS) {
     const categoryId = categoryMap.get(item.categorySlug) || CATEGORY_SEEDS[0].id;
     const { categorySlug, ...rest } = item;
-    const record = await prisma.cakeGalleryItem.upsert({
+    const record = await prisma.product.upsert({
       where: { id: item.id },
       update: { ...rest, categoryId },
       create: { ...rest, categoryId }
     });
-    console.log(`Upserted gallery item: ${record.id} (${record.name})`);
+    console.log(`Upserted product item: ${record.id} (${record.name})`);
   }
 
   // D. Seed Reviews (idempotent; leaves user-created reviews untouched)
@@ -55,7 +82,29 @@ async function main() {
       update: review,
       create: review
     });
-    console.log(`Upserted review: ${record.id} (${record.author})`);
+    console.log(`Upserted review: ${record.id} (${review.author})`);
+  }
+
+  // E. Seed Business Availability Policy
+  const existingPolicy = await prisma.businessAvailabilityPolicy.findFirst();
+  if (!existingPolicy) {
+    const policy = await prisma.businessAvailabilityPolicy.create({
+      data: {
+        isEnabled: true,
+        timezone: 'Africa/Addis_Ababa',
+        minimumLeadTimeHours: 24,
+        mondayEnabled: false,
+        tuesdayEnabled: false,
+        wednesdayEnabled: false,
+        thursdayEnabled: false,
+        fridayEnabled: false,
+        saturdayEnabled: true,
+        sundayEnabled: true,
+      },
+    });
+    console.log(`Created business availability policy: ${policy.id}`);
+  } else {
+    console.log(`Business availability policy already exists: ${existingPolicy.id}`);
   }
 
   console.log('Database successfully seeded with requests, gallery items, and reviews!');

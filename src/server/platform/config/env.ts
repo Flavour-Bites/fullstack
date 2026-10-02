@@ -50,7 +50,7 @@ export interface AppEnv {
   readonly GEMINI_API_KEY?: string;
   readonly REDIS_URL?: string;
   readonly REDIS_CONVERSATION_TTL_SECONDS: number;
-  readonly REDIS_QUOTE_TTL_SECONDS: number;
+  readonly REDIS_PRICE_TTL_SECONDS: number;
 }
 
 const required = [
@@ -148,26 +148,25 @@ function isLoopbackAppUrlAllowed(): boolean {
   return process.env.ALLOW_LOOPBACK_APP_URL === 'true';
 }
 
-export function validateEnv(): void {
-  const missing = required.filter((key) => !process.env[key]);
-  if (missing.length > 0) {
-    throw new Error(
-      `Missing required environment variables: ${missing.join(', ')}\n` +
-      `Copy .env.example to .env and fill in the values.`
-    );
-  }
-
-  // Validate APP_URL is a real URL
-  let appUrl = (process.env.APP_URL || '').replace(/^["']|["']$/g, '').trim();
-  const nodeEnv = normalizeAppEnv(process.env.NODE_ENV);
-  const isProd = nodeEnv === 'production';
-  const isPlatform = nodeEnv === 'production' || nodeEnv === 'preview';
+function resolveAppUrl(rawAppUrl: string, isProd: boolean): string {
+  let appUrl = rawAppUrl.replace(/^["']|["']$/g, '').trim();
 
   // If deployed on Render and APP_URL is unset, loopback, or an outdated render
   // domain, fall back to the platform-injected URL. Production-only: preview
   // deployments must be explicit about where they live.
-  if (isProd && !isLoopbackAppUrlAllowed() && (isLocalhostUrl(appUrl) || !appUrl || PLACEHOLDER_URLS.has(appUrl) || (isRenderDomain(appUrl) && Boolean(process.env.RENDER_EXTERNAL_URL) && appUrl !== process.env.RENDER_EXTERNAL_URL))) {
-    const platformUrl = process.env.RENDER_EXTERNAL_URL ||
+  const shouldFallbackToRender =
+    isProd &&
+    !isLoopbackAppUrlAllowed() &&
+    (isLocalhostUrl(appUrl) ||
+      !appUrl ||
+      PLACEHOLDER_URLS.has(appUrl) ||
+      (isRenderDomain(appUrl) &&
+        Boolean(process.env.RENDER_EXTERNAL_URL) &&
+        appUrl !== process.env.RENDER_EXTERNAL_URL));
+
+  if (shouldFallbackToRender) {
+    const platformUrl =
+      process.env.RENDER_EXTERNAL_URL ||
       (process.env.RENDER_EXTERNAL_HOSTNAME ? `https://${process.env.RENDER_EXTERNAL_HOSTNAME}` : null);
     if (platformUrl) {
       appUrl = platformUrl;
@@ -175,6 +174,10 @@ export function validateEnv(): void {
     }
   }
 
+  return appUrl;
+}
+
+function validateAppUrl(appUrl: string, isPlatform: boolean): void {
   const isLocal = isLocalhostUrl(appUrl);
 
   // Development and test may live on loopback; any deployment (preview,
@@ -182,39 +185,63 @@ export function validateEnv(): void {
   if (PLACEHOLDER_URLS.has(appUrl) || (isPlatform && isLocal && !isLoopbackAppUrlAllowed())) {
     throw new Error(
       `In production, APP_URL must be a real URL (e.g. https://flavourbites.com), got: "${appUrl}"\n` +
-      (isPlatform && isLocal
-        ? 'Local preview stacks can set ALLOW_LOOPBACK_APP_URL=true (see .local/docker-compose.yml).\n'
-        : '')
+        (isPlatform && isLocal
+          ? 'Local preview stacks can set ALLOW_LOOPBACK_APP_URL=true (see .local/docker-compose.yml).\n'
+          : '')
     );
   }
 
   if (!isValidHttpUrl(appUrl)) {
     throw new Error(`APP_URL must start with http:// or https://, got: "${appUrl}"`);
   }
+}
 
-  // Validate FRONTEND_URL if explicitly provided
-  const frontendUrl = (process.env.FRONTEND_URL || '').replace(/^["']|["']$/g, '').trim();
+function validateFrontendUrl(rawFrontendUrl?: string): void {
+  const frontendUrl = (rawFrontendUrl || '').replace(/^["']|["']$/g, '').trim();
   if (frontendUrl && !isValidHttpUrl(frontendUrl)) {
     throw new Error(`FRONTEND_URL must start with http:// or https://, got: "${frontendUrl}"`);
   }
+}
 
-  // Validate JWT_SECRET is not a placeholder
-  const jwtSecret = process.env.JWT_SECRET || '';
+function validateJwtSecret(jwtSecret: string): void {
   if (PLACEHOLDER_JWT_SECRETS.has(jwtSecret.toLowerCase())) {
     throw new Error(
       'JWT_SECRET must be a strong random string, not a placeholder.\n' +
-      'Generate one with: node -e "console.log(require(\'crypto\').randomBytes(64).toString(\'hex\'))"'
+        'Generate one with: node -e "console.log(require(\'crypto\').randomBytes(64).toString(\'hex\'))"'
     );
   }
+}
 
-  // Cloudinary: either CLOUDINARY_URL or all three individual vars required
-  const hasUrl = !!process.env.CLOUDINARY_URL;
+function validateCloudinaryConfig(isDevOrTest: boolean): void {
+  if (isDevOrTest) return;
+
+  const hasUrl = Boolean(process.env.CLOUDINARY_URL);
   const missingCloudinary = cloudinaryRequired.filter((key) => !process.env[key]);
   if (!hasUrl && missingCloudinary.length > 0) {
     throw new Error(
       `Missing Cloudinary configuration: either set CLOUDINARY_URL or all of: ${missingCloudinary.join(', ')}`
     );
   }
+}
+
+export function validateEnv(): void {
+  const missing = required.filter((key) => !process.env[key]);
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing required environment variables: ${missing.join(', ')}\n` +
+        `Copy .env.example to .env and fill in the values.`
+    );
+  }
+
+  const nodeEnv = normalizeAppEnv(process.env.NODE_ENV);
+  const isProd = nodeEnv === 'production';
+  const isPlatform = nodeEnv === 'production' || nodeEnv === 'preview';
+
+  const appUrl = resolveAppUrl(process.env.APP_URL || '', isProd);
+  validateAppUrl(appUrl, isPlatform);
+  validateFrontendUrl(process.env.FRONTEND_URL);
+  validateJwtSecret(process.env.JWT_SECRET || '');
+  validateCloudinaryConfig(nodeEnv === 'development' || nodeEnv === 'test');
 
   const missingRecommended = recommended.filter((key) => !process.env[key]);
   if (missingRecommended.length > 0) {
@@ -284,7 +311,7 @@ export function getEnv(): AppEnv {
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
     REDIS_URL: process.env.REDIS_URL,
     REDIS_CONVERSATION_TTL_SECONDS: Number(process.env.REDIS_CONVERSATION_TTL_SECONDS || 60 * 60 * 24),
-    REDIS_QUOTE_TTL_SECONDS: Number(process.env.REDIS_QUOTE_TTL_SECONDS || 60 * 30),
+    REDIS_PRICE_TTL_SECONDS: Number(process.env.REDIS_PRICE_TTL_SECONDS || 60 * 30),
   };
 }
 

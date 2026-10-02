@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Request, Response, NextFunction } from 'express';
-import { AuthenticationError } from '@server/platform/errors/AuthenticationError.js';
+import { AuthenticationError } from '@server/platform/errors';
 
 vi.mock('@shared/utils/auth.js', () => ({
   getTokenFromRequest: vi.fn(),

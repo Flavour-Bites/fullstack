@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Package, Image, Layers, Users, ShieldCheck, Star,
-  BarChart2, RefreshCw, Download, Loader2
+  BarChart2, RefreshCw, Download, Loader2, CalendarDays
 } from 'lucide-react';
 import { t } from '@client/i18n/index';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
@@ -9,6 +9,7 @@ import { useRecovery } from '../../recovery/hooks/useRecovery';
 import { useReviews } from '../../reviews/hooks/useReviews';
 import { useCategories } from '../../categories/hooks/useCategories';
 import { useGallery } from '../../gallery/hooks/useGallery';
+import { useGalleryQuery } from '../../gallery/hooks/useGalleryQuery';
 import { useUsers } from '../../users/hooks/useUsers';
 import { useOrders } from '../../orders/hooks/useOrders';
 import { useAdminData } from '../hooks/useAdminData';
@@ -19,6 +20,7 @@ import AdminCategories from './AdminCategories';
 import AdminReviews from './AdminReviews';
 import AdminUsers from './AdminUsers';
 import AdminRecovery from './AdminRecovery';
+import AdminAvailability from './AdminAvailability';
 import type { User } from '@shared/types';
 import type { AdminTab } from '../types';
 import { exportOrdersCSV } from '../utils/ordersCsv';
@@ -37,9 +39,10 @@ const TABS = [
   { key: 'reviews', label: 'Reviews', icon: Star },
   { key: 'users', label: t('admin.users'), icon: Users },
   { key: 'recovery', label: 'Recovery', icon: ShieldCheck },
+  { key: 'availability', label: 'Availability', icon: CalendarDays },
 ] as const;
 
-export default function AdminView({ activeTab, onTabChange, currentUser }: AdminViewProps) {
+export default function AdminView({ activeTab, onTabChange, currentUser }: Readonly<AdminViewProps>) {
   usePageTitle("Admin");
 
 
@@ -51,7 +54,8 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
   const recovery = useRecovery();
   const reviews = useReviews();
   const categories = useCategories();
-  const gallery = useGallery();
+  const galleryMutations = useGallery();
+  const { data: galleryItems = [], isLoading: galleryLoading } = useGalleryQuery();
   const usersPage = useUsers();
   const orders = useOrders(() => admin.fetchStats());
   const { isAdmin, stats } = admin;
@@ -59,8 +63,7 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
 
   useEffect(() => {
     if (currentTab === 'users' && isAdmin) usersPage.fetchUsers();
-    if (currentTab === 'menu') gallery.fetchGallery();
-    if (currentTab === 'categories') { categories.fetchCategories(); gallery.fetchGallery(); }
+    if (currentTab === 'categories') categories.fetchCategories();
     if (currentTab === 'reviews') reviews.fetchReviews();
     if (currentTab === 'recovery' && isAdmin) recovery.fetchRecoveryRequests();
   }, [currentTab]);
@@ -161,11 +164,11 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
 
         {currentTab === 'menu' && (
           <AdminMenu
-            galleryItems={gallery.galleryItems}
-            galleryLoading={gallery.galleryLoading}
+            galleryItems={galleryItems}
+            galleryLoading={galleryLoading}
             categories={categories.categories}
-            handleSaveGalleryItem={gallery.handleSaveGalleryItem}
-            handleDeleteGalleryItem={gallery.handleDeleteGalleryItem}
+            handleSaveGalleryItem={galleryMutations.handleSaveGalleryItem}
+            handleDeleteGalleryItem={galleryMutations.handleDeleteGalleryItem}
           />
         )}
 
@@ -185,7 +188,6 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
             reviewItems={reviews.reviewItems}
             reviewsLoading={reviews.reviewsLoading}
             handleDeleteReview={reviews.handleDeleteReview}
-            handleSaveReview={reviews.handleSaveReview}
             fetchReviews={reviews.fetchReviews}
           />
         )}
@@ -212,6 +214,10 @@ export default function AdminView({ activeTab, onTabChange, currentUser }: Admin
             fetchRecoveryRequests={recovery.fetchRecoveryRequests}
             handleRecoveryStatus={recovery.handleRecoveryStatus}
           />
+        )}
+
+        {currentTab === 'availability' && (
+          <AdminAvailability />
         )}
       </div>
     </div>

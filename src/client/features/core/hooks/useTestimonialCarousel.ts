@@ -1,18 +1,17 @@
 import { useState, useEffect } from 'react';
 
-// Rotating review carousel over a live list. Count comes from the data source
-// (zero until reviews load, one or more once known) so the hooks never index
-// a static, fabricated array.
-export function useTestimonialCarousel(count: number) {
+const ROTATION_INTERVAL_MS = 7000;
+
+export function useTestimonialCarousel(count: number = 0) {
   const [activeTestimonial, setActiveTestimonial] = useState(0);
 
   useEffect(() => {
     if (count <= 1) return;
     const timer = setInterval(() => {
       setActiveTestimonial((prev) => (prev + 1) % count);
-    }, 7000);
+    }, ROTATION_INTERVAL_MS);
     return () => clearInterval(timer);
-  }, [count, activeTestimonial]);
+  }, [activeTestimonial, count]);
 
   const handleNextTestimonial = () => {
     if (count <= 1) return;

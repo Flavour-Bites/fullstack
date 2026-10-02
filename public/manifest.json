@@ -1,0 +1,44 @@
+{
+  "name": "Flavour Bites",
+  "short_name": "Flavour Bites",
+  "description": "Beautiful custom cakes hand-baked by designer Yodit Ashenafi. Order premium wedding cakes, birthday cakes, treats, and unique celebration bakes.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fafafa",
+  "theme_color": "#111111",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon_pink_f_1782078000588.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["food", "lifestyle", "shopping"],
+  "shortcuts": [
+    {
+      "name": "Order a Custom Cake",
+      "short_name": "Order Cake",
+      "description": "Start a new custom cake request",
+      "url": "/order",
+      "icons": [{ "src": "/favicon_pink_f_1782078000588.jpg", "sizes": "192x192" }]
+    },
+    {
+      "name": "View Gallery",
+      "short_name": "Gallery",
+      "description": "Browse our custom cake designs",
+      "url": "/gallery",
+      "icons": [{ "src": "/favicon_pink_f_1782078000588.jpg", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/hero_cake.png",
+      "sizes": "1200x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Flavour Bites Custom Cakes"
+    }
+  ]
+}

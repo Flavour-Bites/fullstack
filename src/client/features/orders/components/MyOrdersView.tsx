@@ -1,25 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Search, AlertCircle, ShoppingBag, ShieldCheck, Loader2 } from 'lucide-react';
+import { Search, AlertCircle, ShoppingBag, ShieldCheck } from 'lucide-react';
 import { t } from '@client/i18n/index';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
 import { getStatusStyles } from '../../../../shared/utils/statusStyles';
+import { BUSINESS_INFO } from '../../../../shared/constants/index';
 import { useOrders } from '../hooks/useOrders';
-import { useOrderTimeline } from '../hooks/useOrderTimeline';
-import { orderPrice, type CakeRequest } from '../../admin/types';
-import type { OrderStatusEvent } from '@shared/types';
 
-interface OrderView {
+interface FrontendOrder {
   id: string;
   clientName: string;
-  phone: string;
+  email: string;
   cakeType: string;
   eventDate: string;
-  status: string;
+  status: 'Pending' | 'In Review' | 'Confirmed' | 'Designing' | 'Priced' | 'InProgress' | 'Ready' | 'Completed';
+  stepNum: number; // 1 to 5 steps
   tierCount: number;
   flavor: string;
   amount: string;
   details: string;
+  timeline: { title: string; date: string; description: string; done: boolean }[];
 }
 
 interface MyOrdersViewProps {
@@ -31,60 +31,12 @@ interface MyOrdersViewProps {
   };
 }
 
-function toOrderView(item: CakeRequest): OrderView {
-  const tiers = Number(item.tierCount) || 1;
-  const price = orderPrice(item);
-  return {
-    id: item.id,
-    clientName: item.contactName || 'Valued Client',
-    phone: item.contactPhone || '',
-    cakeType: `${item.eventType || 'Bespoke Celebration'} Cake`,
-    eventDate: item.deliveryDate || 'TBD',
-    status: item.status,
-    tierCount: tiers,
-    flavor: item.flavor || 'Bespoke Assortment',
-    amount: price ? `${price.toLocaleString()} ETB` : 'Pending Price',
-    details: item.designStyle || 'Custom cake studio creation requested.',
-  };
-}
-
-function humanizeStatus(status: string): string {
-  return status.replace(/([A-Z])/g, ' $1').trim();
-}
-
-function formatEventDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
-function sourceLabel(source: string): string {
-  switch (source) {
-    case 'customer_api':
-      return 'Updated by you';
-    case 'staff_api':
-      return 'Updated by Flavour Bites staff';
-    case 'admin_api':
-      return 'Updated by Flavour Bites';
-    case 'seed':
-      return 'Initial record';
-    default:
-      return 'Record updated';
-  }
-}
-
-function eventDescription(event: OrderStatusEvent): string {
-  if (event.note) return event.note;
-  const from = event.fromStatus
-    ? `${humanizeStatus(event.fromStatus)} → `
-    : '';
-  return `${sourceLabel(event.source)} (${from}${humanizeStatus(event.toStatus)})`;
-}
-
 export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
   usePageTitle("My Orders");
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedOrder, setSelectedOrder] = useState<OrderView | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<FrontendOrder | null>(null);
   const [searchError, setSearchError] = useState(false);
-
+  
   const { requests, fetchRequests } = useOrders();
 
   useEffect(() => {
@@ -93,25 +45,54 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
     }
   }, [currentUser, fetchRequests]);
 
-  const orders: OrderView[] = requests.map(toOrderView);
+  const liveOrders: FrontendOrder[] = requests.map((item: any) => {
+    const numTiers = Number(item.tierCount) || 1;
+    const price = item.finalPrice ?? item.price ?? 0;
+    const amountEtb = price ? `${price.toLocaleString()} ETB` : 'Pending Price';
+    
+    let stepNumber = 1;
+    if (item.status === 'Priced') stepNumber = 2;
+    if (item.status === 'Confirmed') stepNumber = 3;
+    if (item.status === 'Designing' || item.status === 'InProgress') stepNumber = 4;
+    if (item.status === 'Ready' || item.status === 'Completed') stepNumber = 5;
 
-  const selectedTimeline = useOrderTimeline(selectedOrder ? selectedOrder.id : null);
+    return {
+      id: item.id || `FB-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
+      clientName: item.contactName || 'Valued Client',
+      email: item.contactEmail || '',
+      cakeType: `${item.eventType || 'Custom Celebration'} Cake`,
+      eventDate: item.deliveryDate || 'TBD',
+      status: item.status || 'Pending',
+      stepNum: stepNumber,
+      tierCount: numTiers,
+      flavor: item.flavor || 'Custom Assortment',
+      amount: amountEtb,
+      details: item.designStyle || 'Custom cake studio creation requested.',
+      timeline: [
+        { title: 'Inquiry Received', date: item.requestDate || 'Just Now', description: 'Your request has been filed in Yodit\'s review queue!', done: true },
+        { title: 'Aesthetic Concept Design', date: 'Studio Stage', description: 'Yodit reviews your specs to draft a visual layout.', done: stepNumber >= 2 },
+        { title: 'Price Confirmed & Deposit Paid', date: 'Booking Confirmed', description: 'After price confirmation, a 50% reservation fee secures your slot.', done: stepNumber >= 3 },
+        { title: 'Baking & Handcrafting Artistry', date: 'Active Phase', description: 'Oven baking and intricate hand-sculpted marzipan artwork.', done: stepNumber >= 4 },
+        { title: 'Secure Event Pickup', date: item.deliveryDate || 'TBD', description: `Safe hand-off at ${BUSINESS_INFO.location.name} coordinates.`, done: stepNumber >= 5 }
+      ]
+    };
+  });
 
   const handleSearch = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSearchError(false);
-
+    
     if (!searchQuery.trim()) {
       setSelectedOrder(null);
       return;
     }
 
     const trimmed = searchQuery.trim().toLowerCase();
-    const found = orders.find(
+    const found = liveOrders.find(
       (ord) =>
         ord.id.toLowerCase().includes(trimmed) ||
         ord.clientName.toLowerCase().includes(trimmed) ||
-        ord.phone.toLowerCase().includes(trimmed)
+        ord.email.toLowerCase().includes(trimmed)
     );
 
     if (found) {
@@ -126,10 +107,10 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
     <div className="bg-lux-cream/30 dark:bg-stone-900/10 min-h-screen py-16 px-4 sm:px-6">
       {/* Visual Title Header */}
       <div className="max-w-6xl mx-auto mb-16 text-center">
-        <span className="text-[10px] uppercase tracking-[0.3em] text-lux-gold font-mono block mb-2 font-bold">{t('order.commissionMonitor')}</span>
+        <span className="text-[10px] uppercase tracking-[0.3em] text-lux-gold font-mono block mb-2 font-bold">{t('order.orderMonitor')}</span>
         <h1 className="text-4xl font-serif text-warm-950 dark:text-stone-100 font-medium italic">{t('order.orderUpdates')}</h1>
         <p className="text-xs text-stone-500 dark:text-stone-400 font-light mt-2 max-w-lg mx-auto font-sans">
-          {t('order.commissionMonitorDesc')}
+          {t('order.orderMonitorDesc')}
         </p>
         <div className="h-[2px] w-12 bg-lux-gold mx-auto mt-4" />
       </div>
@@ -174,21 +155,18 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
           <div className="bg-white dark:bg-stone-950 p-6 border border-stone-200/60 dark:border-stone-850 rounded-xs shadow-xs space-y-4 text-left">
             <div className="flex justify-between items-center pb-2 border-b border-stone-100 dark:border-stone-850">
               <h3 className="font-serif text-sm text-stone-900 dark:text-stone-100 font-medium">{t('order.sampleOrdersList')}</h3>
+              <span className="text-[9px] uppercase tracking-wider font-mono text-lux-gold bg-lux-gold/15 py-0.5 px-2 font-bold rounded-xs">
+                {t('common.sandbox')}
+              </span>
             </div>
 
             <div className="space-y-3.5 max-h-[360px] overflow-y-auto pr-1">
-              {orders.length === 0 && (
-                <p className="text-[11px] text-stone-500 dark:text-stone-400 font-light font-sans py-6 text-center">
-                  No orders yet — commission a custom cake and it will be tracked here.
-                </p>
-              )}
-              {orders.map((ord) => (
-                <div
+              {liveOrders.map((ord) => (
+                <button
                   key={ord.id}
+                  type="button"
                   onClick={() => { setSelectedOrder(ord); setSearchError(false); }}
-                  role="button"
-                  tabIndex={0}
-                  className={`p-3.5 rounded-sm border transition-all cursor-pointer text-left ${
+                  className={`p-3.5 rounded-sm border transition-all cursor-pointer text-left w-full text-left ${
                     selectedOrder?.id === ord.id
                       ? 'bg-lux-cream/20 dark:bg-stone-900/40 border-lux-gold/60 shadow-xs'
                       : 'bg-stone-50/50 dark:bg-stone-900/20 hover:bg-stone-50 dark:hover:bg-stone-900/65 border-stone-200 dark:border-stone-800'
@@ -205,7 +183,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
                     <span>{ord.cakeType} ({ord.tierCount} Tiers)</span>
                     <span className="font-mono">{ord.eventDate}</span>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -221,7 +199,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
             >
               {/* Gold status bar */}
               <div className="h-1 bg-lux-gold w-full" />
-
+              
               <div className="p-6 sm:p-8 space-y-6">
                 {/* Header Profile */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-100 dark:border-stone-800 pb-5">
@@ -230,7 +208,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
                       {t('order.orderDetailsLabel')}
                     </span>
                     <h2 className="font-serif text-xl font-medium text-stone-900 dark:text-stone-100">{selectedOrder.clientName}</h2>
-                    <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono mt-1">{selectedOrder.id} • {selectedOrder.phone || '—'}</p>
+                    <p className="text-[10px] text-stone-500 dark:text-stone-400 font-mono mt-1">{selectedOrder.id} • {selectedOrder.email}</p>
                   </div>
                   <div className="sm:text-right text-left">
                     <span className="text-[10px] uppercase tracking-wider text-stone-400 dark:text-stone-500 block font-mono">{t('order.orderProgressTracker')}</span>
@@ -266,50 +244,43 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
                   <p className="text-xs text-stone-650 dark:text-stone-300 font-light leading-relaxed font-sans">{selectedOrder.details}</p>
                 </div>
 
-                {/* Real status history timeline */}
+                {/* Visual Blueprint Steps Map - Accordion timeline */}
                 <div className="space-y-4 pt-4 border-t border-stone-100 dark:border-stone-800 text-left">
-                  <span className="text-[9px] uppercase tracking-[0.15em] text-stone-400 dark:text-stone-400 font-mono font-semibold block">{t('order.artisanMilestones')}</span>
+                  <span className="text-[9px] uppercase tracking-[0.15em] text-stone-400 dark:text-stone-400 font-mono font-semibold block">{t('order.orderMilestones')}</span>
+                  
+                  <div className="relative pl-6 space-y-6 border-l-2 border-stone-200 dark:border-stone-800">
+                    {selectedOrder.timeline.map((step) => {
 
-                  {selectedTimeline.isLoading && (
-                    <div className="flex items-center gap-2 text-[11px] text-stone-400 font-sans py-4">
-                      <Loader2 className="w-4 h-4 animate-spin text-lux-gold" />
-                      Loading status history…
-                    </div>
-                  )}
-
-                  {!selectedTimeline.isLoading && selectedTimeline.data && selectedTimeline.data.length === 0 && (
-                    <p className="text-[11px] text-stone-500 dark:text-stone-400 font-light font-sans py-2">
-                      No status updates recorded yet.
-                    </p>
-                  )}
-
-                  {selectedTimeline.data && selectedTimeline.data.length > 0 && (
-                    <div className="relative pl-6 space-y-6 border-l-2 border-stone-200 dark:border-stone-800">
-                      {selectedTimeline.data.map((event, idx) => (
-                        <div key={event.id || idx} className="relative">
+                      return (
+                        <div key={step.title} className="relative">
                           {/* Circle indicator node */}
-                          <div className="absolute -left-[31px] top-0 w-4 h-4 rounded-full border-2 bg-white dark:bg-stone-900 flex items-center justify-center border-lux-gold text-lux-gold">
-                            <div className="w-1.5 h-1.5 rounded-full bg-lux-gold" />
+                          <div className={`absolute -left-[31px] top-0 w-4 h-4 rounded-full border-2 bg-white dark:bg-stone-900 flex items-center justify-center transition-all ${
+                            step.done 
+                              ? 'border-lux-gold text-lux-gold' 
+                              : 'border-stone-300 dark:border-stone-700'
+                          }`}>
+                            {step.done && (
+                              <div className="w-1.5 h-1.5 rounded-full bg-lux-gold" />
+                            )}
                           </div>
 
                           <div>
                             <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 justify-between">
-                              <h4 className="text-xs font-semibold text-stone-850 dark:text-stone-200">
-                                {humanizeStatus(event.toStatus)}
+                              <h4 className={`text-xs font-semibold ${step.done ? 'text-stone-850 dark:text-stone-200' : 'text-stone-400 dark:text-stone-500 font-medium'}`}>
+                                {step.title}
                               </h4>
-                              <span className="text-[9px] font-mono text-lux-gold font-bold">
-                                {formatEventDate(event.createdAt)}
+                              <span className={`text-[9px] font-mono ${step.done ? 'text-lux-gold font-bold' : 'text-stone-400 dark:text-stone-500'}`}>
+                                {step.date}
                               </span>
                             </div>
-                            <p className="text-[11px] leading-relaxed mt-1 font-sans font-light text-stone-600 dark:text-stone-300">
-                              {eventDescription(event)}
-                              {event.changedBy?.name ? ` — ${event.changedBy.name}` : ''}
+                            <p className={`text-[11px] leading-relaxed mt-1 font-sans font-light ${step.done ? 'text-stone-600 dark:text-stone-300' : 'text-stone-400 dark:text-stone-500'}`}>
+                              {step.description}
                             </p>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      );
+                    })}
+                  </div>
                 </div>
 
                 <div className="p-4 bg-stone-100 dark:bg-stone-900/60 border-l-2 border-lux-gold text-stone-800 dark:text-white text-[11px] rounded-xs font-sans leading-relaxed tracking-normal flex items-start gap-2.5">

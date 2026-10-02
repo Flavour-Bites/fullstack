@@ -1,12 +1,12 @@
 import { Send, Loader2 } from 'lucide-react';
-import { CakeGalleryItem } from '@shared/types';
+import { Product } from '@shared/types';
 import { t } from '@client/i18n/index';
 import ReferenceImageUploader from './ReferenceImageUploader';
 import { getDateInputStyles, RequestForm } from '../hooks/useRequestForm';
 
 interface RequestFormFieldsProps {
   form: RequestForm;
-  prefilledCake: CakeGalleryItem | null;
+  prefilledCake: Product | null;
   valError: string | null;
   dateError: string | null;
   uploading: boolean;
@@ -23,6 +23,7 @@ interface RequestFormFieldsProps {
   onDrop: (e: React.DragEvent) => void;
   onClearPrefilledCake: () => void;
   onSubmit: (e: React.SyntheticEvent<HTMLFormElement>) => void;
+  availability: { minimumLeadTimeHours: number; days: Record<string, boolean> } | undefined;
 }
 
 export default function RequestFormFields({
@@ -44,7 +45,8 @@ export default function RequestFormFields({
   onDrop,
   onClearPrefilledCake,
   onSubmit,
-}: RequestFormFieldsProps) {
+  availability,
+}: Readonly<RequestFormFieldsProps>) {
   return (
     <form onSubmit={onSubmit} className="space-y-6" id="cake-custom-form">
       {valError && (
@@ -115,7 +117,7 @@ export default function RequestFormFields({
             <label className={`text-[10px] uppercase font-mono tracking-widest font-bold block ${dateError ? 'text-red-500' : 'text-stone-500 dark:text-stone-400'}`}>
               {t('order.targetDate')} *
             </label>
-            {form.deliveryDate && !dateError && (
+            {form.eventDate && !dateError && (
               <span className="text-[9px] uppercase font-mono text-emerald-600 dark:text-emerald-400 font-bold tracking-wider flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />{' '}
                 Notice Met
@@ -124,17 +126,19 @@ export default function RequestFormFields({
           </div>
           <input
             type="date"
-            name="deliveryDate"
-            value={form.deliveryDate}
+            name="eventDate"
+            value={form.eventDate}
             onChange={onInputChange}
             min={getMinDateString()}
             required
-            className={`w-full border p-3 text-sm focus:outline-none rounded-sm font-mono transition-colors text-stone-850 dark:text-stone-100 ${getDateInputStyles(dateError, form.deliveryDate)}`}
+            className={`w-full border p-3 text-sm focus:outline-none rounded-sm font-mono transition-colors text-stone-850 dark:text-stone-100 ${getDateInputStyles(dateError, form.eventDate, availability)}`}
           />
           {dateError ? (
             <p className="text-[10px] text-red-500 dark:text-red-400 font-sans mt-1 leading-normal font-medium">{dateError}</p>
-          ) : (
-            <span className="text-[10px] text-stone-400 mt-1 block">Minimum 48 hours notice required.</span>
+          ) : availability && (
+            <span className="text-[10px] text-stone-400 mt-1 block">
+              Minimum {availability.minimumLeadTimeHours} hours notice required. Orders accepted for {Object.entries(availability.days).filter(([, v]) => v).map(([k]) => k.charAt(0).toUpperCase() + k.slice(1)).join(', ')}.
+            </span>
           )}
         </div>
 

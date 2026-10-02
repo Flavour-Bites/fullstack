@@ -1,6 +1,7 @@
 import { Bot } from 'grammy';
 import { env } from '../platform/config/env';
-import { handleCommands } from './commands';
+import { registerCommands } from './commands';
+import { registerConversations } from './conversations';
 import { handleCallbacks } from './callbacks';
 import { handleInline } from './inline';
 
@@ -13,7 +14,8 @@ let bot: Bot | undefined;
 export function getBot(): Bot {
   if (!bot) {
     bot = new Bot(env.TELEGRAM_BOT_TOKEN);
-    handleCommands(bot);
+    registerCommands(bot);
+    registerConversations(bot);
     handleCallbacks(bot);
     handleInline(bot);
 

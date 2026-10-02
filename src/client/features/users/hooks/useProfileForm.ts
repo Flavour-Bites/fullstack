@@ -5,6 +5,8 @@ import type { ApiResponse } from '@/shared/api';
 
 export const DIETARY_OPTIONS = ['Gluten-Free', 'Vegan', 'Dairy-Free', 'Nut Allergy', 'Egg-Free'];
 
+const SAVE_SUCCESS_NOTIFICATION_DURATION_MS = 3000;
+
 export type ProfileTab = 'personal' | 'preferences' | 'notifications' | 'security';
 
 export function useProfileForm(currentUser: UserType, onUpdateUser?: (updated: UserType) => void) {
@@ -44,7 +46,7 @@ export function useProfileForm(currentUser: UserType, onUpdateUser?: (updated: U
       if (data.success && data.user) {
         if (onUpdateUser) onUpdateUser(data.user);
         setSaveSuccess(true);
-        setTimeout(() => setSaveSuccess(false), 3000);
+        setTimeout(() => setSaveSuccess(false), SAVE_SUCCESS_NOTIFICATION_DURATION_MS);
       }
     } catch (err) {
       console.error('Failed to update profile:', err);

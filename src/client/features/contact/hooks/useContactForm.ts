@@ -16,6 +16,8 @@ const INITIAL_FORM: ContactFormState = {
   message: '',
 };
 
+const SUBMISSION_RESET_DELAY_MS = 15000;
+
 export function useContactForm() {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
@@ -43,7 +45,7 @@ export function useContactForm() {
       setTimeout(() => {
         setFormSubmitted(false);
         setContactForm(INITIAL_FORM);
-      }, 15000);
+      }, SUBMISSION_RESET_DELAY_MS);
     } catch (err: any) {
       setValError(err.message);
     } finally {

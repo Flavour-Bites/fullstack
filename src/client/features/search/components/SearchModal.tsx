@@ -2,28 +2,30 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, X, HelpCircle, ArrowRight, Command, ChevronDown, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { FAQS } from '@client/data';
-import type { CakeGalleryItem } from '@shared/types';
-import { useGalleryItems } from '../../gallery/hooks/useGalleryItems';
+import { FAQS } from '@client/content/faqs';
+import { useGalleryQuery } from '@client/features/gallery/hooks/useGalleryQuery';
+import type { Product } from '@shared/types';
+
+const INPUT_FOCUS_DELAY_MS = 100;
 
 interface SearchModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectCake?: (cake: CakeGalleryItem) => void;
+  onSelectCake?: (cake: Product) => void;
 }
 
-export default function SearchModal({ isOpen, onClose, onSelectCake }: SearchModalProps) {
+export default function SearchModal({ isOpen, onClose, onSelectCake }: Readonly<SearchModalProps>) {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [expandedFaqId, setExpandedFaqId] = useState<string | null>(null);
+  const { data: cakes = [] } = useGalleryQuery();
   const inputRef = useRef<HTMLInputElement>(null);
-  const { data: galleryItems = [], isLoading: galleryLoading } = useGalleryItems();
 
   useEffect(() => {
     if (isOpen) {
       setQuery('');
       setExpandedFaqId(null);
-      setTimeout(() => inputRef.current?.focus(), 100);
+      setTimeout(() => inputRef.current?.focus(), INPUT_FOCUS_DELAY_MS);
     }
   }, [isOpen]);
 
@@ -45,7 +47,7 @@ export default function SearchModal({ isOpen, onClose, onSelectCake }: SearchMod
     if (!query.trim()) return { cakes: [], faqs: [] };
     const q = query.toLowerCase();
 
-    const cakes = galleryItems.filter(
+    const filteredCakes = cakes.filter(
       (item) =>
         item.name.toLowerCase().includes(q) ||
         item.description.toLowerCase().includes(q) ||
@@ -59,14 +61,13 @@ export default function SearchModal({ isOpen, onClose, onSelectCake }: SearchMod
         faq.answer.toLowerCase().includes(q)
     ).slice(0, 4);
 
-    return { cakes, faqs };
-  }, [query, galleryItems]);
+    return { cakes: filteredCakes, faqs };
+  }, [query, cakes]);
 
   const hasResults = results.cakes.length > 0 || results.faqs.length > 0;
   const hasQuery = query.trim().length > 0;
-  const searching = hasQuery && galleryLoading && galleryItems.length === 0 && results.faqs.length === 0;
 
-  const handleCakeClick = (cake: CakeGalleryItem) => {
+  const handleCakeClick = (cake: Product) => {
     if (onSelectCake) {
       onSelectCake(cake);
     }
@@ -135,23 +136,17 @@ export default function SearchModal({ isOpen, onClose, onSelectCake }: SearchMod
                   <div className="flex items-center justify-center gap-4 mt-4 text-[10px] text-stone-400 font-mono">
                     <span className="flex items-center gap-1">
                       <span className="border border-stone-200 dark:border-stone-700 rounded px-1.5 py-0.5 text-[9px]">⌘K</span>
-                      to toggle
+                      {' '}to toggle
                     </span>
                     <span className="flex items-center gap-1">
                       <span className="border border-stone-200 dark:border-stone-700 rounded px-1.5 py-0.5 text-[9px]">ESC</span>
-                      to close
+                      {' '}to close
                     </span>
                   </div>
                 </div>
               )}
 
-              {hasQuery && !hasResults && searching && (
-                <div className="px-5 py-8 text-center">
-                  <p className="text-sm text-stone-500 dark:text-stone-400 font-sans">Searching the catalog…</p>
-                </div>
-              )}
-
-              {hasQuery && !hasResults && !searching && (
+              {hasQuery && !hasResults && (
                 <div className="px-5 py-8 text-center">
                   <p className="text-sm text-stone-500 dark:text-stone-400 font-sans">No results for "{query}"</p>
                   <p className="text-xs text-stone-400 dark:text-stone-500 mt-1 font-sans">Try a different search term.</p>

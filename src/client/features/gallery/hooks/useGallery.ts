@@ -1,21 +1,17 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '../../../components/Toast';
 import { http } from '@client/lib/http';
+import { queryKeys } from '@client/lib/queryKeys';
 import type { ApiResponse } from '@/shared/api';
 
 export function useGallery() {
+  const queryClient = useQueryClient();
   const { showToast } = useToast();
-  const [galleryItems, setGalleryItems] = useState<any[]>([]);
-  const [galleryLoading, setGalleryLoading] = useState(false);
 
-  const fetchGallery = useCallback(async () => {
-    setGalleryLoading(true);
-    try {
-      const { data } = await http.get<ApiResponse<{ items: any[] }>>('/api/gallery');
-      if (data.success) setGalleryItems(data.items || []);
-    } catch (e) { /* ignore */ }
-    finally { setGalleryLoading(false); }
-  }, []);
+  const invalidateGallery = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.gallery.all });
+  }, [queryClient]);
 
   const handleSaveGalleryItem = useCallback(async (galleryForm: any, editingGalleryId: string | null) => {
     if (!galleryForm.name.trim() || !galleryForm.priceEstimate.trim()) {
@@ -33,40 +29,38 @@ export function useGallery() {
         tags: galleryForm.tags.split(',').map((t: string) => t.trim()).filter(Boolean),
       };
       if (editingGalleryId) {
-        const { data } = await http.patch<ApiResponse>(`/api/gallery/${editingGalleryId}`, body);
+        const { data } = await http.patch<ApiResponse>(`/api/products/${editingGalleryId}`, body);
         if (data.success) {
-          showToast('Gallery Item Updated', `"${galleryForm.name}" updated.`, 'success');
+          showToast('Product Updated', `"${galleryForm.name}" updated.`, 'success');
         } else throw new Error(data.error);
       } else {
-        const { data } = await http.post<ApiResponse>('/api/gallery', body);
+        const { data } = await http.post<ApiResponse>('/api/products', body);
         if (data.success) {
-          showToast('Gallery Item Created', `"${galleryForm.name}" added.`, 'success');
+          showToast('Product Created', `"${galleryForm.name}" added.`, 'success');
         } else throw new Error(data.error);
       }
-      fetchGallery();
+      invalidateGallery();
       return true;
     } catch (e: any) { showToast('Failed', e.message, 'error'); }
     return false;
-  }, []);
+  }, [invalidateGallery]);
 
   const handleDeleteGalleryItem = useCallback(async (id: string, name: string) => {
-    if (!window.confirm(`Delete gallery item "${name}"? This cannot be undone.`)) return false;
+    if (!window.confirm(`Delete product "${name}"? This cannot be undone.`)) return false;
     try {
-      const { data } = await http.delete<ApiResponse>(`/api/gallery/${id}`);
+      const { data } = await http.delete<ApiResponse>(`/api/products/${id}`);
       if (data.success) {
-        showToast('Gallery Item Deleted', `"${name}" removed.`, 'warning');
-        fetchGallery();
+        showToast('Product Deleted', `"${name}" removed.`, 'warning');
+        invalidateGallery();
         return true;
       } else throw new Error(data.error);
     } catch (e: any) { showToast('Delete Failed', e.message, 'error'); }
     return false;
-  }, []);
+  }, [invalidateGallery]);
 
   return {
-    galleryItems,
-    galleryLoading,
-    fetchGallery,
     handleSaveGalleryItem,
     handleDeleteGalleryItem,
+    invalidateGallery,
   };
 }

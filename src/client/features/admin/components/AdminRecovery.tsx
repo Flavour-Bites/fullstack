@@ -25,6 +25,17 @@ function getRecoveryStatusBadge(status: string) {
   }
 }
 
+function getRecoveryStatusIcon(status: string) {
+  switch (status) {
+    case 'approved':
+      return <ShieldCheck className="w-3 h-3" />;
+    case 'rejected':
+      return <X className="w-3 h-3" />;
+    default:
+      return <Clock className="w-3 h-3" />;
+  }
+}
+
 export default function AdminRecovery({
   isAdmin, recoveryRequests, recoveryLoading,
   recoveryStatusFilter, setRecoveryStatusFilter,
@@ -38,6 +49,76 @@ export default function AdminRecovery({
         <p className="text-xs text-stone-400 dark:text-stone-400 max-w-xs mx-auto leading-relaxed">
           Recovery request management is restricted to system administrators.
         </p>
+      </div>
+    );
+  }
+
+  let content: React.ReactNode;
+  if (recoveryLoading) {
+    content = (
+      <div className="text-center py-16 bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm">
+        <Loader2 className="w-7 h-7 animate-spin text-lux-gold mx-auto mb-2" />
+        <p className="text-xs text-stone-400 dark:text-stone-400 font-mono">Loading recovery requests...</p>
+      </div>
+    );
+  } else if (recoveryRequests.length === 0) {
+    content = (
+      <div className="text-center py-16 bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm">
+        <ShieldCheck className="w-10 h-10 text-stone-400 dark:text-stone-500 mx-auto mb-3" />
+        <p className="text-sm font-serif text-stone-600 dark:text-stone-300 italic">No recovery requests found.</p>
+      </div>
+    );
+  } else {
+    content = (
+      <div className="bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-stone-100 dark:bg-stone-950 text-stone-400 dark:text-stone-400 uppercase font-mono tracking-wider font-semibold border-b border-stone-200 dark:border-stone-800">
+              <tr>
+                <th className="px-5 py-4">Old Telegram ID</th>
+                <th className="px-5 py-4">New Telegram ID</th>
+                <th className="px-5 py-4">Status</th>
+                <th className="px-5 py-4">Created</th>
+                <th className="px-5 py-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-stone-800/60">
+              {recoveryRequests.map((req: any) => (
+                <tr key={req.id} className="hover:bg-white/5 transition-colors">
+                  <td className="px-5 py-4 font-mono text-stone-900 dark:text-white text-sm">{req.oldTelegramId}</td>
+                  <td className="px-5 py-4 font-mono text-stone-900 dark:text-white text-sm">{req.newTelegramId}</td>
+                  <td className="px-5 py-4">
+                    <span className={getRecoveryStatusBadge(req.status)}>
+                      {getRecoveryStatusIcon(req.status)}
+                      {req.status}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4 text-stone-500 font-mono text-[10px]">{new Date(req.createdAt).toLocaleDateString()}</td>
+                  <td className="px-5 py-4">
+                    <div className="flex items-center justify-end gap-2">
+                      {req.status === 'pending' && (
+                        <>
+                          <button
+                            onClick={() => handleRecoveryStatus(req.id, 'approved')}
+                            className="px-2.5 py-1 bg-emerald-600 text-white font-mono text-[9px] uppercase font-bold rounded-xs flex items-center gap-1 hover:bg-emerald-500 cursor-pointer"
+                          >
+                            <ShieldCheck className="w-3 h-3" /> Approve
+                          </button>
+                          <button
+                            onClick={() => handleRecoveryStatus(req.id, 'rejected')}
+                            className="px-2.5 py-1 bg-red-700 text-white font-mono text-[9px] uppercase font-bold rounded-xs flex items-center gap-1 hover:bg-red-600 cursor-pointer"
+                          >
+                            <X className="w-3 h-3" /> Reject
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   }
@@ -70,68 +151,7 @@ export default function AdminRecovery({
         </div>
       </div>
 
-      {recoveryLoading ? (
-        <div className="text-center py-16 bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm">
-          <Loader2 className="w-7 h-7 animate-spin text-lux-gold mx-auto mb-2" />
-          <p className="text-xs text-stone-400 dark:text-stone-400 font-mono">Loading recovery requests...</p>
-        </div>
-      ) : recoveryRequests.length === 0 ? (
-        <div className="text-center py-16 bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm">
-          <ShieldCheck className="w-10 h-10 text-stone-400 dark:text-stone-500 mx-auto mb-3" />
-          <p className="text-sm font-serif text-stone-600 dark:text-stone-300 italic">No recovery requests found.</p>
-        </div>
-      ) : (
-        <div className="bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-stone-100 dark:bg-stone-950 text-stone-400 dark:text-stone-400 uppercase font-mono tracking-wider font-semibold border-b border-stone-200 dark:border-stone-800">
-                <tr>
-                  <th className="px-5 py-4">Old Telegram ID</th>
-                  <th className="px-5 py-4">New Telegram ID</th>
-                  <th className="px-5 py-4">Status</th>
-                  <th className="px-5 py-4">Created</th>
-                  <th className="px-5 py-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-stone-800/60">
-                {recoveryRequests.map((req: any) => (
-                  <tr key={req.id} className="hover:bg-white/5 transition-colors">
-                    <td className="px-5 py-4 font-mono text-stone-900 dark:text-white text-sm">{req.oldTelegramId}</td>
-                    <td className="px-5 py-4 font-mono text-stone-900 dark:text-white text-sm">{req.newTelegramId}</td>
-                    <td className="px-5 py-4">
-                      <span className={getRecoveryStatusBadge(req.status)}>
-                        {req.status === 'approved' ? <ShieldCheck className="w-3 h-3" /> : req.status === 'rejected' ? <X className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
-                        {req.status}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 text-stone-500 font-mono text-[10px]">{new Date(req.createdAt).toLocaleDateString()}</td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        {req.status === 'pending' && (
-                          <>
-                            <button
-                              onClick={() => handleRecoveryStatus(req.id, 'approved')}
-                              className="px-2.5 py-1 bg-emerald-600 text-white font-mono text-[9px] uppercase font-bold rounded-xs flex items-center gap-1 hover:bg-emerald-500 cursor-pointer"
-                            >
-                              <ShieldCheck className="w-3 h-3" /> Approve
-                            </button>
-                            <button
-                              onClick={() => handleRecoveryStatus(req.id, 'rejected')}
-                              className="px-2.5 py-1 bg-red-700 text-white font-mono text-[9px] uppercase font-bold rounded-xs flex items-center gap-1 hover:bg-red-600 cursor-pointer"
-                            >
-                              <X className="w-3 h-3" /> Reject
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      {content}
     </div>
   );
 }

@@ -70,43 +70,43 @@ describe('ConversationStateStore', () => {
     });
   });
 
-  describe('quote conversation', () => {
+  describe('price conversation', () => {
     const telegramId = '789012';
-    const quoteData = {
+    const priceData = {
       orderId: 'FB-ABC123',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
-    it('stores and retrieves a quote conversation', async () => {
-      await store.setQuote(telegramId, quoteData);
-      const result = await store.getQuote(telegramId);
+    it('stores and retrieves a price conversation', async () => {
+      await store.setPrice(telegramId, priceData);
+      const result = await store.getPrice(telegramId);
       expect(result).not.toBeNull();
       expect(result?.orderId).toBe('FB-ABC123');
     });
 
-    it('returns null for non-existent quote', async () => {
-      const result = await store.getQuote('999');
+    it('returns null for non-existent price', async () => {
+      const result = await store.getPrice('999');
       expect(result).toBeNull();
     });
 
-    it('clears a quote conversation', async () => {
-      await store.setQuote(telegramId, quoteData);
-      await store.clearQuote(telegramId);
-      expect(await store.getQuote(telegramId)).toBeNull();
+    it('clears a price conversation', async () => {
+      await store.setPrice(telegramId, priceData);
+      await store.clearPrice(telegramId);
+      expect(await store.getPrice(telegramId)).toBeNull();
     });
   });
 
-  describe('independence of order and quote', () => {
-    it('order and quote keys do not interfere', async () => {
+  describe('independence of order and price', () => {
+    it('order and price keys do not interfere', async () => {
       await store.setOrder('user1', { step: 'done', userId: 'user1', contactName: 'A', contactPhone: '1', createdAt: '', updatedAt: '' });
-      await store.setQuote('user1', { orderId: 'FB-1', createdAt: '', updatedAt: '' });
+      await store.setPrice('user1', { orderId: 'FB-1', createdAt: '', updatedAt: '' });
       const order = await store.getOrder('user1');
-      const quote = await store.getQuote('user1');
+      const price = await store.getPrice('user1');
       expect(order).not.toBeNull();
-      expect(quote).not.toBeNull();
+      expect(price).not.toBeNull();
       expect(order?.step).toBe('done');
-      expect(quote?.orderId).toBe('FB-1');
+      expect(price?.orderId).toBe('FB-1');
     });
   });
 });
@@ -145,7 +145,7 @@ describe('ConversationStateStore — corrupted data resilience', () => {
     expect(delFn).toHaveBeenCalled();
   });
 
-  it('returns null and clears corrupted JSON for quote', async () => {
+  it('returns null and clears corrupted JSON for price', async () => {
     const delFn = vi.fn(async () => {});
     const corruptedStore: KeyValueStore = {
       get: vi.fn(async () => '{{invalid'),
@@ -154,7 +154,7 @@ describe('ConversationStateStore — corrupted data resilience', () => {
     };
     const store = new ConversationStateStore(corruptedStore);
 
-    const result = await store.getQuote('user1');
+    const result = await store.getPrice('user1');
     expect(result).toBeNull();
     expect(delFn).toHaveBeenCalled();
   });

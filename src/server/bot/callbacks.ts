@@ -4,7 +4,7 @@ import { answerCallback, editMessage, sendMessage } from "../platform/integratio
 import {
     getStaffChatIds,
     notifyCustomerStatusChange,
-    notifyStaffQuoteAccepted,
+    notifyStaffPriceConfirmed,
 } from "../platform/integrations/telegram/telegramNotifications";
 import { getConversationStore } from "../platform/integrations/redis/conversationState";
 import { ordersRepository } from "../modules/orders/orders.repository";
@@ -37,7 +37,7 @@ export function handleCallbacks(bot: Bot) {
                 chatId!,
                 messageId!,
                 `✅ <b>Status updated to "${newStatus}"</b> for order <code>${orderId}</code>\n\n` +
-                    `Customer: ${order.contactName} | ${order.eventType} | ${order.deliveryDate}`,
+                    `Customer: ${order.contactName} | ${order.eventType} | ${order.eventDate}`,
                 newStatus === "InProgress"
                     ? [
                           [
@@ -51,10 +51,10 @@ export function handleCallbacks(bot: Bot) {
             );
 
             await answerCallback(callbackId, `Status updated to ${newStatus}`);
-        } else if (data.startsWith("quote:")) {
+        } else if (data.startsWith("price:")) {
             const [, orderId] = data.split(":");
 
-            await conversationStore.setQuote(String(ctx.from?.id), {
+            await conversationStore.setPrice(String(ctx.from?.id), {
                 orderId,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -88,12 +88,12 @@ export function handleCallbacks(bot: Bot) {
             });
 
             await notifyCustomerStatusChange(orderId);
-            await notifyStaffQuoteAccepted({ ...order, user: order.user });
+            await notifyStaffPriceConfirmed({ ...order, user: order.user });
 
             await editMessage(
                 chatId!,
                 messageId!,
-                `✅ <b>Quote accepted!</b>\n\nYour <b>${order.eventType}</b> cake is now confirmed. We'll start baking and keep you posted. Thank you! 🎂`,
+                `✅ <b>Price confirmed!</b>\n\nYour <b>${order.eventType}</b> cake is now confirmed. We'll start baking and keep you posted. Thank you! 🎂`,
             );
 
             await answerCallback(callbackId, "Order confirmed!");
@@ -108,8 +108,8 @@ export function handleCallbacks(bot: Bot) {
             for (const id of staffIds) {
                 await sendMessage(
                     id,
-                    `💬 <b>Quote Revision Requested</b>\n\n` +
-                        `<b>${order?.contactName}</b> would like to discuss the quote for order <code>${orderId}</code>.\n` +
+                    `💬 <b>Price Change Requested</b>\n\n` +
+                        `<b>${order?.contactName}</b> would like to discuss the price for order <code>${orderId}</code>.\n` +
                         `Please contact them directly.`,
                 );
             }
@@ -125,38 +125,5 @@ export function handleCallbacks(bot: Bot) {
                 "Revision request sent to the baker.",
             );
         }
-    });
-
-    bot.on("message:text", async (ctx) => {
-        const senderId = String(ctx.from?.id);
-        const pendingQuote = await conversationStore.getQuote(senderId);
-        const orderId = pendingQuote?.orderId;
-        if (!orderId) return;
-
-        const priceRaw = ctx.message.text.replace(/[^0-9]/g, "");
-        const price = parseInt(priceRaw, 10);
-
-        if (isNaN(price) || price < 500 || price > 100000) {
-            await ctx.reply(
-                "⚠️ Please enter a valid price in ETB (e.g. <code>4500</code>).",
-                { parse_mode: "HTML" },
-            );
-            return;
-        }
-
-        await ordersRepository.updateCommercials(orderId, { quotedPrice: price });
-        await ordersRepository.updateStatus(orderId, "Quoted", {
-            source: "telegram_bot",
-            userId: String(ctx.from?.id),
-        });
-
-        await conversationStore.clearQuote(senderId);
-
-        await notifyCustomerStatusChange(orderId);
-
-        await ctx.reply(
-            `✅ Price of <b>${price.toLocaleString()} ETB</b> sent to the customer for order <code>${orderId}</code>.\n\nThey'll receive a notification with Accept/Change buttons.`,
-            { parse_mode: "HTML" },
-        );
     });
 }

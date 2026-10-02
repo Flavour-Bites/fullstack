@@ -11,9 +11,10 @@ export default function NotificationsTab({ notify, onNotifyChange }: Notificatio
       title="Notifications"
       subtitle="Control how and when we communicate with you"
     >
-      <label className="flex items-start gap-4.5 cursor-pointer p-5 bg-stone-50/30 dark:bg-stone-900/10 border border-stone-200/80 dark:border-stone-800 rounded-sm hover:border-lux-gold/40 transition-all duration-300 group shadow-xs">
+      <label htmlFor="notify-toggle" className="flex items-start gap-4.5 cursor-pointer p-5 bg-stone-50/30 dark:bg-stone-900/10 border border-stone-200/80 dark:border-stone-800 rounded-sm hover:border-lux-gold/40 transition-all duration-300 group shadow-xs">
         <div className="relative mt-1 shrink-0">
           <input
+            id="notify-toggle"
             type="checkbox"
             checked={notify}
             onChange={(e) => onNotifyChange(e.target.checked)}

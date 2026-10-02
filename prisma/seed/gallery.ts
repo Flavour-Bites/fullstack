@@ -57,24 +57,24 @@ export const GALLERY_ITEMS = [
   {
     id: 'kc-02',
     name: 'Sweet Carousel',
-    description: 'A beautiful fairytale-inspired carousel birthday cake in soft blue, pink, and gold details.',
+    description: 'A beautiful storybook carousel birthday cake in soft blue, pink, and gold details.',
     categorySlug: 'kids',
     flavors: ['Classic Strawberry Shortcake', 'Sweet Honey Butter'],
     priceEstimate: '3,200 ETB',
     image: 'https://images.unsplash.com/photo-1558961313-7f24be4c1945?auto=format&fit=crop&q=80&w=800',
     servingCount: '25 - 30 guests',
-    tags: ['Kids', 'Fairytale', 'Gold Leaf', 'Birthday']
+    tags: ['Kids', 'Storybook', 'Gold Leaf', 'Birthday']
   },
   {
     id: 'tr-01',
-    name: 'Gourmet Sweets Platter',
+    name: 'Sweet Treats Platter',
     description: 'A handmade selection of classic macarons, raspberry cream buns, and chocolate-layered cakes.',
     categorySlug: 'treats',
     flavors: ['Pistachio', 'Coffee', 'Rose & Lychee'],
     priceEstimate: '850 ETB / dozen',
     image: 'https://images.unsplash.com/photo-1517433456452-f9633a875f6f?auto=format&fit=crop&q=80&w=800',
     servingCount: 'Assorted custom platters',
-    tags: ['Gourmet Treats', 'Assorted', 'Pistachio', 'Macarons']
+    tags: ['Sweet Treats', 'Assorted', 'Pistachio', 'Macarons']
   },
   {
     id: 'tr-02',
@@ -85,11 +85,11 @@ export const GALLERY_ITEMS = [
     priceEstimate: '1,800 ETB',
     image: 'https://images.unsplash.com/photo-1550617931-e17a7b70dce2?auto=format&fit=crop&q=80&w=800',
     servingCount: 'Serves up to 25 people',
-    tags: ['Gourmet Treats', 'Macarons', 'Fruity', 'Gold Leaf']
+    tags: ['Sweet Treats', 'Macarons', 'Fruity', 'Gold Leaf']
   },
   {
     id: 'cc-01',
-    name: 'The Emerald Jewel',
+    name: 'Emerald Green Cake',
     description: 'A striking emerald-green cake combined with edible sugar crystals growing from a gold-painted center.',
     categorySlug: 'celebration',
     flavors: ['Pistachio Praline', 'Lemon Curd & Meringue'],

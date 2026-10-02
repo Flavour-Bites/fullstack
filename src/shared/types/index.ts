@@ -7,6 +7,7 @@ export interface User {
   telegramUsername?: string | null;
   telegramPhoto?: string | null;
   notifyViaTelegram?: boolean;
+  telegramBotWriteAccess?: boolean;
   telegramPhone?: string | null;
   dietaryPreferences?: string[];
   language?: string;
@@ -23,9 +24,17 @@ export interface Review {
   productId?: string | null;
   date: string;
   createdAt: string;
+  user?: {
+    id: string;
+    name: string;
+    telegramPhoto?: string | null;
+  } | null;
 }
 
-export interface CakeGalleryItem {
+export type CompanyReview = Review; // Reviews without productId (company/service testimonials)
+export type ProductReview = Review; // Reviews with productId (product-specific reviews)
+
+export interface Product {
   id: string;
   name: string;
   description: string;
@@ -37,9 +46,10 @@ export interface CakeGalleryItem {
   imagePublicId?: string | null;
   servingCount: string;
   tags: string[];
+  isActive?: boolean;
 }
 
-export type OrderStatus = 'Received' | 'Designing' | 'Quoted' | 'Confirmed' | 'InProgress' | 'Ready' | 'Completed' | 'Cancelled';
+export type OrderStatus = 'Received' | 'Designing' | 'Priced' | 'Confirmed' | 'InProgress' | 'Ready' | 'Completed' | 'Cancelled';
 
 export interface CustomCakeRequest {
   id: string;
@@ -47,9 +57,7 @@ export interface CustomCakeRequest {
   contactPhone: string;
   eventType: string;
   guestCount: number;
-  deliveryOption: 'pickup' | 'delivery';
-  deliveryAddress?: string;
-  deliveryDate: string;
+  eventDate: string;
   designStyle: string;
   flavor: string;
   tierCount: number;
@@ -57,7 +65,7 @@ export interface CustomCakeRequest {
   requestDate: string;
   referenceImage?: string;
   status: OrderStatus;
-  quotedPrice?: number;
+  price?: number;
   finalPrice?: number;
   priceConfirmedAt?: string;
   depositAmount: number;
@@ -93,4 +101,39 @@ export interface IngredientSpotlight {
   origin: string;
   description: string;
   image: string;
+}
+
+export interface RequestForm {
+  contactName: string;
+  contactPhone: string;
+  eventDate: string;
+  cakeDescription: string;
+}
+
+export interface AvailabilityPolicy {
+  isEnabled: boolean;
+  timezone: string;
+  minimumLeadTimeHours: number;
+  mondayEnabled: boolean;
+  tuesdayEnabled: boolean;
+  wednesdayEnabled: boolean;
+  thursdayEnabled: boolean;
+  fridayEnabled: boolean;
+  saturdayEnabled: boolean;
+  sundayEnabled: boolean;
+}
+
+export interface AvailabilityResponse {
+  isEnabled: boolean;
+  timezone: string;
+  minimumLeadTimeHours: number;
+  days: {
+    monday: boolean;
+    tuesday: boolean;
+    wednesday: boolean;
+    thursday: boolean;
+    friday: boolean;
+    saturday: boolean;
+    sunday: boolean;
+  };
 }
