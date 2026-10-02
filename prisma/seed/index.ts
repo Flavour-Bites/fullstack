@@ -67,7 +67,7 @@ async function main() {
   for (const item of GALLERY_ITEMS) {
     const categoryId = categoryMap.get(item.categorySlug) || CATEGORY_SEEDS[0].id;
     const { categorySlug, ...rest } = item;
-    const record = await prisma.cakeGalleryItem.upsert({
+    const record = await prisma.product.upsert({
       where: { id: item.id },
       update: { ...rest, categoryId },
       create: { ...rest, categoryId }

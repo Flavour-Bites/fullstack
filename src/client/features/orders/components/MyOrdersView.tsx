@@ -57,7 +57,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
     if (item.status === 'Ready' || item.status === 'Completed') stepNumber = 5;
 
     return {
-      id: item.id || `FB-${Math.floor(1000 + Math.random() * 9000)}Y`,
+      id: item.id || `FB-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
       clientName: item.contactName || 'Valued Client',
       email: item.contactEmail || '',
       cakeType: `${item.eventType || 'Custom Celebration'} Cake`,
@@ -162,12 +162,11 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
 
             <div className="space-y-3.5 max-h-[360px] overflow-y-auto pr-1">
               {liveOrders.map((ord) => (
-                <div
+                <button
                   key={ord.id}
+                  type="button"
                   onClick={() => { setSelectedOrder(ord); setSearchError(false); }}
-                  role="button"
-                  tabIndex={0}
-                  className={`p-3.5 rounded-sm border transition-all cursor-pointer text-left ${
+                  className={`p-3.5 rounded-sm border transition-all cursor-pointer text-left w-full text-left ${
                     selectedOrder?.id === ord.id
                       ? 'bg-lux-cream/20 dark:bg-stone-900/40 border-lux-gold/60 shadow-xs'
                       : 'bg-stone-50/50 dark:bg-stone-900/20 hover:bg-stone-50 dark:hover:bg-stone-900/65 border-stone-200 dark:border-stone-800'
@@ -184,7 +183,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
                     <span>{ord.cakeType} ({ord.tierCount} Tiers)</span>
                     <span className="font-mono">{ord.eventDate}</span>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -250,10 +249,10 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
                   <span className="text-[9px] uppercase tracking-[0.15em] text-stone-400 dark:text-stone-400 font-mono font-semibold block">{t('order.orderMilestones')}</span>
                   
                   <div className="relative pl-6 space-y-6 border-l-2 border-stone-200 dark:border-stone-800">
-                    {selectedOrder.timeline.map((step, idx) => {
+                    {selectedOrder.timeline.map((step) => {
 
                       return (
-                        <div key={idx} className="relative">
+                        <div key={step.title} className="relative">
                           {/* Circle indicator node */}
                           <div className={`absolute -left-[31px] top-0 w-4 h-4 rounded-full border-2 bg-white dark:bg-stone-900 flex items-center justify-center transition-all ${
                             step.done 

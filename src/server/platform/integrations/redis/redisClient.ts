@@ -92,7 +92,7 @@ export class RedisStore implements KeyValueStore {
 
   private async getSocket(): Promise<RedisSocket> {
     if (this.socket && !this.socket.destroyed) return this.socket;
-    if (this.connectPromise) return this.connectPromise;
+    if (this.connectPromise !== null) return this.connectPromise;
 
     this.connectPromise = this.createSocket();
     try {

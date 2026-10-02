@@ -1,7 +1,6 @@
 import { Product } from '@shared/types';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useFeaturedCakes } from '../hooks/useFeaturedCakes';
-import { useTestimonials } from '../hooks/useTestimonials';
 import { useTestimonialCarousel } from '../hooks/useTestimonialCarousel';
 import { useReviews } from '../hooks/useReviews';
 import HomeHero from './home/HomeHero';

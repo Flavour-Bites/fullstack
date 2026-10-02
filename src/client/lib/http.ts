@@ -100,7 +100,7 @@ export async function apiGet<T>(
 ): Promise<Extract<ApiResponse<T>, { success: true }>> {
   const { data } = await http.get<ApiResponse<T>>(path, config);
   if (!data.success) {
-    throw new ApiError(data.error || 'Request failed');
+    throw new ApiError(data.error || 'Request failed', data.status, data.code || 'REQUEST_FAILED');
   }
   return data;
 }

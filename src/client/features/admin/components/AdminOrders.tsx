@@ -138,18 +138,24 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
 
               {/* Inline edit form */}
               {isEditing && (
-                <div onClick={e => e.stopPropagation()} className="mt-4 p-4 border-t border-stone-200/70 dark:border-stone-800/70 bg-stone-100/50 dark:bg-stone-900/50 space-y-4 rounded-xs">
-                  <h4 className="text-[10px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 font-bold">{t('admin.editOrder')}</h4>
+                <div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="edit-order-title"
+                  onClick={e => e.stopPropagation()}
+                  className="mt-4 p-4 border-t border-stone-200/70 dark:border-stone-800/70 bg-stone-100/50 dark:bg-stone-900/50 space-y-4 rounded-xs w-full text-left"
+                >
+                  <h4 id="edit-order-title" className="text-[10px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 font-bold">{t('admin.editOrder')}</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.statusLabel')}</label>
-                      <select value={editStatus} onChange={e => setEditStatus(e.target.value)} className="w-full bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs">
+                      <label htmlFor="edit-status" className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.statusLabel')}</label>
+                      <select id="edit-status" value={editStatus} onChange={e => setEditStatus(e.target.value)} className="w-full bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs">
                         {WORKFLOW.map(s => <option key={s} value={s}>{s}</option>)}
                       </select>
                     </div>
                     <div>
-                      <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.price')}</label>
-                      <input type="number" value={editCost} onChange={e => setEditCost(Math.max(0, Number(e.target.value)))} className="w-full bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
+                      <label htmlFor="edit-price" className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.price')}</label>
+                      <input id="edit-price" type="number" value={editCost} onChange={e => setEditCost(Math.max(0, Number(e.target.value)))} className="w-full bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs" />
                     </div>
                   </div>
                   <div className="flex justify-end gap-2">

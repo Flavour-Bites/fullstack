@@ -1,14 +1,14 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { screen, cleanup } from '@testing-library/react';
 import { renderWithQueryClient } from '@test/queryClientWrapper';
 import TestimonialsView from '@client/features/core/components/TestimonialsView';
-import { apiGet } from '@client/lib/http';
-import { t } from '@client/i18n/index';
 import { http } from '@client/lib/http';
 
 vi.mock('@client/lib/http', () => ({
-  apiGet: vi.fn(),
+  http: {
+    get: vi.fn(),
+  },
 }));
 
 const REVIEW = {
@@ -32,7 +32,9 @@ beforeAll(() => {
     unobserve() {}
   }
   vi.stubGlobal('IntersectionObserver', IntersectionObserverMock);
-  vi.mocked(apiGet).mockResolvedValue({ success: true, reviews: [REVIEW] } as never);
+  vi.mocked(http.get).mockResolvedValue({
+    data: { success: true, reviews: [REVIEW] },
+  } as never);
 });
 
 afterEach(() => {
@@ -41,13 +43,9 @@ afterEach(() => {
 });
 
 beforeEach(() => {
-  vi.mocked(apiGet).mockResolvedValue({ success: true, reviews: [REVIEW] } as never);
-});
-
-beforeEach(() => {
-  vi.spyOn(http, 'get').mockResolvedValue({
-    data: { success: true, reviews: [] },
-  } as any);
+  vi.mocked(http.get).mockResolvedValue({
+    data: { success: true, reviews: [REVIEW] },
+  } as never);
 });
 
 afterEach(() => {
@@ -63,9 +61,9 @@ describe('TestimonialsView', () => {
 
   it('renders filter buttons', () => {
     renderWithQueryClient(<TestimonialsView />);
-    expect(screen.getByText(t('testimonials.allTributes'))).toBeInTheDocument();
-    expect(screen.getByText(t('testimonials.milestoneCelebrations'))).toBeInTheDocument();
-    expect(screen.getByText(t('testimonials.birthdaysParties'))).toBeInTheDocument();
+    expect(screen.getByText('All Reviews')).toBeInTheDocument();
+    expect(screen.getByText('Milestone Celebrations')).toBeInTheDocument();
+    expect(screen.getByText('Birthdays & Parties')).toBeInTheDocument();
   });
 
   it('renders community feedback section', () => {
@@ -79,7 +77,7 @@ describe('TestimonialsView', () => {
 
   it('renders real reviews from the API', async () => {
     renderWithQueryClient(<TestimonialsView />);
-    expect(apiGet).toHaveBeenCalledWith('/api/reviews');
+    expect(vi.mocked(http.get)).toHaveBeenCalledWith('/api/reviews');
     const review = await screen.findByText(/breathtaking three-tier cake/);
     expect(review).toBeInTheDocument();
     expect(screen.getByText('Saba Tekle')).toBeInTheDocument();

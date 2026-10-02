@@ -30,21 +30,13 @@ export default function HomeShowcase({ featuredCakes, onSelectCake }: Readonly<H
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {featuredCakes.map((cake) => (
-            <div
+            <button
               key={cake.id}
-              role="button"
-              tabIndex={0}
+              type="button"
               className="group cursor-pointer text-left bg-white dark:bg-stone-950 border border-stone-200/60 dark:border-stone-850/70 p-4 rounded-sm shadow-xs transition-all duration-300 hover:shadow-xl"
               onClick={() => {
                 onSelectCake(cake);
                 navigate('/gallery');
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  onSelectCake(cake);
-                  navigate('/gallery');
-                }
               }}
             >
               <div className="aspect-[3/4] overflow-hidden mb-4 relative bg-stone-100 dark:bg-stone-900 rounded-sm">
@@ -65,7 +57,7 @@ export default function HomeShowcase({ featuredCakes, onSelectCake }: Readonly<H
                 </div>
                 <span className="font-mono text-xs text-lux-gold font-bold bg-lux-gold/10 px-2 py-1 rounded-sm border border-lux-gold/15 shrink-0">{cake.priceEstimate}</span>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>

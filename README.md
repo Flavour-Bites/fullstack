@@ -138,7 +138,7 @@ services:
       retries: 10
 
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     container_name: fb_redis
     ports:
       - "6379:6379"
@@ -220,7 +220,7 @@ services:
       retries: 10
 
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     container_name: fb_redis
     volumes:
       - redisdata:/data

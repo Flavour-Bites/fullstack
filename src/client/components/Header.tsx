@@ -17,6 +17,15 @@ interface HeaderProps {
   onSearchOpen: () => void;
 }
 
+function getMobileMenuButtonClass(isOpen: boolean, isDark: boolean): string {
+  if (isOpen) {
+    return isDark ? 'bg-stone-900 text-lux-gold' : 'bg-stone-200/60 text-stone-900';
+  }
+  return isDark
+    ? 'text-stone-300 hover:text-white hover:bg-stone-900/60'
+    : 'text-stone-700 hover:text-stone-950 hover:bg-stone-200/50';
+}
+
 export default function Header({
   currentUser, darkMode, locale,
   onToggleDarkMode, onToggleLocale, onLogout, onSearchOpen,
@@ -131,15 +140,10 @@ export default function Header({
 
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className={`p-2 rounded-full focus:outline-none transition-all cursor-pointer flex items-center justify-center ${
-              mobileMenuOpen
-                ? darkMode
-                  ? 'bg-stone-900 text-lux-gold'
-                  : 'bg-stone-200/60 text-stone-900'
-                : darkMode
-                  ? 'text-stone-300 hover:text-white hover:bg-stone-900/60'
-                  : 'text-stone-700 hover:text-stone-950 hover:bg-stone-200/50'
-            }`}
+            className={`p-2 rounded-full focus:outline-none transition-all cursor-pointer flex items-center justify-center ${getMobileMenuButtonClass(
+              mobileMenuOpen,
+              darkMode
+            )}`}
             aria-label="Toggle menu"
             aria-expanded={mobileMenuOpen}
           >

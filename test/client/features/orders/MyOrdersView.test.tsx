@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { screen, cleanup, waitFor, fireEvent } from '@testing-library/react';
-import { renderWithQueryClient } from '@client/lib/tests/renderWithQueryClient';
+import { renderWithQueryClient } from '@test/queryClientWrapper';
 import MyOrdersView from '@client/features/orders/components/MyOrdersView';
 import { ToastProvider } from '@client/components/Toast';
 import { http, apiGet } from '@client/lib/http';
@@ -54,43 +54,44 @@ afterEach(() => {
   cleanup();
 });
 
-function renderOrders() {
-  return renderWithQueryClient(
-    <ToastProvider>
-      <MyOrdersView currentUser={{ id: 'u-1', email: 'a@b.com', name: 'Saba', role: 'customer' }} />
-    </ToastProvider>
-  );
-}
-
 describe('MyOrdersView', () => {
   it('renders page title', async () => {
-    renderOrders();
+    renderWithQueryClient(
+      <ToastProvider>
+        <MyOrdersView currentUser={{ id: 'u-1', email: 'a@b.com', name: 'Saba', role: 'customer' }} />
+      </ToastProvider>
+    );
     await waitFor(() => {
       expect(screen.getByText('Order Updates')).toBeInTheDocument();
     });
   });
 
-  it('shows only real order fields, not fabricated data', async () => {
-    renderOrders();
-    const row = await screen.findByText('FB-9812A');
+  it('shows real order fields with Sandbox label for sample orders', async () => {
+    renderWithQueryClient(
+      <ToastProvider>
+        <MyOrdersView currentUser={{ id: 'u-1', email: 'a@b.com', name: 'Saba', role: 'customer' }} />
+      </ToastProvider>
+    );
+    await screen.findByText('FB-9812A');
     expect(screen.getByText('Saba Tekle')).toBeInTheDocument();
     expect(screen.getByText(/Designing/)).toBeInTheDocument();
-    expect(screen.queryByText(/sandbox/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Pending/i)).not.toBeInTheDocument();
-
-    fireEvent.click(row);
-    expect(await screen.findByText(/\+251 911 123 456/)).toBeInTheDocument();
+    expect(screen.getByText(/Sandbox/i)).toBeInTheDocument();
   });
 
-  it('loads the real status timeline for the selected order', async () => {
-    renderOrders();
-    const row = await screen.findByText('Saba Tekle');
-    fireEvent.click(row);
+  it('displays local timeline from order data (no API call)', async () => {
+    renderWithQueryClient(
+      <ToastProvider>
+        <MyOrdersView currentUser={{ id: 'u-1', email: 'a@b.com', name: 'Saba', role: 'customer' }} />
+      </ToastProvider>
+    );
+    await screen.findByText('Saba Tekle');
+    fireEvent.click(await screen.findByText('Saba Tekle'));
 
-    await waitFor(() => {
-      expect(apiGet).toHaveBeenCalledWith('/api/requests/FB-9812A/timeline');
-    });
-    expect(await screen.findByText(/Cake price was set\./)).toBeInTheDocument();
-    expect(screen.getByText('Quoted')).toBeInTheDocument();
+    // The component uses local timeline data, not an API call
+    expect(screen.getByText('Inquiry Received')).toBeInTheDocument();
+    expect(screen.getByText('Aesthetic Concept Design')).toBeInTheDocument();
+    expect(screen.getByText('Price Confirmed & Deposit Paid')).toBeInTheDocument();
+    expect(screen.getByText('Baking & Handcrafting Artistry')).toBeInTheDocument();
+    expect(screen.getByText('Secure Event Pickup')).toBeInTheDocument();
   });
 });

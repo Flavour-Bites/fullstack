@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import type { CakeGalleryItem } from '@shared/types';
+import type { Product } from '@shared/types';
 import { apiGet } from '@client/lib/http';
 
 // Single source of truth for the public gallery catalog. React Query caches
@@ -8,6 +8,6 @@ import { apiGet } from '@client/lib/http';
 export function useGalleryItems() {
   return useQuery({
     queryKey: ['gallery', 'items'],
-    queryFn: async () => (await apiGet<{ items: CakeGalleryItem[] }>('/api/gallery')).items,
+    queryFn: async () => (await apiGet<{ items: Product[] }>('/api/gallery')).items,
   });
 }

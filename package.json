@@ -28,8 +28,12 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:client": "vitest run test/client",
-    "test:server": "vitest run test/server test/shared",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "sonar": "sonar-queue",
+    "sonar:status": "sonar-queue status",
+    "sonar:next": "sonar-queue next",
+    "sonar:sync": "sonar-queue sync",
+    "sonar:export": "sonar-queue export"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
