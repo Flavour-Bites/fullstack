@@ -1,43 +1,19 @@
 import { Bot } from "grammy";
 import type { InlineQueryResultArticle, InputTextMessageContent } from "grammy/types";
-import { getPrisma } from "../platform/config/prisma";
+import { ordersService } from "../modules/orders/orders.service";
+import { productsService } from "../modules/products/products.service";
 
 export function handleInline(bot: Bot) {
     bot.on("inline_query", async (ctx) => {
         const query = ctx.inlineQuery.query.trim().toLowerCase();
-        const prisma = getPrisma();
 
         if (query.length === 0) {
             return ctx.answerInlineQuery([]);
         }
 
         const [orders, gallery] = await Promise.all([
-            prisma.customCakeRequest.findMany({
-                where: {
-                    deletedAt: null,
-                    OR: [
-                        { id: { contains: query, mode: "insensitive" } },
-                        { contactName: { contains: query, mode: "insensitive" } },
-                        { flavor: { contains: query, mode: "insensitive" } },
-                        { eventType: { contains: query, mode: "insensitive" } },
-                        { contactPhone: { contains: query, mode: "insensitive" } },
-                    ],
-                },
-                orderBy: { createdAt: "desc" },
-                take: 30,
-            }),
-            prisma.product.findMany({
-                where: {
-                    OR: [
-                        { name: { contains: query, mode: "insensitive" } },
-                        { flavors: { has: query } },
-                        { tags: { has: query } },
-                        { description: { contains: query, mode: "insensitive" } },
-                    ],
-                },
-                take: 10,
-                orderBy: { createdAt: "desc" },
-            }),
+            ordersService.search(query, 30),
+            productsService.search(query, 10),
         ]);
 
         const results: InlineQueryResultArticle[] = [];

@@ -1,9 +1,6 @@
 import { Context } from 'grammy';
-import { ordersRepository } from '../../modules/orders/orders.repository';
-import { notifyStaffNewOrder } from '../../platform/integrations/telegram/telegramNotifications';
+import { ordersService } from '../../modules/orders/orders.service';
 import { getConversationStore } from '../../platform/integrations/redis/conversationState';
-import { formatRequestDate } from '../../../shared/utils/dateFormat';
-import { makeOrderId } from '../../../shared/utils/ids';
 import { businessAvailabilityService } from '../../modules/business/businessAvailability.service';
 import type { OrderConversation, OrderWizardStep } from '../types';
 
@@ -116,13 +113,8 @@ const stepHandlers: Record<OrderWizardStep, WizardHandler> = {
     conv.specialInstructions = text === 'none' ? '' : text;
     conv.step = 'done';
 
-    const requestId = makeOrderId();
-    const requestDate = formatRequestDate();
-
-    const order = await ordersRepository.create(
+    const order = await ordersService.create(
       {
-        id: requestId,
-        userId: conv.userId,
         contactName: conv.contactName,
         contactPhone: conv.contactPhone,
         eventType: conv.eventType || 'Custom Order',
@@ -132,16 +124,12 @@ const stepHandlers: Record<OrderWizardStep, WizardHandler> = {
         flavor: conv.flavor || 'Vanilla',
         tierCount: conv.tierCount || 1,
         specialInstructions: conv.specialInstructions || '',
-        requestDate,
       },
-      { source: 'telegram_bot', userId: conv.userId }
+      conv.userId,
+      'telegram_bot'
     );
 
     await conversationStore.clearOrder(telegramId);
-
-    notifyStaffNewOrder(order).catch((e) =>
-      console.error('[Notify] Failed to notify staff of new order:', e.message)
-    );
 
     await ctx.reply(
       `✅ <b>Your cake request has been sent!</b> 🎂\n\n` +
@@ -151,7 +139,7 @@ const stepHandlers: Record<OrderWizardStep, WizardHandler> = {
         `• <b>Guests:</b> ${conv.guestCount}\n` +
         `• <b>Flavor:</b> ${conv.flavor}\n` +
         `• <b>Tiers:</b> ${conv.tierCount}\n` +
-        `• <b>Order ID:</b> <code>${requestId}</code>\n\n` +
+        `• <b>Order ID:</b> <code>${order.id}</code>\n\n` +
         `Yodit will review your request and get back to you soon! Use /status to check your order anytime.`,
       { parse_mode: 'HTML' }
     );

@@ -1,23 +1,12 @@
 import { CommandContext, Context } from 'grammy';
-import { getPrisma } from '../../platform/config/prisma';
+import { usersService } from '../../modules/users/users.service';
+import { ordersService } from '../../modules/orders/orders.service';
 import { STATUS_EMOJI } from '../../../shared/constants/orderStatus';
 
 export async function handleStatusCommand(ctx: CommandContext<Context>): Promise<void> {
   const telegramId = String(ctx.from?.id);
-  const prisma = getPrisma();
 
-  const user = await prisma.user.findFirst({
-    where: { telegramId, deletedAt: null },
-    include: {
-      requests: {
-        where: {
-          status: { notIn: ['Completed', 'Cancelled'] },
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 5,
-      },
-    },
-  });
+  const user = await usersService.findByTelegramId(telegramId);
 
   if (!user) {
     await ctx.reply(
@@ -27,7 +16,9 @@ export async function handleStatusCommand(ctx: CommandContext<Context>): Promise
     return;
   }
 
-  if (user.requests.length === 0) {
+  const activeOrders = await ordersService.findActiveByUserId(user.id, 5);
+
+  if (activeOrders.length === 0) {
     await ctx.reply(
       `Hi <b>${user.name}</b>! You have no active orders right now.\n\nUse /order to start a new cake request. 🎂`,
       { parse_mode: 'HTML' }
@@ -35,7 +26,7 @@ export async function handleStatusCommand(ctx: CommandContext<Context>): Promise
     return;
   }
 
-  const lines = user.requests.map((r, i) => {
+  const lines = activeOrders.map((r, i) => {
     const emoji = STATUS_EMOJI[r.status] ?? '📦';
     return (
       `<b>${i + 1}. ${r.eventType} Cake</b>\n` +

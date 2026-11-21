@@ -1,13 +1,10 @@
 import { Bot } from "grammy";
-import { getPrisma } from "../platform/config/prisma";
 import { answerCallback, editMessage, sendMessage } from "../platform/integrations/telegram/telegramClient";
-import {
-    getStaffChatIds,
-    notifyCustomerStatusChange,
-    notifyStaffPriceConfirmed,
-} from "../platform/integrations/telegram/telegramNotifications";
+import { getStaffChatIds } from "../platform/integrations/telegram/telegramNotifications";
 import { getConversationStore } from "../platform/integrations/redis/conversationState";
-import { ordersRepository } from "../modules/orders/orders.repository";
+import { ordersService } from "../modules/orders/orders.service";
+import { usersService } from "../modules/users/users.service";
+import type { OrderStatus } from "@prisma/client";
 
 const conversationStore = getConversationStore();
 
@@ -17,40 +14,41 @@ export function handleCallbacks(bot: Bot) {
         const callbackId = ctx.callbackQuery.id;
         const messageId = ctx.callbackQuery.message?.message_id;
         const chatId = ctx.callbackQuery.message?.chat.id;
-        const prisma = getPrisma();
 
         if (data.startsWith("status:")) {
             const [, orderId, newStatus] = data.split(":");
 
-            const order = await ordersRepository.updateStatus(
-                orderId,
-                newStatus as any,
-                {
-                    source: "telegram_bot",
-                    userId: ctx.from?.id ? String(ctx.from.id) : null,
-                },
-            );
+            try {
+                const order = await ordersService.update(
+                    orderId,
+                    { status: newStatus as OrderStatus },
+                    {
+                        source: "telegram_bot",
+                        userId: ctx.from?.id ? String(ctx.from.id) : null,
+                    },
+                );
 
-            await notifyCustomerStatusChange(orderId);
+                await editMessage(
+                    chatId!,
+                    messageId!,
+                    `✅ <b>Status updated to "${newStatus}"</b> for order <code>${orderId}</code>\n\n` +
+                        `Customer: ${order.contactName} | ${order.eventType} | ${order.eventDate}`,
+                    newStatus === "InProgress"
+                        ? [
+                              [
+                                  {
+                                      text: "🎂 Mark Ready",
+                                      callback_data: `status:${orderId}:Ready`,
+                                  },
+                              ],
+                          ]
+                        : undefined,
+                );
 
-            await editMessage(
-                chatId!,
-                messageId!,
-                `✅ <b>Status updated to "${newStatus}"</b> for order <code>${orderId}</code>\n\n` +
-                    `Customer: ${order.contactName} | ${order.eventType} | ${order.eventDate}`,
-                newStatus === "InProgress"
-                    ? [
-                          [
-                              {
-                                  text: "🎂 Mark Ready",
-                                  callback_data: `status:${orderId}:Ready`,
-                              },
-                          ],
-                      ]
-                    : undefined,
-            );
-
-            await answerCallback(callbackId, `Status updated to ${newStatus}`);
+                await answerCallback(callbackId, `Status updated to ${newStatus}`);
+            } catch (err: any) {
+                await answerCallback(callbackId, `⚠️ ${err.message || 'Failed to update status'}`);
+            }
         } else if (data.startsWith("price:")) {
             const [, orderId] = data.split(":");
 
@@ -69,40 +67,40 @@ export function handleCallbacks(bot: Bot) {
             const [, orderId] = data.split(":");
             const telegramId = String(ctx.from?.id);
 
-            const order = await prisma.customCakeRequest.findUnique({
-                where: { id: orderId },
-                include: { user: true },
-            });
-
-            if (!order || order.user?.telegramId !== telegramId) {
+            const user = await usersService.findByTelegramId(telegramId);
+            if (!user) {
                 await answerCallback(
                     callbackId,
-                    "⚠️ You can only confirm your own orders.",
+                    "⚠️ Your account is not linked.",
                 );
                 return;
             }
 
-            await ordersRepository.updateStatus(orderId, "Confirmed", {
-                source: "telegram_bot",
-                userId: order.user?.id ?? null,
-            });
+            try {
+                const updated = await ordersService.acceptPrice(
+                    orderId,
+                    user.id,
+                    'customer',
+                    'telegram_bot'
+                );
 
-            await notifyCustomerStatusChange(orderId);
-            await notifyStaffPriceConfirmed({ ...order, user: order.user });
+                await editMessage(
+                    chatId!,
+                    messageId!,
+                    `✅ <b>Price confirmed!</b>\n\nYour <b>${updated.eventType}</b> cake is now confirmed. We'll start baking and keep you posted. Thank you! 🎂`,
+                );
 
-            await editMessage(
-                chatId!,
-                messageId!,
-                `✅ <b>Price confirmed!</b>\n\nYour <b>${order.eventType}</b> cake is now confirmed. We'll start baking and keep you posted. Thank you! 🎂`,
-            );
-
-            await answerCallback(callbackId, "Order confirmed!");
+                await answerCallback(callbackId, "Order confirmed!");
+            } catch (err: any) {
+                await answerCallback(
+                    callbackId,
+                    `⚠️ ${err.message || 'Cannot confirm order.'}`,
+                );
+            }
         } else if (data.startsWith("revise:")) {
             const [, orderId] = data.split(":");
 
-            const order = await prisma.customCakeRequest.findUnique({
-                where: { id: orderId },
-            });
+            const order = await ordersService.findById(orderId);
 
             const staffIds = await getStaffChatIds();
             for (const id of staffIds) {

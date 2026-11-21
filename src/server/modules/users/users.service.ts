@@ -7,6 +7,10 @@ export const usersService = {
     return usersRepository.findAll();
   },
 
+  async findByTelegramId(telegramId: string) {
+    return usersRepository.findByTelegramId(telegramId);
+  },
+
   async updateRole(targetUserId: string, role: Role, currentUserId: string) {
     if (targetUserId === currentUserId && role !== 'admin') {
       throw new ValidationError('You cannot remove your own admin access.');

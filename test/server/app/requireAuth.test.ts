@@ -2,13 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Request, Response, NextFunction } from 'express';
 import { AuthenticationError } from '@server/platform/errors';
 
-vi.mock('@shared/utils/auth.js', () => ({
+vi.mock('@server/modules/auth/auth.crypto.js', () => ({
   getTokenFromRequest: vi.fn(),
   verifyToken: vi.fn(),
 }));
 
 import { requireAuth } from '@server/platform/middleware/requireAuth.js';
-import { getTokenFromRequest, verifyToken } from '@/shared/utils/auth.js';
+import { getTokenFromRequest, verifyToken } from '@server/modules/auth/auth.crypto.js';
 
 const mockGetTokenFromRequest = vi.mocked(getTokenFromRequest);
 const mockVerifyToken = vi.mocked(verifyToken);

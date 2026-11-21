@@ -21,7 +21,7 @@ const mockExistingUser = {
   passwordHash: 'hashed:mypass',
 };
 
-vi.mock('@shared/utils/auth.ts', () => ({
+vi.mock('@server/modules/auth/auth.crypto.js', () => ({
   signToken: vi.fn((payload) => `token-${payload.userId}`),
   verifyPassword: vi.fn((plain, hash) => Promise.resolve(hash === `hashed:${plain}`)),
   hashPassword: vi.fn((plain) => Promise.resolve(`hashed:${plain}`)),
@@ -226,7 +226,7 @@ describe('authService.handleOidcCallback', () => {
     });
     vi.stubGlobal('fetch', mockFetch);
 
-    const { verifyOidcIdToken } = await import('@shared/utils/auth.ts');
+    const { verifyOidcIdToken } = await import('@server/modules/auth/auth.crypto.js');
     vi.mocked(verifyOidcIdToken).mockResolvedValueOnce({
       id: 99999,
       sub: '99999',

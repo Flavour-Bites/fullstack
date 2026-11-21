@@ -28,6 +28,13 @@ export const usersRepository = {
     });
   },
 
+  async findByTelegramId(telegramId: string) {
+    const prisma = getPrisma();
+    return prisma.user.findFirst({
+      where: { telegramId, deletedAt: null },
+    });
+  },
+
   async countByRole(role: Role) {
     const prisma = getPrisma();
     return prisma.user.count({ where: { role, deletedAt: null } });

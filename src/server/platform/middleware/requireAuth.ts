@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifyToken, getTokenFromRequest, TokenPayload } from '../../../shared/utils/auth';
+import { verifyToken, getTokenFromRequest, type TokenPayload } from '../../modules/auth/auth.crypto';
 import { AuthenticationError } from '../errors/index';
 
 declare global {

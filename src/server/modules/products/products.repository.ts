@@ -83,4 +83,20 @@ export const productsRepository = {
       include: { category: true },
     });
   },
+
+  async search(query: string, limit = 10) {
+    const prisma = getPrisma();
+    return prisma.product.findMany({
+      where: {
+        OR: [
+          { name: { contains: query, mode: 'insensitive' } },
+          { flavors: { has: query } },
+          { tags: { has: query } },
+          { description: { contains: query, mode: 'insensitive' } },
+        ],
+      },
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+    });
+  },
 };

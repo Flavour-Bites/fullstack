@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import crypto from 'node:crypto';
-import { env } from '../../server/platform/config/env';
+import { env } from '../../platform/config/env';
 
 const JWT_EXPIRES = '30d';
 const BCRYPT_ROUNDS = 12;
@@ -116,7 +116,7 @@ export function getTokenFromRequest(req: { cookies?: Record<string, string>; hea
   return null;
 }
 
-import { THIRTY_DAYS_MS } from '../constants/index.js';
+import { THIRTY_DAYS_MS } from '@shared/constants/index.js';
 
 export const authCookieOptions = {
   httpOnly: true,

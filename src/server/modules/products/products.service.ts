@@ -11,6 +11,10 @@ export const productsService = {
     return productsRepository.findById(id);
   },
 
+  async search(query: string, limit = 10) {
+    return productsRepository.search(query, limit);
+  },
+
   async create(data: ProductInput) {
     const categoryId = await productsRepository.resolveCategoryId(data);
 

@@ -11,7 +11,7 @@ export const ORDER_WORKFLOW: OrderStatus[] = [
 ];
 
 export const VALID_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  Received: ['Designing', 'Cancelled'],
+  Received: ['Designing', 'Priced', 'Cancelled'],
   Designing: ['Priced', 'Cancelled'],
   Priced: ['Confirmed', 'Cancelled'],
   Confirmed: ['InProgress', 'Cancelled'],
@@ -22,6 +22,7 @@ export const VALID_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
 };
 
 export function isValidTransition(from: OrderStatus, to: OrderStatus): boolean {
+  if (from === to) return true;
   return VALID_TRANSITIONS[from]?.includes(to) ?? false;
 }
 

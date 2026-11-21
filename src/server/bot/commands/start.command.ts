@@ -1,19 +1,16 @@
 import { CommandContext, Context } from 'grammy';
-import { getPrisma } from '../../platform/config/prisma';
+import { ordersService } from '../../modules/orders/orders.service';
+import { usersService } from '../../modules/users/users.service';
 import { STATUS_EMOJI } from '../../../shared/constants/orderStatus';
 import { BUSINESS_INFO } from '../../../shared/constants/business';
 
 export async function handleStartCommand(ctx: CommandContext<Context>): Promise<void> {
   const telegramId = String(ctx.from?.id);
-  const prisma = getPrisma();
   const payload = ctx.match?.toString().trim();
 
   if (payload?.startsWith('order_')) {
     const orderId = payload.slice(6);
-    const order = await prisma.customCakeRequest.findUnique({
-      where: { id: orderId },
-      include: { user: true },
-    });
+    const order = await ordersService.findById(orderId);
 
     if (!order) {
       await ctx.reply(
@@ -44,7 +41,7 @@ export async function handleStartCommand(ctx: CommandContext<Context>): Promise<
     return;
   }
 
-  const user = await prisma.user.findFirst({ where: { telegramId, deletedAt: null } });
+  const user = await usersService.findByTelegramId(telegramId);
 
   if (user) {
     await ctx.reply(

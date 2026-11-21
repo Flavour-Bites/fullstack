@@ -2,6 +2,7 @@ import { ordersRepository } from './orders.repository';
 import { makeOrderId } from '../../../shared/utils/ids';
 import { formatRequestDate } from '../../../shared/utils/dateFormat';
 import { normalizeMoney, isValidTransition } from './orders.workflow';
+import { businessAvailabilityService } from '../business/businessAvailability.service';
 import { notifyStaffNewOrder, notifyCustomerStatusChange, notifyStaffPriceConfirmed } from '../../platform/integrations/telegram/telegramNotifications';
 import { NotFoundError, ValidationError, AuthorizationError } from '../../platform/errors/index';
 import type { OrderStatus } from '@prisma/client';
@@ -47,7 +48,12 @@ export const ordersService = {
     referenceImageFormat?: string | null;
     referenceImageBytes?: number | null;
     requestDate?: string;
-  }, userId: string) {
+  }, userId: string, source: OrderActor['source'] = 'customer_api') {
+    const validation = await businessAvailabilityService.validateOrderDate(data.eventDate);
+    if (!validation.valid) {
+      throw new ValidationError(validation.error || 'The selected date is not available.');
+    }
+
     const orderData = {
       id: makeOrderId(),
       userId,
@@ -69,7 +75,7 @@ export const ordersService = {
 
     const order = await ordersRepository.create(orderData, {
       userId,
-      source: 'customer_api',
+      source,
     });
 
     notifyStaffNewOrder(order).catch((err: Error) =>
@@ -167,7 +173,12 @@ export const ordersService = {
     return updated;
   },
 
-  async acceptPrice(orderId: string, userId: string, role: string) {
+  async acceptPrice(
+    orderId: string,
+    userId: string,
+    role: string,
+    source?: OrderActor['source']
+  ) {
     const order = await ordersRepository.findById(orderId);
     if (!order || order.deletedAt) throw new NotFoundError('Order not found.');
     if (role === 'customer' && order.userId !== userId) {
@@ -182,7 +193,7 @@ export const ordersService = {
 
     const updated = await ordersRepository.updateStatus(orderId, 'Confirmed', {
       userId,
-      source: role === 'customer' ? 'customer_api' : 'staff_api',
+      source: source ?? (role === 'customer' ? 'customer_api' : 'staff_api'),
       note: 'Cake price confirmed.',
     });
 
@@ -194,6 +205,14 @@ export const ordersService = {
     );
 
     return updated;
+  },
+
+  async findActiveByUserId(userId: string, limit = 5) {
+    return ordersRepository.findActiveByUserId(userId, limit);
+  },
+
+  async search(query: string, limit = 30) {
+    return ordersRepository.search(query, limit);
   },
 
   async softDelete(orderId: string) {

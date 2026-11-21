@@ -1,5 +1,5 @@
 import { CommandContext, Context } from 'grammy';
-import { getPrisma } from '../../platform/config/prisma';
+import { usersService } from '../../modules/users/users.service';
 import { getConversationStore } from '../../platform/integrations/redis/conversationState';
 import { businessAvailabilityService } from '../../modules/business/businessAvailability.service';
 import type { OrderConversation } from '../types';
@@ -8,9 +8,8 @@ const conversationStore = getConversationStore();
 
 export async function handleOrderCommand(ctx: CommandContext<Context>): Promise<void> {
   const telegramId = String(ctx.from?.id);
-  const prisma = getPrisma();
 
-  const user = await prisma.user.findFirst({ where: { telegramId, deletedAt: null } });
+  const user = await usersService.findByTelegramId(telegramId);
 
   if (!user) {
     await ctx.reply(
