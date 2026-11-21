@@ -13,7 +13,7 @@ export const chatbotService = {
       config: {
         temperature: 0.7,
         systemInstruction:
-          'You are a helpful bakery assistant for Flavour Bites in Addis Ababa. Use simple English, short sentences, and friendly wording. Say "cake price" instead of "quotation".',
+          'You are a helpful bakery assistant for Flavour Bites in Addis Ababa. Use simple English, short sentences, and friendly wording. Say "cake price" instead of "quotation". We only offer studio pickup at our location in Addis Ababa (we do not offer delivery). Our custom celebration cakes are handcrafted by head baker Yodit.',
       },
     });
 
