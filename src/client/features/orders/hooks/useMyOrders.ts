@@ -37,6 +37,22 @@ export function useMyOrders() {
     }
   };
 
+  const acceptPrice = async (id: string) => {
+    try {
+      const { data } = await http.post<ApiResponse<{ request: CustomCakeRequest }>>(`/api/requests/${id}/accept-price`, {});
+      if (data.success) {
+        toast?.showToast('Price Accepted', 'Your order is confirmed. Yodit will begin crafting your cake.', 'success');
+        await queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
+        return true;
+      }
+      throw new Error(data.error || 'Failed to accept price');
+    } catch (err: any) {
+      const msg = err?.response?.data?.error || err.message || 'Unable to accept price.';
+      toast?.showToast('Action Failed', msg, 'error');
+      return false;
+    }
+  };
+
   return {
     requests: query.data ?? [],
     isLoading: query.isLoading,
@@ -44,5 +60,6 @@ export function useMyOrders() {
     error: query.error,
     refetch: query.refetch,
     cancelRequest,
+    acceptPrice,
   };
 }

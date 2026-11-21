@@ -37,12 +37,14 @@ export const ordersController = {
 
   softDelete: asyncHandler(async (req: Request, res: Response) => {
     const order = await ordersService.findById(req.params.id);
-    if (!order) {
+    if (!order || order.deletedAt) {
       res.status(404).json({ success: false, error: 'Order not found.' });
       return;
     }
-    if (order.deletedAt) {
-      res.status(404).json({ success: false, error: 'Order not found.' });
+    const isStaffOrAdmin = req.user?.role === 'admin' || req.user?.role === 'staff';
+    const isOwner = req.user?.userId && order.userId === req.user.userId;
+    if (!isStaffOrAdmin && !isOwner) {
+      res.status(403).json({ success: false, error: 'You are not authorized to cancel this order.' });
       return;
     }
     await ordersService.softDelete(req.params.id);

@@ -69,7 +69,11 @@ export default function RequestFormView({
         <RequestSidebar />
       </div>
 
-      <OrderTrackingView requests={form.activeRequests} onDelete={form.deleteRequest} />
+      <OrderTrackingView
+        requests={form.activeRequests}
+        onDelete={form.deleteRequest}
+        onAcceptPrice={form.acceptPrice}
+      />
     </div>
   );
 }

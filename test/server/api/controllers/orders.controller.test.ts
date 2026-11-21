@@ -166,4 +166,35 @@ describe('ordersController.softDelete', () => {
     expect(res.jsonBody.success).toBe(true);
     expect(mockSoftDelete).toHaveBeenCalledWith('FB-123');
   });
+
+  it('returns 403 when user is customer and not the order owner', async () => {
+    mockFindById.mockResolvedValue({ id: 'FB-123', userId: 'usr_other', deletedAt: null } as any);
+    const res = createRes();
+    const req = {
+      params: { id: 'FB-123' },
+      user: { userId: 'usr_customer', role: 'customer' },
+    } as any;
+
+    await ordersController.softDelete(req, res, vi.fn());
+
+    expect(res.statusCode).toBe(403);
+    expect(res.jsonBody).toEqual({ success: false, error: 'You are not authorized to cancel this order.' });
+    expect(mockSoftDelete).not.toHaveBeenCalled();
+  });
+
+  it('allows order owner to soft delete their own order', async () => {
+    mockFindById.mockResolvedValue({ id: 'FB-123', userId: 'usr_customer', deletedAt: null } as any);
+    mockSoftDelete.mockResolvedValue({ id: 'FB-123', deletedAt: new Date() } as any);
+    const res = createRes();
+    const req = {
+      params: { id: 'FB-123' },
+      user: { userId: 'usr_customer', role: 'customer' },
+    } as any;
+
+    await ordersController.softDelete(req, res, vi.fn());
+
+    expect(res.statusCode).toBe(200);
+    expect(res.jsonBody.success).toBe(true);
+    expect(mockSoftDelete).toHaveBeenCalledWith('FB-123');
+  });
 });

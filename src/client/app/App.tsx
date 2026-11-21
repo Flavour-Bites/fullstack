@@ -106,7 +106,7 @@ export default function App() {
               <Route path="/help" element={<AnimatedPage><HelpView /></AnimatedPage>} />
               <Route path="/contact" element={<AnimatedPage><ContactView /></AnimatedPage>} />
               <Route path="/profile" element={<AnimatedPage><ProtectedRoute currentUser={currentUser}><ProfileView currentUser={currentUser!} onLogout={handleLogout} onUpdateUser={updateUser} /></ProtectedRoute></AnimatedPage>} />
-              <Route path="/orders" element={<AnimatedPage><MyOrdersView currentUser={currentUser!} /></AnimatedPage>} />
+              <Route path="/orders" element={<AnimatedPage><ProtectedRoute currentUser={currentUser}><MyOrdersView currentUser={currentUser!} /></ProtectedRoute></AnimatedPage>} />
 
               <Route path="/auth" element={
                 <AnimatedPage>
