@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import Header from '@client/components/Header';
@@ -65,5 +65,15 @@ describe('Header', () => {
     renderWithRouter(<Header {...baseProps} currentUser={user} />);
     expect(screen.getByText('T')).toBeInTheDocument();
     expect(screen.getByText('Test')).toBeInTheDocument();
+  });
+
+  it('renders Help / Support link pointing to /help in profile dropdown', async () => {
+    renderWithRouter(<Header {...baseProps} />);
+    const signInBtn = screen.getByRole('button', { name: 'Sign in' });
+    fireEvent.click(signInBtn);
+
+    const helpLink = await screen.findByRole('link', { name: /Help \/ Support/i });
+    expect(helpLink).toBeInTheDocument();
+    expect(helpLink).toHaveAttribute('href', '/help');
   });
 });
