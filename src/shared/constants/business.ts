@@ -5,12 +5,7 @@
  */
 
 function getEnv(key: string): string | undefined {
-  // Vite exposes VITE_* vars on import.meta.env at build time
-  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[key]) {
-    return import.meta.env[key];
-  }
-  // Node.js/Node-compatible runtime
-  if (typeof process !== 'undefined' && process.env && process.env[key]) {
+  if (typeof process !== 'undefined' && process?.env && process.env[key]) {
     return process.env[key];
   }
   return undefined;
