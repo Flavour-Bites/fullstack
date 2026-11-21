@@ -1,4 +1,4 @@
-import { usePageTitle } from '../../core/hooks/usePageTitle';
+import { usePageTitle } from '@client/lib/usePageTitle';
 import { useContactForm } from '../hooks/useContactForm';
 import ContactIntro from './ContactIntro';
 import ContactInfoColumn from './ContactInfoColumn';

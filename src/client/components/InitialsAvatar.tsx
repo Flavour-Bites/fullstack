@@ -23,3 +23,4 @@ export default function InitialsAvatar({ name, className = '' }: InitialsAvatarP
     </div>
   );
 }
+

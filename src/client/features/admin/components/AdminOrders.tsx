@@ -10,6 +10,7 @@ import { SkeletonCard } from '../../../components/Skeleton';
 import { STATUS_COLORS, STATUS_ICONS } from './statusPresentation';
 import { WORKFLOW, nextStatus, orderPrice } from '../types';
 import type { CakeRequest } from '../types';
+import type { OrderStatus } from '@shared/types';
 
 interface AdminOrdersProps {
   requests: CakeRequest[];
@@ -33,7 +34,7 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
     const q = searchTerm.toLowerCase();
     const matchesSearch = r.contactName.toLowerCase().includes(q) || r.id.toLowerCase().includes(q) || r.flavor.toLowerCase().includes(q) || r.eventType.toLowerCase().includes(q);
     if (statusFilter === 'all') return matchesSearch;
-    if (statusFilter === 'pending') return matchesSearch && (r.status === 'Received' || r.status === 'Pending');
+    if (statusFilter === 'pending') return matchesSearch && r.status === 'Received';
     if (statusFilter === 'active') return matchesSearch && ['Designing', 'Priced', 'Confirmed', 'InProgress'].includes(r.status);
     if (statusFilter === 'completed') return matchesSearch && (r.status === 'Ready' || r.status === 'Completed');
     return matchesSearch && r.status.toLowerCase() === statusFilter.toLowerCase();
@@ -49,7 +50,7 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
     setUpdating(true);
     await saveRequestUpdates(id, name, editStatus, editCost);
     if (selectedRequest?.id === id) {
-      setSelectedRequest({ ...selectedRequest, status: editStatus, price: editCost });
+      setSelectedRequest({ ...selectedRequest, status: editStatus as OrderStatus, price: editCost });
     }
     setEditingId(null);
     setUpdating(false);

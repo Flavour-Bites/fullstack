@@ -4,7 +4,7 @@ import { Award, Utensils, Compass, ChevronRight } from 'lucide-react';
 import { IngredientSpotlight } from '@shared/types';
 import { INGREDIENT_SPOTLIGHTS } from '@client/content/ingredientSpotlights';
 import { t } from '@client/i18n/index';
-import { usePageTitle } from '../hooks/usePageTitle';
+import { usePageTitle } from '@client/lib/usePageTitle';
 
 export default function AboutView() {
   usePageTitle("About");

@@ -28,6 +28,10 @@ export function useToast() {
   return context;
 }
 
+export function useOptionalToast() {
+  return useContext(ToastContext);
+}
+
 let toastSeq = 0;
 function generateToastId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {

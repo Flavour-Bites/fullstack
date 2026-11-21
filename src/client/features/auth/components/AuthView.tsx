@@ -7,7 +7,7 @@ import { t } from '@client/i18n/index';
 import { http } from '@client/lib/http';
 import { setToken } from '@client/lib/tokenStorage';
 import type { ApiResponse } from '@/shared/api';
-import { usePageTitle } from '../../core/hooks/usePageTitle';
+import { usePageTitle } from '@client/lib/usePageTitle';
 
 interface AuthViewProps {
   onAuthSuccess: (user: UserType) => void;

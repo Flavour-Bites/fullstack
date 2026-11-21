@@ -1,7 +1,7 @@
 import { AnimatePresence } from 'motion/react';
 import { Product, User } from '@shared/types';
 import { t } from '@client/i18n/index';
-import { usePageTitle } from '../../core/hooks/usePageTitle';
+import { usePageTitle } from '@client/lib/usePageTitle';
 import OrderTrackingView from './OrderTrackingView';
 import RequestSuccessView from './RequestSuccessView';
 import RequestSidebar from './RequestSidebar';
