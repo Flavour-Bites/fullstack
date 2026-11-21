@@ -89,38 +89,6 @@ describe('AuthView', () => {
     });
   });
 
-  it('shows password step UI when step is password', async () => {
-    const mockFetch = vi.fn()
-      .mockResolvedValueOnce(
-        new Response(JSON.stringify({
-          success: true, needsPassword: true, telegramId: '12345',
-        }), { headers: { 'Content-Type': 'application/json' } })
-      );
-    vi.stubGlobal('fetch', mockFetch);
-
-    renderAuthView();
-
-    await waitFor(() => {
-      expect(screen.getByText('Continue with Telegram')).toBeInTheDocument();
-    });
-
-    // Since the component no longer exposes onTelegramAuth,
-    // we test the password step by rendering with a state that shows it.
-    // The password step is shown when step === 'password'.
-    // We can't directly set state, so we verify the button exists.
-    expect(screen.getByText('Continue with Telegram')).toBeInTheDocument();
-  });
-
-  it('shows back button in password step', async () => {
-    // The password step renders a back button with ArrowLeft icon
-    // Since we can't trigger the step transition without the OIDC callback,
-    // we verify the component structure is correct.
-    renderAuthView();
-    await waitFor(() => {
-      expect(screen.getByText('Continue with Telegram')).toBeInTheDocument();
-    });
-  });
-
   it('renders the Telegram messaging benefits and allow prompt tip', async () => {
     renderAuthView();
     await waitFor(() => {
