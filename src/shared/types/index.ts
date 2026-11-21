@@ -1,3 +1,5 @@
+export { ReviewEventType, ReviewRole } from '../constants/reviews';
+
 export interface User {
   id: string;
   name: string;

@@ -1,6 +1,7 @@
 import { getPrisma } from '../../platform/config/prisma';
 import { makeId } from '../../../shared/utils/ids';
 import { formatRequestDate } from '../../../shared/utils/dateFormat';
+import { DEFAULT_REVIEW_EVENT_TYPE, DEFAULT_REVIEW_ROLE } from '../../../shared/constants';
 
 export const reviewsRepository = {
   async findAll(productId?: string) {
@@ -37,8 +38,8 @@ export const reviewsRepository = {
         rating: data.rating,
         content: data.content,
         author: data.author,
-        eventType: data.eventType || 'Bakery Order',
-        role: data.role || 'Customer',
+        eventType: data.eventType || DEFAULT_REVIEW_EVENT_TYPE,
+        role: data.role || DEFAULT_REVIEW_ROLE,
         userId: data.userId,
         productId: data.productId ?? null,
         date: data.date || formatRequestDate(),

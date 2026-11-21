@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { reviewsService } from '@server/modules/reviews/reviews.service.js';
+import { ReviewEventType, ReviewRole } from '@shared/constants';
 
 const mockReviews = [
   { id: 'rev_001', rating: 5, content: 'Great cake!', author: 'Alice', eventType: 'Birthday', role: 'Customer', productId: null, userId: 'usr_001', date: 'June 23, 2026' },
@@ -28,8 +29,8 @@ describe('reviewsService.create', () => {
       'usr_003',
     );
     expect(review.author).toBe('Charlie');
-    expect(review.eventType).toBe('Bakery Order');
-    expect(review.role).toBe('Customer');
+    expect(review.eventType).toBe(ReviewEventType.BakeryOrder);
+    expect(review.role).toBe(ReviewRole.Customer);
   });
 
   it('creates a review with custom values', async () => {
