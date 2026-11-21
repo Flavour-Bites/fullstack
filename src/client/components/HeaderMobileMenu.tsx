@@ -22,6 +22,7 @@ const NAV_ITEMS = [
   { label: 'Testimonials', path: '/testimonials' },
   { label: 'Meet Yodit', path: '/about' },
   { label: 'Contact', path: '/contact' },
+  { label: 'Help & Guide', path: '/help' },
 ];
 
 const ROLE_LABELS: Record<string, string> = {

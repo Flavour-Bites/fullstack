@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { User as UserIcon, ShoppingBag, ShieldCheck, LogIn, HelpCircle, Sun, Moon, LogOut } from 'lucide-react';
 import type { User } from '@shared/types';
-import { BUSINESS_INFO } from '../../shared/constants/index';
 
 interface HeaderProfileDropdownProps {
   currentUser: User | null;
@@ -123,6 +122,10 @@ function DropdownNavigationLinks({
           <ShoppingBag className="w-3.5 h-3.5 text-lux-gold shrink-0" />
           <span>My Orders</span>
         </Link>
+        <Link to="/help" onClick={onItemClick} className={itemClass}>
+          <HelpCircle className="w-3.5 h-3.5 text-lux-gold shrink-0" />
+          <span>Help / Support</span>
+        </Link>
         {hasAdminAccess && (
           <Link to="/admin" onClick={onItemClick} className={itemClass}>
             <ShieldCheck className="w-3.5 h-3.5 text-lux-gold shrink-0" />
@@ -139,19 +142,10 @@ function DropdownNavigationLinks({
         <LogIn className="w-3.5 h-3.5 text-lux-gold shrink-0" />
         <span>Sign In / Join</span>
       </Link>
-      <button
-        type="button"
-        onClick={() => {
-          onItemClick();
-          alert(
-            `Flavour Bites Service Desk:\n\nReach our studio team at ${BUSINESS_INFO.email} or call our master desk line at ${BUSINESS_INFO.phone}.`
-          );
-        }}
-        className={itemClass}
-      >
+      <Link to="/help" onClick={onItemClick} className={itemClass}>
         <HelpCircle className="w-3.5 h-3.5 text-lux-gold shrink-0" />
         <span>Help / Support</span>
-      </button>
+      </Link>
     </>
   );
 }
