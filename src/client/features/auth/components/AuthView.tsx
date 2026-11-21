@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Key, LogIn, Loader2, ArrowLeft, Info } from 'lucide-react';
+import { Loader2, Info } from 'lucide-react';
 import { useToast } from '../../../components/Toast';
 import { User as UserType } from '@shared/types';
 import { t } from '@client/i18n/index';
 import { http } from '@client/lib/http';
-import { setToken } from '@client/lib/tokenStorage';
 import type { ApiResponse } from '@/shared/api';
 import { usePageTitle } from '@client/lib/usePageTitle';
 
@@ -16,29 +15,12 @@ interface AuthViewProps {
 }
 
 export const AuthView: React.FC<AuthViewProps> = ({
-  onAuthSuccess,
+  onAuthSuccess: _onAuthSuccess,
   title,
   subtitle,
 }) => {
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [password, setPassword] = useState('');
-  const [telegramId] = useState<string>(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      return params.get('telegramId') || '';
-    } catch {
-      return '';
-    }
-  });
-  const [step, setStep] = useState<'telegram' | 'password'>(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      return params.get('needsPassword') === 'true' ? 'password' : 'telegram';
-    } catch {
-      return 'telegram';
-    }
-  });
 
   usePageTitle(title ?? t('auth.signInTitle'));
 
@@ -61,92 +43,6 @@ export const AuthView: React.FC<AuthViewProps> = ({
       setLoading(false);
     }
   };
-
-  const handlePasswordSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!password) {
-      showToast(t('auth.formIncomplete'), t('auth.enterPassword'), 'warning');
-      return;
-    }
-    setLoading(true);
-    try {
-      const { data } = await http.post<ApiResponse<{ token: string; user: UserType }>>('/api/auth/telegram/finalize', {
-        telegramId,
-        password,
-      });
-      if (data.success) {
-        setToken(data.token);
-        localStorage.setItem('flavourbites_user', JSON.stringify(data.user));
-        showToast(t('auth.welcomeBack'), `Hello, ${data.user.name}. Welcome back.`, 'success');
-        onAuthSuccess(data.user);
-      } else {
-        throw new Error(data.error || 'Sign in failed.');
-      }
-    } catch (err: any) {
-      showToast(t('auth.signInFailed'), err.message || t('auth.checkDetails') + ' Try again.', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (step === 'password') {
-    return (
-      <div className="max-w-md mx-auto py-12 px-4 sm:px-6 font-sans">
-        <div className="bg-white/95 dark:bg-stone-950/90 border border-stone-200/80 dark:border-stone-850 rounded-md p-8 relative shadow-sm">
-          <div className="text-center space-y-2 mb-8">
-            <div className="w-10 h-10 rounded-full border border-lux-gold/30 bg-lux-gold/10 flex items-center justify-center text-lux-gold mx-auto mb-3">
-              <Key className="w-4 h-4 stroke-[1.25]" />
-            </div>
-            <h2 className="text-2xl font-serif text-stone-900 dark:text-white font-bold tracking-tight">
-              {t('auth.enterPasswordTitle')}
-            </h2>
-            <p className="text-xs text-stone-500 dark:text-stone-400 max-w-xs mx-auto">
-              {t('auth.enterPasswordSubtitle')}
-            </p>
-          </div>
-
-          <form onSubmit={handlePasswordSubmit} className="space-y-4">
-            <div className="space-y-1 text-left">
-              <label htmlFor="auth-password-input" className="text-[10px] uppercase tracking-wider text-stone-500 dark:text-stone-450 font-bold block">{t('auth.password')}</label>
-              <div className="relative">
-                <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
-                <input
-                  id="auth-password-input"
-                  type="password"
-                  placeholder={t('auth.passwordPlaceholder')}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-stone-50/60 dark:bg-stone-900/60 border border-stone-200/80 dark:border-stone-800 text-stone-850 dark:text-stone-100 text-xs py-2.5 pl-9 pr-3 rounded-sm focus:outline-none focus:ring-1 focus:ring-lux-gold focus:bg-white focus:dark:bg-stone-900 transition-all"
-                />
-              </div>
-            </div>
-
-            <motion.button
-              type="submit"
-              disabled={loading}
-              whileTap={{ scale: 0.97 }}
-              className="w-full py-2.5 bg-stone-900 hover:bg-lux-gold text-white hover:text-stone-950 font-bold text-xs tracking-widest uppercase transition-all duration-300 rounded-sm flex items-center justify-center gap-2 cursor-pointer border border-stone-800 hover:border-lux-gold disabled:opacity-60"
-            >
-              {loading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <LogIn className="w-4 h-4 stroke-[1.5]" />
-              )}
-              {loading ? t('auth.pleaseWait') : t('auth.signIn')}
-            </motion.button>
-          </form>
-
-          <button
-            onClick={() => { setStep('telegram'); setPassword(''); }}
-            className="mt-4 text-xs text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 flex items-center justify-center gap-1 w-full transition-colors cursor-pointer"
-          >
-            <ArrowLeft className="w-3 h-3" />
-            {t('auth.tryDifferentAccount')}
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-md mx-auto py-12 px-4 sm:px-6 font-sans">
