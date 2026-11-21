@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Search, AlertCircle, ShoppingBag, ShieldCheck } from 'lucide-react';
 import { t } from '@client/i18n/index';
 import { usePageTitle } from '@client/lib/usePageTitle';
-import { getStatusStyles } from '../../../../shared/utils/statusStyles';
+import { getStatusStyles } from '@shared/constants/orderStatus';
 import { BUSINESS_INFO } from '../../../../shared/constants/index';
 import { useMyOrders } from '../hooks/useMyOrders';
 

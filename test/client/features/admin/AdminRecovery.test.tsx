@@ -6,8 +6,8 @@ import AdminRecovery from '@client/features/admin/components/AdminRecovery';
 const noop = () => Promise.resolve();
 
 const sampleRequests = [
-  { id: 'r1', oldTelegramId: '111', newTelegramId: '222', status: 'pending', createdAt: '2024-06-01T00:00:00.000Z' },
-  { id: 'r2', oldTelegramId: '333', newTelegramId: '444', status: 'approved', createdAt: '2024-06-15T00:00:00.000Z' },
+  { id: 'r1', oldTelegramId: '111', newTelegramId: '222', status: 'pending' as const, createdAt: '2024-06-01T00:00:00.000Z' },
+  { id: 'r2', oldTelegramId: '333', newTelegramId: '444', status: 'approved' as const, createdAt: '2024-06-15T00:00:00.000Z' },
 ];
 
 describe('AdminRecovery', () => {

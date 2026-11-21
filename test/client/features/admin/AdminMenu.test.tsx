@@ -12,7 +12,7 @@ const sampleItem = {
   name: 'Chocolate Cake',
   description: 'Rich dark chocolate',
   categoryId: 'cat1',
-  category: { name: 'Cakes', id: 'cat1' },
+  category: { name: 'Cakes', id: 'cat1', slug: 'cakes' },
   flavors: ['Chocolate'],
   priceEstimate: '4,500 ETB',
   image: 'https://example.com/cake.jpg',
@@ -21,9 +21,9 @@ const sampleItem = {
 };
 
 const sampleCategories = [
-  { id: 'cat1', name: 'Cakes', isActive: true },
-  { id: 'cat2', name: 'Cupcakes', isActive: true },
-  { id: 'cat3', name: 'Pastries', isActive: false },
+  { id: 'cat1', name: 'Cakes', slug: 'cakes', description: null, color: null, icon: null, sortOrder: 0, isActive: true },
+  { id: 'cat2', name: 'Cupcakes', slug: 'cupcakes', description: null, color: null, icon: null, sortOrder: 1, isActive: true },
+  { id: 'cat3', name: 'Pastries', slug: 'pastries', description: null, color: null, icon: null, sortOrder: 2, isActive: false },
 ];
 
 describe('AdminMenu', () => {

@@ -28,6 +28,7 @@ export const reviewsRepository = {
     role: string;
     userId: string;
     productId?: string | null;
+    date?: string;
   }) {
     const prisma = getPrisma();
     return prisma.review.create({
@@ -40,7 +41,7 @@ export const reviewsRepository = {
         role: data.role || 'Customer',
         userId: data.userId,
         productId: data.productId ?? null,
-        date: formatRequestDate(),
+        date: data.date || formatRequestDate(),
       },
     });
   },

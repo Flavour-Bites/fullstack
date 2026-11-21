@@ -1,32 +1,8 @@
-import { getPrisma } from '../../platform/config/prisma';
+import { statsRepository } from './stats.repository';
 
 export const statsService = {
   async getStats() {
-    const prisma = getPrisma();
-
-    const [orderStats, userRoles, reviewStats, statusCounts, totalUsers] = await Promise.all([
-      prisma.customCakeRequest.aggregate({
-        where: { deletedAt: null },
-        _count: true,
-        _sum: { finalPrice: true },
-        _avg: { finalPrice: true },
-      }),
-      prisma.user.groupBy({
-        by: ['role'],
-        where: { deletedAt: null },
-        _count: true,
-      }),
-      prisma.review.aggregate({
-        _count: true,
-        _avg: { rating: true },
-      }),
-      prisma.customCakeRequest.groupBy({
-        by: ['status'],
-        where: { deletedAt: null },
-        _count: true,
-      }),
-      prisma.user.count({ where: { deletedAt: null } }),
-    ]);
+    const [orderStats, userRoles, reviewStats, statusCounts, totalUsers] = await statsRepository.getRawMetrics();
 
     const roleCounts = { customer: 0, staff: 0, admin: 0 };
     for (const r of userRoles) {

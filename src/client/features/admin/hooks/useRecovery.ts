@@ -2,10 +2,11 @@ import { useState, useCallback } from 'react';
 import { useToast } from '@client/components/Toast';
 import { http } from '@client/lib/http';
 import type { ApiResponse } from '@/shared/api';
+import type { RecoveryRequest } from '@shared/types';
 
 export function useRecovery() {
   const { showToast } = useToast();
-  const [recoveryRequests, setRecoveryRequests] = useState<any[]>([]);
+  const [recoveryRequests, setRecoveryRequests] = useState<RecoveryRequest[]>([]);
   const [recoveryLoading, setRecoveryLoading] = useState(false);
   const [recoveryStatusFilter, setRecoveryStatusFilter] = useState('all');
 
@@ -13,7 +14,7 @@ export function useRecovery() {
     setRecoveryLoading(true);
     try {
       const url = recoveryStatusFilter === 'all' ? '/api/recovery' : `/api/recovery?status=${recoveryStatusFilter}`;
-      const { data } = await http.get<ApiResponse<{ requests: any[] }>>(url);
+      const { data } = await http.get<ApiResponse<{ requests: RecoveryRequest[] }>>(url);
       if (data.success) setRecoveryRequests(data.requests || []);
     } catch (e) { /* ignore */ }
     finally { setRecoveryLoading(false); }

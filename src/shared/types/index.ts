@@ -115,6 +115,15 @@ export interface Stats {
   totalReviews: number;
 }
 
+export interface RecoveryRequest {
+  id: string;
+  oldTelegramId: string;
+  newTelegramId: string;
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: string | Date;
+  updatedAt?: string | Date;
+}
+
 export interface OrderStatusEvent {
   id: string;
   orderId: string;

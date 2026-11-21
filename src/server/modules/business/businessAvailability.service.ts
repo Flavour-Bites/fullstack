@@ -1,4 +1,4 @@
-import { getPrisma } from '../../platform/config/prisma';
+import { businessAvailabilityRepository } from './businessAvailability.repository';
 
 export interface AvailabilityPolicy {
   isEnabled: boolean;
@@ -40,8 +40,7 @@ async function getPolicy(): Promise<{
   saturdayEnabled: boolean;
   sundayEnabled: boolean;
 }> {
-  const prisma = getPrisma();
-  let policy = await prisma.businessAvailabilityPolicy.findFirst();
+  const policy = await businessAvailabilityRepository.findFirst();
   
   if (!policy) {
     return {
@@ -122,27 +121,23 @@ export const businessAvailabilityService = {
     saturdayEnabled?: boolean;
     sundayEnabled?: boolean;
   }) {
-    const prisma = getPrisma();
-    const existing = await prisma.businessAvailabilityPolicy.findFirst();
+    const existing = await businessAvailabilityRepository.findFirst();
     
     if (!existing) {
       throw new Error('Business availability policy not found');
     }
     
-    const updated = await prisma.businessAvailabilityPolicy.update({
-      where: { id: existing.id },
-      data: {
-        ...(input.isEnabled !== undefined && { isEnabled: input.isEnabled }),
-        ...(input.timezone !== undefined && { timezone: input.timezone }),
-        ...(input.minimumLeadTimeHours !== undefined && { minimumLeadTimeHours: input.minimumLeadTimeHours }),
-        ...(input.mondayEnabled !== undefined && { mondayEnabled: input.mondayEnabled }),
-        ...(input.tuesdayEnabled !== undefined && { tuesdayEnabled: input.tuesdayEnabled }),
-        ...(input.wednesdayEnabled !== undefined && { wednesdayEnabled: input.wednesdayEnabled }),
-        ...(input.thursdayEnabled !== undefined && { thursdayEnabled: input.thursdayEnabled }),
-        ...(input.fridayEnabled !== undefined && { fridayEnabled: input.fridayEnabled }),
-        ...(input.saturdayEnabled !== undefined && { saturdayEnabled: input.saturdayEnabled }),
-        ...(input.sundayEnabled !== undefined && { sundayEnabled: input.sundayEnabled }),
-      },
+    const updated = await businessAvailabilityRepository.update(existing.id, {
+      ...(input.isEnabled !== undefined && { isEnabled: input.isEnabled }),
+      ...(input.timezone !== undefined && { timezone: input.timezone }),
+      ...(input.minimumLeadTimeHours !== undefined && { minimumLeadTimeHours: input.minimumLeadTimeHours }),
+      ...(input.mondayEnabled !== undefined && { mondayEnabled: input.mondayEnabled }),
+      ...(input.tuesdayEnabled !== undefined && { tuesdayEnabled: input.tuesdayEnabled }),
+      ...(input.wednesdayEnabled !== undefined && { wednesdayEnabled: input.wednesdayEnabled }),
+      ...(input.thursdayEnabled !== undefined && { thursdayEnabled: input.thursdayEnabled }),
+      ...(input.fridayEnabled !== undefined && { fridayEnabled: input.fridayEnabled }),
+      ...(input.saturdayEnabled !== undefined && { saturdayEnabled: input.saturdayEnabled }),
+      ...(input.sundayEnabled !== undefined && { sundayEnabled: input.sundayEnabled }),
     });
     
     return {
@@ -194,7 +189,7 @@ export const businessAvailabilityService = {
     
     const requestedDateTime = new Date(eventDate);
     
-    if (isNaN(requestedDateTime.getTime())) {
+    if (Number.isNaN(requestedDateTime.getTime())) {
       return { valid: false, error: 'Invalid date format', errorCode: 'INVALID_DATE' };
     }
     

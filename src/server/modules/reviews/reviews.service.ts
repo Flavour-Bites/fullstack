@@ -1,5 +1,6 @@
 import { reviewsRepository } from './reviews.repository';
 import type { CreateReviewInput } from './reviews.schemas';
+import { formatRequestDate } from '../../../shared/utils/dateFormat';
 
 export const reviewsService = {
   async findAll() {
@@ -16,6 +17,7 @@ export const reviewsService = {
       eventType: data.eventType || 'Bakery Order',
       role: data.role || 'Customer',
       userId,
+      date: formatRequestDate(),
     });
   },
 

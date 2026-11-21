@@ -4,11 +4,12 @@ import { t } from '@client/i18n/index';
 import { SkeletonGrid } from '../../../components/Skeleton';
 import { http } from '@client/lib/http';
 import type { ApiResponse } from '@/shared/api';
+import type { Product, Category } from '@shared/types';
 
 interface AdminMenuProps {
-  galleryItems: any[];
+  galleryItems: Product[];
   galleryLoading: boolean;
-  categories: any[];
+  categories: Category[];
   handleSaveGalleryItem: (galleryForm: any, editingGalleryId: string | null) => Promise<boolean | undefined>;
   handleDeleteGalleryItem: (id: string, name: string) => Promise<boolean | undefined>;
 }
@@ -25,7 +26,7 @@ export default function AdminMenu({ galleryItems, galleryLoading, categories, ha
     setEditingGalleryId(null);
   };
 
-  const startEditGalleryItem = (item: any) => {
+  const startEditGalleryItem = (item: Product) => {
     setEditingGalleryId(item.id);
     setGalleryForm({
       name: item.name,
@@ -115,7 +116,7 @@ export default function AdminMenu({ galleryItems, galleryLoading, categories, ha
   } else {
     content = (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {galleryItems.map((item: any) => (
+        {galleryItems.map((item: Product) => (
           <div key={item.id} className="bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden group">
             <img src={item.image} alt={item.name} className="h-44 w-full object-cover grayscale brightness-75 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-300" referrerPolicy="no-referrer" />
             <div className="p-5">
@@ -172,7 +173,7 @@ export default function AdminMenu({ galleryItems, galleryLoading, categories, ha
               <label className="text-[9px] uppercase tracking-wider font-mono text-stone-400 dark:text-stone-400 block mb-1">{t('admin.itemCategory')}</label>
               <select value={galleryForm.categoryId} onChange={e => setGalleryForm(f => ({ ...f, categoryId: e.target.value }))} className="w-full bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 p-2 text-xs text-stone-700 dark:text-stone-200 focus:outline-none rounded-xs">
                 <option value="">— No category —</option>
-                {categories.filter((c: any) => c.isActive).map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                {categories.filter((c: Category) => c.isActive).map((c: Category) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
             <div className="sm:col-span-2">

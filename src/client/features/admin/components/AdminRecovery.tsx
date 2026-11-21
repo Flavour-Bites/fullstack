@@ -1,9 +1,10 @@
 import { ShieldCheck, RefreshCw, Loader2, X, Clock } from 'lucide-react';
 import { t } from '@client/i18n/index';
+import type { RecoveryRequest } from '@shared/types';
 
 interface AdminRecoveryProps {
   isAdmin: boolean;
-  recoveryRequests: any[];
+  recoveryRequests: RecoveryRequest[];
   recoveryLoading: boolean;
   recoveryStatusFilter: string;
   setRecoveryStatusFilter: (s: string) => void;
@@ -83,7 +84,7 @@ export default function AdminRecovery({
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-800/60">
-              {recoveryRequests.map((req: any) => (
+              {recoveryRequests.map((req: RecoveryRequest) => (
                 <tr key={req.id} className="hover:bg-white/5 transition-colors">
                   <td className="px-5 py-4 font-mono text-stone-900 dark:text-white text-sm">{req.oldTelegramId}</td>
                   <td className="px-5 py-4 font-mono text-stone-900 dark:text-white text-sm">{req.newTelegramId}</td>

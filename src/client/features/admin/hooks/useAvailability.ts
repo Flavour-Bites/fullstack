@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { http } from '@client/lib/http';
+import { queryKeys } from '@client/lib/queryKeys';
 import type { AvailabilityResponse, AvailabilityPolicy } from '@shared/types';
 
 async function fetchAvailability(): Promise<AvailabilityResponse> {
@@ -18,7 +19,7 @@ async function updateAvailability(input: Partial<AvailabilityPolicy>): Promise<A
 
 export function useAvailability() {
   return useQuery({
-    queryKey: ['availability'],
+    queryKey: queryKeys.availability.all,
     queryFn: fetchAvailability,
   });
 }
@@ -29,7 +30,7 @@ export function useUpdateAvailability() {
   return useMutation({
     mutationFn: (input: Partial<AvailabilityPolicy>) => updateAvailability(input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['availability'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.availability.all });
     },
   });
 }
