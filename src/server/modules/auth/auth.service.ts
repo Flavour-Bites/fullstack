@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { signToken, verifyPassword, hashPassword, generateNonce, generatePkcePair, verifyOidcIdToken, authCookieOptions } from '../../../shared/utils/auth';
+import { signToken, verifyPassword, hashPassword, generateNonce, generatePkcePair, verifyOidcIdToken, authCookieOptions } from './auth.crypto';
 import { authRepository } from './auth.repository';
 import type { LoginResponse, TelegramTokenExchangeResponse } from './auth.types';
 import { AuthenticationError, NotFoundError, ValidationError } from '../../platform/errors/index';

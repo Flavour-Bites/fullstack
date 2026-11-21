@@ -1,7 +1,6 @@
 import { Context } from 'grammy';
 import { getConversationStore } from '../../platform/integrations/redis/conversationState';
-import { ordersRepository } from '../../modules/orders/orders.repository';
-import { notifyCustomerStatusChange } from '../../platform/integrations/telegram/telegramNotifications';
+import { ordersService } from '../../modules/orders/orders.service';
 
 const conversationStore = getConversationStore();
 
@@ -27,15 +26,16 @@ export async function handlePriceInput(
     return true;
   }
 
-  await ordersRepository.updateCommercials(orderId, { price });
-  await ordersRepository.updateStatus(orderId, 'Priced', {
-    source: 'telegram_bot',
-    userId: senderId,
-  });
+  await ordersService.update(
+    orderId,
+    { price, status: 'Priced' },
+    {
+      source: 'telegram_bot',
+      userId: senderId,
+    }
+  );
 
   await conversationStore.clearPrice(senderId);
-
-  await notifyCustomerStatusChange(orderId);
 
   await ctx.reply(
     `✅ Price of <b>${price.toLocaleString()} ETB</b> sent to the customer for order <code>${orderId}</code>.\n\nThey'll receive a notification with Accept/Change buttons.`,

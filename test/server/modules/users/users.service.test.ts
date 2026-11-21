@@ -10,6 +10,7 @@ const mockUsers = [
 vi.mock('@server/modules/users/users.repository.js', () => ({
   usersRepository: {
     findAll: vi.fn(() => Promise.resolve(mockUsers)),
+    findByTelegramId: vi.fn((tid: string) => Promise.resolve(mockUsers.find(u => u.telegramId === tid) ?? null)),
     updateRole: vi.fn((id, role) => Promise.resolve({ ...mockUsers.find(u => u.id === id), role })),
     delete: vi.fn((id) => Promise.resolve(mockUsers.find(u => u.id === id))),
   },
@@ -19,6 +20,18 @@ describe('usersService.findAll', () => {
   it('returns all users', async () => {
     const users = await usersService.findAll();
     expect(users).toHaveLength(3);
+  });
+});
+
+describe('usersService.findByTelegramId', () => {
+  it('finds user by telegram id', async () => {
+    const user = await usersService.findByTelegramId('1');
+    expect(user?.name).toBe('Admin');
+  });
+
+  it('returns null when telegram id not found', async () => {
+    const user = await usersService.findByTelegramId('999');
+    expect(user).toBeNull();
   });
 });
 

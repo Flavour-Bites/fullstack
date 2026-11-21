@@ -8,7 +8,7 @@ import {
   verifyToken,
   getTokenFromRequest,
   authCookieOptions,
-} from '@/shared/utils/auth.js';
+} from '@server/modules/auth/auth.crypto.js';
 
 vi.mock('jose', () => ({
   jwtVerify: vi.fn(),
@@ -102,7 +102,7 @@ import {
   generatePkcePair,
   verifyOidcIdToken,
   TELEGRAM_ISSUER,
-} from '@/shared/utils/auth.js';
+} from '@server/modules/auth/auth.crypto.js';
 
 describe('OIDC Security Generators', () => {
   it('generates random hex state', () => {
@@ -219,7 +219,7 @@ describe('authCookieOptions', () => {
     const previous = process.env.APP_URL;
     process.env.APP_URL = 'https://flavourbites.com';
     vi.resetModules();
-    const { authCookieOptions: httpsCookieOptions } = await import('@/shared/utils/auth.js');
+    const { authCookieOptions: httpsCookieOptions } = await import('@server/modules/auth/auth.crypto.js');
     expect(httpsCookieOptions.secure).toBe(true);
     process.env.APP_URL = previous;
     vi.resetModules();

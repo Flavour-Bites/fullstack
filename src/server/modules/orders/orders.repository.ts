@@ -66,7 +66,41 @@ export const ordersRepository = {
 
   async findById(id: string) {
     const prisma = getPrisma();
-    return prisma.customCakeRequest.findUnique({ where: { id } });
+    return prisma.customCakeRequest.findUnique({
+      where: { id },
+      include: { user: true },
+    });
+  },
+
+  async findActiveByUserId(userId: string, limit = 5) {
+    const prisma = getPrisma();
+    return prisma.customCakeRequest.findMany({
+      where: {
+        userId,
+        deletedAt: null,
+        status: { notIn: ['Completed', 'Cancelled'] },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
+  },
+
+  async search(query: string, limit = 30) {
+    const prisma = getPrisma();
+    return prisma.customCakeRequest.findMany({
+      where: {
+        deletedAt: null,
+        OR: [
+          { id: { contains: query, mode: 'insensitive' } },
+          { contactName: { contains: query, mode: 'insensitive' } },
+          { flavor: { contains: query, mode: 'insensitive' } },
+          { eventType: { contains: query, mode: 'insensitive' } },
+          { contactPhone: { contains: query, mode: 'insensitive' } },
+        ],
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
   },
 
   async findMany(

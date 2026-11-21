@@ -85,6 +85,8 @@ vi.mock('@server/modules/orders/orders.repository.js', () => ({
     restore: vi.fn((id) => Promise.resolve({ ...mockOrder, id, deletedAt: null })),
     updateFull: vi.fn((id, fields) => Promise.resolve({ ...mockOrder, id, ...fields })),
     findStatusEvents: vi.fn(() => Promise.resolve([])),
+    findActiveByUserId: vi.fn((_userId, _limit) => Promise.resolve([mockOrder])),
+    search: vi.fn((_query, _limit) => Promise.resolve([mockOrder])),
   },
 }));
 
@@ -111,6 +113,17 @@ vi.mock('@server/platform/integrations/telegram/telegramNotifications.js', () =>
   notifyStaffPriceConfirmed: vi.fn(() => Promise.resolve()),
 }));
 
+vi.mock('@server/modules/business/businessAvailability.service.js', () => ({
+  businessAvailabilityService: {
+    validateOrderDate: vi.fn((date: string) => {
+      if (date === 'invalid-date') {
+        return Promise.resolve({ valid: false, error: 'The selected date is not available.' });
+      }
+      return Promise.resolve({ valid: true });
+    }),
+  },
+}));
+
 vi.mock('@server/platform/config/prisma.js', () => ({
   getPrisma: vi.fn(() => ({
     customCakeRequest: {
@@ -133,6 +146,20 @@ describe('ordersService.create', () => {
     const order = await ordersService.create(data, 'usr_123');
     expect(order.id).toBe('FB-TEST001');
     expect(order.contactName).toBe('Test User');
+  });
+
+  it('throws ValidationError when selected date is unavailable', async () => {
+    const data = {
+      contactName: 'Test User',
+      contactPhone: '+251911111111',
+      eventType: 'Birthday',
+      guestCount: 30,
+      eventDate: 'invalid-date',
+      flavor: 'Vanilla',
+      tierCount: 2,
+    };
+    await expect(ordersService.create(data, 'usr_123'))
+      .rejects.toThrow('The selected date is not available.');
   });
 });
 
@@ -264,5 +291,19 @@ describe('ordersService.getTimeline', () => {
   it('returns status events', async () => {
     const events = await ordersService.getTimeline('FB-ABC123');
     expect(events).toEqual([]);
+  });
+});
+
+describe('ordersService.findActiveByUserId', () => {
+  it('returns active orders for user', async () => {
+    const orders = await ordersService.findActiveByUserId('usr_123');
+    expect(orders).toHaveLength(1);
+  });
+});
+
+describe('ordersService.search', () => {
+  it('returns matching orders', async () => {
+    const orders = await ordersService.search('birthday');
+    expect(orders).toHaveLength(1);
   });
 });
