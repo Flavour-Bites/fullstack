@@ -90,8 +90,30 @@ describe('MyOrdersView', () => {
     // The component uses local timeline data, not an API call
     expect(screen.getByText('Inquiry Received')).toBeInTheDocument();
     expect(screen.getByText('Aesthetic Concept Design')).toBeInTheDocument();
-    expect(screen.getByText('Price Confirmed & Deposit Paid')).toBeInTheDocument();
+    expect(screen.getByText('Price Confirmed')).toBeInTheDocument();
     expect(screen.getByText('Baking & Handcrafting Artistry')).toBeInTheDocument();
     expect(screen.getByText('Secure Event Pickup')).toBeInTheDocument();
+  });
+
+  it('renders Accept Quoted Price button when order status is Priced', async () => {
+    const pricedRequest = {
+      ...REQUEST,
+      id: 'FB-PRICED1',
+      status: 'Priced' as const,
+      price: 15000,
+      finalPrice: 15000,
+    };
+    vi.mocked(http.get).mockResolvedValue({ data: { success: true, requests: [pricedRequest] } });
+
+    renderWithQueryClient(
+      <ToastProvider>
+        <MyOrdersView currentUser={{ id: 'u-1', email: 'a@b.com', name: 'Saba', role: 'customer' }} />
+      </ToastProvider>
+    );
+
+    await screen.findByText('FB-PRICED1');
+    fireEvent.click(await screen.findByText('Saba Tekle'));
+
+    expect(await screen.findByText('Accept Quoted Price')).toBeInTheDocument();
   });
 });

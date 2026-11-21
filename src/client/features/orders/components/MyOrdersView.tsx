@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Search, AlertCircle, ShoppingBag, ShieldCheck } from 'lucide-react';
+import { Search, AlertCircle, ShoppingBag, ShieldCheck, Check } from 'lucide-react';
 import { t } from '@client/i18n/index';
 import { usePageTitle } from '@client/lib/usePageTitle';
 import { getStatusStyles } from '@shared/constants/orderStatus';
+import { OrderStatus } from '@shared/types';
 import { BUSINESS_INFO } from '../../../../shared/constants/index';
 import { useMyOrders } from '../hooks/useMyOrders';
 
@@ -13,7 +14,7 @@ interface FrontendOrder {
   email: string;
   cakeType: string;
   eventDate: string;
-  status: 'Pending' | 'In Review' | 'Confirmed' | 'Designing' | 'Priced' | 'InProgress' | 'Ready' | 'Completed';
+  status: OrderStatus;
   stepNum: number; // 1 to 5 steps
   tierCount: number;
   flavor: string;
@@ -36,8 +37,9 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<FrontendOrder | null>(null);
   const [searchError, setSearchError] = useState(false);
+  const [acceptingId, setAcceptingId] = useState<string | null>(null);
   
-  const { requests, refetch } = useMyOrders();
+  const { requests, refetch, acceptPrice } = useMyOrders();
 
   useEffect(() => {
     if (currentUser) {
@@ -50,19 +52,25 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
     const price = item.finalPrice ?? item.price ?? 0;
     const amountEtb = price ? `${price.toLocaleString()} ETB` : 'Pending Price';
     
-    let stepNumber = 1;
-    if (item.status === 'Priced') stepNumber = 2;
-    if (item.status === 'Confirmed') stepNumber = 3;
-    if (item.status === 'Designing' || item.status === 'InProgress') stepNumber = 4;
-    if (item.status === 'Ready' || item.status === 'Completed') stepNumber = 5;
+    const stepMap: Record<string, number> = {
+      Received: 1,
+      Designing: 2,
+      Priced: 2,
+      Confirmed: 3,
+      InProgress: 4,
+      Ready: 5,
+      Completed: 5,
+      Cancelled: 0,
+    };
+    const stepNumber = stepMap[item.status] ?? 1;
 
     return {
       id: item.id || `FB-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
       clientName: item.contactName || 'Valued Client',
       email: item.contactEmail || '',
       cakeType: `${item.eventType || 'Custom Celebration'} Cake`,
-      eventDate: item.deliveryDate || 'TBD',
-      status: item.status || 'Pending',
+      eventDate: item.eventDate || item.deliveryDate || 'TBD',
+      status: (item.status as OrderStatus) || 'Received',
       stepNum: stepNumber,
       tierCount: numTiers,
       flavor: item.flavor || 'Custom Assortment',
@@ -71,9 +79,9 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
       timeline: [
         { title: 'Inquiry Received', date: item.requestDate || 'Just Now', description: 'Your request has been filed in Yodit\'s review queue!', done: true },
         { title: 'Aesthetic Concept Design', date: 'Studio Stage', description: 'Yodit reviews your specs to draft a visual layout.', done: stepNumber >= 2 },
-        { title: 'Price Confirmed & Deposit Paid', date: 'Booking Confirmed', description: 'After price confirmation, a 50% reservation fee secures your slot.', done: stepNumber >= 3 },
+        { title: 'Price Confirmed', date: 'Booking Confirmed', description: 'After confirming the quoted price, Yodit will begin crafting your cake.', done: stepNumber >= 3 },
         { title: 'Baking & Handcrafting Artistry', date: 'Active Phase', description: 'Oven baking and intricate hand-sculpted marzipan artwork.', done: stepNumber >= 4 },
-        { title: 'Secure Event Pickup', date: item.deliveryDate || 'TBD', description: `Safe hand-off at ${BUSINESS_INFO.location.name} coordinates.`, done: stepNumber >= 5 }
+        { title: 'Secure Event Pickup', date: item.eventDate || item.deliveryDate || 'TBD', description: `Safe hand-off at ${BUSINESS_INFO.location.name} coordinates.`, done: stepNumber >= 5 }
       ]
     };
   });
@@ -237,6 +245,39 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
                     <span className="text-xs text-lux-gold font-semibold font-mono">{selectedOrder.amount}</span>
                   </div>
                 </div>
+
+                {/* Quoted Price Acceptance Banner */}
+                {selectedOrder.status === 'Priced' && (
+                  <div className="p-4 bg-lux-gold/10 border border-lux-gold/30 rounded-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-left">
+                    <div>
+                      <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-lux-gold block mb-0.5">
+                        Quotation Ready
+                      </span>
+                      <p className="text-xs text-stone-850 dark:text-stone-200 font-medium">
+                        Yodit has quoted {selectedOrder.amount} for your celebration cake. Accept to confirm your order.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setAcceptingId(selectedOrder.id);
+                        try {
+                          const ok = await acceptPrice(selectedOrder.id);
+                          if (ok) {
+                            setSelectedOrder((prev) => (prev ? { ...prev, status: 'Confirmed', stepNum: 3 } : null));
+                          }
+                        } finally {
+                          setAcceptingId(null);
+                        }
+                      }}
+                      disabled={acceptingId === selectedOrder.id}
+                      className="px-4 py-2 bg-stone-900 hover:bg-lux-gold text-white hover:text-stone-950 font-mono text-xs uppercase tracking-wider font-bold rounded-sm border border-stone-800 hover:border-lux-gold transition-colors shrink-0 disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Check className="w-3.5 h-3.5" />
+                      {acceptingId === selectedOrder.id ? 'Confirming...' : 'Accept Quoted Price'}
+                    </button>
+                  </div>
+                )}
 
                 {/* Design Narrative details */}
                 <div className="space-y-1.5 text-left">

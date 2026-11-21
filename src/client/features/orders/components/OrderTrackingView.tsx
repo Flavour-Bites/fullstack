@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Activity, Clock, Filter, Trash2, AlertTriangle, X } from 'lucide-react';
+import { Activity, Clock, Filter, Trash2, AlertTriangle, X, Check } from 'lucide-react';
 import { t } from '@client/i18n/index';
 import type { CustomCakeRequest } from '@shared/types';
 import { getStatusStyles } from '@shared/constants/orderStatus';
@@ -8,10 +8,12 @@ import { getStatusStyles } from '@shared/constants/orderStatus';
 interface OrderTrackingViewProps {
   requests: CustomCakeRequest[];
   onDelete: (id: string) => void;
+  onAcceptPrice?: (id: string) => void | Promise<unknown>;
 }
 
-export default function OrderTrackingView({ requests, onDelete }: OrderTrackingViewProps) {
+export default function OrderTrackingView({ requests, onDelete, onAcceptPrice }: OrderTrackingViewProps) {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [acceptingId, setAcceptingId] = useState<string | null>(null);
 
   const pendingDelete = confirmDeleteId ? (requests ?? []).find(r => r.id === confirmDeleteId) : null;
   return (
@@ -88,13 +90,33 @@ export default function OrderTrackingView({ requests, onDelete }: OrderTrackingV
                       {((req as any).finalPrice ?? (req as any).price ?? 0).toLocaleString()} ETB
                     </td>
                     <td className="py-4 px-4 text-center border-stone-100 dark:border-stone-850">
-                      <button
-                        onClick={() => setConfirmDeleteId(req.id)}
-                        className="p-1 px-2.5 border border-stone-200 dark:border-stone-800 rounded-sm hover:border-red-350 dark:hover:border-red-900 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 text-stone-500 dark:text-stone-400 font-medium font-mono text-[10px] transition-all cursor-pointer inline-flex items-center gap-1"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        {t('order.cancelRequest')}
-                      </button>
+                      <div className="flex items-center justify-center gap-2">
+                        {req.status === 'Priced' && onAcceptPrice && (
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              setAcceptingId(req.id);
+                              try {
+                                await onAcceptPrice(req.id);
+                              } finally {
+                                setAcceptingId(null);
+                              }
+                            }}
+                            disabled={acceptingId === req.id}
+                            className="p-1 px-2.5 bg-lux-gold hover:bg-amber-400 text-stone-950 font-semibold font-mono text-[10px] rounded-sm transition-all cursor-pointer inline-flex items-center gap-1 disabled:opacity-50"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            {acceptingId === req.id ? 'Confirming...' : 'Accept Price'}
+                          </button>
+                        )}
+                        <button
+                          onClick={() => setConfirmDeleteId(req.id)}
+                          className="p-1 px-2.5 border border-stone-200 dark:border-stone-800 rounded-sm hover:border-red-350 dark:hover:border-red-900 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 text-stone-500 dark:text-stone-400 font-medium font-mono text-[10px] transition-all cursor-pointer inline-flex items-center gap-1"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          {t('order.cancelRequest')}
+                        </button>
+                      </div>
                     </td>
                   </motion.tr>
                 ))}

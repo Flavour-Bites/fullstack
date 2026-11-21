@@ -108,6 +108,7 @@ export interface UseRequestFormReturn {
   handleDragLeave: (e: React.DragEvent) => void;
   handleDrop: (e: React.DragEvent) => void;
   deleteRequest: (id: string) => Promise<void>;
+  acceptPrice: (id: string) => Promise<boolean>;
   handleSubmit: (e: React.SyntheticEvent<HTMLFormElement>) => Promise<void>;
   resetForm: () => void;
   availability: AvailabilityResponse | undefined;
@@ -123,7 +124,7 @@ export function useRequestForm(
   const { showToast } = useToast();
   const { data: availability, isLoading: availabilityLoading } = useAvailability();
   const { uploading, uploadedImageUrl, uploadError, isDragging, handleFileChange, handleDragOver, handleDragEnter, handleDragLeave, handleDrop, clearUploadedImage } = useFileUpload();
-  const { requests: activeRequests, cancelRequest } = useMyOrders();
+  const { requests: activeRequests, cancelRequest, acceptPrice } = useMyOrders();
 
   const deleteRequest = useCallback(async (id: string) => {
     await cancelRequest(id);
@@ -196,8 +197,7 @@ export function useRequestForm(
 
       const uniqueId = generateRequestId();
 
-      const newInquiry: CustomCakeRequest = {
-        id: uniqueId,
+      const newInquiry: Partial<CustomCakeRequest> = {
         contactName: form.contactName,
         contactPhone: form.contactPhone,
         eventType: 'Other',
@@ -207,24 +207,20 @@ export function useRequestForm(
         flavor: 'To be discussed',
         tierCount: 1,
         specialInstructions: '',
-        requestDate: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
-        status: 'Received',
         referenceImage: uploadedImageUrl || undefined,
-        depositAmount: 0,
-        remainingBalance: 0,
-        paymentStatus: 'unpaid',
       };
 
       try {
-        const { data } = await http.post<ApiResponse>('/api/requests', newInquiry);
+        const { data } = await http.post<ApiResponse<{ request: CustomCakeRequest }>>('/api/requests', newInquiry);
         if (data.success) {
           await queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
-          setSubmittedId(uniqueId);
+          const assignedId = data.request?.id || uniqueId;
+          setSubmittedId(assignedId);
           setFormSubmitted(true);
           setSubmitting(false);
           onClearPrefilledCake();
           clearUploadedImage();
-          showToast(t('order.inquiryFiled'), t('order.submittedSuccess', { id: uniqueId }), 'majestic', 7000);
+          showToast(t('order.inquiryFiled'), t('order.submittedSuccess', { id: assignedId }), 'majestic', 7000);
           return;
         }
         throw new Error(data.error || 'Failed to submit request');
@@ -273,6 +269,7 @@ export function useRequestForm(
     handleDragLeave,
     handleDrop,
     deleteRequest,
+    acceptPrice,
     handleSubmit,
     resetForm,
     availability,

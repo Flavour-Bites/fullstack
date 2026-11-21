@@ -70,10 +70,10 @@ export interface CustomCakeRequest {
   price?: number;
   finalPrice?: number;
   priceConfirmedAt?: string;
-  depositAmount: number;
+  depositAmount?: number;
   depositPaidAt?: string;
-  remainingBalance: number;
-  paymentStatus: 'unpaid' | 'partial' | 'paid' | string;
+  remainingBalance?: number;
+  paymentStatus?: 'unpaid' | 'partial' | 'paid' | string;
   bakerNote?: string | null;
   userId?: string;
   user?: User;

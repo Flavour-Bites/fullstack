@@ -12,7 +12,7 @@ router.get('/', apiLimiter, requireAuth, ordersController.findAll);
 router.post('/', apiLimiter, requireAuth, validate(createOrderSchema), ordersController.create);
 router.patch('/:id', apiLimiter, requireAuth, requireRole('admin', 'staff'), validate(updateOrderSchema), ordersController.update);
 router.post('/:id/accept-price', apiLimiter, requireAuth, validate(acceptPriceSchema), ordersController.acceptPrice);
-router.delete('/:id', apiLimiter, requireAuth, requireRole('admin', 'staff'), ordersController.softDelete);
+router.delete('/:id', apiLimiter, requireAuth, ordersController.softDelete);
 router.post('/:id/restore', apiLimiter, requireAuth, requireRole('admin', 'staff'), ordersController.restore);
 router.get('/:id/timeline', apiLimiter, requireAuth, ordersController.timeline);
 
