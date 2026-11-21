@@ -1,5 +1,5 @@
 import {
-  Package, Coins, Clock, Activity, BarChart2, Sparkles,
+  Package, Coins, Clock, Activity, BarChart2, Store,
   Database, Users, Loader2, RefreshCw
 } from 'lucide-react';
 import { t } from '@client/i18n/index';
@@ -39,7 +39,7 @@ export function AdminDashboard({
       <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4 relative z-10 font-sans">
         {[
           { label: t('admin.totalOrders'), value: loading ? '…' : requests.length, sub: 'All time cake orders', icon: <Package className="w-4 h-4 text-lux-gold" />, accent: 'from-lux-gold/60' },
-          { label: t('admin.totalRevenue'), value: loading ? '…' : `${totalRevenue.toLocaleString()} ETB`, sub: 'Based on quoted prices', icon: <Coins className="w-4 h-4 text-emerald-400" />, accent: 'from-emerald-500/60' },
+          { label: t('admin.totalRevenue'), value: loading ? '…' : `${totalRevenue.toLocaleString()} ETB`, sub: 'Based on set prices', icon: <Coins className="w-4 h-4 text-emerald-400" />, accent: 'from-emerald-500/60' },
           { label: 'Pending Review', value: loading ? '…' : pendingCount, sub: 'Orders waiting for action', icon: <Clock className="w-4 h-4 text-amber-400" />, accent: 'from-amber-500/60' },
           { label: 'Currently Active', value: loading ? '…' : activeCount, sub: 'In design or baking', icon: <Activity className="w-4 h-4 text-blue-400" />, accent: 'from-blue-500/60' },
         ].map((card) => (
@@ -85,7 +85,7 @@ export function AdminDashboard({
         {/* Bakery Info Panel */}
         <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-6 rounded-sm space-y-4 text-left">
           <h3 className="font-sans text-sm font-semibold text-stone-700 dark:text-stone-200 flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-lux-gold" /> Bakery Status
+            <Store className="w-4 h-4 text-lux-gold" /> Bakery Status
           </h3>
           <div className="space-y-2.5 text-[11px] font-mono">
             {[

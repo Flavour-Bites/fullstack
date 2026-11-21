@@ -16,7 +16,7 @@ enum Role {
 enum OrderStatus {
   Received
   Designing
-  Quoted
+  Priced
   Confirmed
   InProgress
   Ready
@@ -66,9 +66,7 @@ model CustomCakeRequest {
   contactPhone        String
   eventType           String
   guestCount          Int
-  deliveryOption      String
-  deliveryAddress     String?
-  deliveryDate        String
+  eventDate           DateTime
   designStyle         String
   flavor              String
   tierCount           Int
@@ -80,7 +78,7 @@ model CustomCakeRequest {
   legacyContact      Json?
   requestDate         String
 
-  quotedPrice         Int?
+  price         Int?
   finalPrice          Int?
   priceConfirmedAt   DateTime?
   depositAmount      Int           @default(0)
@@ -101,7 +99,7 @@ model CustomCakeRequest {
   @@index([status, deletedAt])
 }
 
-model CakeGalleryItem {
+model Product {
   id            String   @id
   name          String
   description   String
@@ -113,8 +111,12 @@ model CakeGalleryItem {
   imagePublicId String?
   servingCount  String
   tags          String[]
+  isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  reviews       Review[]
+
+  @@index([isActive])
 }
 
 model Category {
@@ -128,7 +130,7 @@ model Category {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  items       CakeGalleryItem[]
+  products    Product[]
 
   @@index([isActive, sortOrder])
 }
@@ -140,11 +142,19 @@ model Review {
   author    String
   eventType String
   role      String   @default("Host")
+
   userId    String?
-  user      User?    @relation(fields: [userId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
   productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+
   date      String
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@index([userId])
 }
 
 model RecoveryRequest {
@@ -172,4 +182,19 @@ model OrderStatusEvent {
 
   @@index([orderId, createdAt])
   @@index([changedById])
+}
+
+model BusinessAvailabilityPolicy {
+  id                     String   @id @default(cuid())
+  isEnabled              Boolean  @default(true)
+  timezone               String   @default("Africa/Addis_Ababa")
+  minimumLeadTimeHours   Int      @default(24)
+  mondayEnabled          Boolean  @default(false)
+  tuesdayEnabled         Boolean  @default(false)
+  wednesdayEnabled       Boolean  @default(false)
+  thursdayEnabled        Boolean  @default(false)
+  fridayEnabled          Boolean  @default(false)
+  saturdayEnabled        Boolean  @default(true)
+  sundayEnabled          Boolean  @default(true)
+  updatedAt              DateTime @updatedAt
 }

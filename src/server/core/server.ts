@@ -1,4 +1,23 @@
 import 'dotenv/config';
+import { resolve } from 'path';
+import { config as loadDotenv } from 'dotenv';
+
+// Load environment-specific .env file from project root
+const nodeEnv = (process.env.NODE_ENV || 'development').trim().toLowerCase();
+const projectRoot = process.cwd();
+const envFiles = [
+  resolve(projectRoot, '.env'),
+  resolve(projectRoot, `.env.${nodeEnv}`),
+];
+
+for (const file of envFiles) {
+  try {
+    loadDotenv({ path: file, override: false });
+  } catch {
+    // file doesn't exist or not readable - skip
+  }
+}
+
 import { validateEnv, env } from '../platform/config/env';
 import { createApp, registerWebhook } from './createServer';
 import { getPrisma } from '../platform/config/prisma';

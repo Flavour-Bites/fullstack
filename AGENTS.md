@@ -1,5 +1,10 @@
 # Flavour Bites — Agent Instructions
 
+## Optimization
+
+Always use the /optimize-execution skill 
+
+
 ## Engineering Standard
 
 Build **production-grade software**, not patches.

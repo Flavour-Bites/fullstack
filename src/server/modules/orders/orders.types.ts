@@ -10,7 +10,7 @@ export type OrderActor = {
 
 export type OrderUpdateInput = {
   status?: OrderStatus;
-  quotedPrice?: number | string;
+  price?: number | string;
   finalPrice?: number | string;
   depositAmount?: number | string;
   depositPaidAt?: string | null;

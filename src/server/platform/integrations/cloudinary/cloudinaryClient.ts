@@ -66,7 +66,7 @@ function requireCloudinaryEnv() {
 
 function signCloudinaryParams(params: Record<string, string | number>, apiSecret: string) {
   const payload = Object.keys(params)
-    .sort()
+    .sort((a, b) => a.localeCompare(b))
     .map((key) => `${key}=${params[key]}`)
     .join('&');
 

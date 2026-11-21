@@ -28,19 +28,22 @@ export function SkeletonCard() {
 }
 
 export function SkeletonTable({ rows = 5, cols = 4 }: { rows?: number; cols?: number }) {
+  const colKeys = Array.from({ length: cols }, (_, i) => `sk-col-${i}`);
+  const rowKeys = Array.from({ length: rows }, (_, r) => `sk-row-${r}`);
+
   return (
     <div className="bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden">
       <div className="bg-stone-100 dark:bg-stone-950 p-4 border-b border-stone-200 dark:border-stone-800">
         <div className="flex gap-8">
-          {Array.from({ length: cols }).map((_1, i) => (
-            <SkeletonLine key={i} className="h-3 flex-1" />
+          {colKeys.map((colKey) => (
+            <SkeletonLine key={colKey} className="h-3 flex-1" />
           ))}
         </div>
       </div>
-      {Array.from({ length: rows }).map((_1, r) => (
-        <div key={r} className="flex gap-8 p-4 border-b border-stone-200/50 dark:border-stone-800/50">
-          {Array.from({ length: cols }).map((_2, c) => (
-            <SkeletonLine key={c} className="h-3 flex-1" />
+      {rowKeys.map((rowKey) => (
+        <div key={rowKey} className="flex gap-8 p-4 border-b border-stone-200/50 dark:border-stone-800/50">
+          {colKeys.map((colKey) => (
+            <SkeletonLine key={`${rowKey}-${colKey}`} className="h-3 flex-1" />
           ))}
         </div>
       ))}
@@ -49,10 +52,12 @@ export function SkeletonTable({ rows = 5, cols = 4 }: { rows?: number; cols?: nu
 }
 
 export function SkeletonGrid({ items = 6 }: { items?: number }) {
+  const itemKeys = Array.from({ length: items }, (_, i) => `sk-grid-${i}`);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {Array.from({ length: items }).map((_, i) => (
-        <div key={i} className="bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden">
+      {itemKeys.map((itemKey) => (
+        <div key={itemKey} className="bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden">
           <SkeletonBlock className="aspect-[3/4] w-full rounded-none" />
           <div className="p-4 space-y-2">
             <SkeletonLine className="w-1/2 h-4" />

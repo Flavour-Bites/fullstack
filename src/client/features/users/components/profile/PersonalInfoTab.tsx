@@ -15,12 +15,13 @@ export default function PersonalInfoTab({ name, phone, onNameChange, onPhoneChan
       subtitle="Update your private details & contact information"
     >
       <div>
-        <label className="block text-[10px] uppercase font-mono tracking-widest text-stone-400 dark:text-stone-500 mb-2 font-bold">Full Name</label>
+        <label htmlFor="name-input" className="block text-[10px] uppercase font-mono tracking-widest text-stone-400 dark:text-stone-500 mb-2 font-bold">Full Name</label>
         <div className="relative rounded-xs shadow-inner">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
             <User className="w-4 h-4 text-stone-400 dark:text-stone-500" />
           </div>
           <input
+            id="name-input"
             type="text"
             value={name}
             onChange={(e) => onNameChange(e.target.value)}
@@ -30,12 +31,13 @@ export default function PersonalInfoTab({ name, phone, onNameChange, onPhoneChan
       </div>
 
       <div>
-        <label className="block text-[10px] uppercase font-mono tracking-widest text-stone-400 dark:text-stone-500 mb-2 font-bold">Phone Number</label>
+        <label htmlFor="phone-input" className="block text-[10px] uppercase font-mono tracking-widest text-stone-400 dark:text-stone-500 mb-2 font-bold">Phone Number</label>
         <div className="relative rounded-xs shadow-inner">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
             <Phone className="w-4 h-4 text-stone-400 dark:text-stone-500" />
           </div>
           <input
+            id="phone-input"
             type="tel"
             value={phone}
             onChange={(e) => onPhoneChange(e.target.value)}

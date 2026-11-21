@@ -1,14 +1,14 @@
 import { ChevronRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { CakeGalleryItem } from '@shared/types';
+import { Product } from '@shared/types';
 import { t } from '@client/i18n/index';
 
 interface HomeShowcaseProps {
-  featuredCakes: CakeGalleryItem[];
-  onSelectCake: (cake: CakeGalleryItem) => void;
+  featuredCakes: Product[];
+  onSelectCake: (cake: Product) => void;
 }
 
-export default function HomeShowcase({ featuredCakes, onSelectCake }: HomeShowcaseProps) {
+export default function HomeShowcase({ featuredCakes, onSelectCake }: Readonly<HomeShowcaseProps>) {
   const navigate = useNavigate();
 
   return (
@@ -30,8 +30,9 @@ export default function HomeShowcase({ featuredCakes, onSelectCake }: HomeShowca
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {featuredCakes.map((cake) => (
-            <div
+            <button
               key={cake.id}
+              type="button"
               className="group cursor-pointer text-left bg-white dark:bg-stone-950 border border-stone-200/60 dark:border-stone-850/70 p-4 rounded-sm shadow-xs transition-all duration-300 hover:shadow-xl"
               onClick={() => {
                 onSelectCake(cake);
@@ -56,7 +57,7 @@ export default function HomeShowcase({ featuredCakes, onSelectCake }: HomeShowca
                 </div>
                 <span className="font-mono text-xs text-lux-gold font-bold bg-lux-gold/10 px-2 py-1 rounded-sm border border-lux-gold/15 shrink-0">{cake.priceEstimate}</span>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>

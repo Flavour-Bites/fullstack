@@ -96,6 +96,13 @@ src/
     ├── constants/             # Business info, order status labels/emoji
     ├── types/                 # Shared domain types (User, Order, etc.)
     └── utils/                 # Pure helpers (status styles, formatting)
+
+test/                          # Test suites mirroring src/ structure
+├── client/                    # UI, features, components, and i18n tests
+├── server/                    # Server module, API, and integration tests
+├── shared/                    # Shared utility tests
+├── setup.ts                   # Vitest environment setup
+└── queryClientWrapper.tsx     # React Query testing harness
 ```
 
 ## Server Module Pattern
@@ -111,9 +118,10 @@ src/server/
     ├── *.repository.ts   # Data access (Prisma queries)
     ├── *.schemas.ts      # Zod validation schemas
     ├── *.types.ts        # Module-specific types
-    ├── *.workflow.ts     # Domain state machines (e.g. order status)
-    └── tests/            # Unit tests
+    └── *.workflow.ts     # Domain state machines (e.g. order status)
 ```
+
+Tests live in `test/server/modules/<module>/*.test.ts`.
 
 Requests flow **inward**: route → middleware (auth, role, validation) → controller → service → repository → Prisma. Controllers depend on services, services depend on schemas for types, and repositories own all Prisma access. Higher layers never reach back into HTTP concerns.
 
@@ -126,9 +134,10 @@ features/<domain>/
 ├── components/       # Presentational components
 │   └── <area>/       # Sub-folder per decomposed view surface
 ├── hooks/            # Stateful logic (data fetching, form state)
-├── utils/            # Feature-specific helpers
-└── tests/            # Component tests
+└── utils/            # Feature-specific helpers
 ```
+
+Tests live in `test/client/features/<domain>/*.test.tsx`.
 
 Cross-cutting, app-wide state lives in `app/providers/` (Auth, Theme, Locale, CakeSelection) and is consumed through typed context hooks at the composition root (`App.tsx`). Views are composition roots that wire feature hooks to presentational components; business logic does not live inside JSX.
 

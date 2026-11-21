@@ -102,7 +102,7 @@ Update order status, pricing, or notes.
 **Auth:** Required (admin/staff)
 
 ### POST /api/requests/:id/accept-price
-Accept the quoted price for an order.
+Accept the price for an order.
 
 **Auth:** Required
 
@@ -147,77 +147,57 @@ Soft-delete (sets `isActive = false`).
 
 ---
 
-## Gallery
+## Products & Bakery Catalog
 
-### GET /api/gallery
-List gallery items. Supports `?category=slug` filtering.
+The `/api/products` endpoint represents the bakery catalog (cakes, cookies, cupcakes, pastries, desserts).
 
-### POST /api/gallery
-Create gallery item.
+### GET /api/products
+List active catalog items. Supports `?category=slug` and `?includeInactive=true` (admin/staff).
 
-**Auth:** Required (admin/staff)
+### GET /api/products/:id
+Get a single catalog product by ID.
 
-### PATCH /api/gallery/:id
-Update gallery item.
-
-**Auth:** Required (admin/staff)
-
-### DELETE /api/gallery/:id
-Delete gallery item.
+### POST /api/products
+Create catalog product.
 
 **Auth:** Required (admin/staff)
 
----
+### PATCH /api/products/:id
+Update catalog product (e.g. title, price, category, `isActive`).
 
-## Uploads
+**Auth:** Required (admin/staff)
 
-### POST /api/uploads/image
-Upload an image to Cloudinary.
+### DELETE /api/products/:id
+Delete catalog product. Permanently cascading removes product reviews (`onDelete: Cascade`).
+
+**Auth:** Required (admin/staff)
+
+### GET /api/products/:id/reviews
+List approved customer reviews for a specific product.
+
+### POST /api/products/:id/reviews
+Submit a customer review for a specific product.
 
 **Auth:** Required
 
-**Body:** `{ "fileName": "cake.jpg", "mimeType": "image/jpeg", "size": 500000, "dataBase64": "..." }`
-
-### DELETE /api/uploads/image
-Delete image from Cloudinary.
-
-**Auth:** Required (admin/staff)
-
-**Body:** `{ "publicId": "..." }`
+**Body:** `{ "rating": 5, "content": "Best cupcakes ever!", "author": "Sara", "eventType": "Birthday", "role": "Host" }`
 
 ---
 
-## Recovery
-
-### POST /api/recovery
-Create a Telegram account recovery request.
-
-### GET /api/recovery
-List all recovery requests.
-
-**Auth:** Required (admin/staff)
-
-### PATCH /api/recovery/:id
-Approve or reject a recovery request.
-
-**Auth:** Required (admin)
-
----
-
-## Reviews
+## Reviews (Company Testimonials & Moderation)
 
 ### GET /api/reviews
-List all reviews.
+List general company-wide testimonials (`productId: null`).
 
 ### POST /api/reviews
-Create a review.
+Submit a company-wide review/testimonial.
 
 **Auth:** Required
 
-**Body:** `{ "rating": 5, "content": "Amazing cake!", "author": "John", "eventType": "Birthday", "role": "Host" }`
+**Body:** `{ "rating": 5, "content": "Flavour Bites is fantastic!", "author": "John", "eventType": "Bakery Order", "role": "Customer" }`
 
 ### DELETE /api/reviews/:id
-Delete a review.
+Delete a review (moderation for abusive/inappropriate language). Note: To protect review integrity and authenticity, admins **cannot** edit customer review text or ratings; only moderation deletion is supported.
 
 **Auth:** Required (admin)
 
@@ -259,7 +239,7 @@ Get admin dashboard statistics.
   "avgOrderValue": 3571,
   "totalOrders": 58,
   "avgRating": 4.8,
-  "statusBreakdown": { "Received": 5, "Quoted": 3, ... },
+  "statusBreakdown": { "Received": 5, "Priced": 3, ... },
   "roleCounts": { "customer": 85, "staff": 3, "admin": 1 },
   "totalUsers": 89,
   "totalReviews": 23

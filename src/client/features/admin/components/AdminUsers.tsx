@@ -15,6 +15,18 @@ interface AdminUsersProps {
   fetchUsers: () => Promise<void>;
 }
 
+const ROLE_LABELS: Record<string, string> = {
+  admin: 'System Admin',
+  staff: 'Bakery Staff',
+  customer: 'Customer',
+};
+
+const ROLE_BADGE_CLASSES: Record<string, string> = {
+  admin: 'bg-lux-gold/10 border-lux-gold text-lux-gold',
+  staff: 'bg-blue-900/10 border-blue-800 text-blue-400',
+  customer: 'bg-stone-100 dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300',
+};
+
 export default function AdminUsers({
   users, usersLoading, isAdmin, currentUser,
   saveUserRole, deleteUser, fetchUsers,
@@ -91,12 +103,8 @@ export default function AdminUsers({
                           <option value="admin">System Admin</option>
                         </select>
                       ) : (
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-mono uppercase font-bold border ${
-                          u.role === 'admin' ? 'bg-lux-gold/10 border-lux-gold text-lux-gold'
-                          : u.role === 'staff' ? 'bg-blue-900/10 border-blue-800 text-blue-400'
-                          : 'bg-stone-100 dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300'
-                        }`}>
-                          {u.role === 'admin' ? 'System Admin' : u.role === 'staff' ? 'Bakery Staff' : 'Customer'}
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-mono uppercase font-bold border ${ROLE_BADGE_CLASSES[u.role] ?? ROLE_BADGE_CLASSES.customer}`}>
+                          {ROLE_LABELS[u.role] ?? 'Customer'}
                         </span>
                       )}
                     </td>

@@ -10,7 +10,7 @@
 `customer` | `staff` | `admin`
 
 ### OrderStatus
-`Received` → `Designing` → `Quoted` → `Confirmed` → `InProgress` → `Ready` → `Completed`
+`Received` → `Designing` → `Priced` → `Confirmed` → `InProgress` → `Ready` → `Completed`
 
 Cancelled can occur at any point.
 
@@ -67,7 +67,7 @@ Relations: `requests` (CustomCakeRequest[]), `reviews` (Review[]), `statusEvents
 | referenceImageBytes | Int? | |
 | legacyContact | Json? | |
 | requestDate | DateTime | |
-| quotedPrice | Decimal? | **v2** — Price quoted by staff |
+| price | Decimal? | **v2** — Price set by staff |
 | finalPrice | Decimal? | **v2** — Price confirmed by customer |
 | priceConfirmedAt | DateTime? | **v2** — When customer accepted price |
 | depositAmount | Decimal | **v2** — Amount paid so far (default: 0) |
@@ -83,20 +83,21 @@ Relations: `requests` (CustomCakeRequest[]), `reviews` (Review[]), `statusEvents
 
 Indexes: `[userId, deletedAt]`, `[status, deletedAt]`
 
-### CakeGalleryItem
+### Product
 
 | Field | Type | Notes |
 |-------|------|-------|
 | id | String (UUID) | Primary key |
 | name | String | |
 | description | String | |
-| categoryId | String? | FK → Category |
+| categoryId | String | FK → Category |
 | flavors | String[] | |
-| priceEstimate | Decimal | |
+| priceEstimate | String | |
 | image | String | Cloudinary URL |
 | imagePublicId | String? | |
-| servingCount | Int? | |
+| servingCount | String | Default: "Ask us" |
 | tags | String[] | |
+| isActive | Boolean | Default: true |
 | createdAt | DateTime | |
 | updatedAt | DateTime | |
 
@@ -171,5 +172,5 @@ User ──┐
 │      ├── Review              │
 │      └── OrderStatusEvent ◄──┘
 │
-Category ── CakeGalleryItem
+Category ── Product
 ```

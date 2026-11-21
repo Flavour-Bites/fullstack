@@ -1,6 +1,6 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, CheckCircle, AlertOctagon, Info, AlertTriangle, X } from 'lucide-react';
+import { Award, CheckCircle, AlertOctagon, Info, AlertTriangle, X } from 'lucide-react';
 import { t } from '@client/i18n/index';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info' | 'majestic';
@@ -28,15 +28,26 @@ export function useToast() {
   return context;
 }
 
+let toastSeq = 0;
+function generateToastId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  toastSeq += 1;
+  return `toast-${Date.now()}-${toastSeq}`;
+}
+
+const DEFAULT_TOAST_DURATION_MS = 4000;
+
 interface ToastProviderProps {
   children: ReactNode;
 }
 
-export function ToastProvider({ children }: ToastProviderProps) {
+export function ToastProvider({ children }: Readonly<ToastProviderProps>) {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
-  const showToast = useCallback((title: string, description: string, type: ToastType = 'success', duration = 4000) => {
-    const id = `toast-${Date.now()}-${Math.random()}`;
+  const showToast = useCallback((title: string, description: string, type: ToastType = 'success', duration = DEFAULT_TOAST_DURATION_MS) => {
+    const id = generateToastId();
     setToasts((prev) => [...prev, { id, title, description, type, duration }]);
     
     setTimeout(() => {
@@ -89,14 +100,16 @@ export function ToastProvider({ children }: ToastProviderProps) {
           bg: 'bg-stone-950/98 text-white',
           border: 'border border-lux-gold/60 border-l-[6px] border-l-lux-gold',
           glow: 'shadow-[0_0_20px_rgba(212,175,55,0.25)]',
-          icon: <Sparkles className="w-5 h-5 text-lux-gold shrink-0 animate-pulse" />,
+          icon: <Award className="w-5 h-5 text-lux-gold shrink-0 animate-pulse" />,
           accent: 'text-lux-gold'
         };
     }
   };
 
+  const contextValue = useMemo(() => ({ showToast, dismissToast }), [showToast, dismissToast]);
+
   return (
-    <ToastContext.Provider value={{ showToast, dismissToast }}>
+    <ToastContext.Provider value={contextValue}>
       {children}
       
       {/* Toast Notification HUD Overlay */}
@@ -128,7 +141,7 @@ export function ToastProvider({ children }: ToastProviderProps) {
                     {toast.title}
                     {toast.type === 'majestic' && (
                       <span className="text-[7.5px] uppercase tracking-widest font-mono bg-lux-gold/15 px-1.5 text-lux-gold py-0.5 rounded-sm font-black border border-lux-gold/20">
-                        {t('toast.atelierExquisite')}
+                        {t('toast.brandName')}
                       </span>
                     )}
                   </h4>

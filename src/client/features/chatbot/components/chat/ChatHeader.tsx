@@ -1,4 +1,4 @@
-import { Cake, Trash2, X } from 'lucide-react';
+import { Trash2, X } from 'lucide-react';
 import { t } from '@client/i18n/index';
 
 interface ChatHeaderProps {
@@ -11,7 +11,7 @@ export default function ChatHeader({ onClear, onClose }: ChatHeaderProps) {
     <div className="bg-stone-900 text-white p-4 flex items-center justify-between border-b border-lux-gold/25 relative">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-md bg-stone-900 border border-lux-gold/30 flex items-center justify-center text-lux-gold">
-          <Cake className="w-4.5 h-4.5 stroke-[1.5]" />
+          <img src="/favicon_pink_f_1782078000588.jpg" alt="Flavour Bites" className="w-full h-full rounded-full object-cover" />
         </div>
         <div>
           <h3 className="font-serif text-sm tracking-wider text-white font-medium flex items-center gap-1.5">

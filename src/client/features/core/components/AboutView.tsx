@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Award, Utensils, Compass, ChevronRight } from 'lucide-react';
 import { IngredientSpotlight } from '@shared/types';
-import { INGREDIENT_SPOTLIGHTS } from '@client/data';
+import { INGREDIENT_SPOTLIGHTS } from '@client/content/ingredientSpotlights';
 import { t } from '@client/i18n/index';
 import { usePageTitle } from '../hooks/usePageTitle';
 
@@ -172,7 +172,7 @@ export default function AboutView() {
             <p className="text-xs text-stone-500 dark:text-stone-400 font-light leading-relaxed font-sans">We partner with local organic Highland growers and small-scale cooperatives to source pure, high-quality ingredients.</p>
           </div>
           <div className="p-4 bg-white dark:bg-stone-950 border border-stone-150 dark:border-stone-850 rounded-sm shadow-xs">
-            <h4 className="font-serif text-lg text-stone-900 dark:text-stone-100 mb-2 font-serif font-medium">{t('about.bespokeCuration')}</h4>
+            <h4 className="font-serif text-lg text-stone-900 dark:text-stone-100 mb-2 font-serif font-medium">{t('about.customCuration')}</h4>
             <p className="text-xs text-stone-500 dark:text-stone-400 font-light leading-relaxed font-sans">Yodit coordinates each pre-scheduled pickup. We provide detailed travel recommendations to ensure your cake stays beautiful and perfect.</p>
           </div>
         </div>

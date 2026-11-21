@@ -1,12 +1,23 @@
 import { getPrisma } from '../../platform/config/prisma';
 import { makeId } from '../../../shared/utils/ids';
 import { formatRequestDate } from '../../../shared/utils/dateFormat';
-import type { UpdateReviewInput } from './reviews.schemas';
 
 export const reviewsRepository = {
-  async findAll() {
+  async findAll(productId?: string) {
     const prisma = getPrisma();
-    return prisma.review.findMany({ orderBy: { createdAt: 'desc' } });
+    return prisma.review.findMany({
+      where: productId ? { productId } : { productId: null },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            telegramPhoto: true,
+          },
+        },
+      },
+    });
   },
 
   async create(data: {
@@ -25,7 +36,7 @@ export const reviewsRepository = {
         rating: data.rating,
         content: data.content,
         author: data.author,
-        eventType: data.eventType || 'Cake Order',
+        eventType: data.eventType || 'Bakery Order',
         role: data.role || 'Customer',
         userId: data.userId,
         productId: data.productId ?? null,
@@ -37,10 +48,5 @@ export const reviewsRepository = {
   async delete(id: string) {
     const prisma = getPrisma();
     return prisma.review.delete({ where: { id } });
-  },
-
-  async update(id: string, data: UpdateReviewInput) {
-    const prisma = getPrisma();
-    return prisma.review.update({ where: { id }, data });
   },
 };

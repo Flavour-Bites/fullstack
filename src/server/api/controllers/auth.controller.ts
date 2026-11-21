@@ -50,9 +50,14 @@ export const authController = {
     }
 
     if (req.method === 'GET') {
-      const frontendBase = env.FRONTEND_URL.replace(/\/+$/, '');
+      const frontendBase = (() => {
+        let url = env.FRONTEND_URL;
+        while (url.endsWith('/')) url = url.slice(0, -1);
+        return url;
+      })();
+      const telegramIdParam = result.telegramId ? `&telegramId=${encodeURIComponent(result.telegramId)}` : '';
       const redirectTarget = result.needsPassword
-        ? `${frontendBase}/auth?needsPassword=true${result.telegramId ? `&telegramId=${encodeURIComponent(result.telegramId)}` : ''}`
+        ? `${frontendBase}/auth?needsPassword=true${telegramIdParam}`
         : `${frontendBase}/?token=${encodeURIComponent(result.token || '')}`;
       res.redirect(redirectTarget);
     } else {

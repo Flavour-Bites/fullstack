@@ -10,6 +10,7 @@ export interface LoginResponse {
     telegramPhone: string | null;
     telegramPhoto: string | null;
     notifyViaTelegram: boolean;
+    telegramBotWriteAccess?: boolean;
     createdAt: string;
   };
   needsPassword?: boolean;
@@ -26,6 +27,8 @@ export interface TelegramTokenExchangeResponse {
   token_type: string;
   expires_in: number;
   id_token: string;
+  scope?: string;
+  refresh_token?: string;
 }
 
 export interface AuthPayload {

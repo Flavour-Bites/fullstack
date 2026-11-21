@@ -4,16 +4,27 @@ interface HeaderDesktopNavProps {
   darkMode: boolean;
 }
 
+function getDesktopNavLinkClassName(isActive: boolean, darkMode: boolean): string {
+  if (isActive) {
+    return darkMode ? 'text-lux-gold bg-lux-gold/10' : 'text-lux-gold bg-lux-gold/5';
+  }
+  if (darkMode) {
+    return 'text-stone-400 hover:text-stone-200 hover:bg-stone-900/50';
+  }
+  return 'text-stone-500 hover:text-stone-900 hover:bg-stone-100';
+}
+
 export default function HeaderDesktopNav({
   darkMode,
 }: Readonly<HeaderDesktopNavProps>) {
   const location = useLocation();
 
   return (
-    <nav className="hidden lg:flex items-center gap-1.5 ml-8 mr-auto font-sans">
+    <nav className="hidden lg:flex items-center gap-1.5 font-sans">
       {[
         { label: 'Home', path: '/' },
         { label: 'Cake Gallery', path: '/gallery' },
+        { label: 'Testimonials', path: '/testimonials' },
         { label: 'Meet Yodit', path: '/about' },
         { label: 'Contact', path: '/contact' },
       ].map((item) => {
@@ -22,13 +33,10 @@ export default function HeaderDesktopNav({
           <Link
             key={item.path}
             to={item.path}
-            className={`px-3.5 py-1.5 text-[11px] uppercase tracking-widest font-bold transition-all rounded-sm cursor-pointer ${
-              isActive
-                ? darkMode ? 'text-lux-gold bg-lux-gold/10' : 'text-lux-gold bg-lux-gold/5'
-                : darkMode
-                  ? 'text-stone-400 hover:text-stone-200 hover:bg-stone-900/50'
-                  : 'text-stone-500 hover:text-stone-900 hover:bg-stone-100'
-            }`}
+            className={`px-3.5 py-1.5 text-[11px] uppercase tracking-widest font-bold transition-all rounded-sm cursor-pointer ${getDesktopNavLinkClassName(
+              isActive,
+              darkMode,
+            )}`}
           >
             {item.label}
           </Link>

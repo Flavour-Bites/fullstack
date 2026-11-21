@@ -46,7 +46,7 @@ export function useOrders(onMutation?: () => void) {
   const saveRequestUpdates = useCallback(async (id: string, name: string, editStatus: string, editCost: number) => {
     try {
       const body: Record<string, any> = { status: editStatus };
-      if (editCost > 0) body.quotedPrice = editCost;
+      if (editCost > 0) body.price = editCost;
       const { data } = await http.patch<ApiResponse>(`/api/requests/${id}`, body);
       if (data.success) {
         showToast('Order Updated', `${name}'s order updated — status: ${editStatus}, price: ${editCost.toLocaleString()} ETB.`, 'success');
@@ -74,7 +74,7 @@ export function useOrders(onMutation?: () => void) {
   // ── Derived Values ─────────────────────────────────────────
   const totalRevenue = requests.reduce((s, r) => s + orderPrice(r), 0);
   const pendingCount = requests.filter(r => r.status === 'Received' || r.status === 'Pending').length;
-  const activeCount = requests.filter(r => ['Designing', 'Quoted', 'Confirmed', 'InProgress'].includes(r.status)).length;
+  const activeCount = requests.filter(r => ['Designing', 'Priced', 'Confirmed', 'InProgress'].includes(r.status)).length;
 
   return {
     requests, loading, refreshing,

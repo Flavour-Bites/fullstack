@@ -1,5 +1,5 @@
 import { AnimatePresence } from 'motion/react';
-import { CakeGalleryItem, User } from '@shared/types';
+import { Product, User } from '@shared/types';
 import { t } from '@client/i18n/index';
 import { usePageTitle } from '../../core/hooks/usePageTitle';
 import OrderTrackingView from './OrderTrackingView';
@@ -9,7 +9,7 @@ import RequestFormFields from './RequestFormFields';
 import { useRequestForm } from '../hooks/useRequestForm';
 
 interface RequestFormViewProps {
-  readonly prefilledCake: CakeGalleryItem | null;
+  readonly prefilledCake: Product | null;
   readonly onClearPrefilledCake: () => void;
   readonly currentUser?: User | null;
 }
@@ -60,6 +60,7 @@ export default function RequestFormView({
                 onDrop={form.handleDrop}
                 onClearPrefilledCake={onClearPrefilledCake}
                 onSubmit={form.handleSubmit}
+                availability={form.availability}
               />
             )}
           </AnimatePresence>
@@ -68,7 +69,7 @@ export default function RequestFormView({
         <RequestSidebar />
       </div>
 
-      <OrderTrackingView requests={form.activeRequests} dbConnected={form.dbConnected} onDelete={form.deleteRequest} />
+      <OrderTrackingView requests={form.activeRequests} onDelete={form.deleteRequest} />
     </div>
   );
 }

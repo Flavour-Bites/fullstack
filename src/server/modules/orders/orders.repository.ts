@@ -2,6 +2,7 @@ import { getPrisma } from '../../platform/config/prisma';
 import { makeId } from '../../../shared/utils/ids';
 import type { OrderStatus } from '@prisma/client';
 import type { OrderActor } from './orders.types';
+import { NotFoundError } from '../../platform/errors/index';
 
 export const ordersRepository = {
   async create(data: {
@@ -11,9 +12,7 @@ export const ordersRepository = {
     contactPhone: string;
     eventType: string;
     guestCount: number;
-    deliveryOption: string;
-    deliveryAddress?: string | null;
-    deliveryDate: string;
+    eventDate: string;
     designStyle?: string | null;
     flavor: string;
     tierCount: number;
@@ -34,9 +33,7 @@ export const ordersRepository = {
           contactPhone: data.contactPhone,
           eventType: data.eventType,
           guestCount: data.guestCount,
-          deliveryOption: data.deliveryOption,
-          deliveryAddress: data.deliveryAddress ?? null,
-          deliveryDate: data.deliveryDate,
+          eventDate: data.eventDate,
           designStyle: data.designStyle ?? '',
           flavor: data.flavor,
           tierCount: data.tierCount,
@@ -78,11 +75,10 @@ export const ordersRepository = {
     role?: string,
   ) {
     const prisma = getPrisma();
-    const baseWhere = includeDeleted
-      ? role === 'customer'
-        ? { userId }
-        : {}
-      : { deletedAt: null, ...(role === 'customer' ? { userId } : {}) };
+    const baseWhere = {
+      ...(includeDeleted ? {} : { deletedAt: null }),
+      ...(role === 'customer' ? { userId } : {}),
+    };
 
     return prisma.customCakeRequest.findMany({
       where: baseWhere,
@@ -104,7 +100,7 @@ export const ordersRepository = {
       });
 
       if (!current || current.deletedAt) {
-        throw new Error('Order not found.');
+        throw new NotFoundError('Order not found.');
       }
 
       if (current.status === toStatus) {
@@ -139,7 +135,7 @@ export const ordersRepository = {
   async updateCommercials(
     orderId: string,
     input: {
-      quotedPrice?: number | null;
+      price?: number | null;
       finalPrice?: number | null;
       depositAmount?: number | null;
       depositPaidAt?: Date | null;
@@ -152,7 +148,7 @@ export const ordersRepository = {
         where: { id: orderId },
         select: { finalPrice: true, depositAmount: true, deletedAt: true },
       });
-      if (!current || current.deletedAt) throw new Error('Order not found.');
+      if (!current || current.deletedAt) throw new NotFoundError('Order not found.');
 
       const nextFinalPrice =
         input.finalPrice !== undefined
@@ -166,7 +162,7 @@ export const ordersRepository = {
       return tx.customCakeRequest.update({
         where: { id: orderId },
         data: {
-          ...(input.quotedPrice !== undefined ? { quotedPrice: input.quotedPrice } : {}),
+          ...(input.price !== undefined ? { price: input.price } : {}),
           ...(input.finalPrice !== undefined ? { finalPrice: input.finalPrice } : {}),
           ...(input.priceConfirmedAt !== undefined ? { priceConfirmedAt: input.priceConfirmedAt } : {}),
           ...(input.depositPaidAt !== undefined ? { depositPaidAt: input.depositPaidAt } : {}),
@@ -199,7 +195,7 @@ export const ordersRepository = {
         where: { id: orderId },
         select: { id: true, deletedAt: true },
       });
-      if (!current || current.deletedAt) throw new Error('Order not found.');
+      if (!current || current.deletedAt) throw new NotFoundError('Order not found.');
       return tx.customCakeRequest.update({ where: { id: orderId }, data: fields });
     });
   },

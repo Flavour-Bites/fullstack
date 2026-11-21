@@ -5,7 +5,7 @@ export function exportOrdersCSV(requests: CakeRequest[]) {
   const headers = ['ID', 'Customer', 'Phone', 'Event', 'Guests', 'Event Date', 'Flavor', 'Tiers', 'Status', 'Price (ETB)', 'Submitted'];
   const rows = requests.map(r => [
     r.id, r.contactName, r.contactPhone, r.eventType,
-    r.guestCount, r.deliveryDate, r.flavor, r.tierCount, r.status,
+    r.guestCount, r.eventDate, r.flavor, r.tierCount, r.status,
     orderPrice(r), r.requestDate
   ]);
   const csv = [headers, ...rows].map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');

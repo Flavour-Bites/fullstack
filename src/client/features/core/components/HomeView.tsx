@@ -1,8 +1,8 @@
-import { CakeGalleryItem } from '@shared/types';
+import { Product } from '@shared/types';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { useFeaturedCakes } from '../hooks/useFeaturedCakes';
-import { useTestimonials } from '../hooks/useTestimonials';
 import { useTestimonialCarousel } from '../hooks/useTestimonialCarousel';
+import { useReviews } from '../hooks/useReviews';
 import HomeHero from './home/HomeHero';
 import HomeTrustSeals from './home/HomeTrustSeals';
 import HomeCollections from './home/HomeCollections';
@@ -13,13 +13,13 @@ import HomeTestimonials from './home/HomeTestimonials';
 import HomeFinalCta from './home/HomeFinalCta';
 
 interface HomeViewProps {
-  onSelectCake: (cake: CakeGalleryItem) => void;
+  onSelectCake: (cake: Product) => void;
 }
 
-export default function HomeView({ onSelectCake }: HomeViewProps) {
+export default function HomeView({ onSelectCake }: Readonly<HomeViewProps>) {
   usePageTitle("Home");
   const featuredCakes = useFeaturedCakes();
-  const { data: reviews = [], isLoading: reviewsLoading } = useTestimonials();
+  const { reviews, isLoading: reviewsLoading } = useReviews();
   const testimonials = useTestimonialCarousel(reviews.length);
 
   return (

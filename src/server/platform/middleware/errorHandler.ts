@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { AppError } from '../errors/index';
+import { errorResponse } from '@shared/api';
 
 export function errorHandler(
   err: Error,
@@ -8,20 +9,25 @@ export function errorHandler(
   _next: NextFunction,
 ) {
   if (err instanceof AppError) {
-    res.status(err.statusCode).json({ success: false, error: err.message });
-    return;
+    return res
+      .status(err.statusCode)
+      .json(errorResponse(err.message, err.statusCode, err.code));
   }
 
   if (err.name === 'ZodError') {
-    res.status(400).json({ success: false, error: 'Validation failed', details: (err as any).errors });
-    return;
+    return res
+      .status(400)
+      .json(errorResponse('Validation failed', 400, 'VALIDATION_ERROR', (err as any).errors));
   }
 
   if ((err as any).code === 'P2025') {
-    res.status(404).json({ success: false, error: 'Record not found.' });
-    return;
+    return res
+      .status(404)
+      .json(errorResponse('Record not found.', 404, 'NOT_FOUND'));
   }
 
   console.error('[Unhandled Error]', err);
-  res.status(500).json({ success: false, error: 'Internal server error.' });
+  return res
+    .status(500)
+    .json(errorResponse('Internal server error.', 500, 'INTERNAL_ERROR'));
 }

@@ -10,7 +10,7 @@ export default function StudioMapSection() {
           <div className="lg:col-span-5 space-y-6">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-lux-gold/20 bg-lux-gold/5 font-sans">
               <MapPin className="w-3.5 h-3.5 text-lux-gold" />
-              <span className="text-[9px] uppercase tracking-[0.25em] text-lux-gold font-mono font-semibold">Studio Location & Atelier</span>
+              <span className="text-[9px] uppercase tracking-[0.25em] text-lux-gold font-mono font-semibold">Studio Location</span>
             </div>
             <h2 className="text-3xl sm:text-4xl font-serif text-white">{BUSINESS_INFO.location.name}</h2>
             <p className="text-sm text-stone-300 font-light leading-relaxed font-sans">
@@ -79,7 +79,7 @@ export default function StudioMapSection() {
                 <div className="absolute bottom-4 left-4 pointer-events-none">
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-xs bg-stone-950/90 backdrop-blur-md border border-stone-800 shadow-lg text-[11px] font-mono text-stone-200">
                     <span className="w-1.5 h-1.5 rounded-full bg-lux-gold" />
-                    <span>{BUSINESS_INFO.name} Atelier</span>
+                    <span>{BUSINESS_INFO.name} Studio</span>
                     <span className="text-stone-500">•</span>
                     <span className="text-lux-gold">{BUSINESS_INFO.location.area}</span>
                   </div>

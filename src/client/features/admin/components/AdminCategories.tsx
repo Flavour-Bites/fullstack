@@ -49,6 +49,65 @@ export default function AdminCategories({
     setSavingCategory(false);
   };
 
+  let content: React.ReactNode;
+  if (categoriesLoading) {
+    content = <SkeletonTable rows={4} cols={3} />;
+  } else if (categories.length === 0) {
+    content = (
+      <div className="text-center py-16 bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm">
+        <Layers className="w-10 h-10 text-stone-400 dark:text-stone-500 mx-auto mb-3" />
+        <p className="text-sm font-serif text-stone-600 dark:text-stone-300 italic">{t('admin.noCategories')}</p>
+      </div>
+    );
+  } else {
+    content = (
+      <div className="bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-stone-100 dark:bg-stone-950 text-stone-400 dark:text-stone-400 uppercase font-mono tracking-wider font-semibold border-b border-stone-200 dark:border-stone-800">
+              <tr>
+                <th className="px-5 py-4">{t('admin.categoryName')}</th>
+                <th className="px-5 py-4">{t('admin.categorySlug')}</th>
+                <th className="px-5 py-4">{t('admin.categorySortOrder')}</th>
+                <th className="px-5 py-4">{t('admin.categoryColor')}</th>
+                <th className="px-5 py-4">Status</th>
+                <th className="px-5 py-4 text-right">{t('admin.saveChanges')}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-stone-800/60">
+              {categories.map(cat => (
+                <tr key={cat.id} className="hover:bg-white/5 transition-colors">
+                  <td className="px-5 py-4 font-serif italic text-stone-900 dark:text-white text-sm">{cat.name}</td>
+                  <td className="px-5 py-4 text-stone-500 dark:text-stone-400 font-mono text-[10px]">{cat.slug}</td>
+                  <td className="px-5 py-4 text-stone-400 dark:text-stone-500">{cat.sortOrder}</td>
+                  <td className="px-5 py-4">
+                    {cat.color ? <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full border" style={{ backgroundColor: cat.color }} />{cat.color}</span> : <span className="text-stone-500">—</span>}
+                  </td>
+                  <td className="px-5 py-4">
+                    <button onClick={() => handleToggleCategoryActive(cat)} className={`text-[9px] font-mono uppercase font-bold px-2 py-0.5 rounded-full border flex items-center gap-1 ${cat.isActive ? 'bg-emerald-900/20 border-emerald-800 text-emerald-400' : 'bg-stone-800 border-stone-700 text-stone-500'}`}>
+                      {cat.isActive ? <ToggleRight className="w-3 h-3" /> : <ToggleLeft className="w-3 h-3" />}
+                      {cat.isActive ? t('admin.active') : t('admin.inactive')}
+                    </button>
+                  </td>
+                  <td className="px-5 py-4">
+                    <div className="flex items-center justify-end gap-2">
+                      <button onClick={() => startEditCategory(cat)} aria-label={t('admin.editCategory')} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-400 hover:text-lux-gold rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.editCategory')}>
+                        <Edit3 className="w-3.5 h-3.5" />
+                      </button>
+                      <button onClick={() => handleDeleteCategory(cat.id, cat.name)} aria-label={t('admin.deleteCategory')} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.deleteCategory')}>
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto space-y-5 relative z-10 font-sans">
       <div className="flex justify-between items-center bg-stone-50 dark:bg-stone-900 p-5 border border-stone-200 dark:border-stone-800 rounded-sm">
@@ -103,59 +162,7 @@ export default function AdminCategories({
         </div>
       )}
 
-      {categoriesLoading ? (
-        <SkeletonTable rows={4} cols={3} />
-      ) : categories.length === 0 ? (
-        <div className="text-center py-16 bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm">
-          <Layers className="w-10 h-10 text-stone-400 dark:text-stone-500 mx-auto mb-3" />
-          <p className="text-sm font-serif text-stone-600 dark:text-stone-300 italic">{t('admin.noCategories')}</p>
-        </div>
-      ) : (
-        <div className="bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-stone-100 dark:bg-stone-950 text-stone-400 dark:text-stone-400 uppercase font-mono tracking-wider font-semibold border-b border-stone-200 dark:border-stone-800">
-                <tr>
-                  <th className="px-5 py-4">{t('admin.categoryName')}</th>
-                  <th className="px-5 py-4">{t('admin.categorySlug')}</th>
-                  <th className="px-5 py-4">{t('admin.categorySortOrder')}</th>
-                  <th className="px-5 py-4">{t('admin.categoryColor')}</th>
-                  <th className="px-5 py-4">Status</th>
-                  <th className="px-5 py-4 text-right">{t('admin.saveChanges')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-stone-800/60">
-                {categories.map(cat => (
-                  <tr key={cat.id} className="hover:bg-white/5 transition-colors">
-                    <td className="px-5 py-4 font-serif italic text-stone-900 dark:text-white text-sm">{cat.name}</td>
-                    <td className="px-5 py-4 text-stone-500 dark:text-stone-400 font-mono text-[10px]">{cat.slug}</td>
-                    <td className="px-5 py-4 text-stone-400 dark:text-stone-500">{cat.sortOrder}</td>
-                    <td className="px-5 py-4">
-                      {cat.color ? <span className="flex items-center gap-2"><span className="w-3 h-3 rounded-full border" style={{ backgroundColor: cat.color }} />{cat.color}</span> : <span className="text-stone-500">—</span>}
-                    </td>
-                    <td className="px-5 py-4">
-                      <button onClick={() => handleToggleCategoryActive(cat)} className={`text-[9px] font-mono uppercase font-bold px-2 py-0.5 rounded-full border flex items-center gap-1 ${cat.isActive ? 'bg-emerald-900/20 border-emerald-800 text-emerald-400' : 'bg-stone-800 border-stone-700 text-stone-500'}`}>
-                        {cat.isActive ? <ToggleRight className="w-3 h-3" /> : <ToggleLeft className="w-3 h-3" />}
-                        {cat.isActive ? t('admin.active') : t('admin.inactive')}
-                      </button>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => startEditCategory(cat)} aria-label={t('admin.editCategory')} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-400 hover:text-lux-gold rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.editCategory')}>
-                          <Edit3 className="w-3.5 h-3.5" />
-                        </button>
-                        <button onClick={() => handleDeleteCategory(cat.id, cat.name)} aria-label={t('admin.deleteCategory')} className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-400 dark:text-stone-500 hover:text-red-400 rounded-xs border border-stone-200 dark:border-stone-800" title={t('admin.deleteCategory')}>
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      {content}
     </div>
   );
 }

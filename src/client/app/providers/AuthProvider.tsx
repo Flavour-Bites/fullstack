@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useMemo, useCallback, ReactNode } from 'react';
 import { User } from '@shared/types';
 import { http } from '@client/lib/http';
 import { setToken, clearToken } from '@client/lib/tokenStorage';
@@ -50,24 +50,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setAuthChecked(true));
   }, []);
 
-  const loginUser = (user: User) => {
+  const loginUser = useCallback((user: User) => {
     setCurrentUser(user);
     localStorage.setItem('flavourbites_user', JSON.stringify(user));
-  };
+  }, []);
 
-  const updateUser = (user: User) => {
+  const updateUser = useCallback((user: User) => {
     setCurrentUser(user);
     localStorage.setItem('flavourbites_user', JSON.stringify(user));
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('flavourbites_user');
     clearToken();
     setCurrentUser(null);
-  };
+  }, []);
+
+  const value = useMemo(
+    () => ({ currentUser, authChecked, loginUser, updateUser, logout }),
+    [currentUser, authChecked, loginUser, updateUser, logout]
+  );
 
   return (
-    <AuthContext.Provider value={{ currentUser, authChecked, loginUser, updateUser, logout }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

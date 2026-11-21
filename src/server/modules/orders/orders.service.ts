@@ -2,10 +2,34 @@ import { ordersRepository } from './orders.repository';
 import { makeOrderId } from '../../../shared/utils/ids';
 import { formatRequestDate } from '../../../shared/utils/dateFormat';
 import { normalizeMoney, isValidTransition } from './orders.workflow';
-import { notifyStaffNewOrder, notifyCustomerStatusChange, notifyStaffQuoteAccepted } from '../../platform/integrations/telegram/telegramNotifications';
-import { NotFoundError, ValidationError } from '../../platform/errors/index';
+import { notifyStaffNewOrder, notifyCustomerStatusChange, notifyStaffPriceConfirmed } from '../../platform/integrations/telegram/telegramNotifications';
+import { NotFoundError, ValidationError, AuthorizationError } from '../../platform/errors/index';
 import type { OrderStatus } from '@prisma/client';
 import type { OrderActor, OrderUpdateInput } from './orders.types';
+
+function parseMoneyCommercials(data: Record<string, unknown>): Record<string, number> {
+  const moneyFields = ['price', 'finalPrice', 'depositAmount'] as const;
+  const result: Record<string, number> = {};
+  for (const field of moneyFields) {
+    if (field in data) {
+      const value = normalizeMoney(data[field]);
+      if (value === null) throw new ValidationError('Please enter a valid amount.');
+      result[field] = value;
+    }
+  }
+  return result;
+}
+
+function parseDateCommercials(data: Record<string, unknown>): Record<string, Date | null> {
+  const result: Record<string, Date | null> = {};
+  if ('depositPaidAt' in data) {
+    result.depositPaidAt = data.depositPaidAt ? new Date(data.depositPaidAt as string) : null;
+  }
+  if ('priceConfirmedAt' in data) {
+    result.priceConfirmedAt = data.priceConfirmedAt ? new Date(data.priceConfirmedAt as string) : null;
+  }
+  return result;
+}
 
 export const ordersService = {
   async create(data: {
@@ -13,9 +37,7 @@ export const ordersService = {
     contactPhone: string;
     eventType: string;
     guestCount: number;
-    deliveryOption?: string;
-    deliveryAddress?: string | null;
-    deliveryDate: string;
+    eventDate: string;
     designStyle?: string | null;
     flavor: string;
     tierCount: number;
@@ -33,9 +55,7 @@ export const ordersService = {
       contactPhone: data.contactPhone,
       eventType: data.eventType,
       guestCount: data.guestCount,
-      deliveryOption: data.deliveryOption || 'pickup',
-      deliveryAddress: data.deliveryAddress ?? null,
-      deliveryDate: data.deliveryDate,
+      eventDate: data.eventDate,
       designStyle: data.designStyle ?? '',
       flavor: data.flavor,
       tierCount: data.tierCount,
@@ -100,10 +120,10 @@ export const ordersService = {
         note: input.note ?? null,
       });
     } else if (
-      input.quotedPrice !== undefined &&
+      input.price !== undefined &&
       (current.status === 'Received' || current.status === 'Designing')
     ) {
-      updated = await this.changeStatus(orderId, 'Quoted', {
+      updated = await this.changeStatus(orderId, 'Priced', {
         userId: actor.userId,
         source: actor.source,
         note: 'Cake price was set.',
@@ -118,25 +138,10 @@ export const ordersService = {
     data: Record<string, unknown>,
     predefinedCommercials?: Record<string, number | Date | null>,
   ) {
-    const moneyFields = ['quotedPrice', 'finalPrice', 'depositAmount'] as const;
-    const commercialInput: Record<string, number | Date | null> = { ...predefinedCommercials };
-
-    if (!predefinedCommercials) {
-      for (const field of moneyFields) {
-        if (field in data) {
-          const value = normalizeMoney(data[field]);
-          if (value === null) throw new ValidationError('Please enter a valid amount.');
-          commercialInput[field] = value;
-        }
-      }
-    }
-
-    if ('depositPaidAt' in data) {
-      commercialInput.depositPaidAt = data.depositPaidAt ? new Date(data.depositPaidAt as string) : null;
-    }
-    if ('priceConfirmedAt' in data) {
-      commercialInput.priceConfirmedAt = data.priceConfirmedAt ? new Date(data.priceConfirmedAt as string) : null;
-    }
+    const commercialInput: Record<string, number | Date | null> = {
+      ...(predefinedCommercials ?? parseMoneyCommercials(data)),
+      ...parseDateCommercials(data),
+    };
 
     if (Object.keys(commercialInput).length === 0) return null;
 
@@ -164,14 +169,14 @@ export const ordersService = {
 
   async acceptPrice(orderId: string, userId: string, role: string) {
     const order = await ordersRepository.findById(orderId);
-    if (!order || order.deletedAt) throw new Error('Order not found.');
+    if (!order || order.deletedAt) throw new NotFoundError('Order not found.');
     if (role === 'customer' && order.userId !== userId) {
-      throw new Error('You can only confirm your own cake order.');
+      throw new AuthorizationError('You can only confirm your own cake order.');
     }
-    if (!order.quotedPrice) throw new Error('Cake price is not ready yet.');
+    if (!order.price) throw new ValidationError('Cake price is not ready yet.');
 
     await ordersRepository.updateCommercials(orderId, {
-      finalPrice: order.finalPrice ?? order.quotedPrice,
+      finalPrice: order.finalPrice ?? order.price,
       priceConfirmedAt: new Date(),
     });
 
@@ -184,8 +189,8 @@ export const ordersService = {
     notifyCustomerStatusChange(orderId).catch((err: Error) =>
       console.error('[Notify] Customer notice failed:', err.message),
     );
-    notifyStaffQuoteAccepted(updated as any).catch((err: Error) =>
-      console.error('[Notify] Staff quote-accepted notice failed:', err.message),
+    notifyStaffPriceConfirmed(updated as any).catch((err: Error) =>
+      console.error('[Notify] Staff price-confirmed notice failed:', err.message),
     );
 
     return updated;

@@ -9,13 +9,4 @@ export const createReviewSchema = z.object({
   productId: z.string().optional().nullable(),
 });
 
-export const updateReviewSchema = z.object({
-  rating: z.coerce.number().int().min(1).max(5).optional(),
-  content: z.string().min(5).optional(),
-  author: z.string().min(2).optional(),
-  eventType: z.string().optional(),
-  role: z.string().optional(),
-});
-
 export type CreateReviewInput = z.infer<typeof createReviewSchema>;
-export type UpdateReviewInput = z.infer<typeof updateReviewSchema>;

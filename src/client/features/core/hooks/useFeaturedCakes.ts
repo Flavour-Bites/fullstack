@@ -1,9 +1,8 @@
-import { CakeGalleryItem } from '@shared/types';
-import { useGalleryItems } from '../../gallery/hooks/useGalleryItems';
+import { useFeaturedCakesQuery } from '@client/features/gallery/hooks/useGalleryQuery';
+import type { Product } from '@shared/types';
 
-// Home-page featured strip: the three most recent real (or zero items on a
-// cold/empty catalog) gallery pieces — never static stand-ins.
-export function useFeaturedCakes(): CakeGalleryItem[] {
-  const { data: items = [] } = useGalleryItems();
-  return items.slice(0, 3);
+export function useFeaturedCakes(): Product[] {
+  const { data: featuredCakes = [] } = useFeaturedCakesQuery();
+
+  return featuredCakes;
 }

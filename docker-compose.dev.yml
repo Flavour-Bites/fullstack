@@ -33,7 +33,7 @@ services:
       retries: 10
 
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     container_name: flavour-bites-dev-redis
     ports:
       - "${DEV_REDIS_PORT:-6379}:6379"

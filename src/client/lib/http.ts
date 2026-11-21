@@ -58,27 +58,30 @@ http.interceptors.response.use(
     ) {
       throw new ApiError(
         'Backend unreachable: received HTML instead of JSON. Check that VITE_API_URL is configured.',
-        response.status
+        response.status,
+        'BAD_GATEWAY',
       );
     }
     return response;
   },
-  (error: AxiosError<{ error?: string; message?: string }>) => {
+  (error: AxiosError<ApiResponse<never>>) => {
     const status = error.response?.status;
     if (status === 401) {
       clearToken();
     }
-
-    const serverMessage = error.response?.data?.error || error.response?.data?.message;
+    if (error.response?.data) {
+      return Promise.reject(ApiError.fromResponse(error.response.data));
+    }
     let message: string;
-    if (typeof serverMessage === 'string' && serverMessage) {
-      message = serverMessage;
-    } else if (error.code === 'ECONNABORTED') {
+    let code: string;
+    if (error.code === 'ECONNABORTED') {
       message = 'Request timed out';
+      code = 'TIMEOUT';
     } else {
       message = error.message || 'Network request failed';
+      code = 'NETWORK_ERROR';
     }
-    return Promise.reject(new ApiError(message, status));
+    return Promise.reject(new ApiError(message, status ?? 500, code));
   }
 );
 
@@ -97,7 +100,7 @@ export async function apiGet<T>(
 ): Promise<Extract<ApiResponse<T>, { success: true }>> {
   const { data } = await http.get<ApiResponse<T>>(path, config);
   if (!data.success) {
-    throw new ApiError(data.error || 'Request failed');
+    throw new ApiError(data.error || 'Request failed', data.status, data.code || 'REQUEST_FAILED');
   }
   return data;
 }

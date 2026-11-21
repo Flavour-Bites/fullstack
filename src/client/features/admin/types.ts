@@ -1,4 +1,4 @@
-export type AdminTab = 'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users' | 'recovery';
+export type AdminTab = 'dashboard' | 'orders' | 'menu' | 'categories' | 'reviews' | 'users' | 'recovery' | 'availability';
 
 export interface CakeRequest {
   id: string;
@@ -6,9 +6,7 @@ export interface CakeRequest {
   contactPhone: string;
   eventType: string;
   guestCount: number;
-  deliveryOption: string;
-  deliveryAddress: string | null;
-  deliveryDate: string;
+  eventDate: string;
   designStyle: string;
   flavor: string;
   tierCount: number;
@@ -16,13 +14,13 @@ export interface CakeRequest {
   requestDate: string;
   status: string;
   referenceImage: string | null;
-  userId?: string;
-  quotedPrice?: number;
+  price?: number;
   finalPrice?: number;
   depositAmount: number;
   remainingBalance: number;
   paymentStatus: string;
   bakerNote?: string | null;
+  userId?: string;
   createdAt: string;
 }
 
@@ -69,7 +67,7 @@ export interface ReviewItem {
   createdAt: string;
 }
 
-export const WORKFLOW: string[] = ['Received', 'Designing', 'Quoted', 'Confirmed', 'InProgress', 'Ready', 'Completed'];
+export const WORKFLOW: string[] = ['Received', 'Designing', 'Priced', 'Confirmed', 'InProgress', 'Ready', 'Completed'];
 
 export function nextStatus(current: string): string | null {
   const idx = WORKFLOW.indexOf(current);
@@ -77,5 +75,5 @@ export function nextStatus(current: string): string | null {
 }
 
 export function orderPrice(r: CakeRequest): number {
-  return r.finalPrice ?? r.quotedPrice ?? 0;
+  return r.finalPrice ?? r.price ?? 0;
 }

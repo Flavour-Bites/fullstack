@@ -1,0 +1,6 @@
+provider = "postgresql"
+migrations = [
+  "202606230001_telegram_first_order_foundation",
+  "202607130001_add_user_soft_delete",
+  "202609210001_baseline_schema",
+]

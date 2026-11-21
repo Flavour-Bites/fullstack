@@ -19,7 +19,8 @@
       "@/*": ["./src/*"],
       "@client/*": ["./src/client/*"],
       "@server/*": ["./src/server/*"],
-      "@shared/*": ["./src/shared/*"]
+      "@shared/*": ["./src/shared/*"],
+      "@test/*": ["./test/*"]
     },
     "allowImportingTsExtensions": true,
     "noEmit": true,

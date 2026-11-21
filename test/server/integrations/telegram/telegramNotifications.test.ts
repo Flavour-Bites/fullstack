@@ -20,7 +20,7 @@ vi.mock('@server/platform/config/prisma.js', () => ({
   getPrisma: vi.fn(() => mockPrisma),
 }));
 
-import { notifyStaffNewOrder, notifyCustomerStatusChange, notifyStaffQuoteAccepted } from '@server/platform/integrations/telegram/telegramNotifications.js';
+import { notifyStaffNewOrder, notifyCustomerStatusChange, notifyStaffPriceConfirmed } from '@server/platform/integrations/telegram/telegramNotifications.js';
 import { sendMessage } from '@server/platform/integrations/telegram/telegramClient.js';
 
 describe('notifyStaffNewOrder', () => {
@@ -35,14 +35,12 @@ describe('notifyStaffNewOrder', () => {
       contactName: 'Test User',
       contactPhone: '+251911111111',
       eventType: 'Birthday',
-      deliveryDate: '2026-07-15',
+      eventDate: '2026-07-15',
       guestCount: 30,
       tierCount: 2,
       flavor: 'Vanilla',
       designStyle: 'Elegant gold trim',
-      deliveryOption: 'pickup',
-      deliveryAddress: null,
-      quotedPrice: null,
+      price: null,
       finalPrice: null,
       specialInstructions: 'No nuts',
       user: { telegramUsername: 'testuser' },
@@ -56,24 +54,24 @@ describe('notifyStaffNewOrder', () => {
     expect(text).toContain('FB-ABC123');
     expect(text).toContain('Test User');
     expect(text).toContain('@testuser');
-    expect(text).toContain('Pickup');
+    expect(text).toContain('Birthday');
+    expect(text).toContain('2026-07-15');
+    expect(text).toContain('Vanilla');
     expect(buttons).toHaveLength(3);
   });
 
-  it('includes delivery address for delivery orders', async () => {
+  it('uses eventDate in notification', async () => {
     const order = {
       id: 'FB-DELIVERY',
       contactName: 'Delivery Client',
       contactPhone: '+251922222222',
       eventType: 'Wedding',
-      deliveryDate: '2026-08-01',
+      eventDate: '2026-08-01',
       guestCount: 100,
       tierCount: 3,
       flavor: 'Chocolate',
       designStyle: 'Modern',
-      deliveryOption: 'delivery',
-      deliveryAddress: 'Bole, Addis Ababa',
-      quotedPrice: null,
+      price: null,
       finalPrice: null,
       specialInstructions: null,
       user: null,
@@ -81,8 +79,7 @@ describe('notifyStaffNewOrder', () => {
 
     await notifyStaffNewOrder(order as any);
     const text = (sendMessage as any).mock.calls[0][1];
-    expect(text).toContain('Delivery to');
-    expect(text).toContain('Bole, Addis Ababa');
+    expect(text).toContain('2026-08-01');
   });
 });
 
@@ -111,7 +108,7 @@ describe('notifyCustomerStatusChange', () => {
   it('does nothing when user has no telegramId', async () => {
     mockPrisma.customCakeRequest.findUnique.mockResolvedValue({
       id: 'FB-123',
-      status: 'Quoted',
+      status: 'Priced',
       lastNotifiedStatus: 'Designing',
       user: { telegramId: null, notifyViaTelegram: true },
     });
@@ -122,7 +119,7 @@ describe('notifyCustomerStatusChange', () => {
   it('does nothing when notifyViaTelegram is false', async () => {
     mockPrisma.customCakeRequest.findUnique.mockResolvedValue({
       id: 'FB-123',
-      status: 'Quoted',
+      status: 'Priced',
       lastNotifiedStatus: 'Designing',
       user: { telegramId: '12345', notifyViaTelegram: false },
     });
@@ -135,7 +132,7 @@ describe('notifyCustomerStatusChange', () => {
       id: 'FB-123',
       contactName: 'Test',
       eventType: 'Birthday',
-      deliveryDate: '2026-07-15',
+      eventDate: '2026-07-15',
       status: 'Designing',
       lastNotifiedStatus: 'Received',
       user: { telegramId: '12345', notifyViaTelegram: true },
@@ -153,14 +150,14 @@ describe('notifyCustomerStatusChange', () => {
     });
   });
 
-  it('sends Quoted notification with confirm/revision buttons', async () => {
+  it('sends Priced notification with confirm/revision buttons', async () => {
     mockPrisma.customCakeRequest.findUnique.mockResolvedValue({
       id: 'FB-123',
       contactName: 'Test',
       eventType: 'Wedding',
-      deliveryDate: '2026-08-15',
-      status: 'Quoted',
-      quotedPrice: 15000,
+      eventDate: '2026-08-15',
+      status: 'Priced',
+      price: 15000,
       finalPrice: null,
       lastNotifiedStatus: 'Designing',
       user: { telegramId: '12345', notifyViaTelegram: true },
@@ -174,14 +171,13 @@ describe('notifyCustomerStatusChange', () => {
     expect(buttons[0][1].callback_data).toContain('revise:');
   });
 
-  it('sends Ready notification with delivery info', async () => {
+  it('sends Ready notification with pickup info', async () => {
     mockPrisma.customCakeRequest.findUnique.mockResolvedValue({
       id: 'FB-123',
       contactName: 'Test',
       eventType: 'Birthday',
-      deliveryDate: '2026-07-15',
+      eventDate: '2026-07-15',
       status: 'Ready',
-      deliveryOption: 'pickup',
       lastNotifiedStatus: 'InProgress',
       user: { telegramId: '12345', notifyViaTelegram: true },
     });
@@ -198,7 +194,7 @@ describe('notifyCustomerStatusChange', () => {
     mockPrisma.customCakeRequest.findUnique.mockResolvedValue({
       id: 'FB-123',
       status: 'Cancelled',
-      lastNotifiedStatus: 'Quoted',
+      lastNotifiedStatus: 'Priced',
       user: { telegramId: '12345', notifyViaTelegram: true },
     });
     mockPrisma.customCakeRequest.update.mockResolvedValue({});
@@ -223,27 +219,27 @@ describe('notifyCustomerStatusChange', () => {
   });
 });
 
-describe('notifyStaffQuoteAccepted', () => {
+describe('notifyStaffPriceConfirmed', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockPrisma.user.findMany.mockResolvedValue([{ telegramId: '-100_staff_chat' }]);
   });
 
-  it('notifies staff when a quote is accepted', async () => {
+  it('notifies staff when a price is confirmed', async () => {
     const order = {
       id: 'FB-456',
       contactName: 'Happy Client',
       eventType: 'Anniversary',
-      deliveryDate: '2026-09-01',
-      quotedPrice: 25000,
+      eventDate: '2026-09-01',
+      price: 25000,
       finalPrice: null,
       user: null,
     };
 
-    await notifyStaffQuoteAccepted(order as any);
+    await notifyStaffPriceConfirmed(order as any);
     const [chatId, text, buttons] = (sendMessage as any).mock.calls[0];
     expect(chatId).toBe('-100_staff_chat');
-    expect(text).toContain('Quote Accepted');
+    expect(text).toContain('Price Confirmed');
     expect(text).toContain('Happy Client');
     expect(text).toContain('25,000 ETB');
     expect(buttons[0][0].callback_data).toContain('InProgress');

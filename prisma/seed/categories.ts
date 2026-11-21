@@ -5,7 +5,7 @@ export const CATEGORY_SEEDS = [
     slug: 'celebration',
     description: 'Luxury celebration cakes for weddings, anniversaries, and special events.',
     color: '#c5a880',
-    icon: 'sparkles',
+    icon: 'cake',
     sortOrder: 1,
   },
   {

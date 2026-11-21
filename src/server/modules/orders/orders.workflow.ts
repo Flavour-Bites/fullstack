@@ -3,7 +3,7 @@ import type { OrderStatus } from '@prisma/client';
 export const ORDER_WORKFLOW: OrderStatus[] = [
   'Received',
   'Designing',
-  'Quoted',
+  'Priced',
   'Confirmed',
   'InProgress',
   'Ready',
@@ -12,8 +12,8 @@ export const ORDER_WORKFLOW: OrderStatus[] = [
 
 export const VALID_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   Received: ['Designing', 'Cancelled'],
-  Designing: ['Quoted', 'Cancelled'],
-  Quoted: ['Confirmed', 'Cancelled'],
+  Designing: ['Priced', 'Cancelled'],
+  Priced: ['Confirmed', 'Cancelled'],
   Confirmed: ['InProgress', 'Cancelled'],
   InProgress: ['Ready'],
   Ready: ['Completed'],
