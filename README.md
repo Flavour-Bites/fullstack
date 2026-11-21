@@ -22,7 +22,7 @@
 | Layer | Technology |
 |-------|-----------|
 | Frontend | React 19, TypeScript, TailwindCSS 4, Vite 6, React Router 7 |
-| Backend | Express 4, Node.js 22+ (ESM) |
+| Backend | Express 4, Node.js 24+ (ESM) |
 | Database | PostgreSQL (Neon), Prisma ORM |
 | Auth | JWT (30d), bcrypt (12 rounds), Telegram OIDC (PKCE) |
 | Bot | grammY (Telegram) |
@@ -38,7 +38,7 @@
 ### Prerequisites
 
 - **Docker** + **Docker Compose v2** (v2.20+)
-- **Node.js 22+** (for local npm commands)
+- **Node.js 24+** (for local npm commands)
 - **pnpm** or **npm** (project uses npm)
 
 ### 1. Clone and Install
@@ -239,7 +239,7 @@ volumes:
 
 ```dockerfile
 # Build stage
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci

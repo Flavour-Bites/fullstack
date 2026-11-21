@@ -22,17 +22,51 @@ vi.mock('react-router-dom', async (importOriginal) => {
 
 // Polyfill matchMedia which is often missing in jsdom
 if (typeof window !== 'undefined') {
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: vi.fn().mockImplementation(query => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(), // deprecated
-    removeListener: vi.fn(), // deprecated
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
-});
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation(query => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(), // deprecated
+      removeListener: vi.fn(), // deprecated
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
+}
+
+// Node 22 defines globalThis.localStorage as undefined without --localstorage-file,
+// which shadows jsdom's window.localStorage and breaks client tests.
+const createStorageMock = () => {
+  const store = new Map<string, string>();
+  return {
+    getItem: (key: string) => store.get(key) ?? null,
+    setItem: (key: string, value: string) => { store.set(key, String(value)); },
+    removeItem: (key: string) => { store.delete(key); },
+    clear: () => { store.clear(); },
+    key: (index: number) => Array.from(store.keys())[index] ?? null,
+    get length() { return store.size; },
+  };
+};
+
+if (!globalThis.localStorage || typeof globalThis.localStorage.getItem !== 'function') {
+  const storageInstance = (typeof window !== 'undefined' && window.localStorage && typeof window.localStorage.getItem === 'function')
+    ? window.localStorage
+    : createStorageMock();
+
+  Object.defineProperty(globalThis, 'localStorage', {
+    value: storageInstance,
+    writable: true,
+    configurable: true,
+  });
+
+  if (typeof window !== 'undefined' && (!window.localStorage || typeof window.localStorage.getItem !== 'function')) {
+    Object.defineProperty(window, 'localStorage', {
+      value: storageInstance,
+      writable: true,
+      configurable: true,
+    });
+  }
 }

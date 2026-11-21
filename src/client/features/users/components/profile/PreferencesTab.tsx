@@ -16,8 +16,8 @@ export default function PreferencesTab({ dietary, language, onDietaryToggle, onL
       subtitle="Help us tailor your bakery & tasting experience"
     >
       <div>
-        <label htmlFor="dietary-restrictions" className="block text-[10px] uppercase font-mono tracking-widest text-stone-400 dark:text-stone-500 mb-3 font-bold">Dietary Restrictions & Allergies</label>
-        <div className="flex flex-wrap gap-2.5" role="group" aria-labelledby="dietary-restrictions">
+        <fieldset className="flex flex-wrap gap-2.5" aria-labelledby="dietary-restrictions">
+          <legend id="dietary-restrictions" className="block text-[10px] uppercase font-mono tracking-widest text-stone-400 dark:text-stone-500 mb-3 font-bold">Dietary Restrictions & Allergies</legend>
           {DIETARY_OPTIONS.map((pref) => {
             const isSelected = dietary.includes(pref);
             return (
@@ -36,10 +36,7 @@ export default function PreferencesTab({ dietary, language, onDietaryToggle, onL
               </button>
             );
           })}
-        </div>
-      </div>
-
-      <div>
+        </fieldset>
         <label htmlFor="language-select" className="block text-[10px] uppercase font-mono tracking-widest text-stone-400 dark:text-stone-500 mb-2 font-bold">Preferred Language</label>
         <div className="relative rounded-xs shadow-inner max-w-xs">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">

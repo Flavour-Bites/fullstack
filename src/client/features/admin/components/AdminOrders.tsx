@@ -84,8 +84,15 @@ export default function AdminOrders({ requests, loading, handleDeleteRequest, sa
               key={req.id}
               layoutId={`order-${req.id}`}
               onClick={() => { if (!isEditing) setSelectedRequest(req); }}
+              onKeyDown={e => {
+                if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget && !isEditing) {
+                  e.preventDefault();
+                  setSelectedRequest(req);
+                }
+              }}
               role="button"
               tabIndex={0}
+              aria-label={`Select order ${req.id} for ${req.contactName}`}
               className={`bg-white/95 dark:bg-stone-900/95 border text-left rounded-sm p-5 transition-all cursor-pointer relative ${
                 isSelected ? 'border-lux-gold shadow-lg shadow-lux-gold/5 bg-stone-100 dark:bg-stone-850' : 'border-stone-200 dark:border-stone-800 hover:border-stone-300 dark:hover:border-stone-700'
               }`}

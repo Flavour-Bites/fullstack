@@ -4,6 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "packageManager": "npm@10.9.0",
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "scripts": {
     "dev": "concurrently -n api,web -c blue,green \"npm:dev:server\" \"npm:dev:web\"",
     "dev:server": "nodemon",

@@ -119,12 +119,12 @@ export default function AdminAvailability() {
         <h3 className="font-serif text-lg text-stone-900 dark:text-white">Global Settings</h3>
         
         <div className="flex items-center justify-between">
-          <label className="flex items-center gap-3 cursor-pointer">
+          <label htmlFor="ordering-enabled" className="flex items-center gap-3 cursor-pointer">
             <div>
               <span className="text-sm font-medium text-stone-900 dark:text-white">Ordering Enabled</span>
               <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">Enable or disable all order requests globally</p>
             </div>
-            <span className="relative inline-flex items-center" aria-hidden="true" role="presentation">
+            <span className="relative inline-flex items-center" aria-hidden="true">
               <input
                 id="ordering-enabled"
                 type="checkbox"
@@ -176,7 +176,7 @@ export default function AdminAvailability() {
             return (
               <label key={key} className="flex items-center justify-between p-4 bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-sm cursor-pointer hover:border-lux-gold/50 transition-colors">
                 <span className="font-medium text-stone-900 dark:text-white capitalize">{label}</span>
-                <span className="relative inline-flex items-center" aria-hidden="true" role="presentation">
+                <span className="relative inline-flex items-center" aria-hidden="true">
                   <input
                     id={checkboxId}
                     type="checkbox"
