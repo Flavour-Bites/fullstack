@@ -3,6 +3,7 @@ import { ordersService } from '../../modules/orders/orders.service';
 import { usersService } from '../../modules/users/users.service';
 import { STATUS_EMOJI } from '../../../shared/constants/orderStatus';
 import { BUSINESS_INFO } from '../../../shared/constants/business';
+import { getWebsiteHtmlLink } from '../botHelpers';
 
 export async function handleStartCommand(ctx: CommandContext<Context>): Promise<void> {
   const telegramId = String(ctx.from?.id);
@@ -57,7 +58,7 @@ export async function handleStartCommand(ctx: CommandContext<Context>): Promise<
     await ctx.reply(
       `Hello! 👋 I'm <b>Yodit's Apprentice</b>, the bot for <b>Flavour Bites</b> — a custom cake boutique in ${BUSINESS_INFO.location.area}, ${BUSINESS_INFO.location.city}.\n\n` +
         `To use me fully, you'll need to link your account. Visit our website and sign in with Telegram:\n` +
-        `<b>👉 flavourbites.com</b>\n\n` +
+        `👉 <b>${getWebsiteHtmlLink()}</b>\n\n` +
         `Once linked, you can check your order status and get updates right here.`,
       { parse_mode: 'HTML' }
     );

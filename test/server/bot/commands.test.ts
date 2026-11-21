@@ -25,9 +25,16 @@ vi.mock('@server/platform/integrations/redis/conversationState', () => ({
   }),
 }));
 
+vi.mock('@server/platform/config/env', () => ({
+  env: {
+    FRONTEND_URL: 'https://test-flavour-bites.example.com',
+  },
+}));
+
 import { handleStartCommand } from '@server/bot/commands/start.command';
 import { handleStatusCommand } from '@server/bot/commands/status.command';
 import { handleOrderCommand } from '@server/bot/commands/order.command';
+import { handleHelpCommand } from '@server/bot/commands/help.command';
 import { usersService } from '@server/modules/users/users.service';
 import { ordersService } from '@server/modules/orders/orders.service';
 import { businessAvailabilityService } from '@server/modules/business/businessAvailability.service';
@@ -87,6 +94,27 @@ describe('bot commands', () => {
         expect.anything()
       );
     });
+
+    it('prompts unlinked users with dynamic website link', async () => {
+      vi.mocked(usersService.findByTelegramId).mockResolvedValue(null);
+
+      const ctx = {
+        from: { id: 333 },
+        match: '',
+        reply: vi.fn(),
+      };
+
+      await handleStartCommand(ctx as any);
+
+      expect(ctx.reply).toHaveBeenCalledWith(
+        expect.stringContaining('href="https://test-flavour-bites.example.com"'),
+        expect.anything()
+      );
+      expect(ctx.reply).toHaveBeenCalledWith(
+        expect.stringContaining('test-flavour-bites.example.com'),
+        expect.anything()
+      );
+    });
   });
 
   describe('status command', () => {
@@ -116,6 +144,22 @@ describe('bot commands', () => {
       expect(ordersService.findActiveByUserId).toHaveBeenCalledWith('usr_1', 5);
       expect(ctx.reply).toHaveBeenCalledWith(
         expect.stringContaining('Graduation Cake'),
+        expect.anything()
+      );
+    });
+
+    it('prompts unlinked user with dynamic website link', async () => {
+      vi.mocked(usersService.findByTelegramId).mockResolvedValue(null);
+
+      const ctx = {
+        from: { id: 333 },
+        reply: vi.fn(),
+      };
+
+      await handleStatusCommand(ctx as any);
+
+      expect(ctx.reply).toHaveBeenCalledWith(
+        expect.stringContaining('href="https://test-flavour-bites.example.com"'),
         expect.anything()
       );
     });
@@ -154,6 +198,37 @@ describe('bot commands', () => {
       expect(usersService.findByTelegramId).toHaveBeenCalledWith('222');
       expect(ctx.reply).toHaveBeenCalledWith(
         expect.stringContaining("Let's make your cake!"),
+        expect.anything()
+      );
+    });
+
+    it('prompts unlinked user with dynamic website link', async () => {
+      vi.mocked(usersService.findByTelegramId).mockResolvedValue(null);
+
+      const ctx = {
+        from: { id: 333 },
+        reply: vi.fn(),
+      };
+
+      await handleOrderCommand(ctx as any);
+
+      expect(ctx.reply).toHaveBeenCalledWith(
+        expect.stringContaining('href="https://test-flavour-bites.example.com"'),
+        expect.anything()
+      );
+    });
+  });
+
+  describe('help command', () => {
+    it('replies with dynamic website link', async () => {
+      const ctx = {
+        reply: vi.fn(),
+      };
+
+      await handleHelpCommand(ctx as any);
+
+      expect(ctx.reply).toHaveBeenCalledWith(
+        expect.stringContaining('href="https://test-flavour-bites.example.com"'),
         expect.anything()
       );
     });

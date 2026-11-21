@@ -1,4 +1,5 @@
 import { CommandContext, Context } from 'grammy';
+import { getWebsiteHtmlLink } from '../botHelpers';
 
 export async function handleHelpCommand(ctx: CommandContext<Context>): Promise<void> {
   await ctx.reply(
@@ -7,7 +8,7 @@ export async function handleHelpCommand(ctx: CommandContext<Context>): Promise<v
       `/status — Check your active orders\n` +
       `/order — Start a new cake request\n` +
       `/help — This message\n\n` +
-      `For questions, visit <b>flavourbites.com</b> or call us directly.`,
+      `For questions, visit ${getWebsiteHtmlLink()} or call us directly.`,
     { parse_mode: 'HTML' }
   );
 }

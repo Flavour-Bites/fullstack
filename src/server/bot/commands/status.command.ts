@@ -2,6 +2,7 @@ import { CommandContext, Context } from 'grammy';
 import { usersService } from '../../modules/users/users.service';
 import { ordersService } from '../../modules/orders/orders.service';
 import { STATUS_EMOJI } from '../../../shared/constants/orderStatus';
+import { getWebsiteHtmlLink } from '../botHelpers';
 
 export async function handleStatusCommand(ctx: CommandContext<Context>): Promise<void> {
   const telegramId = String(ctx.from?.id);
@@ -10,7 +11,7 @@ export async function handleStatusCommand(ctx: CommandContext<Context>): Promise
 
   if (!user) {
     await ctx.reply(
-      "⚠️ Your Telegram account isn't linked yet.\n\nVisit <b>flavourbites.com</b> and sign in with Telegram to link your account.",
+      `⚠️ Your Telegram account isn't linked yet.\n\nVisit ${getWebsiteHtmlLink()} and sign in with Telegram to link your account.`,
       { parse_mode: 'HTML' }
     );
     return;
