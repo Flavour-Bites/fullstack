@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useToast } from '../../../components/Toast';
+import { useToast } from '@client/components/Toast';
 import { http } from '@client/lib/http';
 import { queryKeys } from '@client/lib/queryKeys';
 import type { ApiResponse } from '@/shared/api';

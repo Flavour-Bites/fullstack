@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { HelpCircle, ChevronDown, Search, ArrowRight, ShieldCheck, UserCircle, MessageSquare, CheckCircle2 } from 'lucide-react';
-import { usePageTitle } from '../hooks/usePageTitle';
+import { usePageTitle } from '@client/lib/usePageTitle';
 import { Link } from 'react-router-dom';
 import { FAQS } from '@client/content/faqs';
 import { t } from '@client/i18n/index';

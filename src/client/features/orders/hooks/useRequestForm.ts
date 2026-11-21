@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { CustomCakeRequest, Product, User, AvailabilityResponse } from '@shared/types';
 import { useToast } from '../../../components/Toast';
 import { t } from '@client/i18n/index';
 import { http } from '@client/lib/http';
+import { queryKeys } from '@client/lib/queryKeys';
 import type { ApiResponse } from '@/shared/api';
 import { useAvailability } from '../../admin/hooks/useAvailability';
 import { useFileUpload } from './useFileUpload';
-import { useRequestManagement } from './useRequestManagement';
+import { useMyOrders } from './useMyOrders';
 
 export const DEFAULT_FORM = {
   contactName: '',
@@ -117,10 +119,15 @@ export function useRequestForm(
   onClearPrefilledCake: () => void,
   currentUser?: User | null,
 ): UseRequestFormReturn {
+  const queryClient = useQueryClient();
   const { showToast } = useToast();
   const { data: availability, isLoading: availabilityLoading } = useAvailability();
   const { uploading, uploadedImageUrl, uploadError, isDragging, handleFileChange, handleDragOver, handleDragEnter, handleDragLeave, handleDrop, clearUploadedImage } = useFileUpload();
-  const { activeRequests, setActiveRequests, fetchRequests, deleteRequest } = useRequestManagement();
+  const { requests: activeRequests, cancelRequest } = useMyOrders();
+
+  const deleteRequest = useCallback(async (id: string) => {
+    await cancelRequest(id);
+  }, [cancelRequest]);
 
   const [form, setForm] = useState<RequestForm>(DEFAULT_FORM);
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -208,32 +215,32 @@ export function useRequestForm(
         paymentStatus: 'unpaid',
       };
 
-      let savedOnBackend = false;
       try {
         const { data } = await http.post<ApiResponse>('/api/requests', newInquiry);
-        if (data.success) { savedOnBackend = true; fetchRequests(); }
-      } catch (saveErr) { console.error('Failed to save request to backend:', saveErr); }
-
-      if (!savedOnBackend) {
-        const nextList = [newInquiry, ...activeRequests];
-        setActiveRequests(nextList);
-        localStorage.setItem('fb_request_orders', JSON.stringify(nextList));
+        if (data.success) {
+          await queryClient.invalidateQueries({ queryKey: queryKeys.orders.all });
+          setSubmittedId(uniqueId);
+          setFormSubmitted(true);
+          setSubmitting(false);
+          onClearPrefilledCake();
+          clearUploadedImage();
+          showToast(t('order.inquiryFiled'), t('order.submittedSuccess', { id: uniqueId }), 'majestic', 7000);
+          return;
+        }
+        throw new Error(data.error || 'Failed to submit request');
+      } catch (saveErr: any) {
+        setSubmitting(false);
+        const errMsg = saveErr?.response?.data?.error || saveErr.message || 'Failed to save request to server.';
+        setValError(errMsg);
+        showToast('Submission Failed', errMsg, 'error');
       }
-
-      setSubmittedId(uniqueId);
-      setFormSubmitted(true);
-      setSubmitting(false);
-      onClearPrefilledCake();
-      clearUploadedImage();
-      showToast(t('order.inquiryFiled'), t('order.submittedSuccess', { id: uniqueId }), 'majestic', 7000);
     },
     [
       form,
       getMinDateString,
       availability,
       uploadedImageUrl,
-      activeRequests,
-      fetchRequests,
+      queryClient,
       onClearPrefilledCake,
       clearUploadedImage,
       showToast,

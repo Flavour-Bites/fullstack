@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Search, AlertCircle, ShoppingBag, ShieldCheck } from 'lucide-react';
 import { t } from '@client/i18n/index';
-import { usePageTitle } from '../../core/hooks/usePageTitle';
+import { usePageTitle } from '@client/lib/usePageTitle';
 import { getStatusStyles } from '../../../../shared/utils/statusStyles';
 import { BUSINESS_INFO } from '../../../../shared/constants/index';
-import { useOrders } from '../hooks/useOrders';
+import { useMyOrders } from '../hooks/useMyOrders';
 
 interface FrontendOrder {
   id: string;
@@ -37,13 +37,13 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
   const [selectedOrder, setSelectedOrder] = useState<FrontendOrder | null>(null);
   const [searchError, setSearchError] = useState(false);
   
-  const { requests, fetchRequests } = useOrders();
+  const { requests, refetch } = useMyOrders();
 
   useEffect(() => {
     if (currentUser) {
-      fetchRequests(true);
+      refetch();
     }
-  }, [currentUser, fetchRequests]);
+  }, [currentUser, refetch]);
 
   const liveOrders: FrontendOrder[] = requests.map((item: any) => {
     const numTiers = Number(item.tierCount) || 1;

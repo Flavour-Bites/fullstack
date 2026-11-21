@@ -1,6 +1,6 @@
 import { AnimatePresence } from 'motion/react';
 import { t } from '@client/i18n/index';
-import { usePageTitle } from '../../core/hooks/usePageTitle';
+import { usePageTitle } from '@client/lib/usePageTitle';
 import { User as UserType } from '@shared/types';
 import { useProfileForm } from '../hooks/useProfileForm';
 import ProfileSidebar from './profile/ProfileSidebar';

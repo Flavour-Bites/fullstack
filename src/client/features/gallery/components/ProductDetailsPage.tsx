@@ -3,9 +3,9 @@ import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Cake, Star, ChevronLeft, Quote, ArrowRight } from 'lucide-react';
 import { t } from '@client/i18n/index';
-import { usePageTitle } from '../../core/hooks/usePageTitle';
+import { usePageTitle } from '@client/lib/usePageTitle';
 import { useGalleryQuery } from '../hooks/useGalleryQuery';
-import { useProductReviews } from '../../core/hooks/useReviews';
+import { useProductReviews } from '../../reviews/hooks/useReviews';
 import type { Review } from '@shared/types';
 
 interface ProductReviewsEmptyStateProps {

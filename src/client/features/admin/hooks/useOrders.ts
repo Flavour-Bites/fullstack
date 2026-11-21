@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
-import { useToast } from '../../../components/Toast';
+import { useToast } from '@client/components/Toast';
 import { http } from '@client/lib/http';
 import type { ApiResponse } from '@/shared/api';
-import type { CakeRequest } from '../../admin/types';
-import { orderPrice } from '../../admin/types';
+import type { CakeRequest } from '../types';
+import { orderPrice } from '../types';
 
 export function useOrders(onMutation?: () => void) {
   const { showToast } = useToast();
@@ -73,7 +73,7 @@ export function useOrders(onMutation?: () => void) {
 
   // ── Derived Values ─────────────────────────────────────────
   const totalRevenue = requests.reduce((s, r) => s + orderPrice(r), 0);
-  const pendingCount = requests.filter(r => r.status === 'Received' || r.status === 'Pending').length;
+  const pendingCount = requests.filter(r => r.status === 'Received').length;
   const activeCount = requests.filter(r => ['Designing', 'Priced', 'Confirmed', 'InProgress'].includes(r.status)).length;
 
   return {

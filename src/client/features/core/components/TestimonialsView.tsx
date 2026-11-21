@@ -4,8 +4,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Quote, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { t } from '@client/i18n/index';
-import { usePageTitle } from '../hooks/usePageTitle';
-import { useReviews, type ReviewItem } from '../hooks/useReviews';
+import { usePageTitle } from '@client/lib/usePageTitle';
+import { useReviews, type ReviewItem } from '../../reviews/hooks/useReviews';
 
 function TestimonialsLoadingSkeleton() {
   return (

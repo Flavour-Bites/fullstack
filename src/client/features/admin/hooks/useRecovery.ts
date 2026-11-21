@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useToast } from '../../../components/Toast';
+import { useToast } from '@client/components/Toast';
 import { http } from '@client/lib/http';
 import type { ApiResponse } from '@/shared/api';
 
@@ -29,7 +29,7 @@ export function useRecovery() {
     } catch (e: any) {
       showToast('Update Failed', e.message, 'error');
     }
-  }, []);
+  }, [fetchRecoveryRequests]);
 
   return {
     recoveryRequests,

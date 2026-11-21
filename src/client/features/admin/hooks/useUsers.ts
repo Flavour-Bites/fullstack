@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
-import { useToast } from '../../../components/Toast';
+import { useToast } from '@client/components/Toast';
 import { http } from '@client/lib/http';
 import type { ApiResponse } from '@/shared/api';
-import type { SystemUser } from '../../admin/types';
+import type { SystemUser } from '../types';
 
 export function useUsers() {
   const { showToast } = useToast();

@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
-import { useToast } from '../../../components/Toast';
+import { useToast } from '@client/components/Toast';
 import { http } from '@client/lib/http';
 import type { ApiResponse } from '@/shared/api';
-import type { Category } from '../../admin/types';
+import type { Category } from '../types';
 
 export function useCategories() {
   const { showToast } = useToast();
@@ -38,7 +38,7 @@ export function useCategories() {
       return true;
     } catch (e: any) { showToast('Failed', e.message, 'error'); }
     return false;
-  }, []);
+  }, [fetchCategories]);
 
   const handleDeleteCategory = useCallback(async (id: string, name: string) => {
     if (!window.confirm(`Delete category "${name}"? Gallery items in it will become uncategorized.`)) return false;
@@ -51,7 +51,7 @@ export function useCategories() {
       } else throw new Error(data.error);
     } catch (e: any) { showToast('Delete Failed', e.message, 'error'); }
     return false;
-  }, []);
+  }, [fetchCategories]);
 
   const handleToggleCategoryActive = useCallback(async (cat: Category) => {
     try {
@@ -61,7 +61,7 @@ export function useCategories() {
         fetchCategories();
       } else throw new Error(data.error);
     } catch (e: any) { showToast('Failed', e.message, 'error'); }
-  }, []);
+  }, [fetchCategories]);
 
   return {
     categories,

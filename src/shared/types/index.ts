@@ -61,9 +61,9 @@ export interface CustomCakeRequest {
   designStyle: string;
   flavor: string;
   tierCount: number;
-  specialInstructions: string;
+  specialInstructions: string | null;
   requestDate: string;
-  referenceImage?: string;
+  referenceImage?: string | null;
   status: OrderStatus;
   price?: number;
   finalPrice?: number;
@@ -71,10 +71,48 @@ export interface CustomCakeRequest {
   depositAmount: number;
   depositPaidAt?: string;
   remainingBalance: number;
-  paymentStatus: 'unpaid' | 'partial' | 'paid';
+  paymentStatus: 'unpaid' | 'partial' | 'paid' | string;
   bakerNote?: string | null;
+  userId?: string;
   user?: User;
   statusEvents?: OrderStatusEvent[];
+  createdAt?: string;
+}
+
+export type CakeRequest = CustomCakeRequest;
+
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  color: string | null;
+  icon: string | null;
+  sortOrder: number;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface SystemUser {
+  id: string;
+  name: string;
+  email?: string;
+  role: string;
+  telegramId?: string | null;
+  telegramUsername?: string | null;
+  telegramPhone?: string | null;
+  createdAt?: string;
+}
+
+export interface Stats {
+  totalOrders: number;
+  totalRevenue: number;
+  avgRating: string;
+  statusBreakdown: Record<string, number>;
+  roleCounts: Record<string, number>;
+  totalUsers: number;
+  totalReviews: number;
 }
 
 export interface OrderStatusEvent {

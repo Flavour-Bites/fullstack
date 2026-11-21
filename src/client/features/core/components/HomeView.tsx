@@ -1,8 +1,8 @@
 import { Product } from '@shared/types';
-import { usePageTitle } from '../hooks/usePageTitle';
+import { usePageTitle } from '@client/lib/usePageTitle';
 import { useFeaturedCakes } from '../hooks/useFeaturedCakes';
 import { useTestimonialCarousel } from '../hooks/useTestimonialCarousel';
-import { useReviews } from '../hooks/useReviews';
+import { useReviews } from '../../reviews/hooks/useReviews';
 import HomeHero from './home/HomeHero';
 import HomeTrustSeals from './home/HomeTrustSeals';
 import HomeCollections from './home/HomeCollections';

@@ -4,14 +4,14 @@ import {
   BarChart2, RefreshCw, Download, Loader2, CalendarDays
 } from 'lucide-react';
 import { t } from '@client/i18n/index';
-import { usePageTitle } from '../../core/hooks/usePageTitle';
-import { useRecovery } from '../../recovery/hooks/useRecovery';
+import { usePageTitle } from '@client/lib/usePageTitle';
+import { useRecovery } from '../hooks/useRecovery';
 import { useReviews } from '../../reviews/hooks/useReviews';
-import { useCategories } from '../../categories/hooks/useCategories';
-import { useGallery } from '../../gallery/hooks/useGallery';
+import { useCategories } from '../hooks/useCategories';
+import { useGallery } from '../hooks/useGallery';
 import { useGalleryQuery } from '../../gallery/hooks/useGalleryQuery';
-import { useUsers } from '../../users/hooks/useUsers';
-import { useOrders } from '../../orders/hooks/useOrders';
+import { useUsers } from '../hooks/useUsers';
+import { useOrders } from '../hooks/useOrders';
 import { useAdminData } from '../hooks/useAdminData';
 import { AdminDashboard } from './AdminDashboard';
 import AdminOrders from './AdminOrders';

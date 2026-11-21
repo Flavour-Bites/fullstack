@@ -1,6 +1,6 @@
 import { Product } from '@shared/types';
 import { t } from '@client/i18n/index';
-import { usePageTitle } from '../../core/hooks/usePageTitle';
+import { usePageTitle } from '@client/lib/usePageTitle';
 import { useGalleryFilters, FilterType } from '../hooks/useGalleryFilters';
 import GalleryIntro from './gallery/GalleryIntro';
 import GalleryFilterBar from './gallery/GalleryFilterBar';
