@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Activity, Clock, Filter, Trash2, AlertTriangle, X, Check } from 'lucide-react';
+import { Activity, Clock, Filter, Trash2, AlertTriangle, X, Check, Send } from 'lucide-react';
 import { t } from '@client/i18n/index';
 import type { CustomCakeRequest } from '@shared/types';
 import { getStatusStyles } from '@shared/constants/orderStatus';
+import { BUSINESS_INFO } from '@shared/constants/business';
 
 interface OrderTrackingViewProps {
   requests: CustomCakeRequest[];
@@ -87,7 +88,12 @@ export default function OrderTrackingView({ requests, onDelete, onAcceptPrice }:
                       </span>
                     </td>
                     <td className="py-4 px-4 font-mono text-right text-stone-900 dark:text-stone-100 font-semibold border-stone-100 dark:border-stone-850">
-                      {((req as any).finalPrice ?? (req as any).price ?? 0).toLocaleString()} ETB
+                      <div>{((req as any).finalPrice ?? (req as any).price ?? 0).toLocaleString()} ETB</div>
+                      {req.status === 'Priced' && (
+                        <div className="text-[10px] text-stone-500 font-normal">
+                          50% Dep: {Math.round((((req as any).finalPrice ?? (req as any).price ?? 0) * 0.5)).toLocaleString()} ETB
+                        </div>
+                      )}
                     </td>
                     <td className="py-4 px-4 text-center border-stone-100 dark:border-stone-850">
                       <div className="flex items-center justify-center gap-2">
@@ -109,6 +115,15 @@ export default function OrderTrackingView({ requests, onDelete, onAcceptPrice }:
                             {acceptingId === req.id ? 'Confirming...' : 'Accept Price'}
                           </button>
                         )}
+                        <a
+                          href={`${BUSINESS_INFO.social.telegram.link}?start=order_${req.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-1 px-2 border border-stone-200 dark:border-stone-800 rounded-sm hover:border-[#229ED9] text-[#229ED9] hover:bg-[#229ED9]/10 font-medium font-mono text-[10px] transition-all inline-flex items-center gap-1"
+                          title="Track and discuss on Telegram"
+                        >
+                          <Send className="w-3.5 h-3.5" />
+                        </a>
                         <button
                           onClick={() => setConfirmDeleteId(req.id)}
                           className="p-1 px-2.5 border border-stone-200 dark:border-stone-800 rounded-sm hover:border-red-350 dark:hover:border-red-900 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 text-stone-500 dark:text-stone-400 font-medium font-mono text-[10px] transition-all cursor-pointer inline-flex items-center gap-1"

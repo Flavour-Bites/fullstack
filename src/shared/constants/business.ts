@@ -50,8 +50,8 @@ export const BUSINESS_INFO = {
   },
   social: {
     telegram: {
-      handle: getEnv('VITE_FLAVOURBITES_TELEGRAM_HANDLE') || getEnv('FLAVOURBITES_TELEGRAM_HANDLE') || '@flavourbites',
-      link: getEnv('VITE_FLAVOURBITES_TELEGRAM_LINK') || getEnv('FLAVOURBITES_TELEGRAM_LINK') || 'https://t.me/flavourbites',
+      handle: getEnv('VITE_FLAVOURBITES_TELEGRAM_HANDLE') || getEnv('FLAVOURBITES_TELEGRAM_HANDLE') || '@flavour_bites_bot',
+      link: getEnv('VITE_FLAVOURBITES_TELEGRAM_LINK') || getEnv('FLAVOURBITES_TELEGRAM_LINK') || 'https://t.me/flavour_bites_bot',
     },
     instagram: {
       handle: getEnv('VITE_FLAVOURBITES_INSTAGRAM_HANDLE') || getEnv('FLAVOURBITES_INSTAGRAM_HANDLE') || '@flavourbites',

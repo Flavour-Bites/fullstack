@@ -128,6 +128,42 @@ describe('bot commands', () => {
       );
     });
 
+    it('displays quote breakdown and accept/revise buttons when order status is Priced', async () => {
+      vi.mocked(usersService.findByTelegramId).mockResolvedValue({
+        id: 'usr_cust',
+        role: 'customer',
+        name: 'Sara',
+      } as any);
+      vi.mocked(ordersService.findByIdForUser).mockResolvedValue({
+        id: 'FB-888',
+        status: 'Priced',
+        contactName: 'Sara',
+        contactPhone: '+251911223344',
+        eventType: 'Birthday',
+        flavor: 'Chocolate Fudge',
+        eventDate: '2026-09-10',
+        guestCount: 30,
+        tierCount: 2,
+        price: 6000,
+        bakerNote: 'Handmade chocolate roses included.',
+      } as any);
+
+      const ctx = {
+        from: { id: 222 },
+        match: 'order_FB-888',
+        reply: vi.fn(),
+      };
+
+      await handleStartCommand(ctx as any);
+
+      expect(ctx.reply).toHaveBeenCalled();
+      const [msg, options] = ctx.reply.mock.calls[0];
+      expect(msg).toContain('<b>Deposit Required (50%):</b> 3,000 ETB');
+      expect(msg).toContain('Handmade chocolate roses included.');
+      expect(options.reply_markup.inline_keyboard[0][0].callback_data).toBe('confirm:FB-888');
+      expect(options.reply_markup.inline_keyboard[1][0].callback_data).toBe('revise:FB-888');
+    });
+
     it('looks up user via usersService for general start', async () => {
       vi.mocked(usersService.findByTelegramId).mockResolvedValue({
         id: 'usr_1',

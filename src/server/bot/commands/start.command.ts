@@ -45,11 +45,54 @@ export async function handleStartCommand(ctx: CommandContext<Context>): Promise<
       `👥 <b>Guests:</b> ${order.guestCount}\n` +
       `🏗️ <b>Tiers:</b> ${order.tierCount}\n`;
 
-    if (order.price) {
-      msg += `💰 <b>Price:</b> ${formatCurrency(order.price)}\n`;
+    const effectivePrice = order.finalPrice ?? order.price;
+    if (effectivePrice) {
+      msg += `💰 <b>Total Price:</b> ${formatCurrency(effectivePrice)}\n`;
     }
 
-    await ctx.reply(msg, { parse_mode: 'HTML' });
+    const replyOptions: any = { parse_mode: 'HTML' };
+
+    if (order.status === 'Priced') {
+      const priceQuote = formatCurrency(effectivePrice);
+      const depositRequired = Math.round((effectivePrice || 0) * 0.5);
+
+      msg += `💵 <b>Deposit Required (50%):</b> ${formatCurrency(depositRequired)}\n`;
+      if (order.bakerNote) {
+        msg += `📝 <b>Note from Yodit:</b> <i>${escapeHtml(order.bakerNote)}</i>\n`;
+      }
+      msg += `\n<i>Please accept the quote or request a revision below.</i>`;
+
+      replyOptions.reply_markup = {
+        inline_keyboard: [
+          [{ text: `✅ Accept Price (${priceQuote})`, callback_data: `confirm:${order.id}` }],
+          [
+            { text: '✏️ Request Revision', callback_data: `revise:${order.id}` },
+            { text: '📊 My Orders', callback_data: 'my_orders' },
+          ],
+        ],
+      };
+    } else if (order.status === 'Received' || order.status === 'Designing') {
+      msg += `\n<i>⏳ Yodit is reviewing your cake design and will quote a price shortly. You will receive an alert right here!</i>`;
+      replyOptions.reply_markup = {
+        inline_keyboard: [
+          [
+            { text: '📊 My Orders', callback_data: 'my_orders' },
+            { text: '🎂 New Request', callback_data: 'wiz_start' },
+          ],
+        ],
+      };
+    } else {
+      replyOptions.reply_markup = {
+        inline_keyboard: [
+          [
+            { text: '📊 My Orders', callback_data: 'my_orders' },
+            { text: '🎂 New Request', callback_data: 'wiz_start' },
+          ],
+        ],
+      };
+    }
+
+    await ctx.reply(msg, replyOptions);
     return;
   }
 
