@@ -9,6 +9,7 @@ vi.mock('@server/modules/users/users.service', () => ({
 vi.mock('@server/modules/orders/orders.service', () => ({
   ordersService: {
     findById: vi.fn(),
+    findByIdForUser: vi.fn(),
     findActiveByUserId: vi.fn(),
   },
 }));
@@ -45,18 +46,64 @@ describe('bot commands', () => {
   });
 
   describe('start command', () => {
-    it('looks up order via ordersService when deep-link payload provided', async () => {
-      vi.mocked(ordersService.findById).mockResolvedValue({
+    it('prompts unlinked user to link Telegram account when accessing order deep link', async () => {
+      vi.mocked(usersService.findByTelegramId).mockResolvedValue(null);
+
+      const ctx = {
+        from: { id: 111 },
+        match: 'order_FB-999',
+        reply: vi.fn(),
+      };
+
+      await handleStartCommand(ctx as any);
+
+      expect(ctx.reply).toHaveBeenCalledWith(
+        expect.stringContaining('Please link your Telegram account'),
+        expect.anything()
+      );
+      expect(ordersService.findByIdForUser).not.toHaveBeenCalled();
+    });
+
+    it('rejects access when user does not have permission to view order', async () => {
+      vi.mocked(usersService.findByTelegramId).mockResolvedValue({
+        id: 'usr_other',
+        role: 'customer',
+        name: 'Eve',
+      } as any);
+      vi.mocked(ordersService.findByIdForUser).mockResolvedValue(null);
+
+      const ctx = {
+        from: { id: 111 },
+        match: 'order_FB-999',
+        reply: vi.fn(),
+      };
+
+      await handleStartCommand(ctx as any);
+
+      expect(ordersService.findByIdForUser).toHaveBeenCalledWith('FB-999', { id: 'usr_other', role: 'customer' });
+      expect(ctx.reply).toHaveBeenCalledWith(
+        expect.stringContaining('was not found or you do not have permission'),
+        expect.anything()
+      );
+    });
+
+    it('displays order details with escaped HTML and formatted date when authorized', async () => {
+      vi.mocked(usersService.findByTelegramId).mockResolvedValue({
+        id: 'usr_staff',
+        role: 'staff',
+        name: 'Staff Member',
+      } as any);
+      vi.mocked(ordersService.findByIdForUser).mockResolvedValue({
         id: 'FB-999',
         status: 'Received',
-        contactName: 'Bob',
+        contactName: 'Bob <script>',
         contactPhone: '+251911111111',
-        eventType: 'Anniversary',
+        eventType: 'Anniversary & Party',
         flavor: 'Vanilla',
-        eventDate: 'August 1, 2026',
+        eventDate: '2026-08-01',
         guestCount: 50,
         tierCount: 3,
-        price: null,
+        price: 5000,
       } as any);
 
       const ctx = {
@@ -67,9 +114,13 @@ describe('bot commands', () => {
 
       await handleStartCommand(ctx as any);
 
-      expect(ordersService.findById).toHaveBeenCalledWith('FB-999');
+      expect(ordersService.findByIdForUser).toHaveBeenCalledWith('FB-999', { id: 'usr_staff', role: 'staff' });
       expect(ctx.reply).toHaveBeenCalledWith(
-        expect.stringContaining('Order #FB-999'),
+        expect.stringContaining('Bob &lt;script&gt;'),
+        expect.anything()
+      );
+      expect(ctx.reply).toHaveBeenCalledWith(
+        expect.stringContaining('Aug 1, 2026'),
         expect.anything()
       );
     });
