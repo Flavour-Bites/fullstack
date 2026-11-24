@@ -3,7 +3,7 @@ import { ordersService } from '../../modules/orders/orders.service';
 import { usersService } from '../../modules/users/users.service';
 import { STATUS_EMOJI } from '../../../shared/constants/orderStatus';
 import { BUSINESS_INFO } from '../../../shared/constants/business';
-import { getWebsiteHtmlLink } from '../botHelpers';
+import { getWebsiteHtmlLink, resolveTelegramUser, escapeHtml, formatDate, formatCurrency } from '../botHelpers';
 
 export async function handleStartCommand(ctx: CommandContext<Context>): Promise<void> {
   const telegramId = String(ctx.from?.id);
@@ -11,31 +11,42 @@ export async function handleStartCommand(ctx: CommandContext<Context>): Promise<
 
   if (payload?.startsWith('order_')) {
     const orderId = payload.slice(6);
-    const order = await ordersService.findById(orderId);
+    const user = await resolveTelegramUser(ctx);
+
+    if (!user) {
+      await ctx.reply(
+        `⚠️ Please link your Telegram account to view order details.\n\nVisit: <b>${getWebsiteHtmlLink()}</b>`,
+        { parse_mode: 'HTML' }
+      );
+      return;
+    }
+
+    const order = await ordersService.findByIdForUser(orderId, { id: user.id, role: user.role });
 
     if (!order) {
       await ctx.reply(
-        `⚠️ Order <code>${orderId}</code> not found.\n\nUse /start to see the welcome message.`,
+        `⚠️ Order <code>${escapeHtml(orderId)}</code> was not found or you do not have permission to view it.\n\nUse /start to see the main menu.`,
         { parse_mode: 'HTML' }
       );
       return;
     }
 
     const emoji = STATUS_EMOJI[order.status] ?? '📦';
+    const formattedDate = formatDate(order.eventDate);
 
     let msg =
-      `<b>🎂 Order #${order.id}</b>\n\n` +
-      `${emoji} <b>Status:</b> ${order.status}\n` +
-      `👤 <b>Customer:</b> ${order.contactName}\n` +
-      `📞 <b>Phone:</b> ${order.contactPhone}\n` +
-      `🎉 <b>Event:</b> ${order.eventType}\n` +
-      `🍰 <b>Flavor:</b> ${order.flavor}\n` +
-      `📅 <b>Event Date:</b> ${order.eventDate}\n` +
+      `<b>🎂 Order #${escapeHtml(order.id)}</b>\n\n` +
+      `${emoji} <b>Status:</b> ${escapeHtml(order.status)}\n` +
+      `👤 <b>Customer:</b> ${escapeHtml(order.contactName)}\n` +
+      `📞 <b>Phone:</b> ${escapeHtml(order.contactPhone)}\n` +
+      `🎉 <b>Event:</b> ${escapeHtml(order.eventType)}\n` +
+      `🍰 <b>Flavor:</b> ${escapeHtml(order.flavor)}\n` +
+      `📅 <b>Event Date:</b> ${escapeHtml(formattedDate)}\n` +
       `👥 <b>Guests:</b> ${order.guestCount}\n` +
       `🏗️ <b>Tiers:</b> ${order.tierCount}\n`;
 
     if (order.price) {
-      msg += `💰 <b>Price:</b> ${order.price.toLocaleString()} ETB\n`;
+      msg += `💰 <b>Price:</b> ${formatCurrency(order.price)}\n`;
     }
 
     await ctx.reply(msg, { parse_mode: 'HTML' });
@@ -46,7 +57,7 @@ export async function handleStartCommand(ctx: CommandContext<Context>): Promise<
 
   if (user) {
     await ctx.reply(
-      `Welcome back, <b>${user.name}</b>! 🎂\n\n` +
+      `Welcome back, <b>${escapeHtml(user.name)}</b>! 🎂\n\n` +
         `I'm Yodit's Cake Helper, your Flavour Bites assistant.\n\n` +
         `<b>What I can do:</b>\n` +
         `• /status — check your current orders\n` +

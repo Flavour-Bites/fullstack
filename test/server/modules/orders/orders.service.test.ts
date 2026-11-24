@@ -332,3 +332,45 @@ describe('ordersService.search', () => {
     expect(orders).toHaveLength(1);
   });
 });
+
+describe('ordersService.searchForStaff', () => {
+  it('returns empty array when user is not staff or admin', async () => {
+    const result = await ordersService.searchForStaff('birthday', { id: 'usr_cust', role: 'customer' });
+    expect(result).toEqual([]);
+  });
+
+  it('returns search results when user is staff or admin', async () => {
+    const result = await ordersService.searchForStaff('birthday', { id: 'usr_staff', role: 'staff' });
+    expect(result).toHaveLength(1);
+    const adminResult = await ordersService.searchForStaff('birthday', { id: 'usr_admin', role: 'admin' });
+    expect(adminResult).toHaveLength(1);
+  });
+});
+
+describe('ordersService.findByIdForUser', () => {
+  it('returns null when order is not found or is soft-deleted', async () => {
+    const notFound = await ordersService.findByIdForUser('FB-NOPE', { id: 'usr_123', role: 'customer' });
+    expect(notFound).toBeNull();
+
+    const deleted = await ordersService.findByIdForUser('FB-DELETED', { id: 'usr_123', role: 'customer' });
+    expect(deleted).toBeNull();
+  });
+
+  it('returns order when user is staff or admin', async () => {
+    const staffResult = await ordersService.findByIdForUser('FB-ABC123', { id: 'usr_other', role: 'staff' });
+    expect(staffResult?.id).toBe('FB-ABC123');
+
+    const adminResult = await ordersService.findByIdForUser('FB-ABC123', { id: 'usr_other', role: 'admin' });
+    expect(adminResult?.id).toBe('FB-ABC123');
+  });
+
+  it('returns order when customer owns the order', async () => {
+    const result = await ordersService.findByIdForUser('FB-ABC123', { id: 'usr_123', role: 'customer' });
+    expect(result?.id).toBe('FB-ABC123');
+  });
+
+  it('returns null when customer does not own the order', async () => {
+    const result = await ordersService.findByIdForUser('FB-ABC123', { id: 'usr_stranger', role: 'customer' });
+    expect(result).toBeNull();
+  });
+});

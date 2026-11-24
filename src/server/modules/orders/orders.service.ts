@@ -227,6 +227,25 @@ export const ordersService = {
     return ordersRepository.search(query, limit);
   },
 
+  async searchForStaff(query: string, actor: { id: string; role: string }, limit = 30) {
+    if (actor.role !== 'staff' && actor.role !== 'admin') {
+      return [];
+    }
+    return ordersRepository.search(query, limit);
+  },
+
+  async findByIdForUser(orderId: string, actor: { id: string; role: string }) {
+    const order = await ordersRepository.findById(orderId);
+    if (!order || order.deletedAt) return null;
+    if (actor.role === 'staff' || actor.role === 'admin') {
+      return order;
+    }
+    if (order.userId === actor.id) {
+      return order;
+    }
+    return null;
+  },
+
   async softDelete(orderId: string) {
     return ordersRepository.softDelete(orderId);
   },
