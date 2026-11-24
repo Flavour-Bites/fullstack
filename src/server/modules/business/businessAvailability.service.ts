@@ -71,18 +71,86 @@ async function getPolicy(): Promise<{
   };
 }
 
-function getDayOfWeekInTimeZoneSync(date: Date, timeZone: string): number {
-  const day = date.toLocaleString('en-US', { timeZone, weekday: 'long' });
-  const dayMap: Record<string, number> = {
-    Sunday: 0,
-    Monday: 1,
-    Tuesday: 2,
-    Wednesday: 3,
-    Thursday: 4,
-    Friday: 5,
-    Saturday: 6,
-  };
-  return dayMap[day] ?? date.getDay();
+export interface DateValidationResult {
+  valid: boolean;
+  normalizedDate?: string;
+  error?: string;
+  errorCode?: string;
+}
+
+const MONTH_NAMES: Record<string, number> = {
+  jan: 1, january: 1,
+  feb: 2, february: 2,
+  mar: 3, march: 3,
+  apr: 4, april: 4,
+  may: 5,
+  jun: 6, june: 6,
+  jul: 7, july: 7,
+  aug: 8, august: 8,
+  sep: 9, september: 9,
+  oct: 10, october: 10,
+  nov: 11, november: 11,
+  dec: 12, december: 12,
+};
+
+function parseDateComponents(input: string): { year: number; month: number; day: number; originalDate?: Date } | null {
+  if (!input || typeof input !== 'string') return null;
+  const clean = input.trim();
+  if (!clean) return null;
+
+  // 1. ISO YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss...
+  const isoMatch = clean.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T\s].*)?$/);
+  if (isoMatch) {
+    const year = Number.parseInt(isoMatch[1], 10);
+    const month = Number.parseInt(isoMatch[2], 10);
+    const day = Number.parseInt(isoMatch[3], 10);
+    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+      return { year, month, day, originalDate: new Date(clean) };
+    }
+  }
+
+  // 2. Month Day, Year (e.g. "July 15, 2026", "jul 15 2026", "July 15th, 2026")
+  const mdyMatch = clean.toLowerCase().match(/^([a-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})$/);
+  if (mdyMatch && MONTH_NAMES[mdyMatch[1]]) {
+    const month = MONTH_NAMES[mdyMatch[1]];
+    const day = Number.parseInt(mdyMatch[2], 10);
+    const year = Number.parseInt(mdyMatch[3], 10);
+    if (day >= 1 && day <= 31) {
+      return { year, month, day };
+    }
+  }
+
+  // 3. Day Month Year (e.g. "15 July 2026", "15th July, 2026")
+  const dmyMatch = clean.toLowerCase().match(/^(\d{1,2})(?:st|nd|rd|th)?\s+([a-z]+),?\s+(\d{4})$/);
+  if (dmyMatch && MONTH_NAMES[dmyMatch[2]]) {
+    const day = Number.parseInt(dmyMatch[1], 10);
+    const month = MONTH_NAMES[dmyMatch[2]];
+    const year = Number.parseInt(dmyMatch[3], 10);
+    if (day >= 1 && day <= 31) {
+      return { year, month, day };
+    }
+  }
+
+  // 4. Fallback to standard JS Date parsing
+  const parsed = new Date(clean);
+  if (!Number.isNaN(parsed.getTime())) {
+    if (clean.includes('T') || clean.endsWith('Z')) {
+      return {
+        year: parsed.getUTCFullYear(),
+        month: parsed.getUTCMonth() + 1,
+        day: parsed.getUTCDate(),
+        originalDate: parsed,
+      };
+    }
+    return {
+      year: parsed.getFullYear(),
+      month: parsed.getMonth() + 1,
+      day: parsed.getDate(),
+      originalDate: parsed,
+    };
+  }
+
+  return null;
 }
 
 export const businessAvailabilityService = {
@@ -154,15 +222,21 @@ export const businessAvailabilityService = {
     };
   },
 
-  async validateOrderDate(eventDate: string): Promise<{ valid: boolean; error?: string; errorCode?: string }> {
+  async validateOrderDate(eventDate: string): Promise<DateValidationResult> {
     const policy = await this.getPolicy();
     
     if (!policy.isEnabled) {
       return { valid: false, error: 'Ordering is currently disabled. Please check back later.', errorCode: 'ORDERING_DISABLED' };
     }
     
-    const requestedDate = new Date(eventDate);
-    const dayOfWeek = getDayOfWeekInTimeZoneSync(requestedDate, policy.timezone);
+    const components = parseDateComponents(eventDate);
+    if (!components) {
+      return { valid: false, error: 'Invalid date format', errorCode: 'INVALID_DATE' };
+    }
+
+    const normalizedDate = `${components.year}-${String(components.month).padStart(2, '0')}-${String(components.day).padStart(2, '0')}`;
+    const utcDate = new Date(Date.UTC(components.year, components.month - 1, components.day, 12, 0, 0));
+    const dayOfWeek = utcDate.getUTCDay();
     
     const isEnabled = (() => {
       switch (dayOfWeek) {
@@ -183,14 +257,9 @@ export const businessAvailabilityService = {
       return { 
         valid: false, 
         error: `Orders for ${dayName} are not currently accepted. Please choose an available day.`, 
-        errorCode: 'DAY_NOT_AVAILABLE' 
+        errorCode: 'DAY_NOT_AVAILABLE',
+        normalizedDate,
       };
-    }
-    
-    const requestedDateTime = new Date(eventDate);
-    
-    if (Number.isNaN(requestedDateTime.getTime())) {
-      return { valid: false, error: 'Invalid date format', errorCode: 'INVALID_DATE' };
     }
     
     // Check if date is in the past (before start of today in business timezone)
@@ -198,11 +267,22 @@ export const businessAvailabilityService = {
     const todayStart = new Date(now.toLocaleString('en-US', { timeZone: policy.timezone }));
     todayStart.setHours(0, 0, 0, 0);
     
+    let requestedDateTime: Date;
+    if (components.originalDate && (eventDate.includes('T') || eventDate.endsWith('Z'))) {
+      requestedDateTime = components.originalDate;
+    } else {
+      requestedDateTime = new Date(`${normalizedDate}T00:00:00`);
+      if (Number.isNaN(requestedDateTime.getTime())) {
+        requestedDateTime = new Date(Date.UTC(components.year, components.month - 1, components.day, 0, 0, 0));
+      }
+    }
+    
     if (requestedDateTime < todayStart) {
       return { 
         valid: false, 
         error: 'The date you entered is in the past. Please choose a future date.', 
-        errorCode: 'DATE_IN_PAST' 
+        errorCode: 'DATE_IN_PAST',
+        normalizedDate,
       };
     }
     
@@ -213,10 +293,11 @@ export const businessAvailabilityService = {
       return { 
         valid: false, 
         error: `Minimum notice of ${hours} hours is required. Please choose a later date.`, 
-        errorCode: 'MINIMUM_LEAD_TIME_NOT_MET' 
+        errorCode: 'MINIMUM_LEAD_TIME_NOT_MET',
+        normalizedDate,
       };
     }
     
-    return { valid: true };
+    return { valid: true, normalizedDate };
   },
 };

@@ -61,7 +61,7 @@ export const ordersService = {
       contactPhone: data.contactPhone,
       eventType: data.eventType,
       guestCount: data.guestCount,
-      eventDate: data.eventDate,
+      eventDate: validation.normalizedDate ?? data.eventDate,
       designStyle: data.designStyle ?? '',
       flavor: data.flavor,
       tierCount: data.tierCount,

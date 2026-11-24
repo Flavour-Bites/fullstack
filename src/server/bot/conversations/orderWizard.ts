@@ -36,11 +36,12 @@ const stepHandlers: Record<OrderWizardStep, WizardHandler> = {
       return;
     }
 
-    conv.eventDate = text;
+    const savedDate = validation.normalizedDate ?? text;
+    conv.eventDate = savedDate;
     conv.step = 'guestCount';
     await conversationStore.setOrder(telegramId, conv);
     await ctx.reply(
-      `📅 <b>${text}</b> — noted!\n\n<b>3.</b> How many guests will the cake serve?`,
+      `📅 <b>${savedDate}</b> — noted!\n\n<b>3.</b> How many guests will the cake serve?`,
       { parse_mode: 'HTML' }
     );
   },
