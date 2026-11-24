@@ -51,6 +51,26 @@ describe('orderWizard', () => {
     expect(mockSetOrder).not.toHaveBeenCalled();
   });
 
+  it('stores normalizedDate and moves to guestCount step on valid date', async () => {
+    vi.mocked(businessAvailabilityService.validateOrderDate).mockResolvedValue({
+      valid: true,
+      normalizedDate: '2026-07-15',
+    });
+
+    const ctx = { reply: vi.fn() };
+    const conv = { step: 'eventDate', eventType: 'Birthday', userId: 'usr_1', contactName: 'Alice' } as any;
+
+    const handled = await handleOrderWizardStep(ctx as any, conv, 'July 15, 2026', 'tg_123');
+    expect(handled).toBe(true);
+    expect(conv.eventDate).toBe('2026-07-15');
+    expect(conv.step).toBe('guestCount');
+    expect(mockSetOrder).toHaveBeenCalledWith('tg_123', conv);
+    expect(ctx.reply).toHaveBeenCalledWith(
+      expect.stringContaining('2026-07-15'),
+      expect.anything()
+    );
+  });
+
   it('routes order creation through ordersService.create on the final step', async () => {
     vi.mocked(ordersService.create).mockResolvedValue({
       id: 'FB-BOT-001',

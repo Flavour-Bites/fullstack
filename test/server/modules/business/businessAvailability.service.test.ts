@@ -236,6 +236,121 @@ describe('businessAvailabilityService', () => {
       const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
       const result = await businessAvailabilityService.validateOrderDate(futureDate);
       expect(result.valid).toBe(true);
+      expect(result.normalizedDate).toBeDefined();
+    });
+
+    it('returns INVALID_DATE for unparseable date strings', async () => {
+      mockGetPrisma.mockReturnValue({
+        businessAvailabilityPolicy: {
+          findFirst: vi.fn().mockResolvedValue({
+            id: 'bap_123',
+            isEnabled: true,
+            timezone: 'Africa/Addis_Ababa',
+            minimumLeadTimeHours: 24,
+            mondayEnabled: true,
+            tuesdayEnabled: true,
+            wednesdayEnabled: true,
+            thursdayEnabled: true,
+            fridayEnabled: true,
+            saturdayEnabled: true,
+            sundayEnabled: true,
+          }),
+        },
+      } as any);
+
+      const result = await businessAvailabilityService.validateOrderDate('not-a-valid-date');
+      expect(result.valid).toBe(false);
+      expect(result.errorCode).toBe('INVALID_DATE');
+    });
+
+    it('parses human date format "July 15, 2026" and normalizes to "2026-07-15"', async () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-06-01T10:00:00Z'));
+      try {
+        mockGetPrisma.mockReturnValue({
+          businessAvailabilityPolicy: {
+            findFirst: vi.fn().mockResolvedValue({
+              id: 'bap_123',
+              isEnabled: true,
+              timezone: 'Africa/Addis_Ababa',
+              minimumLeadTimeHours: 24,
+              mondayEnabled: true,
+              tuesdayEnabled: true,
+              wednesdayEnabled: true,
+              thursdayEnabled: true,
+              fridayEnabled: true,
+              saturdayEnabled: true,
+              sundayEnabled: true,
+            }),
+          },
+        } as any);
+
+        const result = await businessAvailabilityService.validateOrderDate('July 15, 2026');
+        expect(result.valid).toBe(true);
+        expect(result.normalizedDate).toBe('2026-07-15');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('parses human date format "15 July 2026" and normalizes to "2026-07-15"', async () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-06-01T10:00:00Z'));
+      try {
+        mockGetPrisma.mockReturnValue({
+          businessAvailabilityPolicy: {
+            findFirst: vi.fn().mockResolvedValue({
+              id: 'bap_123',
+              isEnabled: true,
+              timezone: 'Africa/Addis_Ababa',
+              minimumLeadTimeHours: 24,
+              mondayEnabled: true,
+              tuesdayEnabled: true,
+              wednesdayEnabled: true,
+              thursdayEnabled: true,
+              fridayEnabled: true,
+              saturdayEnabled: true,
+              sundayEnabled: true,
+            }),
+          },
+        } as any);
+
+        const result = await businessAvailabilityService.validateOrderDate('15 July 2026');
+        expect(result.valid).toBe(true);
+        expect(result.normalizedDate).toBe('2026-07-15');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('parses ISO date "2026-07-15" and normalizes to "2026-07-15"', async () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-06-01T10:00:00Z'));
+      try {
+        mockGetPrisma.mockReturnValue({
+          businessAvailabilityPolicy: {
+            findFirst: vi.fn().mockResolvedValue({
+              id: 'bap_123',
+              isEnabled: true,
+              timezone: 'Africa/Addis_Ababa',
+              minimumLeadTimeHours: 24,
+              mondayEnabled: true,
+              tuesdayEnabled: true,
+              wednesdayEnabled: true,
+              thursdayEnabled: true,
+              fridayEnabled: true,
+              saturdayEnabled: true,
+              sundayEnabled: true,
+            }),
+          },
+        } as any);
+
+        const result = await businessAvailabilityService.validateOrderDate('2026-07-15');
+        expect(result.valid).toBe(true);
+        expect(result.normalizedDate).toBe('2026-07-15');
+      } finally {
+        vi.useRealTimers();
+      }
     });
   });
 });
