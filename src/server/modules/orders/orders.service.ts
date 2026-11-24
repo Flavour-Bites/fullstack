@@ -32,6 +32,20 @@ function parseDateCommercials(data: Record<string, unknown>): Record<string, Dat
   return result;
 }
 
+export function sanitizeOrder<T>(order: T): T {
+  if (!order || typeof order !== 'object') return order;
+  const clone = { ...(order as any) };
+  if (clone.user && typeof clone.user === 'object') {
+    const { passwordHash: _discard, ...safeUser } = clone.user;
+    clone.user = safeUser;
+  }
+  return clone;
+}
+
+export function sanitizeOrders<T>(orders: T[]): T[] {
+  return orders.map(sanitizeOrder);
+}
+
 export const ordersService = {
   async create(data: {
     contactName: string;
@@ -82,19 +96,21 @@ export const ordersService = {
       console.error('[Notify] Staff order notice failed:', err.message),
     );
 
-    return order;
+    return sanitizeOrder(order);
   },
 
   async findAll(params: { includeDeleted?: boolean; userId?: string; role?: string }) {
-    return ordersRepository.findMany(
+    const orders = await ordersRepository.findMany(
       params.includeDeleted || false,
       params.userId,
       params.role,
     );
+    return sanitizeOrders(orders);
   },
 
   async findById(id: string) {
-    return ordersRepository.findById(id);
+    const order = await ordersRepository.findById(id);
+    return order ? sanitizeOrder(order) : null;
   },
 
   async update(orderId: string, input: OrderUpdateInput, actor: OrderActor) {
@@ -139,7 +155,7 @@ export const ordersService = {
       });
     }
 
-    return updated;
+    return sanitizeOrder(updated);
   },
 
   async updateCommercials(
@@ -216,7 +232,7 @@ export const ordersService = {
       console.error('[Notify] Staff price-confirmed notice failed:', err.message),
     );
 
-    return updated;
+    return sanitizeOrder(updated);
   },
 
   async findActiveByUserId(userId: string, limit = 5) {
@@ -238,10 +254,10 @@ export const ordersService = {
     const order = await ordersRepository.findById(orderId);
     if (!order || order.deletedAt) return null;
     if (actor.role === 'staff' || actor.role === 'admin') {
-      return order;
+      return sanitizeOrder(order);
     }
     if (order.userId === actor.id) {
-      return order;
+      return sanitizeOrder(order);
     }
     return null;
   },
@@ -251,7 +267,8 @@ export const ordersService = {
   },
 
   async updateAll(orderId: string, fields: Record<string, unknown>) {
-    return ordersRepository.updateFull(orderId, fields);
+    const updated = await ordersRepository.updateFull(orderId, fields);
+    return sanitizeOrder(updated);
   },
 
   async restore(orderId: string) {

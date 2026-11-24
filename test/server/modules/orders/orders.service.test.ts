@@ -374,3 +374,41 @@ describe('ordersService.findByIdForUser', () => {
     expect(result).toBeNull();
   });
 });
+
+describe('ordersService security: passwordHash leak prevention', () => {
+  it('strips passwordHash from user object in order responses', async () => {
+    vi.spyOn(ordersRepository, 'findById').mockResolvedValueOnce({
+      ...mockOrder,
+      user: {
+        id: 'usr_123',
+        name: 'Test User',
+        role: 'customer',
+        passwordHash: '$2b$12$superSecretHashThatMustNeverLeak',
+      } as any,
+    } as any);
+
+    const result = await ordersService.findById('FB-ABC123');
+    expect(result).toBeDefined();
+    expect((result?.user as any)?.passwordHash).toBeUndefined();
+    expect(JSON.stringify(result)).not.toContain('superSecretHashThatMustNeverLeak');
+  });
+
+  it('strips passwordHash across findAll results', async () => {
+    vi.spyOn(ordersRepository, 'findMany').mockResolvedValueOnce([
+      {
+        ...mockOrder,
+        user: {
+          id: 'usr_123',
+          name: 'Test User',
+          role: 'customer',
+          passwordHash: '$2b$12$anotherSecretHash',
+        } as any,
+      } as any,
+    ]);
+
+    const results = await ordersService.findAll({ userId: 'usr_123', role: 'customer' });
+    expect(results).toHaveLength(1);
+    expect((results[0].user as any)?.passwordHash).toBeUndefined();
+    expect(JSON.stringify(results)).not.toContain('anotherSecretHash');
+  });
+});

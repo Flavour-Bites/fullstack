@@ -169,7 +169,7 @@ describe('authController.handleTelegramCallback', () => {
     await authController.handleTelegramCallback(req, res, vi.fn());
 
     expect(res.cookie).toHaveBeenCalledWith('auth_token', 'jwt_app_token', expect.any(Object));
-    expect(res.redirect).toHaveBeenCalledWith(`${env.FRONTEND_URL.replace(/\/+$/, '')}/?token=jwt_app_token`);
+    expect(res.redirect).toHaveBeenCalledWith(`${env.FRONTEND_URL.replace(/\/+$/, '')}/`);
   });
 
   it('redirects to auth view with needsPassword and telegramId when password required', async () => {

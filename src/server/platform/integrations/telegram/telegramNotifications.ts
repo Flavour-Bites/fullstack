@@ -31,7 +31,7 @@ function getOrderPrice(order: { price?: number | null; finalPrice?: number | nul
 }
 
 export async function notifyStaffNewOrder(
-  order: CustomCakeRequest & { user?: User | null },
+  order: CustomCakeRequest & { user?: Partial<User> | null },
 ): Promise<void> {
   const text = [
     `<b>🎂 New Cake Request! ${escapeHtml(order.id)}</b>`,
@@ -192,7 +192,7 @@ export async function notifyCustomerPriceUpdated(orderId: string): Promise<void>
 }
 
 export async function notifyStaffRevisionRequested(
-  order: CustomCakeRequest & { user?: User | null },
+  order: CustomCakeRequest & { user?: Partial<User> | null },
   reason?: string | null,
 ): Promise<void> {
   const text = [
