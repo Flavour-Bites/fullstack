@@ -3,6 +3,7 @@ import { usersService } from '../../modules/users/users.service';
 import { getConversationStore } from '../../platform/integrations/redis/conversationState';
 import { businessAvailabilityService } from '../../modules/business/businessAvailability.service';
 import { getWebsiteHtmlLink } from '../botHelpers';
+import { getEventTypeButtons } from '../conversations/orderWizard';
 import type { OrderConversation } from '../types';
 
 const conversationStore = getConversationStore();
@@ -62,8 +63,13 @@ export async function handleOrderCommand(ctx: CommandContext<Context>): Promise<
       `I'll ask you a few simple questions.\n\n` +
       `📅 <b>Available days:</b> ${availableDays}\n` +
       `⏱️ <b>Minimum notice:</b> ${hours} hours\n\n` +
-      `<b>1.</b> What type of event is this?\n` +
-      `(e.g., Birthday, Wedding, Anniversary, etc.)`,
-    { parse_mode: 'HTML' }
+      `<b>1.</b> What type of event is this celebration for?\n` +
+      `Choose an option below or type your event:`,
+    {
+      parse_mode: 'HTML',
+      reply_markup: {
+        inline_keyboard: getEventTypeButtons(),
+      },
+    }
   );
 }

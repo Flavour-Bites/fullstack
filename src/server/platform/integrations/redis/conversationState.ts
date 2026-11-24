@@ -13,6 +13,7 @@ export interface OrderConversation {
   designStyle?: string;
   tierCount?: number;
   specialInstructions?: string;
+  referenceImage?: string;
   createdAt: string;
   updatedAt: string;
 }

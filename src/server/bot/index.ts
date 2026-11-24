@@ -19,9 +19,42 @@ export function getBot(): Bot {
     handleCallbacks(bot);
     handleInline(bot);
 
-    bot.catch((err) => {
+    bot.catch(async (err) => {
       console.error('[Bot] Unhandled error:', err.message);
+      try {
+        if (err.ctx) {
+          await err.ctx.reply('⚠️ An unexpected error occurred. Please try again or use /help.', {
+            parse_mode: 'HTML',
+          });
+        }
+      } catch {
+        // Ignore reply failures in error handler
+      }
     });
   }
   return bot;
+}
+
+export async function setupBotCommandsAndMenu(botInstance: Bot = getBot()): Promise<void> {
+  await botInstance.api.setMyCommands([
+    { command: 'start', description: 'Welcome and main menu' },
+    { command: 'order', description: 'Start a new custom cake order' },
+    { command: 'status', description: 'Check your active orders' },
+    { command: 'cancel', description: 'Cancel current request or action' },
+    { command: 'help', description: 'Bot commands and bakery info' },
+  ]);
+
+  if (env.FRONTEND_URL && env.FRONTEND_URL.startsWith('https://')) {
+    await botInstance.api.setChatMenuButton({
+      menu_button: {
+        type: 'web_app',
+        text: 'Bakery Menu 🍰',
+        web_app: { url: env.FRONTEND_URL },
+      },
+    });
+  } else {
+    await botInstance.api.setChatMenuButton({
+      menu_button: { type: 'default' },
+    });
+  }
 }

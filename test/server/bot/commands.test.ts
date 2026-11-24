@@ -23,6 +23,8 @@ vi.mock('@server/modules/business/businessAvailability.service', () => ({
 vi.mock('@server/platform/integrations/redis/conversationState', () => ({
   getConversationStore: () => ({
     setOrder: vi.fn(() => Promise.resolve()),
+    clearOrder: vi.fn(() => Promise.resolve()),
+    clearPrice: vi.fn(() => Promise.resolve()),
   }),
 }));
 
@@ -36,6 +38,7 @@ import { handleStartCommand } from '@server/bot/commands/start.command';
 import { handleStatusCommand } from '@server/bot/commands/status.command';
 import { handleOrderCommand } from '@server/bot/commands/order.command';
 import { handleHelpCommand } from '@server/bot/commands/help.command';
+import { handleCancelCommand } from '@server/bot/commands/cancel.command';
 import { usersService } from '@server/modules/users/users.service';
 import { ordersService } from '@server/modules/orders/orders.service';
 import { businessAvailabilityService } from '@server/modules/business/businessAvailability.service';
@@ -281,6 +284,22 @@ describe('bot commands', () => {
       expect(ctx.reply).toHaveBeenCalledWith(
         expect.stringContaining('href="https://test-flavour-bites.example.com"'),
         expect.anything()
+      );
+    });
+  });
+
+  describe('cancel command', () => {
+    it('clears active order and price state and replies confirmation', async () => {
+      const ctx = {
+        from: { id: 777 },
+        reply: vi.fn(),
+      };
+
+      await handleCancelCommand(ctx as any);
+
+      expect(ctx.reply).toHaveBeenCalledWith(
+        expect.stringContaining('Active order request or action cancelled'),
+        expect.objectContaining({ reply_markup: { remove_keyboard: true } })
       );
     });
   });
