@@ -1,7 +1,7 @@
 import { sendMessage, type InlineKeyboard } from '@server/platform/integrations/telegram/telegramClient.js';
 import { getPrisma } from '@server/platform/config/prisma.js';
 import type { CustomCakeRequest, User } from '@prisma/client';
-import { escapeHtml } from '../../../bot/botHelpers';
+import { escapeHtml, formatDate } from '../../../bot/botHelpers';
 
 import { STATUS_EMOJI, STATUS_LABEL } from '../../../../shared/constants/orderStatus';
 import { BUSINESS_INFO } from '../../../../shared/constants/business';
@@ -92,24 +92,30 @@ export async function notifyCustomerStatusChange(orderId: string): Promise<void>
       message = `${emoji} <b>Your cake is being designed!</b>\n\nHi ${order.contactName}! Yodit has started working on the design for your <b>${order.eventType}</b> cake.\n\nWe'll send you the price once the design is ready. This usually takes 1-2 days.\n\n<b>Your order:</b> <code>${order.id}</code>`;
       break;
 
-    case 'Priced':
+    case 'Priced': {
+      const price = getOrderPrice(order);
+      const deposit = Math.round((price || 0) * 0.5);
       message = [
-        `${emoji} <b>Your price is ready!</b>`,
+        `${emoji} <b>Your price quote is ready!</b>`,
         '',
-        `Hi ${order.contactName}! Your custom <b>${order.eventType}</b> cake price is ready:`,
+        `Hi ${escapeHtml(order.contactName)}! Yodit has quoted a price for your custom <b>${escapeHtml(order.eventType)}</b> cake:`,
         '',
-        `<b>Price: ${etb(getOrderPrice(order))}</b>`,
-        order.bakerNote ? `\n<i>Note from Yodit: ${order.bakerNote}</i>` : '',
+        `💰 <b>Total Price:</b> ${etb(price)}`,
+        `💵 <b>50% Deposit to Confirm:</b> ${etb(deposit)}`,
+        order.bakerNote ? `\n📝 <i>Note from Yodit: ${escapeHtml(order.bakerNote)}</i>` : '',
         '',
-        `Please confirm or request a revision below. Your date (${order.eventDate}) is held for 48 hours.`,
-      ].join('\n');
+        `Please accept the quote or request a revision below. Your date (${formatDate(order.eventDate)}) is held for 48 hours.`,
+      ]
+        .filter(Boolean)
+        .join('\n');
       buttons = [
         [
-          { text: '✅ Accept Price', callback_data: `confirm:${order.id}` },
+          { text: `✅ Accept Price (${etb(price)})`, callback_data: `confirm:${order.id}` },
           { text: '💬 Request Revision', callback_data: `revise:${order.id}` },
         ],
       ];
       break;
+    }
 
     case 'Confirmed':
       message = [

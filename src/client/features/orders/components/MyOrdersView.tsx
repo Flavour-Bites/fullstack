@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Search, AlertCircle, ShoppingBag, ShieldCheck, Check } from 'lucide-react';
+import { Search, AlertCircle, ShoppingBag, ShieldCheck, Check, Send } from 'lucide-react';
 import { t } from '@client/i18n/index';
 import { usePageTitle } from '@client/lib/usePageTitle';
 import { getStatusStyles } from '@shared/constants/orderStatus';
@@ -19,6 +19,9 @@ interface FrontendOrder {
   tierCount: number;
   flavor: string;
   amount: string;
+  rawPrice?: number;
+  depositRequired?: number;
+  bakerNote?: string | null;
   details: string;
   timeline: { title: string; date: string; description: string; done: boolean }[];
 }
@@ -51,6 +54,7 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
     const numTiers = Number(item.tierCount) || 1;
     const price = item.finalPrice ?? item.price ?? 0;
     const amountEtb = price ? `${price.toLocaleString()} ETB` : 'Pending Price';
+    const depositRequired = price ? Math.round(price * 0.5) : 0;
     
     const stepMap: Record<string, number> = {
       Received: 1,
@@ -75,6 +79,9 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
       tierCount: numTiers,
       flavor: item.flavor || 'Custom Assortment',
       amount: amountEtb,
+      rawPrice: price,
+      depositRequired,
+      bakerNote: item.bakerNote || null,
       details: item.designStyle || 'Custom cake studio creation requested.',
       timeline: [
         { title: 'Inquiry Received', date: item.requestDate || 'Just Now', description: 'Your request has been filed in Yodit\'s review queue!', done: true },
@@ -248,34 +255,57 @@ export default function MyOrdersView({ currentUser }: MyOrdersViewProps) {
 
                 {/* Quoted Price Acceptance Banner */}
                 {selectedOrder.status === 'Priced' && (
-                  <div className="p-4 bg-lux-gold/10 border border-lux-gold/30 rounded-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-left">
-                    <div>
-                      <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-lux-gold block mb-0.5">
-                        Quotation Ready
-                      </span>
-                      <p className="text-xs text-stone-850 dark:text-stone-200 font-medium">
-                        Yodit has quoted {selectedOrder.amount} for your celebration cake. Accept to confirm your order.
-                      </p>
+                  <div className="p-4 bg-lux-gold/10 border border-lux-gold/30 rounded-xs space-y-3 text-left">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div>
+                        <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-lux-gold block mb-0.5">
+                          Quotation Ready
+                        </span>
+                        <p className="text-xs text-stone-850 dark:text-stone-200 font-medium">
+                          Yodit has quoted <span className="font-bold text-lux-gold">{selectedOrder.amount}</span> for your celebration cake.
+                          {selectedOrder.depositRequired ? (
+                            <span className="block text-[11px] text-stone-600 dark:text-stone-300 font-mono mt-0.5">
+                              50% Deposit to Confirm: <b>{selectedOrder.depositRequired.toLocaleString()} ETB</b> (Remaining paid at pickup)
+                            </span>
+                          ) : null}
+                        </p>
+                        {selectedOrder.bakerNote && (
+                          <p className="text-[11px] text-stone-600 dark:text-stone-300 italic mt-1 font-serif">
+                            Note from Yodit: &ldquo;{selectedOrder.bakerNote}&rdquo;
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <a
+                          href={`${BUSINESS_INFO.social.telegram.link}?start=order_${selectedOrder.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-2 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 font-mono text-xs uppercase tracking-wider font-semibold rounded-sm border border-stone-300 dark:border-stone-700 transition-colors inline-flex items-center gap-1.5"
+                        >
+                          <Send className="w-3.5 h-3.5 text-[#229ED9]" />
+                          Discuss on Telegram
+                        </a>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            setAcceptingId(selectedOrder.id);
+                            try {
+                              const ok = await acceptPrice(selectedOrder.id);
+                              if (ok) {
+                                setSelectedOrder((prev) => (prev ? { ...prev, status: 'Confirmed', stepNum: 3 } : null));
+                              }
+                            } finally {
+                              setAcceptingId(null);
+                            }
+                          }}
+                          disabled={acceptingId === selectedOrder.id}
+                          className="px-4 py-2 bg-stone-900 hover:bg-lux-gold text-white hover:text-stone-950 font-mono text-xs uppercase tracking-wider font-bold rounded-sm border border-stone-800 hover:border-lux-gold transition-colors shrink-0 disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          {acceptingId === selectedOrder.id ? 'Confirming...' : 'Accept Quoted Price'}
+                        </button>
+                      </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        setAcceptingId(selectedOrder.id);
-                        try {
-                          const ok = await acceptPrice(selectedOrder.id);
-                          if (ok) {
-                            setSelectedOrder((prev) => (prev ? { ...prev, status: 'Confirmed', stepNum: 3 } : null));
-                          }
-                        } finally {
-                          setAcceptingId(null);
-                        }
-                      }}
-                      disabled={acceptingId === selectedOrder.id}
-                      className="px-4 py-2 bg-stone-900 hover:bg-lux-gold text-white hover:text-stone-950 font-mono text-xs uppercase tracking-wider font-bold rounded-sm border border-stone-800 hover:border-lux-gold transition-colors shrink-0 disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
-                    >
-                      <Check className="w-3.5 h-3.5" />
-                      {acceptingId === selectedOrder.id ? 'Confirming...' : 'Accept Quoted Price'}
-                    </button>
                   </div>
                 )}
 
