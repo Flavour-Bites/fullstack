@@ -10,6 +10,7 @@ export interface OrderConversation {
   designStyle?: string;
   tierCount?: number;
   specialInstructions?: string;
+  referenceImage?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -22,4 +23,5 @@ export type OrderWizardStep =
   | 'tierCount'
   | 'designStyle'
   | 'contactPhone'
-  | 'specialInstructions';
+  | 'specialInstructions'
+  | 'summary';

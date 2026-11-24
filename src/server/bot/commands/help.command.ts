@@ -7,6 +7,7 @@ export async function handleHelpCommand(ctx: CommandContext<Context>): Promise<v
       `/start — Welcome message\n` +
       `/status — Check your active orders\n` +
       `/order — Start a new cake request\n` +
+      `/cancel — Cancel your active request or prompt\n` +
       `/help — This message\n\n` +
       `For questions, visit ${getWebsiteHtmlLink()} or call us directly.`,
     { parse_mode: 'HTML' }

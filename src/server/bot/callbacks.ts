@@ -3,7 +3,9 @@ import { answerCallback, editMessage, type InlineKeyboard } from "../platform/in
 import { notifyStaffRevisionRequested } from "../platform/integrations/telegram/telegramNotifications";
 import { getConversationStore } from "../platform/integrations/redis/conversationState";
 import { ordersService } from "../modules/orders/orders.service";
-import { resolveTelegramUser, isStaffUser, escapeHtml, formatDate } from "./botHelpers";
+import { resolveTelegramUser, isStaffUser, escapeHtml, formatDate, formatCurrency } from "./botHelpers";
+import { handleWizardCallback } from "./conversations/orderWizard";
+import { STATUS_EMOJI } from "../../shared/constants/orderStatus";
 import type { OrderStatus } from "@prisma/client";
 
 const conversationStore = getConversationStore();
@@ -55,6 +57,14 @@ export function handleCallbacks(bot: Bot) {
 
     if (!chatId || !messageId) {
       await answerCallback(callbackId, '⚠️ Invalid interaction.');
+      return;
+    }
+
+    // 0. Customer Order Wizard Callbacks
+    if (data.startsWith("wiz_")) {
+      const senderId = String(ctx.from.id);
+      await answerCallback(callbackId);
+      await handleWizardCallback(ctx, data, senderId);
       return;
     }
 
@@ -273,6 +283,56 @@ export function handleCallbacks(bot: Bot) {
       );
 
       await answerCallback(callbackId, "Revision request sent to Yodit.");
+    }
+
+    // 8. View Order Details from Status or Notification
+    else if (data.startsWith("view_order:")) {
+      const orderId = data.slice("view_order:".length);
+      const user = await resolveTelegramUser(ctx);
+      if (!user) {
+        await answerCallback(callbackId, "⚠️ Please link your account.");
+        return;
+      }
+
+      const order = await ordersService.findByIdForUser(orderId, { id: user.id, role: user.role });
+      if (!order) {
+        await answerCallback(callbackId, "⚠️ Order not found or permission denied.");
+        return;
+      }
+
+      await answerCallback(callbackId);
+
+      const emoji = STATUS_EMOJI[order.status] ?? '📦';
+      const dateFormatted = formatDate(order.eventDate);
+      let text =
+        `<b>🎂 Order #${escapeHtml(order.id)}</b>\n\n` +
+        `${emoji} <b>Status:</b> ${escapeHtml(order.status)}\n` +
+        `👤 <b>Customer:</b> ${escapeHtml(order.contactName)}\n` +
+        `📞 <b>Phone:</b> ${escapeHtml(order.contactPhone)}\n` +
+        `🎉 <b>Event:</b> ${escapeHtml(order.eventType)}\n` +
+        `🍰 <b>Flavor:</b> ${escapeHtml(order.flavor)}\n` +
+        `📅 <b>Event Date:</b> ${escapeHtml(dateFormatted)}\n` +
+        `👥 <b>Guests:</b> ${order.guestCount}\n` +
+        `🏗️ <b>Tiers:</b> ${order.tierCount}\n`;
+
+      if (order.price) {
+        text += `💰 <b>Price:</b> ${formatCurrency(order.price)}\n`;
+      }
+
+      const buttons = [];
+      if (order.status === 'Priced') {
+        buttons.push([
+          { text: `✅ Accept Price (${formatCurrency(order.finalPrice ?? order.price)})`, callback_data: `confirm:${order.id}` },
+        ]);
+        buttons.push([
+          { text: '✏️ Request Revision', callback_data: `revise:${order.id}` },
+        ]);
+      }
+
+      await ctx.reply(text, {
+        parse_mode: 'HTML',
+        reply_markup: buttons.length > 0 ? { inline_keyboard: buttons } : undefined,
+      });
     }
   });
 }

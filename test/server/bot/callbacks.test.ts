@@ -21,7 +21,12 @@ vi.mock('@server/modules/orders/orders.service', () => ({
     update: vi.fn(),
     acceptPrice: vi.fn(),
     findById: vi.fn(),
+    findByIdForUser: vi.fn(),
   },
+}));
+
+vi.mock('@server/bot/conversations/orderWizard', () => ({
+  handleWizardCallback: vi.fn(() => Promise.resolve(true)),
 }));
 
 vi.mock('@server/modules/users/users.service', () => ({
@@ -35,6 +40,7 @@ import { ordersService } from '@server/modules/orders/orders.service';
 import { usersService } from '@server/modules/users/users.service';
 import { editMessage, answerCallback } from '@server/platform/integrations/telegram/telegramClient';
 import { notifyStaffRevisionRequested } from '@server/platform/integrations/telegram/telegramNotifications';
+import { handleWizardCallback } from '@server/bot/conversations/orderWizard';
 
 describe('bot callbacks', () => {
   let callbackHandler: (ctx: any) => Promise<void>;
@@ -313,6 +319,66 @@ describe('bot callbacks', () => {
       expect(answerCallback).toHaveBeenCalledWith(
         'cb_rev',
         'Revision request sent to Yodit.'
+      );
+    });
+
+    it('routes wiz_ callbacks to handleWizardCallback', async () => {
+      const ctx = {
+        callbackQuery: {
+          id: 'cb_wiz',
+          data: 'wiz_event:Birthday',
+          message: { chat: { id: 111 }, message_id: 222 },
+        },
+        from: { id: 12345 },
+      };
+
+      await callbackHandler(ctx);
+
+      expect(answerCallback).toHaveBeenCalledWith('cb_wiz');
+      expect(handleWizardCallback).toHaveBeenCalledWith(ctx, 'wiz_event:Birthday', '12345');
+    });
+
+    it('routes view_order: callback and displays order card', async () => {
+      vi.mocked(usersService.findByTelegramId).mockResolvedValue({
+        id: 'usr_cust_1',
+        name: 'Bob',
+        role: 'customer',
+      } as any);
+
+      vi.mocked(ordersService.findByIdForUser).mockResolvedValue({
+        id: 'FB-VIEW-123',
+        status: 'Priced',
+        eventType: 'Birthday Party',
+        contactName: 'Bob',
+        contactPhone: '+251911223344',
+        flavor: 'Vanilla',
+        eventDate: '2026-08-15',
+        guestCount: 25,
+        tierCount: 2,
+        price: 3500,
+        finalPrice: 3500,
+      } as any);
+
+      const ctx = {
+        callbackQuery: {
+          id: 'cb_view',
+          data: 'view_order:FB-VIEW-123',
+          message: { chat: { id: 111 }, message_id: 222 },
+        },
+        from: { id: 54321 },
+        reply: vi.fn(),
+      };
+
+      await callbackHandler(ctx);
+
+      expect(answerCallback).toHaveBeenCalledWith('cb_view');
+      expect(ordersService.findByIdForUser).toHaveBeenCalledWith('FB-VIEW-123', {
+        id: 'usr_cust_1',
+        role: 'customer',
+      });
+      expect(ctx.reply).toHaveBeenCalledWith(
+        expect.stringContaining('Order #FB-VIEW-123'),
+        expect.objectContaining({ parse_mode: 'HTML' })
       );
     });
   });

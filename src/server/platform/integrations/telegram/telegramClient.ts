@@ -128,3 +128,34 @@ export async function answerCallback(
     text: text ?? '',
   });
 }
+
+export async function setMyCommands(
+  commands: Array<{ command: string; description: string }>
+): Promise<boolean> {
+  return callTelegram('setMyCommands', { commands });
+}
+
+export async function setChatMenuButton(
+  menuButton?: { type: string; text?: string; web_app?: { url: string } }
+): Promise<boolean> {
+  return callTelegram('setChatMenuButton', {
+    menu_button: menuButton ?? { type: 'default' },
+  });
+}
+
+export async function setWebhook(
+  url: string,
+  secretToken?: string
+): Promise<boolean> {
+  const body: Record<string, unknown> = { url };
+  if (secretToken) body.secret_token = secretToken;
+  return callTelegram('setWebhook', body);
+}
+
+export async function deleteWebhook(
+  dropPendingUpdates = false
+): Promise<boolean> {
+  return callTelegram('deleteWebhook', {
+    drop_pending_updates: dropPendingUpdates,
+  });
+}
