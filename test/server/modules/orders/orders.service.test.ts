@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ordersService } from '@server/modules/orders/orders.service.js';
+import { ordersRepository } from '@server/modules/orders/orders.repository.js';
 
 const mockOrder = {
   id: 'FB-ABC123',
@@ -41,6 +42,13 @@ const mockPricedOrder = {
   price: 5000,
 };
 
+const mockPricedNoPriceOrder = {
+  ...mockOrder,
+  id: 'FB-PRICED-NO-PRICE',
+  status: 'Priced',
+  price: null,
+};
+
 const mockCompletedOrder = {
   ...mockOrder,
   id: 'FB-COMPLETED',
@@ -55,6 +63,7 @@ const mockCancelledOrder = {
 
 const mockOrdersById: Record<string, typeof mockOrder> = {
   'FB-PRICED': mockPricedOrder,
+  'FB-PRICED-NO-PRICE': mockPricedNoPriceOrder,
   'FB-COMPLETED': mockCompletedOrder,
   'FB-CANCELLED': mockCancelledOrder,
 };
@@ -69,6 +78,7 @@ vi.mock('@server/modules/orders/orders.repository.js', () => ({
     findById: vi.fn((id) => {
       if (id === 'FB-ABC123') return Promise.resolve(mockOrder);
       if (id === 'FB-PRICED') return Promise.resolve(mockPricedOrder);
+      if (id === 'FB-PRICED-NO-PRICE') return Promise.resolve(mockPricedNoPriceOrder);
       if (id === 'FB-COMPLETED') return Promise.resolve(mockCompletedOrder);
       if (id === 'FB-CANCELLED') return Promise.resolve(mockCancelledOrder);
       if (id === 'FB-DELETED') return Promise.resolve({ ...mockOrder, id: 'FB-DELETED', deletedAt: new Date() });
@@ -80,6 +90,9 @@ vi.mock('@server/modules/orders/orders.repository.js', () => ({
     ),
     updateCommercials: vi.fn((id, data) =>
       Promise.resolve({ ...getMockOrder(id), id, ...data }),
+    ),
+    acceptPrice: vi.fn((id, commercials, _actor) =>
+      Promise.resolve({ ...getMockOrder(id), id, status: 'Confirmed', ...commercials }),
     ),
     softDelete: vi.fn((id) => Promise.resolve({ ...mockOrder, id, deletedAt: new Date() })),
     restore: vi.fn((id) => Promise.resolve({ ...mockOrder, id, deletedAt: null })),
@@ -205,9 +218,11 @@ describe('ordersService.update', () => {
     expect(result?.status).toBe('Cancelled');
   });
 
-  it('throws ValidationError on an invalid explicit status transition', async () => {
-    await expect(ordersService.update('FB-COMPLETED', { status: 'Priced' }, actor))
+  it('throws ValidationError on an invalid explicit status transition and does not write commercials', async () => {
+    vi.mocked(ordersRepository.updateCommercials).mockClear();
+    await expect(ordersService.update('FB-COMPLETED', { status: 'Priced', price: 9999 }, actor))
       .rejects.toThrow('Cannot change status from Completed to Priced');
+    expect(ordersRepository.updateCommercials).not.toHaveBeenCalled();
   });
 });
 
@@ -250,18 +265,28 @@ describe('ordersService.acceptPrice', () => {
   });
 
   it('throws when customer tries to confirm another customer order', async () => {
-    await expect(ordersService.acceptPrice('FB-ABC123', 'usr_OTHER', 'customer'))
+    await expect(ordersService.acceptPrice('FB-PRICED', 'usr_OTHER', 'customer'))
       .rejects.toThrow('You can only confirm your own cake order');
   });
 
-  it('throws when no price is set', async () => {
+  it('throws when order is not in Priced status', async () => {
     await expect(ordersService.acceptPrice('FB-ABC123', 'usr_123', 'customer'))
+      .rejects.toThrow('cannot be confirmed');
+  });
+
+  it('throws when no price is set', async () => {
+    await expect(ordersService.acceptPrice('FB-PRICED-NO-PRICE', 'usr_123', 'customer'))
       .rejects.toThrow('Cake price is not ready yet');
   });
 
-  it('accepts price and updates to Confirmed', async () => {
+  it('accepts price and updates to Confirmed transactionally', async () => {
     const result = await ordersService.acceptPrice('FB-PRICED', 'usr_123', 'customer');
     expect(result.status).toBe('Confirmed');
+    expect(ordersRepository.acceptPrice).toHaveBeenCalledWith(
+      'FB-PRICED',
+      expect.objectContaining({ finalPrice: 5000 }),
+      expect.objectContaining({ userId: 'usr_123' })
+    );
   });
 });
 

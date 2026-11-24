@@ -7,7 +7,9 @@ function getBaseUrl(): string {
 
 export interface InlineButton {
   text: string;
-  callback_data: string;
+  callback_data?: string;
+  url?: string;
+  web_app?: { url: string };
 }
 
 export type InlineKeyboard = InlineButton[][];
@@ -68,6 +70,53 @@ export async function editMessage(
   }
 
   return callTelegram('editMessageText', body);
+}
+
+export async function editMessageReplyMarkup(
+  chatId: string | number,
+  messageId: number,
+  buttons?: InlineKeyboard
+): Promise<boolean> {
+  const body: Record<string, unknown> = {
+    chat_id: chatId,
+    message_id: messageId,
+    reply_markup: { inline_keyboard: buttons ?? [] },
+  };
+
+  return callTelegram('editMessageReplyMarkup', body);
+}
+
+export async function sendChatAction(
+  chatId: string | number,
+  action: 'typing' | 'upload_photo' | 'choose_sticker' | 'find_location' = 'typing'
+): Promise<boolean> {
+  return callTelegram('sendChatAction', {
+    chat_id: chatId,
+    action,
+  });
+}
+
+export async function sendPhoto(
+  chatId: string | number,
+  photo: string,
+  caption?: string,
+  buttons?: InlineKeyboard
+): Promise<boolean> {
+  const body: Record<string, unknown> = {
+    chat_id: chatId,
+    photo,
+    parse_mode: 'HTML',
+  };
+
+  if (caption) {
+    body.caption = caption;
+  }
+
+  if (buttons && buttons.length > 0) {
+    body.reply_markup = { inline_keyboard: buttons };
+  }
+
+  return callTelegram('sendPhoto', body);
 }
 
 export async function answerCallback(

@@ -32,6 +32,16 @@ export const usersRepository = {
     const prisma = getPrisma();
     return prisma.user.findFirst({
       where: { telegramId, deletedAt: null },
+      select: {
+        id: true,
+        name: true,
+        role: true,
+        telegramId: true,
+        telegramUsername: true,
+        telegramPhone: true,
+        notifyViaTelegram: true,
+        createdAt: true,
+      },
     });
   },
 
