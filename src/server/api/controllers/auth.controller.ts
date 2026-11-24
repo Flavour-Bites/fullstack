@@ -58,7 +58,7 @@ export const authController = {
       const telegramIdParam = result.telegramId ? `&telegramId=${encodeURIComponent(result.telegramId)}` : '';
       const redirectTarget = result.needsPassword
         ? `${frontendBase}/auth?needsPassword=true${telegramIdParam}`
-        : `${frontendBase}/?token=${encodeURIComponent(result.token || '')}`;
+        : `${frontendBase}/`;
       res.redirect(redirectTarget);
     } else {
       res.json(result);

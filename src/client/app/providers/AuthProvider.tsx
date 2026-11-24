@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useMemo, useCallback, ReactNode } from 'react';
 import { User } from '@shared/types';
 import { http } from '@client/lib/http';
-import { setToken, clearToken } from '@client/lib/tokenStorage';
+import { clearToken } from '@client/lib/tokenStorage';
 import type { ApiResponse } from '@/shared/api';
 
 interface AuthContextValue {
@@ -19,19 +19,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
-    try {
-      const urlParams = new URLSearchParams(window.location.search);
-      const tokenParam = urlParams.get('token');
-      if (tokenParam) {
-        setToken(tokenParam);
-        urlParams.delete('token');
-        const newSearch = urlParams.toString();
-        const newUrl = window.location.pathname + (newSearch ? `?${newSearch}` : '');
-        window.history.replaceState({}, '', newUrl);
-      }
-    } catch {
-      // Ignore if URLSearchParams is unavailable
-    }
+    // Clear any legacy localStorage token to enforce cookie-only authentication
+    clearToken();
 
     http.get<ApiResponse<{ user: User }>>('/api/auth/me')
       .then(({ data }) => {
@@ -60,7 +49,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('flavourbites_user', JSON.stringify(user));
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      await http.post('/api/auth/logout');
+    } catch {
+      // Ignore network errors during logout
+    }
     localStorage.removeItem('flavourbites_user');
     clearToken();
     setCurrentUser(null);

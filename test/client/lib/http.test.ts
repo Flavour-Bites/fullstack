@@ -25,9 +25,7 @@ describe('http transport layer & interceptors', () => {
   });
 
   describe('request interceptor', () => {
-    it('attaches Authorization Bearer header when token is present in tokenStorage', async () => {
-      setToken('jwt_test_token');
-
+    it('uses withCredentials for cookie-only authentication and omits Bearer header', async () => {
       let capturedConfig: InternalAxiosRequestConfig | undefined;
       http.defaults.adapter = async (config: InternalAxiosRequestConfig): Promise<AxiosResponse> => {
         capturedConfig = config;
@@ -42,25 +40,7 @@ describe('http transport layer & interceptors', () => {
 
       const response = await http.get('/api/test');
       expect(response.status).toBe(200);
-      expect(capturedConfig?.headers.get('Authorization')).toBe('Bearer jwt_test_token');
-    });
-
-    it('omits Authorization header when token is not present in tokenStorage', async () => {
-      clearToken();
-
-      let capturedConfig: InternalAxiosRequestConfig | undefined;
-      http.defaults.adapter = async (config: InternalAxiosRequestConfig): Promise<AxiosResponse> => {
-        capturedConfig = config;
-        return {
-          data: { success: true },
-          status: 200,
-          statusText: 'OK',
-          headers: {},
-          config,
-        };
-      };
-
-      await http.get('/api/test');
+      expect(capturedConfig?.withCredentials).toBe(true);
       expect(capturedConfig?.headers.get('Authorization')).toBeUndefined();
     });
 

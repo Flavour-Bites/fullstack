@@ -1,5 +1,5 @@
 import axios, { type AxiosError, type AxiosRequestConfig, type InternalAxiosRequestConfig, type AxiosResponse } from 'axios';
-import { clearToken, getToken } from './tokenStorage';
+import { clearToken } from './tokenStorage';
 import { env } from '../platform/config/env';
 import { ApiError, type ApiResponse } from '../../shared/api/types';
 
@@ -38,11 +38,6 @@ http.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
     if (token) {
       config.headers.set('x-csrf-token', token);
     }
-  }
-
-  const authToken = getToken();
-  if (authToken) {
-    config.headers.set('Authorization', `Bearer ${authToken}`);
   }
 
   return config;

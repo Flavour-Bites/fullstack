@@ -4,6 +4,26 @@ import type { OrderStatus } from '@prisma/client';
 import type { OrderActor } from './orders.types';
 import { NotFoundError } from '../../platform/errors/index';
 
+export const SAFE_ORDER_USER_SELECT = {
+  id: true,
+  name: true,
+  role: true,
+  telegramId: true,
+  telegramUsername: true,
+  telegramPhone: true,
+  telegramPhoto: true,
+  notifyViaTelegram: true,
+  dietaryPreferences: true,
+  language: true,
+  createdAt: true,
+} as const;
+
+export const ORDER_SAFE_INCLUDE = {
+  user: {
+    select: SAFE_ORDER_USER_SELECT,
+  },
+} as const;
+
 export const ordersRepository = {
   async create(data: {
     id: string;
@@ -45,7 +65,7 @@ export const ordersRepository = {
           requestDate: data.requestDate,
           status: 'Received',
         },
-        include: { user: true },
+        include: ORDER_SAFE_INCLUDE,
       });
 
       await tx.orderStatusEvent.create({
@@ -68,7 +88,7 @@ export const ordersRepository = {
     const prisma = getPrisma();
     return prisma.customCakeRequest.findUnique({
       where: { id },
-      include: { user: true },
+      include: ORDER_SAFE_INCLUDE,
     });
   },
 
@@ -116,7 +136,7 @@ export const ordersRepository = {
 
     return prisma.customCakeRequest.findMany({
       where: baseWhere,
-      include: { user: true },
+      include: ORDER_SAFE_INCLUDE,
       orderBy: { createdAt: 'desc' },
     });
   },
@@ -140,14 +160,14 @@ export const ordersRepository = {
       if (current.status === toStatus) {
         return tx.customCakeRequest.findUnique({
           where: { id: orderId },
-          include: { user: true },
+          include: ORDER_SAFE_INCLUDE,
         });
       }
 
       const updated = await tx.customCakeRequest.update({
         where: { id: orderId },
         data: { status: toStatus },
-        include: { user: true },
+        include: ORDER_SAFE_INCLUDE,
       });
 
       await tx.orderStatusEvent.create({
@@ -205,7 +225,7 @@ export const ordersRepository = {
 
       return tx.customCakeRequest.findUnique({
         where: { id: orderId },
-        include: { user: true },
+        include: ORDER_SAFE_INCLUDE,
       });
     });
   },
