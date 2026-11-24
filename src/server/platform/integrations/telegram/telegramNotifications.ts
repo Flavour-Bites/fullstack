@@ -1,6 +1,7 @@
-import { sendMessage } from '@server/platform/integrations/telegram/telegramClient.js';
+import { sendMessage, type InlineKeyboard } from '@server/platform/integrations/telegram/telegramClient.js';
 import { getPrisma } from '@server/platform/config/prisma.js';
 import type { CustomCakeRequest, User } from '@prisma/client';
+import { escapeHtml } from '../../../bot/botHelpers';
 
 import { STATUS_EMOJI, STATUS_LABEL } from '../../../../shared/constants/orderStatus';
 import { BUSINESS_INFO } from '../../../../shared/constants/business';
@@ -33,34 +34,34 @@ export async function notifyStaffNewOrder(
   order: CustomCakeRequest & { user?: User | null },
 ): Promise<void> {
   const text = [
-    `<b>🎂 New Cake Request! ${order.id}</b>`,
+    `<b>🎂 New Cake Request! ${escapeHtml(order.id)}</b>`,
     '',
-    `<b>Customer:</b> ${order.contactName}`,
-    `<b>Phone:</b> ${order.contactPhone}`,
+    `<b>Customer:</b> ${escapeHtml(order.contactName)}`,
+    `<b>Phone:</b> ${escapeHtml(order.contactPhone)}`,
     order.user?.telegramUsername
-      ? `<b>Telegram:</b> @${order.user.telegramUsername}`
+      ? `<b>Telegram:</b> @${escapeHtml(order.user.telegramUsername)}`
       : '',
     '',
-    `<b>Event:</b> ${order.eventType}`,
-    `<b>Date needed:</b> ${order.eventDate}`,
+    `<b>Event:</b> ${escapeHtml(order.eventType)}`,
+    `<b>Date needed:</b> ${escapeHtml(order.eventDate)}`,
     `<b>Guests:</b> ${order.guestCount} people`,
     `<b>Tiers:</b> ${order.tierCount}`,
-    `<b>Flavour:</b> ${order.flavor}`,
-    `<b>Style:</b> ${order.designStyle}`,
+    `<b>Flavour:</b> ${escapeHtml(order.flavor)}`,
+    `<b>Style:</b> ${escapeHtml(order.designStyle)}`,
     '',
     `<b>Price:</b> ${etb(getOrderPrice(order))}`,
     '',
     order.specialInstructions
-      ? `<b>Special instructions:</b>\n${order.specialInstructions}`
+      ? `<b>Special instructions:</b>\n${escapeHtml(order.specialInstructions)}`
       : '<i>No special instructions</i>',
   ]
     .filter(Boolean)
     .join('\n');
 
-  const buttons = [
+  const buttons: InlineKeyboard = [
     [{ text: '✏️ Start Designing', callback_data: `status:${order.id}:Designing` }],
     [{ text: '💰 Send Price', callback_data: `price:${order.id}` }],
-    [{ text: '❌ Cancel Order', callback_data: `status:${order.id}:Cancelled` }],
+    [{ text: '❌ Cancel Order', callback_data: `cancel_prompt:${order.id}` }],
   ];
 
   const staffIds = await getStaffChatIds();
@@ -146,26 +147,68 @@ export async function notifyCustomerStatusChange(orderId: string): Promise<void>
       ].join('\n');
       break;
 
+    case 'Completed':
+      message = [
+        `${emoji} <b>Order Completed! 🎉</b>`,
+        '',
+        `Hi ${escapeHtml(order.contactName)}! Your order <code>${escapeHtml(order.id)}</code> has been completed.`,
+        '',
+        'We hope you and your guests loved the cake! Thank you for choosing Flavour Bites.',
+      ].join('\n');
+      break;
+
     case 'Cancelled':
       message = [
         `${emoji} <b>Order Cancelled</b>`,
         '',
-        `Your order <code>${order.id}</code> has been cancelled.`,
+        `Your order <code>${escapeHtml(order.id)}</code> has been cancelled.`,
         '',
-        "If this was unexpected or you'd like to discuss, please contact us directly.",
+        "If this was unexpected or you'd like to discuss, please contact our studio team.",
       ].join('\n');
       break;
 
     default:
-      message = `${emoji} Your order <code>${order.id}</code> status is now: <b>${label}</b>`;
+      message = `${emoji} Your order <code>${escapeHtml(order.id)}</code> status is now: <b>${escapeHtml(label)}</b>`;
   }
 
-  await sendMessage(order.user.telegramId, message, buttons);
+  const sent = await sendMessage(order.user.telegramId, message, buttons);
 
-  await prisma.customCakeRequest.update({
-    where: { id: orderId },
-    data: { lastNotifiedStatus: order.status },
-  });
+  if (sent) {
+    await prisma.customCakeRequest.update({
+      where: { id: orderId },
+      data: { lastNotifiedStatus: order.status },
+    });
+  }
+}
+
+export async function notifyCustomerPriceUpdated(orderId: string): Promise<void> {
+  await notifyCustomerStatusChange(orderId);
+}
+
+export async function notifyStaffRevisionRequested(
+  order: CustomCakeRequest & { user?: User | null },
+  reason?: string | null,
+): Promise<void> {
+  const text = [
+    `💬 <b>Price Revision Requested!</b>`,
+    '',
+    `<b>Customer:</b> ${escapeHtml(order.contactName)} requested a price or detail revision for order <code>${escapeHtml(order.id)}</code>.`,
+    `<b>Current Quoted Price:</b> ${etb(getOrderPrice(order))}`,
+    `<b>Event:</b> ${escapeHtml(order.eventType)} · ${escapeHtml(order.flavor)}`,
+    reason ? `<b>Customer Note:</b> <i>${escapeHtml(reason)}</i>` : '',
+    '',
+    'Please review the request and submit an updated price.',
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  const buttons: InlineKeyboard = [
+    [{ text: '💰 Send Revised Price', callback_data: `price:${order.id}` }],
+    [{ text: '❌ Cancel Order', callback_data: `cancel_prompt:${order.id}` }],
+  ];
+
+  const staffIds = await getStaffChatIds();
+  await Promise.allSettled(staffIds.map((id) => sendMessage(id, text, buttons)));
 }
 
 export async function notifyStaffPriceConfirmed(
@@ -174,16 +217,17 @@ export async function notifyStaffPriceConfirmed(
   const text = [
     `✅ <b>Price Confirmed!</b>`,
     '',
-    `<b>${order.contactName}</b> accepted the price for their <b>${order.eventType}</b> cake.`,
+    `<b>${escapeHtml(order.contactName)}</b> accepted the price for their <b>${escapeHtml(order.eventType)}</b> cake.`,
     `<b>Price:</b> ${etb(getOrderPrice(order))}`,
-    `<b>Date:</b> ${order.eventDate}`,
-    `<b>Order ID:</b> <code>${order.id}</code>`,
+    `<b>Date:</b> ${escapeHtml(order.eventDate)}`,
+    `<b>Order ID:</b> <code>${escapeHtml(order.id)}</code>`,
     '',
     'You can now mark it as In Progress when baking begins.',
   ].join('\n');
 
-  const buttons = [
+  const buttons: InlineKeyboard = [
     [{ text: '🔥 Mark In Progress', callback_data: `status:${order.id}:InProgress` }],
+    [{ text: '❌ Cancel Order', callback_data: `cancel_prompt:${order.id}` }],
   ];
 
   const staffIds = await getStaffChatIds();

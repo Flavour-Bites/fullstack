@@ -103,6 +103,20 @@ export const ordersService = {
       throw new NotFoundError('Order not found.');
     }
 
+    // Determine target status (if any) and validate transition BEFORE making any database updates
+    let targetStatus: OrderStatus | undefined = input.status;
+    if (
+      targetStatus === undefined &&
+      input.price !== undefined &&
+      (current.status === 'Received' || current.status === 'Designing')
+    ) {
+      targetStatus = 'Priced';
+    }
+
+    if (targetStatus !== undefined && !isValidTransition(current.status, targetStatus)) {
+      throw new ValidationError(`Cannot change status from ${current.status} to ${targetStatus}.`);
+    }
+
     let updated = current;
 
     const commercialResult = await this.updateCommercials(orderId, input as Record<string, unknown>);
@@ -116,23 +130,12 @@ export const ordersService = {
       updated = await this.updateDesignAndNotes(orderId, input);
     }
 
-    if (input.status !== undefined) {
-      if (!isValidTransition(current.status, input.status)) {
-        throw new ValidationError(`Cannot change status from ${current.status} to ${input.status}.`);
-      }
-      updated = await this.changeStatus(orderId, input.status, {
+    if (targetStatus !== undefined) {
+      const note = input.status !== undefined ? (input.note ?? null) : 'Cake price was set.';
+      updated = await this.changeStatus(orderId, targetStatus, {
         userId: actor.userId,
         source: actor.source,
-        note: input.note ?? null,
-      });
-    } else if (
-      input.price !== undefined &&
-      (current.status === 'Received' || current.status === 'Designing')
-    ) {
-      updated = await this.changeStatus(orderId, 'Priced', {
-        userId: actor.userId,
-        source: actor.source,
-        note: 'Cake price was set.',
+        note,
       });
     }
 
@@ -184,18 +187,27 @@ export const ordersService = {
     if (role === 'customer' && order.userId !== userId) {
       throw new AuthorizationError('You can only confirm your own cake order.');
     }
+    if (order.status !== 'Priced') {
+      throw new ValidationError(`Order is currently in "${order.status}" status and cannot be confirmed.`);
+    }
     if (!order.price) throw new ValidationError('Cake price is not ready yet.');
 
-    await ordersRepository.updateCommercials(orderId, {
-      finalPrice: order.finalPrice ?? order.price,
-      priceConfirmedAt: new Date(),
-    });
+    const updated = await ordersRepository.acceptPrice(
+      orderId,
+      {
+        finalPrice: order.finalPrice ?? order.price,
+        priceConfirmedAt: new Date(),
+      },
+      {
+        userId,
+        source: source ?? (role === 'customer' ? 'customer_api' : 'staff_api'),
+        note: 'Cake price confirmed.',
+      }
+    );
 
-    const updated = await ordersRepository.updateStatus(orderId, 'Confirmed', {
-      userId,
-      source: source ?? (role === 'customer' ? 'customer_api' : 'staff_api'),
-      note: 'Cake price confirmed.',
-    });
+    if (!updated) {
+      throw new NotFoundError('Order not found.');
+    }
 
     notifyCustomerStatusChange(orderId).catch((err: Error) =>
       console.error('[Notify] Customer notice failed:', err.message),

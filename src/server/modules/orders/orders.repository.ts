@@ -166,6 +166,50 @@ export const ordersRepository = {
     });
   },
 
+  async acceptPrice(
+    orderId: string,
+    commercials: { finalPrice: number; priceConfirmedAt: Date },
+    actor: OrderActor,
+  ) {
+    const prisma = getPrisma();
+    return prisma.$transaction(async (tx) => {
+      const current = await tx.customCakeRequest.findUnique({
+        where: { id: orderId },
+        select: { id: true, status: true, deletedAt: true },
+      });
+
+      if (!current || current.deletedAt) {
+        throw new NotFoundError('Order not found.');
+      }
+
+      await tx.customCakeRequest.update({
+        where: { id: orderId },
+        data: {
+          finalPrice: commercials.finalPrice,
+          priceConfirmedAt: commercials.priceConfirmedAt,
+          status: 'Confirmed',
+        },
+      });
+
+      await tx.orderStatusEvent.create({
+        data: {
+          id: makeId('ose'),
+          orderId,
+          fromStatus: current.status,
+          toStatus: 'Confirmed',
+          changedById: actor.userId ?? null,
+          source: actor.source,
+          note: actor.note ?? 'Cake price confirmed.',
+        },
+      });
+
+      return tx.customCakeRequest.findUnique({
+        where: { id: orderId },
+        include: { user: true },
+      });
+    });
+  },
+
   async updateCommercials(
     orderId: string,
     input: {

@@ -18,8 +18,19 @@ vi.mock('@server/modules/orders/orders.service', () => ({
   },
 }));
 
+vi.mock('@server/modules/users/users.service', () => ({
+  usersService: {
+    findByTelegramId: vi.fn(),
+  },
+}));
+
+vi.mock('@server/platform/integrations/telegram/telegramNotifications', () => ({
+  notifyCustomerStatusChange: vi.fn(() => Promise.resolve()),
+}));
+
 import { handlePriceInput } from '@server/bot/conversations/priceConversation';
 import { ordersService } from '@server/modules/orders/orders.service';
+import { usersService } from '@server/modules/users/users.service';
 
 describe('handlePriceInput', () => {
   beforeEach(() => {
@@ -28,18 +39,32 @@ describe('handlePriceInput', () => {
 
   it('returns false when no pending price conversation exists', async () => {
     mockGetPrice.mockResolvedValue(null);
-    const ctx = { reply: vi.fn() };
+    const ctx = { reply: vi.fn(), from: { id: 111 } };
 
-    const handled = await handlePriceInput(ctx as any, 'user_1', '4500');
+    const handled = await handlePriceInput(ctx as any, '111', '4500');
     expect(handled).toBe(false);
+    expect(ordersService.update).not.toHaveBeenCalled();
+  });
+
+  it('handles /cancel and clears conversation', async () => {
+    mockGetPrice.mockResolvedValue({ orderId: 'FB-123' });
+    const ctx = { reply: vi.fn(), from: { id: 111 } };
+
+    const handled = await handlePriceInput(ctx as any, '111', '/cancel');
+    expect(handled).toBe(true);
+    expect(mockClearPrice).toHaveBeenCalledWith('111');
+    expect(ctx.reply).toHaveBeenCalledWith(
+      expect.stringContaining('Price entry cancelled'),
+      expect.anything()
+    );
     expect(ordersService.update).not.toHaveBeenCalled();
   });
 
   it('warns user when price is invalid', async () => {
     mockGetPrice.mockResolvedValue({ orderId: 'FB-123' });
-    const ctx = { reply: vi.fn() };
+    const ctx = { reply: vi.fn(), from: { id: 111 } };
 
-    const handled = await handlePriceInput(ctx as any, 'user_1', '10'); // below 50
+    const handled = await handlePriceInput(ctx as any, '111', '10'); // below 50
     expect(handled).toBe(true);
     expect(ctx.reply).toHaveBeenCalledWith(
       expect.stringContaining('Please enter a valid price in ETB'),
@@ -48,18 +73,39 @@ describe('handlePriceInput', () => {
     expect(ordersService.update).not.toHaveBeenCalled();
   });
 
-  it('updates order through ordersService and clears conversation', async () => {
+  it('denies price setting when user is not staff', async () => {
     mockGetPrice.mockResolvedValue({ orderId: 'FB-123' });
-    const ctx = { reply: vi.fn() };
+    vi.mocked(usersService.findByTelegramId).mockResolvedValue({
+      id: 'usr_cust_1',
+      role: 'customer',
+    } as any);
+    const ctx = { reply: vi.fn(), from: { id: 111 } };
 
-    const handled = await handlePriceInput(ctx as any, 'staff_1', '5000 ETB');
+    const handled = await handlePriceInput(ctx as any, '111', '5000');
+    expect(handled).toBe(true);
+    expect(ctx.reply).toHaveBeenCalledWith(
+      expect.stringContaining('Only staff or admin'),
+      expect.anything()
+    );
+    expect(ordersService.update).not.toHaveBeenCalled();
+  });
+
+  it('updates order through ordersService with real user.id and clears conversation', async () => {
+    mockGetPrice.mockResolvedValue({ orderId: 'FB-123' });
+    vi.mocked(usersService.findByTelegramId).mockResolvedValue({
+      id: 'usr_staff_99',
+      role: 'admin',
+    } as any);
+    const ctx = { reply: vi.fn(), from: { id: 111 } };
+
+    const handled = await handlePriceInput(ctx as any, '111', '5000 ETB');
     expect(handled).toBe(true);
     expect(ordersService.update).toHaveBeenCalledWith(
       'FB-123',
       { price: 5000, status: 'Priced' },
-      { source: 'telegram_bot', userId: 'staff_1' }
+      { source: 'telegram_bot', userId: 'usr_staff_99' }
     );
-    expect(mockClearPrice).toHaveBeenCalledWith('staff_1');
+    expect(mockClearPrice).toHaveBeenCalledWith('111');
     expect(ctx.reply).toHaveBeenCalledWith(
       expect.stringContaining('Price of <b>5,000 ETB</b> sent'),
       expect.anything()
